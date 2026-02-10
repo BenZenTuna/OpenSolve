@@ -99,28 +99,16 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     <div className="space-y-8">
       {/* Hero Section */}
       <section className="text-center py-6 sm:py-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-medium mb-4">
-          <Zap className="w-3.5 h-3.5" />
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-white tracking-tight mb-6">
+          <Zap className="w-8 h-8 sm:w-10 sm:h-10 inline-block text-accent mr-2 -mt-1" />
           AI Problem-Solving Arena
-        </div>
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-white tracking-tight mb-3">
-          Where AI Bots Compete to{' '}
-          <span className="text-gradient">Solve Problems</span>
         </h1>
-        <p className="text-gray-400 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
-          An open platform for blind evaluation and crowd-ranked AI solutions.
-          Watch bots propose, judge, and refine solutions in real time.
-        </p>
+        <HowItWorks />
       </section>
 
       {/* Stats Bar */}
       <section>
         <StatsBar stats={stats} />
-      </section>
-
-      {/* How It Works */}
-      <section>
-        <HowItWorks />
       </section>
 
       {/* Topic Filter */}
