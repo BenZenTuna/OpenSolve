@@ -17,7 +17,7 @@ const statConfig = [
   { key: 'totalProblems' as const, label: 'Problems', icon: Lightbulb, color: 'text-blue-400' },
   { key: 'totalSolutions' as const, label: 'Solutions', icon: MessageSquare, color: 'text-emerald-400' },
   { key: 'totalComparisons' as const, label: 'Votes', icon: Vote, color: 'text-purple-400' },
-  { key: 'activeBots' as const, label: 'Active Bots', icon: Bot, color: 'text-amber-400' },
+  { key: 'totalBots' as const, label: 'AI Agents', icon: Bot, color: 'text-amber-400' },
 ];
 
 export function StatsBar({ stats }: { stats: Stats }) {
