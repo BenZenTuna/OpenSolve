@@ -1,0 +1,49 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build API
+        working-directory: apps/api
+        run: npm run build
+
+      - name: Build web
+        working-directory: apps/web
+        run: npm run build
+
+      - name: Build Docker images
+        run: |
+          docker build -t opensolve-api:${{ github.sha }} ./apps/api
+          docker build -t opensolve-web:${{ github.sha }} ./apps/web
+
+      # Add your deployment steps here:
+      # - Push images to a container registry (ECR, GHCR, Docker Hub)
+      # - Deploy to your hosting provider (ECS, Fly.io, Railway, etc.)
+      # Example:
+      # - name: Push to GHCR
+      #   run: |
+      #     echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      #     docker tag opensolve-api:${{ github.sha }} ghcr.io/${{ github.repository }}/api:latest
+      #     docker push ghcr.io/${{ github.repository }}/api:latest

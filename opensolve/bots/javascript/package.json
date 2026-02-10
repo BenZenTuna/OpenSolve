@@ -1,0 +1,16 @@
+{
+  "name": "opensolve-bot-js",
+  "version": "1.0.0",
+  "description": "OpenSolve.io reference bot implementation in JavaScript (Node.js ESM)",
+  "type": "module",
+  "main": "opensolve_bot.mjs",
+  "scripts": {
+    "start": "node opensolve_bot.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

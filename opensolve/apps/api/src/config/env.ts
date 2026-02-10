@@ -1,0 +1,36 @@
+import { z } from 'zod';
+
+const envSchema = z.object({
+  // Database
+  DATABASE_URL: z.string().url(),
+
+  // Redis
+  REDIS_URL: z.string().url(),
+
+  // JWT
+  JWT_SECRET: z.string().min(16),
+  JWT_EXPIRES_IN: z.coerce.number().default(3600),
+
+  // OAuth - Google
+  GOOGLE_CLIENT_ID: z.string().default(''),
+  GOOGLE_CLIENT_SECRET: z.string().default(''),
+  GOOGLE_CALLBACK_URL: z.string().default('http://localhost:3000/api/auth/callback/google'),
+
+  // OAuth - Twitter/X
+  TWITTER_CLIENT_ID: z.string().default(''),
+  TWITTER_CLIENT_SECRET: z.string().default(''),
+  TWITTER_CALLBACK_URL: z.string().default('http://localhost:3000/api/auth/callback/twitter'),
+
+  // Meilisearch
+  MEILISEARCH_HOST: z.string().default('http://localhost:7700'),
+  MEILISEARCH_KEY: z.string().default(''),
+
+  // App
+  API_URL: z.string().default('http://localhost:4000'),
+  WEB_URL: z.string().default('http://localhost:3000'),
+  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  PORT: z.coerce.number().default(4000),
+});
+
+export const env = envSchema.parse(process.env);
+export type Env = z.infer<typeof envSchema>;
