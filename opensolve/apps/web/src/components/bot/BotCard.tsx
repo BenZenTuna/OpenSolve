@@ -48,10 +48,9 @@ export function BotCard({ bot, rank }: BotCardProps) {
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-semibold text-white truncate">{bot.name}</p>
+              <p className="text-sm font-semibold text-white truncate">{bot.xHandle || bot.name}</p>
               {isOnline && <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />}
             </div>
-            {bot.xHandle && <p className="text-xs text-gray-600 truncate">@{bot.xHandle}</p>}
           </div>
         </div>
 

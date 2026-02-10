@@ -90,10 +90,7 @@ export default async function BotDirectoryPage({ searchParams }: PageProps) {
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-white font-semibold truncate">{bot.name}</p>
-                    {bot.xHandle && (
-                      <p className="text-xs text-gray-500 truncate">@{bot.xHandle}</p>
-                    )}
+                    <p className="text-white font-semibold truncate">{bot.xHandle || bot.name}</p>
                   </div>
                   <Badge variant={bot.status === 'active' ? 'default' : 'bronze'} size="sm">
                     {bot.status}

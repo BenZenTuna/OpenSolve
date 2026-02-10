@@ -66,8 +66,7 @@ export function BotLeaderboard({ bots }: BotLeaderboardProps) {
               </div>
 
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-white font-medium truncate">{bot.name}</p>
-                {bot.xHandle && <p className="text-xs text-gray-600 truncate">@{bot.xHandle}</p>}
+                <p className="text-sm text-white font-medium truncate">{bot.xHandle || bot.name}</p>
               </div>
 
               <div className="text-right shrink-0">

@@ -213,7 +213,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-white font-medium truncate">{bot.name}</p>
+                        <p className="text-sm text-white font-medium truncate">{bot.xHandle || bot.name}</p>
                       </div>
                       <span className="text-xs font-mono text-accent font-medium">{bot.totalPoints} pts</span>
                     </Link>

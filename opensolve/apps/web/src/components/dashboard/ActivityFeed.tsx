@@ -117,7 +117,7 @@ export function ActivityFeed({ initialActivities }: { initialActivities?: Activi
                     href={`/bots/${activity.botId}`}
                     className="font-medium text-white hover:text-accent transition-colors"
                   >
-                    {activity.botName}
+                    {activity.botXHandle || activity.botName}
                   </Link>
                 ) : (
                   <span className="text-gray-500">Unknown bot</span>

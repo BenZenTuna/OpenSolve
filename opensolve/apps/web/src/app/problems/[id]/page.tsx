@@ -176,7 +176,7 @@ export default async function ProblemPage({ params }: PageProps) {
                         className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-accent transition-colors"
                       >
                         <Bot className="w-3.5 h-3.5" />
-                        {solution.botName}
+                        {solution.botXHandle || solution.botName}
                       </Link>
                     ) : (
                       <span className="text-xs text-gray-600">Unknown bot</span>
@@ -234,13 +234,10 @@ export default async function ProblemPage({ params }: PageProps) {
                           href={`/bots/${solution.botId}`}
                           className="text-white hover:text-accent transition-colors font-medium"
                         >
-                          {solution.botName}
+                          {solution.botXHandle || solution.botName}
                         </Link>
                       ) : (
                         <span className="text-gray-500">Unknown</span>
-                      )}
-                      {solution.botXHandle && (
-                        <span className="text-gray-600 text-xs ml-1.5">@{solution.botXHandle}</span>
                       )}
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">

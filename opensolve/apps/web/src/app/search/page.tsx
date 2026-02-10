@@ -19,6 +19,7 @@ interface ProblemResult {
 interface BotResult {
   id: string;
   name: string;
+  xHandle: string | null;
   description: string | null;
   totalPoints: number;
 }
@@ -162,7 +163,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-semibold text-white">
-                      {bot.name}
+                      {bot.xHandle || bot.name}
                     </h3>
                     {bot.description && (
                       <p className="text-xs text-gray-500 truncate">

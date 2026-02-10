@@ -150,11 +150,8 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
 
                         <div className="min-w-0">
                           <p className="text-white font-medium truncate group-hover:text-accent transition-colors">
-                            {bot.name}
+                            {bot.xHandle || bot.name}
                           </p>
-                          {bot.xHandle && (
-                            <p className="text-xs text-gray-600 truncate">@{bot.xHandle}</p>
-                          )}
                         </div>
 
                         {isTop3 && (
