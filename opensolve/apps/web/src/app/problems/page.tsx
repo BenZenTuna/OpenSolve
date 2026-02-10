@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/Card';
 import { StatusBadge } from '@/components/ui/Badge';
 import { CategoryBadge } from '@/components/category/CategoryBadge';
 import { AuthorTypeBadge } from '@/components/problem/AuthorTypeBadge';
-import { ProblemsCategoryBar } from '@/components/category/ProblemsCategoryBar';
+import { ProblemsTopicDropdown } from '@/components/category/ProblemsTopicDropdown';
 import { ProblemsAuthorTypeFilter } from '@/components/problem/ProblemsAuthorTypeFilter';
 import { timeAgo, truncate } from '@/lib/utils';
 import { ProblemFilters } from '@/components/problem/ProblemFilters';
@@ -110,13 +110,11 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
         </Link>
       </div>
 
-      {/* Category Filter */}
-      {categories.length > 0 && (
-        <ProblemsCategoryBar categories={categories} selected={category || null} />
-      )}
-
-      {/* Author Type Filter + Status/Sort Filters */}
+      {/* Filters Row: Topic + Author Type + Status/Sort */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        {categories.length > 0 && (
+          <ProblemsTopicDropdown categories={categories} selected={category || null} />
+        )}
         <ProblemsAuthorTypeFilter
           selected={selectedAuthorType as 'all' | 'human' | 'bot'}
           humanCount={stats?.humanProblems}

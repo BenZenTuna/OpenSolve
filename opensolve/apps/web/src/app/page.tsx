@@ -2,13 +2,12 @@ import Link from 'next/link';
 import { ArrowRight, Zap, TrendingUp } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
-import { StatusBadge } from '@/components/ui/Badge';
-import { CategoryBadge } from '@/components/category/CategoryBadge';
-import { AuthorTypeBadge } from '@/components/problem/AuthorTypeBadge';
-import { DashboardCategoryBar } from '@/components/category/DashboardCategoryBar';
+import { DashboardTopicDropdown } from '@/components/category/DashboardTopicDropdown';
+
 import { StatsBar } from '@/components/dashboard/StatsBar';
+import { HowItWorks } from '@/components/dashboard/HowItWorks';
+import { ShuffleProblems } from '@/components/dashboard/ShuffleProblems';
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
-import { timeAgo, truncate } from '@/lib/utils';
 
 interface Stats {
   totalProblems: number;
@@ -50,21 +49,27 @@ interface Activity {
   createdAt: string;
 }
 
+interface ProblemsResponse {
+  problems: Problem[];
+  pagination: { total: number };
+}
+
 async function getPageData(category?: string) {
   try {
     const problemsQuery = category
-      ? `/problems?status=active&sort=newest&limit=6&category=${category}`
-      : '/problems?status=active&sort=newest&limit=6';
+      ? `/problems?sort=newest&limit=6&category=${category}`
+      : '/problems?sort=newest&limit=6';
 
     const [stats, problemsData, activityData, categoriesData] = await Promise.all([
       apiFetch<Stats>('/stats', { cache: 'no-store' }),
-      apiFetch<{ problems: Problem[] }>(problemsQuery, { cache: 'no-store' }),
+      apiFetch<ProblemsResponse>(problemsQuery, { cache: 'no-store' }),
       apiFetch<{ activities: Activity[] }>('/activity?limit=15', { cache: 'no-store' }),
       apiFetch<CategoryInfo[]>('/categories', { cache: 'no-store' }).catch(() => []),
     ]);
     return {
       stats,
       problems: problemsData.problems,
+      totalProblems: problemsData.pagination?.total ?? 0,
       activities: activityData.activities,
       categories: categoriesData,
     };
@@ -72,6 +77,7 @@ async function getPageData(category?: string) {
     return {
       stats: { totalProblems: 0, totalSolutions: 0, totalComparisons: 0, totalBots: 0, activeBots: 0, activeProblems: 0 },
       problems: [],
+      totalProblems: 0,
       activities: [],
       categories: [],
     };
@@ -87,7 +93,7 @@ interface DashboardPageProps {
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const params = await searchParams;
   const selectedCategory = params.category || null;
-  const { stats, problems, activities, categories } = await getPageData(selectedCategory || undefined);
+  const { stats, problems, totalProblems, activities, categories } = await getPageData(selectedCategory || undefined);
 
   return (
     <div className="space-y-8">
@@ -112,10 +118,15 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         <StatsBar stats={stats} />
       </section>
 
-      {/* Category Bar */}
+      {/* How It Works */}
+      <section>
+        <HowItWorks />
+      </section>
+
+      {/* Topic Filter */}
       {categories.length > 0 && (
         <section>
-          <DashboardCategoryBar categories={categories} selected={selectedCategory} />
+          <DashboardTopicDropdown categories={categories} selected={selectedCategory} />
         </section>
       )}
 
@@ -137,39 +148,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             </Link>
           </div>
 
-          {problems.length === 0 ? (
-            <Card className="text-center py-12">
-              <p className="text-gray-500">No active problems yet. Be the first to submit one!</p>
-              <Link href="/submit" className="btn-primary mt-4 inline-flex">
-                Submit a Problem
-              </Link>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {problems.map((problem) => (
-                <Link key={problem.id} href={`/problems/${problem.id}`}>
-                  <Card hover className="h-full">
-                    <div className="flex items-center gap-2 flex-wrap mb-2">
-                      {problem.authorType && <AuthorTypeBadge authorType={problem.authorType} size="sm" />}
-                      <StatusBadge status={problem.status} />
-                      {problem.category && <CategoryBadge slug={problem.category} />}
-                    </div>
-                    <h3 className="text-sm font-semibold text-white line-clamp-2 mb-1">
-                      {problem.title}
-                    </h3>
-                    <p className="text-xs text-gray-500 line-clamp-2 mb-3">
-                      {truncate(problem.description, 120)}
-                    </p>
-                    <div className="flex items-center gap-4 text-xs text-gray-500">
-                      <span>{problem.solutionCount} solutions</span>
-                      <span>{problem.comparisonCount} votes</span>
-                      <span className="ml-auto">{timeAgo(problem.createdAt)}</span>
-                    </div>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          )}
+          <ShuffleProblems
+            initialProblems={problems}
+            category={selectedCategory}
+            totalProblems={totalProblems}
+          />
         </section>
 
         {/* Activity Feed — takes 1 column */}
