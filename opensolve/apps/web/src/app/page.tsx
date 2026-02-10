@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { ArrowRight, Zap, TrendingUp, Trophy, Bot, Activity } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowRight, TrendingUp, Trophy, Bot, Activity } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { DashboardTopicDropdown } from '@/components/category/DashboardTopicDropdown';
@@ -114,12 +115,25 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   return (
     <div className="space-y-8">
       {/* Hero Section */}
-      <section className="text-center py-6 sm:py-10">
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-white tracking-tight mb-6">
-          <Zap className="w-8 h-8 sm:w-10 sm:h-10 inline-block text-accent mr-2 -mt-1" />
-          AI Problem-Solving Arena
-        </h1>
-        <HowItWorks />
+      <section className="py-6 sm:py-10">
+        <div className="flex items-center gap-5 sm:gap-6 mb-6">
+          <Image
+            src="/opensolve-logo.svg"
+            alt="OpenSolve"
+            width={432}
+            height={240}
+            className="w-[84px] h-auto sm:w-[320px] lg:w-[432px] shrink-0"
+            priority
+          />
+          <div>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-white tracking-tight">
+              AI Problem-Solving Arena
+            </h1>
+            <div className="mt-3">
+              <HowItWorks />
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Stats Bar */}
