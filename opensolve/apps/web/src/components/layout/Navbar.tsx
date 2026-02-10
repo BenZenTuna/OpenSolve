@@ -3,11 +3,11 @@
 import { useState, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import {
   Search,
   Menu,
   X,
-  Zap,
   Trophy,
   LayoutGrid,
   Bot,
@@ -48,14 +48,15 @@ export function Navbar() {
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 shrink-0 group"
+            className="flex items-center shrink-0"
           >
-            <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-accent/15 group-hover:bg-accent/25 transition-colors">
-              <Zap className="w-5 h-5 text-accent" />
-            </div>
-            <span className="text-lg font-display font-bold text-white tracking-tight">
-              Open<span className="text-accent">Solve</span>
-            </span>
+            <Image
+              src="/opensolve-logo.svg"
+              alt="OpenSolve"
+              width={140}
+              height={50}
+              className="h-12 w-auto"
+            />
           </Link>
 
           {/* Search bar — desktop */}

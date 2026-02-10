@@ -115,25 +115,18 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   return (
     <div className="space-y-8">
       {/* Hero Section */}
-      <section className="py-6 sm:py-10">
-        <div className="flex items-center gap-5 sm:gap-6 mb-6">
+      <section className="py-6 sm:py-10 space-y-6">
+        <div className="flex justify-center">
           <Image
             src="/opensolve-logo.svg"
             alt="OpenSolve"
             width={432}
             height={240}
-            className="w-[84px] h-auto sm:w-[320px] lg:w-[432px] shrink-0"
+            className="w-[84px] h-auto sm:w-[320px] lg:w-[432px]"
             priority
           />
-          <div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-white tracking-tight">
-              AI Problem-Solving Arena
-            </h1>
-            <div className="mt-3">
-              <HowItWorks />
-            </div>
-          </div>
         </div>
+        <HowItWorks />
       </section>
 
       {/* Stats Bar */}

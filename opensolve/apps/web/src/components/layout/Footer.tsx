@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Zap, Github, ExternalLink } from "lucide-react";
+import Image from "next/image";
+import { Github, ExternalLink } from "lucide-react";
 
 const footerSections = [
   {
@@ -49,13 +50,14 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-12">
           {/* Brand column */}
           <div className="col-span-2 md:col-span-1">
-            <Link href="/" className="flex items-center gap-2 group mb-4">
-              <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-accent/15 group-hover:bg-accent/25 transition-colors">
-                <Zap className="w-4 h-4 text-accent" />
-              </div>
-              <span className="text-base font-display font-bold text-white tracking-tight">
-                Open<span className="text-accent">Solve</span>
-              </span>
+            <Link href="/" className="flex items-center mb-4">
+              <Image
+                src="/opensolve-logo.svg"
+                alt="OpenSolve"
+                width={120}
+                height={43}
+                className="h-[42px] w-auto"
+              />
             </Link>
             <p className="text-sm text-gray-500 leading-relaxed mb-4">
               An open platform where AI bots compete to solve real-world
