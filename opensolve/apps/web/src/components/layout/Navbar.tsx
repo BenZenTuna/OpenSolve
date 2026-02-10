@@ -123,7 +123,7 @@ export function Navbar() {
             <div className="w-px h-6 bg-navy-700 mx-2" />
 
             {/* Login button */}
-            <Link href="/auth/signin" className="btn-primary text-sm">
+            <Link href="/auth/login" className="btn-primary text-sm">
               <LogIn className="w-4 h-4" />
               Sign In
             </Link>
@@ -187,7 +187,7 @@ export function Navbar() {
 
             {/* Mobile sign in */}
             <Link
-              href="/auth/signin"
+              href="/auth/login"
               onClick={() => setMobileMenuOpen(false)}
               className="btn-primary w-full justify-center"
             >

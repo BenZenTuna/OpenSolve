@@ -3,6 +3,10 @@ import { LayoutGrid, MessageSquare, Vote, Clock } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { StatusBadge } from '@/components/ui/Badge';
+import { CategoryBadge } from '@/components/category/CategoryBadge';
+import { AuthorTypeBadge } from '@/components/problem/AuthorTypeBadge';
+import { ProblemsCategoryBar } from '@/components/category/ProblemsCategoryBar';
+import { ProblemsAuthorTypeFilter } from '@/components/problem/ProblemsAuthorTypeFilter';
 import { timeAgo, truncate } from '@/lib/utils';
 import { ProblemFilters } from '@/components/problem/ProblemFilters';
 
@@ -11,12 +15,31 @@ interface Problem {
   title: string;
   description: string;
   status: string;
+  category: string | null;
   authorType: string;
   solutionCount: number;
   comparisonCount: number;
   greenFlags: number;
   redFlags: number;
   createdAt: string;
+}
+
+interface CategoryInfo {
+  slug: string;
+  displayName: string;
+  icon: string;
+  activeProblems: number;
+}
+
+interface Stats {
+  totalProblems: number;
+  humanProblems: number;
+  botProblems: number;
+  totalSolutions: number;
+  totalComparisons: number;
+  totalBots: number;
+  activeBots: number;
+  activeProblems: number;
 }
 
 interface PaginatedResponse {
@@ -34,6 +57,8 @@ interface PageProps {
     status?: string;
     sort?: string;
     page?: string;
+    category?: string;
+    author_type?: string;
   }>;
 }
 
@@ -42,19 +67,30 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
   const status = params.status || '';
   const sort = params.sort || 'newest';
   const page = parseInt(params.page || '1', 10);
+  const category = params.category || '';
+  const authorType = (params.author_type as 'human' | 'bot' | undefined) || '';
 
   const queryParts = [`sort=${sort}`, `page=${page}`, 'limit=20'];
   if (status) queryParts.push(`status=${status}`);
+  if (category) queryParts.push(`category=${category}`);
+  if (authorType) queryParts.push(`author_type=${authorType}`);
   const queryString = queryParts.join('&');
 
   let data: PaginatedResponse;
+  let categories: CategoryInfo[] = [];
+  let stats: Stats | null = null;
   try {
-    data = await apiFetch<PaginatedResponse>(`/problems?${queryString}`, { cache: 'no-store' });
+    [data, categories, stats] = await Promise.all([
+      apiFetch<PaginatedResponse>(`/problems?${queryString}`, { cache: 'no-store' }),
+      apiFetch<CategoryInfo[]>('/categories', { cache: 'no-store' }).catch(() => [] as CategoryInfo[]),
+      apiFetch<Stats>('/stats', { cache: 'no-store' }).catch(() => null),
+    ]);
   } catch {
     data = { problems: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } };
   }
 
   const { problems, pagination } = data;
+  const selectedAuthorType = authorType || 'all';
 
   return (
     <div className="space-y-6">
@@ -74,8 +110,20 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
         </Link>
       </div>
 
-      {/* Filters */}
-      <ProblemFilters currentStatus={status} currentSort={sort} />
+      {/* Category Filter */}
+      {categories.length > 0 && (
+        <ProblemsCategoryBar categories={categories} selected={category || null} />
+      )}
+
+      {/* Author Type Filter + Status/Sort Filters */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <ProblemsAuthorTypeFilter
+          selected={selectedAuthorType as 'all' | 'human' | 'bot'}
+          humanCount={stats?.humanProblems}
+          botCount={stats?.botProblems}
+        />
+        <ProblemFilters currentStatus={status} currentSort={sort} />
+      </div>
 
       {/* Problem Grid */}
       {problems.length === 0 ? (
@@ -89,12 +137,14 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
           {problems.map((problem) => (
             <Link key={problem.id} href={`/problems/${problem.id}`}>
               <Card hover className="h-full flex flex-col">
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <h3 className="text-sm font-semibold text-white line-clamp-2 flex-1">
-                    {problem.title}
-                  </h3>
+                <div className="flex items-center gap-2 flex-wrap mb-2">
+                  <AuthorTypeBadge authorType={problem.authorType} size="sm" />
                   <StatusBadge status={problem.status} />
+                  {problem.category && <CategoryBadge slug={problem.category} />}
                 </div>
+                <h3 className="text-sm font-semibold text-white line-clamp-2 mb-1">
+                  {problem.title}
+                </h3>
 
                 <p className="text-xs text-gray-500 line-clamp-3 mb-4 flex-1">
                   {truncate(problem.description, 180)}
@@ -125,7 +175,7 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
         <nav className="flex items-center justify-center gap-2">
           {page > 1 && (
             <Link
-              href={`/problems?${new URLSearchParams({ ...(status ? { status } : {}), sort, page: String(page - 1) }).toString()}`}
+              href={`/problems?${new URLSearchParams({ ...(status ? { status } : {}), ...(category ? { category } : {}), ...(authorType ? { author_type: authorType } : {}), sort, page: String(page - 1) }).toString()}`}
               className="btn-secondary text-sm"
             >
               Previous
@@ -138,7 +188,7 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
 
           {page < pagination.totalPages && (
             <Link
-              href={`/problems?${new URLSearchParams({ ...(status ? { status } : {}), sort, page: String(page + 1) }).toString()}`}
+              href={`/problems?${new URLSearchParams({ ...(status ? { status } : {}), ...(category ? { category } : {}), ...(authorType ? { author_type: authorType } : {}), sort, page: String(page + 1) }).toString()}`}
               className="btn-secondary text-sm"
             >
               Next

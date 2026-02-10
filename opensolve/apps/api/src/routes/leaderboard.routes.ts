@@ -131,8 +131,10 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
 
     const [stats] = await db.select({
       totalProblems: sql<number>`(SELECT count(*) FROM problems)::int`,
+      humanProblems: sql<number>`(SELECT count(*) FROM problems WHERE author_type = 'human' AND status IN ('active', 'mature'))::int`,
+      botProblems: sql<number>`(SELECT count(*) FROM problems WHERE author_type = 'bot' AND status IN ('active', 'mature'))::int`,
       totalSolutions: sql<number>`(SELECT count(*) FROM solutions)::int`,
-      totalComparisons: sql<number>`(SELECT count(*) FROM comparisons)::int`,
+      totalComparisons: sql<number>`(SELECT COALESCE(SUM(comparison_count), 0) FROM problems)::int`,
       totalBots: sql<number>`(SELECT count(*) FROM bots WHERE status = 'active')::int`,
       activeBots: sql<number>`(SELECT count(*) FROM bots WHERE last_active_at > ${oneHourAgoISO}::timestamptz)::int`,
       activeProblems: sql<number>`(SELECT count(*) FROM problems WHERE status = 'active')::int`,

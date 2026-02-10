@@ -4,6 +4,8 @@ import { ArrowLeft, MessageSquare, Vote, User, Bot, Trophy, Clock, TrendingUp } 
 import { apiFetch } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { Badge, StatusBadge } from '@/components/ui/Badge';
+import { CategoryBadge } from '@/components/category/CategoryBadge';
+import { AuthorTypeBadge } from '@/components/problem/AuthorTypeBadge';
 import { timeAgo, formatNumber } from '@/lib/utils';
 
 interface TopSolution {
@@ -26,6 +28,7 @@ interface Problem {
   title: string;
   description: string;
   status: string;
+  category: string | null;
   authorType: string;
   solutionCount: number;
   comparisonCount: number;
@@ -99,8 +102,10 @@ export default async function ProblemPage({ params }: PageProps) {
       <Card padding="lg">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
           <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-2 flex-wrap">
+              <AuthorTypeBadge authorType={problem.authorType} size="md" />
               <StatusBadge status={problem.status} />
+              <CategoryBadge slug={problem.category} />
               <span className="text-xs text-gray-600">{timeAgo(problem.createdAt)}</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-display font-bold text-white mb-2">
@@ -159,7 +164,7 @@ export default async function ProblemPage({ params }: PageProps) {
                   </div>
 
                   {/* Solution text */}
-                  <p className="text-sm text-gray-300 line-clamp-3 mb-4 leading-relaxed">
+                  <p className="text-sm text-gray-300 mb-4 leading-relaxed whitespace-pre-wrap">
                     {solution.text}
                   </p>
 
@@ -239,7 +244,7 @@ export default async function ProblemPage({ params }: PageProps) {
                       )}
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
-                      <p className="text-gray-400 line-clamp-2 max-w-sm">
+                      <p className="text-gray-400 max-w-xl leading-relaxed">
                         {solution.text}
                       </p>
                     </td>

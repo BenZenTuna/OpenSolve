@@ -1,6 +1,6 @@
 import { db } from '../config/database.js';
 import { flags, problems } from '../db/schema.js';
-import { eq, sql } from 'drizzle-orm';
+import { eq, sql, asc } from 'drizzle-orm';
 
 export class ModerationService {
   async processFlag(
@@ -9,14 +9,6 @@ export class ModerationService {
     verdict: 'green' | 'red',
     category: string
   ): Promise<{ newStatus: string }> {
-    // Record the flag
-    await db.insert(flags).values({
-      problemId,
-      botId,
-      verdict,
-      category: category as any,
-    });
-
     // Update counters
     if (verdict === 'green') {
       await db.update(problems)
@@ -58,6 +50,78 @@ export class ModerationService {
         .where(eq(problems.id, problemId));
     }
 
+    // Assign category when problem becomes active
+    if (newStatus === 'active') {
+      await this.assignCategoryFromFlags(problemId);
+    }
+
     return { newStatus };
+  }
+
+  async assignCategoryFromFlags(problemId: string): Promise<void> {
+    // Get all flags for this problem with their suggested categories
+    const allFlags = await db
+      .select()
+      .from(flags)
+      .where(eq(flags.problemId, problemId))
+      .orderBy(asc(flags.createdAt));
+
+    // Get the problem to check if it already has a creator-assigned category
+    const [problem] = await db
+      .select()
+      .from(problems)
+      .where(eq(problems.id, problemId));
+
+    // Only consider green flags with a suggested category
+    const greenFlags = allFlags.filter(f => f.verdict === 'green' && f.suggestedCategory);
+
+    if (greenFlags.length === 0) {
+      // No category suggestions from flaggers — keep creator's category or leave null
+      return;
+    }
+
+    // Count category votes
+    const categoryCounts: Record<string, { count: number; firstBotId: string }> = {};
+    for (const flag of greenFlags) {
+      const cat = flag.suggestedCategory!;
+      if (!categoryCounts[cat]) {
+        categoryCounts[cat] = { count: 0, firstBotId: flag.botId };
+      }
+      categoryCounts[cat].count++;
+    }
+
+    // Find the category with the most votes
+    let bestCategory = '';
+    let bestCount = 0;
+    let assignedByBotId = '';
+
+    for (const [cat, data] of Object.entries(categoryCounts)) {
+      if (data.count > bestCount) {
+        bestCategory = cat;
+        bestCount = data.count;
+        assignedByBotId = data.firstBotId;
+      }
+    }
+
+    // If there's a tie or all different — use the earliest flagger's suggestion
+    if (bestCount === 1 && greenFlags.length > 1) {
+      bestCategory = greenFlags[0].suggestedCategory!;
+      assignedByBotId = greenFlags[0].botId;
+    }
+
+    // For bot-created problems: override only if flaggers have stronger consensus
+    if (problem.category && problem.authorType === 'bot') {
+      const creatorCategoryCount = categoryCounts[problem.category]?.count ?? 0;
+      if (creatorCategoryCount >= bestCount) {
+        // Flaggers don't have a stronger consensus — keep creator's category
+        return;
+      }
+    }
+
+    // Assign the category
+    await db.update(problems).set({
+      category: bestCategory as any,
+      categoryAssignedBy: assignedByBotId,
+    }).where(eq(problems.id, problemId));
   }
 }

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Flame, MessageSquare, Vote, ArrowRight } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { StatusBadge } from '@/components/ui/Badge';
+import { AuthorTypeBadge } from '@/components/problem/AuthorTypeBadge';
 import { timeAgo } from '@/lib/utils';
 
 interface TopProblemProps {
@@ -10,6 +11,7 @@ interface TopProblemProps {
     title: string;
     description: string;
     status: string;
+    authorType?: string;
     solutionCount: number;
     comparisonCount: number;
     createdAt: string;
@@ -38,6 +40,7 @@ export function TopProblem({ problem }: TopProblemProps) {
           <span className="text-xs font-medium text-orange-400 uppercase tracking-wider">
             Featured Problem
           </span>
+          {problem.authorType && <AuthorTypeBadge authorType={problem.authorType} size="sm" />}
         </div>
 
         <h3 className="text-lg font-semibold text-white mb-2">{problem.title}</h3>

@@ -2,7 +2,8 @@ import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { db } from '../config/database.js';
 import { problems, solutions, bots, users, comparisons } from '../db/schema.js';
-import { eq, desc, asc, sql, and, or } from 'drizzle-orm';
+import { eq, desc, asc, sql, and, or, isNotNull } from 'drizzle-orm';
+import { CATEGORIES } from '@opensolve/shared/categories.js';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { sanitizeMiddleware } from '../middleware/sanitize.middleware.js';
 
@@ -11,7 +12,15 @@ const createProblemSchema = z.object({
   description: z.string().min(20).max(1000),
 });
 
+const CATEGORY_SLUGS = [
+  'science_technology', 'health_medicine', 'environment_climate',
+  'education_learning', 'business_economics', 'society_culture',
+  'governance_policy', 'urban_infrastructure', 'food_agriculture',
+  'safety_security', 'communication_media', 'space_exploration',
+] as const;
+
 const listQuerySchema = z.object({
+  category: z.enum(CATEGORY_SLUGS).optional(),
   status: z.enum(['pending', 'approved', 'rejected', 'active', 'mature']).optional(),
   author_type: z.enum(['human', 'bot']).optional(),
   sort: z.enum(['newest', 'oldest', 'most_solutions', 'most_votes']).default('newest'),
@@ -28,6 +37,7 @@ export async function problemRoutes(fastify: FastifyInstance) {
     const offset = (query.page - 1) * query.limit;
 
     const conditions = [];
+    if (query.category) conditions.push(eq(problems.category, query.category));
     if (query.status) conditions.push(eq(problems.status, query.status));
     if (query.author_type) conditions.push(eq(problems.authorType, query.author_type));
 
@@ -46,6 +56,7 @@ export async function problemRoutes(fastify: FastifyInstance) {
         title: problems.title,
         description: problems.description,
         status: problems.status,
+        category: problems.category,
         authorType: problems.authorType,
         solutionCount: problems.solutionCount,
         comparisonCount: problems.comparisonCount,
@@ -169,6 +180,30 @@ export async function problemRoutes(fastify: FastifyInstance) {
       .offset(offset);
 
     return reply.code(200).send({ solutions: ranked });
+  });
+
+  // ===== LIST CATEGORIES WITH COUNTS =====
+  fastify.get('/categories', async (_request, reply) => {
+    const categoryCounts = await db
+      .select({
+        category: problems.category,
+        count: sql<number>`count(*)::int`,
+        activeCount: sql<number>`count(*) FILTER (WHERE ${problems.status} = 'active')::int`,
+      })
+      .from(problems)
+      .where(isNotNull(problems.category))
+      .groupBy(problems.category);
+
+    const result = CATEGORIES.map(cat => {
+      const counts = categoryCounts.find(c => c.category === cat.slug);
+      return {
+        ...cat,
+        totalProblems: counts?.count ?? 0,
+        activeProblems: counts?.activeCount ?? 0,
+      };
+    });
+
+    return reply.code(200).send(result);
   });
 
   // ===== CREATE PROBLEM (human only) =====

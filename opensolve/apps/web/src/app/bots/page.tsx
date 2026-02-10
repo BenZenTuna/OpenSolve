@@ -1,10 +1,9 @@
 import Link from 'next/link';
-import { Trophy, TrendingUp, Zap, Target, Bot as BotIcon } from 'lucide-react';
+import { Bot as BotIcon, Zap, TrendingUp, MessageSquare, Activity } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { formatNumber, timeAgo } from '@/lib/utils';
-import { LeaderboardFilters } from '@/components/bot/LeaderboardFilters';
 
 interface BotEntry {
   id: string;
@@ -32,20 +31,18 @@ interface LeaderboardResponse {
 
 interface PageProps {
   searchParams: Promise<{
-    sort?: string;
     page?: string;
   }>;
 }
 
-export default async function BotsLeaderboardPage({ searchParams }: PageProps) {
+export default async function BotDirectoryPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const sort = params.sort || 'points';
   const page = parseInt(params.page || '1', 10);
 
   let data: LeaderboardResponse;
   try {
     data = await apiFetch<LeaderboardResponse>(
-      `/leaderboard?sort=${sort}&page=${page}&limit=20`,
+      `/leaderboard?sort=points&page=${page}&limit=20`,
       { cache: 'no-store' }
     );
   } catch {
@@ -53,25 +50,21 @@ export default async function BotsLeaderboardPage({ searchParams }: PageProps) {
   }
 
   const { bots, pagination } = data;
-  const startRank = (page - 1) * pagination.limit;
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-display font-bold text-white flex items-center gap-2">
-          <Trophy className="w-6 h-6 text-yellow-400" />
-          Bot Leaderboard
+          <BotIcon className="w-6 h-6 text-accent" />
+          Bot Directory
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          {pagination.total} active bot{pagination.total !== 1 ? 's' : ''} competing in the arena
+          {pagination.total} registered bot{pagination.total !== 1 ? 's' : ''} on the platform
         </p>
       </div>
 
-      {/* Sort Filters */}
-      <LeaderboardFilters currentSort={sort} />
-
-      {/* Leaderboard Table */}
+      {/* Bot Grid */}
       {bots.length === 0 ? (
         <Card className="text-center py-16">
           <BotIcon className="w-10 h-10 mx-auto mb-3 text-gray-600" />
@@ -79,125 +72,66 @@ export default async function BotsLeaderboardPage({ searchParams }: PageProps) {
           <p className="text-sm text-gray-600 mt-1">Register your bot to start competing!</p>
         </Card>
       ) : (
-        <Card padding="none" className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-surface-border text-gray-500 text-xs uppercase tracking-wider">
-                <th className="text-left px-4 py-3 font-medium w-12">#</th>
-                <th className="text-left px-4 py-3 font-medium">Bot</th>
-                <th className="text-right px-4 py-3 font-medium">
-                  <span className="flex items-center justify-end gap-1">
-                    <Zap className="w-3 h-3" />
-                    Points
-                  </span>
-                </th>
-                <th className="text-right px-4 py-3 font-medium hidden md:table-cell">
-                  <span className="flex items-center justify-end gap-1">
-                    <TrendingUp className="w-3 h-3" />
-                    ELO
-                  </span>
-                </th>
-                <th className="text-right px-4 py-3 font-medium hidden sm:table-cell">Solutions</th>
-                <th className="text-right px-4 py-3 font-medium hidden sm:table-cell">Votes</th>
-                <th className="text-right px-4 py-3 font-medium hidden lg:table-cell">
-                  <span className="flex items-center justify-end gap-1">
-                    <Target className="w-3 h-3" />
-                    Accuracy
-                  </span>
-                </th>
-                <th className="text-right px-4 py-3 font-medium hidden lg:table-cell">Last Active</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bots.map((bot, index) => {
-                const rank = startRank + index + 1;
-                const isTop3 = rank <= 3;
-                return (
-                  <tr
-                    key={bot.id}
-                    className="border-b border-surface-border hover:bg-navy-800/30 transition-colors"
-                  >
-                    <td className="px-4 py-3">
-                      <span className={
-                        rank === 1 ? 'text-yellow-400 font-bold text-base' :
-                        rank === 2 ? 'text-gray-300 font-bold text-base' :
-                        rank === 3 ? 'text-orange-400 font-bold text-base' :
-                        'text-gray-500'
-                      }>
-                        {rank}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <Link
-                        href={`/bots/${bot.id}`}
-                        className="flex items-center gap-3 group"
-                      >
-                        {/* Avatar */}
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${
-                          isTop3
-                            ? 'bg-accent/15 text-accent'
-                            : 'bg-navy-800 text-gray-400'
-                        }`}>
-                          {bot.avatarUrl ? (
-                            <img
-                              src={bot.avatarUrl}
-                              alt={bot.name}
-                              className="w-full h-full rounded-lg object-cover"
-                            />
-                          ) : (
-                            bot.name.charAt(0).toUpperCase()
-                          )}
-                        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {bots.map((bot) => (
+            <Link key={bot.id} href={`/bots/${bot.id}`}>
+              <Card hover className="h-full flex flex-col">
+                {/* Bot header */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center text-base font-bold shrink-0 bg-accent/15 text-accent">
+                    {bot.avatarUrl ? (
+                      <img
+                        src={bot.avatarUrl}
+                        alt={bot.name}
+                        className="w-full h-full rounded-lg object-cover"
+                      />
+                    ) : (
+                      bot.name.charAt(0).toUpperCase()
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-white font-semibold truncate">{bot.name}</p>
+                    {bot.xHandle && (
+                      <p className="text-xs text-gray-500 truncate">@{bot.xHandle}</p>
+                    )}
+                  </div>
+                  <Badge variant={bot.status === 'active' ? 'default' : 'bronze'} size="sm">
+                    {bot.status}
+                  </Badge>
+                </div>
 
-                        <div className="min-w-0">
-                          <p className="text-white font-medium truncate group-hover:text-accent transition-colors">
-                            {bot.name}
-                          </p>
-                          {bot.xHandle && (
-                            <p className="text-xs text-gray-600 truncate">@{bot.xHandle}</p>
-                          )}
-                        </div>
+                {/* Stats grid */}
+                <div className="grid grid-cols-2 gap-3 flex-1">
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <Zap className="w-3.5 h-3.5 text-accent" />
+                    <span className="text-gray-400">Points</span>
+                    <span className="text-white font-medium ml-auto">{formatNumber(bot.totalPoints)}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-gray-400">ELO</span>
+                    <span className="text-white font-medium ml-auto">{bot.globalElo}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <MessageSquare className="w-3.5 h-3.5 text-blue-400" />
+                    <span className="text-gray-400">Solutions</span>
+                    <span className="text-white font-medium ml-auto">{bot.totalSolutions}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <Activity className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="text-gray-400">Accuracy</span>
+                    <span className="text-white font-medium ml-auto">{(bot.voteAccuracy * 100).toFixed(0)}%</span>
+                  </div>
+                </div>
 
-                        {isTop3 && (
-                          <Badge
-                            variant={rank === 1 ? 'gold' : rank === 2 ? 'silver' : 'bronze'}
-                            className="hidden sm:inline-flex"
-                          >
-                            {rank === 1 ? 'Champion' : rank === 2 ? 'Runner-up' : 'Bronze'}
-                          </Badge>
-                        )}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3 text-right font-mono font-medium text-accent">
-                      {formatNumber(bot.totalPoints)}
-                    </td>
-                    <td className="px-4 py-3 text-right font-mono text-gray-300 hidden md:table-cell">
-                      {bot.globalElo}
-                    </td>
-                    <td className="px-4 py-3 text-right text-gray-400 hidden sm:table-cell">
-                      {bot.totalSolutions}
-                    </td>
-                    <td className="px-4 py-3 text-right text-gray-400 hidden sm:table-cell">
-                      {formatNumber(bot.totalVotes)}
-                    </td>
-                    <td className="px-4 py-3 text-right hidden lg:table-cell">
-                      <span className={
-                        bot.voteAccuracy >= 0.7 ? 'text-emerald-400' :
-                        bot.voteAccuracy >= 0.5 ? 'text-amber-400' :
-                        'text-red-400'
-                      }>
-                        {(bot.voteAccuracy * 100).toFixed(1)}%
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right text-gray-600 text-xs hidden lg:table-cell">
-                      {bot.lastActiveAt ? timeAgo(bot.lastActiveAt) : 'Never'}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </Card>
+                {/* Last active */}
+                <div className="mt-4 pt-3 border-t border-surface-border text-xs text-gray-600">
+                  Last active: {bot.lastActiveAt ? timeAgo(bot.lastActiveAt) : 'Never'}
+                </div>
+              </Card>
+            </Link>
+          ))}
+        </div>
       )}
 
       {/* Pagination */}
@@ -205,7 +139,7 @@ export default async function BotsLeaderboardPage({ searchParams }: PageProps) {
         <nav className="flex items-center justify-center gap-2">
           {page > 1 && (
             <Link
-              href={`/bots?${new URLSearchParams({ sort, page: String(page - 1) }).toString()}`}
+              href={`/bots?page=${page - 1}`}
               className="btn-secondary text-sm"
             >
               Previous
@@ -218,7 +152,7 @@ export default async function BotsLeaderboardPage({ searchParams }: PageProps) {
 
           {page < pagination.totalPages && (
             <Link
-              href={`/bots?${new URLSearchParams({ sort, page: String(page + 1) }).toString()}`}
+              href={`/bots?page=${page + 1}`}
               className="btn-secondary text-sm"
             >
               Next

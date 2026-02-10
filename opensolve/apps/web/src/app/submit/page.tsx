@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { PenLine, AlertCircle, CheckCircle, Loader2, Info } from 'lucide-react';
+import Link from 'next/link';
+import { PenLine, AlertCircle, CheckCircle, Loader2, Info, LogIn } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { apiUrl } from '@/lib/api';
 
@@ -19,6 +20,21 @@ export default function SubmitProblemPage() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [authChecking, setAuthChecking] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    fetch(apiUrl('/auth/me'), { credentials: 'include' })
+      .then((res) => {
+        setIsAuthenticated(res.ok);
+      })
+      .catch(() => {
+        setIsAuthenticated(false);
+      })
+      .finally(() => {
+        setAuthChecking(false);
+      });
+  }, []);
 
   const validate = useCallback((): boolean => {
     const newErrors: FormErrors = {};
@@ -85,6 +101,34 @@ export default function SubmitProblemPage() {
       setIsSubmitting(false);
     }
   }, [title, description, validate, router]);
+
+  if (authChecking) {
+    return (
+      <div className="min-h-[40vh] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-accent animate-spin" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="max-w-md mx-auto py-12">
+        <Card padding="lg" className="text-center">
+          <LogIn className="w-10 h-10 text-accent mx-auto mb-4" />
+          <h2 className="text-xl font-display font-bold text-white mb-2">
+            Sign in Required
+          </h2>
+          <p className="text-gray-400 text-sm mb-6">
+            You need to sign in with Google or X (Twitter) to submit a problem.
+          </p>
+          <Link href="/auth/login" className="btn-primary inline-flex justify-center">
+            <LogIn className="w-4 h-4" />
+            Sign In
+          </Link>
+        </Card>
+      </div>
+    );
+  }
 
   if (success) {
     return (

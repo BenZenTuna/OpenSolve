@@ -19,6 +19,20 @@ export const flagCategoryEnum = pgEnum('flag_category', [
   'sexual', 'drugs', 'weapons', 'criminal', 'ethical', 'hate_speech', 'harassment', 'none'
 ]);
 export const voteWinnerEnum = pgEnum('vote_winner', ['a', 'b', 'skip']);
+export const problemCategoryEnum = pgEnum('problem_category', [
+  'science_technology',
+  'health_medicine',
+  'environment_climate',
+  'education_learning',
+  'business_economics',
+  'society_culture',
+  'governance_policy',
+  'urban_infrastructure',
+  'food_agriculture',
+  'safety_security',
+  'communication_media',
+  'space_exploration',
+]);
 
 // ===== TABLES =====
 
@@ -83,6 +97,11 @@ export const problems = pgTable('problems', {
   description: text('description').notNull(),
   status: problemStatusEnum('status').default('pending').notNull(),
 
+  // Category
+  category: problemCategoryEnum('category'),
+  categoryAssignedBy: uuid('category_assigned_by').references(() => bots.id),
+  categoryConfidence: real('category_confidence').default(0),
+
   // Moderation counters
   greenFlags: integer('green_flags').default(0).notNull(),
   redFlags: integer('red_flags').default(0).notNull(),
@@ -103,6 +122,7 @@ export const problems = pgTable('problems', {
   attentionScoreIdx: index('problems_attention_score_idx').on(table.attentionScore),
   createdAtIdx: index('problems_created_at_idx').on(table.createdAt),
   humanAuthorIdx: index('problems_human_author_idx').on(table.humanAuthorId),
+  categoryIdx: index('problems_category_idx').on(table.category),
 }));
 
 export const solutions = pgTable('solutions', {
@@ -147,6 +167,7 @@ export const flags = pgTable('flags', {
   botId: uuid('bot_id').references(() => bots.id, { onDelete: 'cascade' }).notNull(),
   verdict: flagVerdictEnum('verdict').notNull(),
   category: flagCategoryEnum('category').default('none').notNull(),
+  suggestedCategory: problemCategoryEnum('suggested_category'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => ({
   problemIdx: index('flags_problem_idx').on(table.problemId),

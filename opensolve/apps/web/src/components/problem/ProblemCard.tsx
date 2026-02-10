@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { MessageSquare, Vote, Clock } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { StatusBadge } from '@/components/ui/Badge';
+import { CategoryBadge } from '@/components/category/CategoryBadge';
+import { AuthorTypeBadge } from '@/components/problem/AuthorTypeBadge';
 import { timeAgo, truncate } from '@/lib/utils';
 
 interface ProblemCardProps {
@@ -10,6 +12,8 @@ interface ProblemCardProps {
     title: string;
     description: string;
     status: string;
+    category?: string | null;
+    authorType?: string;
     solutionCount: number;
     comparisonCount: number;
     createdAt: string;
@@ -20,12 +24,14 @@ export function ProblemCard({ problem }: ProblemCardProps) {
   return (
     <Link href={`/problems/${problem.id}`}>
       <Card hover className="h-full flex flex-col">
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="text-sm font-semibold text-white line-clamp-2 flex-1">
-            {problem.title}
-          </h3>
+        <div className="flex items-center gap-2 flex-wrap mb-2">
+          {problem.authorType && <AuthorTypeBadge authorType={problem.authorType} size="sm" />}
           <StatusBadge status={problem.status} />
+          {problem.category && <CategoryBadge slug={problem.category} />}
         </div>
+        <h3 className="text-sm font-semibold text-white line-clamp-2 mb-1">
+          {problem.title}
+        </h3>
 
         <p className="text-xs text-gray-500 line-clamp-3 mb-4 flex-1">
           {truncate(problem.description, 180)}

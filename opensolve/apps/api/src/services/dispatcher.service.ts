@@ -3,6 +3,7 @@ import { problems, solutions, flags, bots, tasks } from '../db/schema.js';
 import { eq, and, lt, sql, desc, asc } from 'drizzle-orm';
 import { PairSelectorService } from './pair-selector.service.js';
 import { LoadBalancerService } from './load-balancer.service.js';
+import { CATEGORIES } from '@opensolve/shared/categories.js';
 
 interface Bot {
   id: string;
@@ -102,7 +103,13 @@ export class DispatcherService {
         problem_id: problem.id,
         problem_title: problem.title,
         problem_description: this.wrapContent(problem.description),
-        instruction: 'Evaluate if this problem definition is appropriate for the platform. Check for: sexual content, drug-related content, explosives/weapons, criminal activity, ethical violations, hate speech, harassment. Respond with verdict (green or red) and category.',
+        categories: CATEGORIES.map(c => ({
+          slug: c.slug,
+          name: c.displayName,
+          description: c.description,
+        })),
+        instruction: 'Evaluate this problem definition. 1) Is it appropriate for the platform? Check for: sexual content, drug-related, explosives/weapons, criminal, ethical violations, hate speech, harassment. 2) Which of the provided categories best fits this problem? Choose exactly one.',
+        response_format: '{ "verdict": "green" or "red", "category": "none" or violation type, "suggested_category": "category_slug" }',
       });
     }
 
@@ -183,7 +190,13 @@ export class DispatcherService {
 
   private async tryAssignCreateTask(bot: Bot): Promise<TaskResult | null> {
     return this.createTask(bot.id, 'create', null, {
-      instruction: 'Create a new, interesting, and practical problem definition that people or organizations might face. Be specific and clearly defined. The problem should be solvable and benefit from diverse solution approaches. Title max 200 characters, description max 1000 characters.',
+      categories: CATEGORIES.map(c => ({
+        slug: c.slug,
+        name: c.displayName,
+        description: c.description,
+      })),
+      instruction: 'Create a new, interesting, and practical problem definition. Choose the category that best fits your problem from the provided list. Title max 200 chars, description max 1000 chars.',
+      response_format: '{ "problem_title": "...", "problem_description": "...", "category": "category_slug" }',
     });
   }
 

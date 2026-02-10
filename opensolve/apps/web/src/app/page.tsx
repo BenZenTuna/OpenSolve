@@ -3,6 +3,9 @@ import { ArrowRight, Zap, TrendingUp } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { StatusBadge } from '@/components/ui/Badge';
+import { CategoryBadge } from '@/components/category/CategoryBadge';
+import { AuthorTypeBadge } from '@/components/problem/AuthorTypeBadge';
+import { DashboardCategoryBar } from '@/components/category/DashboardCategoryBar';
 import { StatsBar } from '@/components/dashboard/StatsBar';
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { timeAgo, truncate } from '@/lib/utils';
@@ -21,10 +24,18 @@ interface Problem {
   title: string;
   description: string;
   status: string;
+  category: string | null;
   authorType: string;
   solutionCount: number;
   comparisonCount: number;
   createdAt: string;
+}
+
+interface CategoryInfo {
+  slug: string;
+  displayName: string;
+  icon: string;
+  activeProblems: number;
 }
 
 interface Activity {
@@ -39,25 +50,44 @@ interface Activity {
   createdAt: string;
 }
 
-async function getPageData() {
+async function getPageData(category?: string) {
   try {
-    const [stats, problemsData, activityData] = await Promise.all([
+    const problemsQuery = category
+      ? `/problems?status=active&sort=newest&limit=6&category=${category}`
+      : '/problems?status=active&sort=newest&limit=6';
+
+    const [stats, problemsData, activityData, categoriesData] = await Promise.all([
       apiFetch<Stats>('/stats', { cache: 'no-store' }),
-      apiFetch<{ problems: Problem[] }>('/problems?status=active&sort=newest&limit=6', { cache: 'no-store' }),
+      apiFetch<{ problems: Problem[] }>(problemsQuery, { cache: 'no-store' }),
       apiFetch<{ activities: Activity[] }>('/activity?limit=15', { cache: 'no-store' }),
+      apiFetch<CategoryInfo[]>('/categories', { cache: 'no-store' }).catch(() => []),
     ]);
-    return { stats, problems: problemsData.problems, activities: activityData.activities };
+    return {
+      stats,
+      problems: problemsData.problems,
+      activities: activityData.activities,
+      categories: categoriesData,
+    };
   } catch {
     return {
       stats: { totalProblems: 0, totalSolutions: 0, totalComparisons: 0, totalBots: 0, activeBots: 0, activeProblems: 0 },
       problems: [],
       activities: [],
+      categories: [],
     };
   }
 }
 
-export default async function DashboardPage() {
-  const { stats, problems, activities } = await getPageData();
+interface DashboardPageProps {
+  searchParams: Promise<{
+    category?: string;
+  }>;
+}
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const params = await searchParams;
+  const selectedCategory = params.category || null;
+  const { stats, problems, activities, categories } = await getPageData(selectedCategory || undefined);
 
   return (
     <div className="space-y-8">
@@ -81,6 +111,13 @@ export default async function DashboardPage() {
       <section>
         <StatsBar stats={stats} />
       </section>
+
+      {/* Category Bar */}
+      {categories.length > 0 && (
+        <section>
+          <DashboardCategoryBar categories={categories} selected={selectedCategory} />
+        </section>
+      )}
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -112,12 +149,14 @@ export default async function DashboardPage() {
               {problems.map((problem) => (
                 <Link key={problem.id} href={`/problems/${problem.id}`}>
                   <Card hover className="h-full">
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <h3 className="text-sm font-semibold text-white line-clamp-2 flex-1">
-                        {problem.title}
-                      </h3>
+                    <div className="flex items-center gap-2 flex-wrap mb-2">
+                      {problem.authorType && <AuthorTypeBadge authorType={problem.authorType} size="sm" />}
                       <StatusBadge status={problem.status} />
+                      {problem.category && <CategoryBadge slug={problem.category} />}
                     </div>
+                    <h3 className="text-sm font-semibold text-white line-clamp-2 mb-1">
+                      {problem.title}
+                    </h3>
                     <p className="text-xs text-gray-500 line-clamp-2 mb-3">
                       {truncate(problem.description, 120)}
                     </p>

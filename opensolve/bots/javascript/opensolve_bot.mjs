@@ -166,7 +166,12 @@ async function submitResult(taskId, result) {
  */
 function buildPrompt(taskType, payload) {
   switch (taskType) {
-    case "flag":
+    case "flag": {
+      const flagCategories = payload.categories || [];
+      const flagCategoryList = flagCategories.length > 0
+        ? flagCategories.map((c) => `"${c.slug}" (${c.name})`).join(", ")
+        : '"sexual", "drugs", "weapons", "criminal", "ethical", "hate_speech", "harassment"';
+
       return [
         "You are a content moderator for OpenSolve.io, a problem-solving platform.",
         "",
@@ -175,12 +180,16 @@ function buildPrompt(taskType, payload) {
         "",
         `Instructions: ${payload.instruction || ""}`,
         "",
+        `Available categories: ${flagCategoryList}`,
+        "",
         "Respond with ONLY valid JSON in this exact format (no markdown, no explanation):",
-        '{"verdict": "green" or "red", "category": "none" or one of: "sexual", "drugs", "weapons", "criminal", "ethical", "hate_speech", "harassment"}',
+        '{"verdict": "green" or "red", "category": "none" or a category slug from the list above, "suggested_category": "none" or a category slug that best fits this problem}',
         "",
         'Use "green" if the problem is appropriate, "red" if it violates any category. ',
-        'Set category to "none" if verdict is "green".',
+        'Set category to "none" if verdict is "green". ',
+        'Set suggested_category to the category slug that best describes this problem, or "none" if unsure.',
       ].join("\n");
+    }
 
     case "solve":
       return [
@@ -215,11 +224,25 @@ function buildPrompt(taskType, payload) {
         'Use "skip" only if you genuinely cannot decide.',
       ].join("\n");
 
-    case "create":
+    case "create": {
+      const createCategories = payload.categories || [];
+      const createCategoryList = createCategories.length > 0
+        ? createCategories.map((c) => `"${c.slug}" (${c.name})`).join(", ")
+        : "";
+
+      const categoryLines = createCategoryList
+        ? [
+            "",
+            `Available categories: ${createCategoryList}`,
+            "Choose the single most appropriate category slug for the problem you create.",
+          ]
+        : [];
+
       return [
         "You are an inventive problem designer for OpenSolve.io.",
         "",
         `Instructions: ${payload.instruction || ""}`,
+        ...categoryLines,
         "",
         "Create a novel, interesting, and practical problem that people or organizations",
         "might actually face. It should be specific, clearly defined, and benefit from",
@@ -229,8 +252,9 @@ function buildPrompt(taskType, payload) {
         "Description: max 1000 characters.",
         "",
         "Respond with ONLY valid JSON in this exact format (no markdown, no explanation):",
-        '{"problem_title": "Your title", "problem_description": "Your description"}',
+        '{"problem_title": "Your title", "problem_description": "Your description", "category": "a category slug from the available categories"}',
       ].join("\n");
+    }
 
     default:
       throw new Error(`Unknown task type: ${taskType}`);
@@ -295,6 +319,10 @@ async function processTask(task) {
       if (!result.verdict || !result.category) {
         throw new Error(`Flag result missing required keys: ${JSON.stringify(result)}`);
       }
+      // Include suggested_category if present in the response
+      if (!result.suggested_category) {
+        result.suggested_category = "none";
+      }
       break;
 
     case "solve":
@@ -318,6 +346,10 @@ async function processTask(task) {
       // Enforce length limits
       result.problem_title = result.problem_title.slice(0, 200);
       result.problem_description = result.problem_description.slice(0, 1000);
+      // Include category if present in the response
+      if (!result.category) {
+        result.category = "general";
+      }
       break;
   }
 

@@ -4,7 +4,7 @@ import { botAuthMiddleware } from '../middleware/bot-auth.middleware.js';
 import { sanitizeMiddleware } from '../middleware/sanitize.middleware.js';
 import { registerBotRateLimit } from '../middleware/rate-limit.middleware.js';
 import { db } from '../config/database.js';
-import { bots, tasks, solutions, problems } from '../db/schema.js';
+import { bots, tasks, solutions, problems, flags } from '../db/schema.js';
 import { eq, and, sql } from 'drizzle-orm';
 import { DispatcherService } from '../services/dispatcher.service.js';
 import { BradleyTerryService } from '../services/bradley-terry.service.js';
@@ -20,9 +20,17 @@ const moderation = new ModerationService();
 const gamification = new GamificationService();
 
 // Validation schemas
+const CATEGORY_SLUGS = [
+  'science_technology', 'health_medicine', 'environment_climate',
+  'education_learning', 'business_economics', 'society_culture',
+  'governance_policy', 'urban_infrastructure', 'food_agriculture',
+  'safety_security', 'communication_media', 'space_exploration',
+] as const;
+
 const flagSubmitSchema = z.object({
   verdict: z.enum(['green', 'red']),
   category: z.enum(['sexual', 'drugs', 'weapons', 'criminal', 'ethical', 'hate_speech', 'harassment', 'none']),
+  suggested_category: z.enum(CATEGORY_SLUGS),
 });
 
 const solveSubmitSchema = z.object({
@@ -36,6 +44,7 @@ const voteSubmitSchema = z.object({
 const createSubmitSchema = z.object({
   problem_title: z.string().min(5).max(200),
   problem_description: z.string().min(20).max(1000),
+  category: z.enum(CATEGORY_SLUGS),
 });
 
 export async function botRoutes(fastify: FastifyInstance) {
@@ -94,6 +103,14 @@ export async function botRoutes(fastify: FastifyInstance) {
       switch (task.taskType) {
         case 'flag': {
           const parsed = flagSubmitSchema.parse(body);
+          // Store the flag with suggested_category
+          await db.insert(flags).values({
+            problemId: task.problemId!,
+            botId: bot.id,
+            verdict: parsed.verdict,
+            category: parsed.category as any,
+            suggestedCategory: parsed.suggested_category as any,
+          });
           const moderationResult = await moderation.processFlag(
             task.problemId!, bot.id, parsed.verdict, parsed.category
           );
@@ -181,6 +198,7 @@ export async function botRoutes(fastify: FastifyInstance) {
             title: parsed.problem_title,
             description: parsed.problem_description,
             status: 'pending',
+            category: parsed.category as any,
           }).returning();
           await gamification.onCreate(bot.id, problem.id);
           result = { problem_id: problem.id };

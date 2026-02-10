@@ -12,11 +12,11 @@ const sortOptions = [
   { value: 'accuracy', label: 'Accuracy', icon: Target },
 ];
 
-export function LeaderboardFilters({ currentSort }: { currentSort: string }) {
+export function LeaderboardFilters({ currentSort, basePath = '/bots' }: { currentSort: string; basePath?: string }) {
   const router = useRouter();
 
   function handleSort(value: string) {
-    router.push(`/bots?sort=${value}`);
+    router.push(`${basePath}?sort=${value}`);
   }
 
   return (

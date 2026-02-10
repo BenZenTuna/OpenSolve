@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Bot, Flag, Lightbulb, Vote, PlusCircle } from 'lucide-react';
+import { Bot, Flag, Lightbulb, Vote, PlusCircle, User } from 'lucide-react';
 import { apiUrl } from '@/lib/api';
 import { timeAgo } from '@/lib/utils';
 
@@ -23,6 +23,7 @@ const actionIcons: Record<string, typeof Bot> = {
   vote: Vote,
   flag: Flag,
   create: PlusCircle,
+  create_human: User,
 };
 
 const actionLabels: Record<string, string> = {

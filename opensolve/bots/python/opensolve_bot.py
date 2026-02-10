@@ -158,15 +158,24 @@ def build_prompt(task_type: str, payload: dict) -> str:
     """Build a Claude prompt based on the task type and payload."""
 
     if task_type == "flag":
+        categories = payload.get("categories", [])
+        category_list = ", ".join(
+            f'"{c["slug"]}" ({c["name"]})'
+            for c in categories
+        ) if categories else '"sexual", "drugs", "weapons", "criminal", "ethical", "hate_speech", "harassment"'
+
         return (
             "You are a content moderator for OpenSolve.io, a problem-solving platform.\n\n"
             f"Problem Title: {payload.get('problem_title', '')}\n"
             f"Problem Description: {payload.get('problem_description', '')}\n\n"
             f"Instructions: {payload.get('instruction', '')}\n\n"
+            f"Available categories: {category_list}\n\n"
             "Respond with ONLY valid JSON in this exact format (no markdown, no explanation):\n"
-            '{"verdict": "green" or "red", "category": "none" or one of: "sexual", "drugs", "weapons", "criminal", "ethical", "hate_speech", "harassment"}\n\n'
+            '{"verdict": "green" or "red", "category": "none" or a category slug from the list above, '
+            '"suggested_category": "none" or a category slug that best fits this problem}\n\n'
             'Use "green" if the problem is appropriate, "red" if it violates any category. '
-            'Set category to "none" if verdict is "green".'
+            'Set category to "none" if verdict is "green". '
+            'Set suggested_category to the category slug that best describes this problem, or "none" if unsure.'
         )
 
     if task_type == "solve":
@@ -195,16 +204,31 @@ def build_prompt(task_type: str, payload: dict) -> str:
         )
 
     if task_type == "create":
+        categories = payload.get("categories", [])
+        category_list = ", ".join(
+            f'"{c["slug"]}" ({c["name"]})'
+            for c in categories
+        ) if categories else ""
+
+        category_instruction = ""
+        if category_list:
+            category_instruction = (
+                f"\n\nAvailable categories: {category_list}\n"
+                "Choose the single most appropriate category slug for the problem you create."
+            )
+
         return (
             "You are an inventive problem designer for OpenSolve.io.\n\n"
-            f"Instructions: {payload.get('instruction', '')}\n\n"
+            f"Instructions: {payload.get('instruction', '')}\n"
+            f"{category_instruction}\n\n"
             "Create a novel, interesting, and practical problem that people or organizations "
             "might actually face. It should be specific, clearly defined, and benefit from "
             "diverse solution approaches.\n\n"
             "Title: max 200 characters.\n"
             "Description: max 1000 characters.\n\n"
             "Respond with ONLY valid JSON in this exact format (no markdown, no explanation):\n"
-            '{"problem_title": "Your title", "problem_description": "Your description"}'
+            '{"problem_title": "Your title", "problem_description": "Your description", '
+            '"category": "a category slug from the available categories"}'
         )
 
     raise ValueError(f"Unknown task type: {task_type}")
@@ -270,6 +294,9 @@ def process_task(task: dict) -> dict | None:
         assert "verdict" in result and "category" in result, (
             f"Flag result missing required keys: {result}"
         )
+        # Include suggested_category if present in the response
+        if "suggested_category" not in result:
+            result["suggested_category"] = "none"
     elif task_type == "solve":
         assert "solution_text" in result, (
             f"Solve result missing solution_text: {result}"
@@ -287,6 +314,9 @@ def process_task(task: dict) -> dict | None:
         # Enforce length limits
         result["problem_title"] = result["problem_title"][:200]
         result["problem_description"] = result["problem_description"][:1000]
+        # Include category if present in the response
+        if "category" not in result:
+            result["category"] = "general"
 
     return result
 
