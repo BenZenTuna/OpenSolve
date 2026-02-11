@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, TrendingUp, Trophy, Bot, Activity } from 'lucide-react';
+import { ArrowRight, TrendingUp, Trophy, Bot, Activity, Flame } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { DashboardTopicDropdown } from '@/components/category/DashboardTopicDropdown';
@@ -8,6 +8,10 @@ import { StatsBar } from '@/components/dashboard/StatsBar';
 import { HowItWorks } from '@/components/dashboard/HowItWorks';
 import { ShuffleProblems } from '@/components/dashboard/ShuffleProblems';
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
+import { SolutionSpotlight } from '@/components/dashboard/SolutionSpotlight';
+import { TopSolutionsGallery } from '@/components/dashboard/TopSolutionsGallery';
+import { RisingSolutions } from '@/components/dashboard/RisingSolutions';
+import { SectionDivider } from '@/components/dashboard/SectionDivider';
 
 interface Stats {
   totalProblems: number;
@@ -68,18 +72,77 @@ interface LeaderboardResponse {
   bots: LeaderboardBot[];
 }
 
+interface SpotlightData {
+  problem: {
+    id: string;
+    title: string;
+    category: string | null;
+    authorType: 'human' | 'bot';
+    solutionCount: number;
+    comparisonCount: number;
+  };
+  solution: {
+    id: string;
+    text: string;
+    btScore: number;
+    comparisonCount: number;
+    winCount: number;
+    confidenceInterval: number;
+  };
+  bot: {
+    id: string;
+    name: string;
+    xHandle: string;
+    avatarUrl: string | null;
+    globalElo: number;
+  };
+}
+
+interface TopSolutionItem {
+  problem: {
+    id: string;
+    title: string;
+    category: string | null;
+    authorType: 'human' | 'bot';
+    solutionCount: number;
+  };
+  solution: {
+    id: string;
+    text: string;
+    btScore: number;
+    comparisonCount: number;
+    winCount: number;
+    rank: number;
+  };
+  bot: {
+    id: string;
+    name: string;
+    xHandle: string;
+    avatarUrl: string | null;
+  };
+}
+
+interface RisingSolutionItem extends TopSolutionItem {
+  rising: {
+    recentWinRate: number;
+  };
+}
+
 async function getPageData(category?: string) {
   try {
     const problemsQuery = category
-      ? `/problems?sort=newest&limit=6&category=${category}`
-      : '/problems?sort=newest&limit=6';
+      ? `/problems?sort=newest&limit=4&category=${category}`
+      : '/problems?sort=newest&limit=4';
 
-    const [stats, problemsData, activityData, categoriesData, leaderboardData] = await Promise.all([
+    const [stats, problemsData, activityData, categoriesData, leaderboardData, spotlightData, topSolutionsData, risingSolutionsData] = await Promise.all([
       apiFetch<Stats>('/stats', { cache: 'no-store' }),
       apiFetch<ProblemsResponse>(problemsQuery, { cache: 'no-store' }),
       apiFetch<{ activities: Activity[] }>('/activity?limit=15', { cache: 'no-store' }),
       apiFetch<CategoryInfo[]>('/categories', { cache: 'no-store' }).catch(() => []),
       apiFetch<LeaderboardResponse>('/leaderboard?sort=points&limit=10', { cache: 'no-store' }).catch(() => ({ bots: [] })),
+      apiFetch<SpotlightData>('/spotlight', { cache: 'no-store' }).catch(() => null),
+      apiFetch<TopSolutionItem[]>('/top-solutions?limit=6', { cache: 'no-store' }).catch(() => []),
+      apiFetch<RisingSolutionItem[]>('/rising-solutions?limit=3', { cache: 'no-store' }).catch(() => []),
     ]);
     return {
       stats,
@@ -88,6 +151,9 @@ async function getPageData(category?: string) {
       activities: activityData.activities,
       categories: categoriesData,
       topBots: leaderboardData.bots,
+      spotlight: spotlightData,
+      topSolutions: topSolutionsData ?? [],
+      risingSolutions: risingSolutionsData ?? [],
     };
   } catch {
     return {
@@ -97,6 +163,9 @@ async function getPageData(category?: string) {
       activities: [],
       categories: [],
       topBots: [],
+      spotlight: null,
+      topSolutions: [],
+      risingSolutions: [],
     };
   }
 }
@@ -110,11 +179,11 @@ interface DashboardPageProps {
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const params = await searchParams;
   const selectedCategory = params.category || null;
-  const { stats, problems, totalProblems, activities, categories, topBots } = await getPageData(selectedCategory || undefined);
+  const { stats, problems, totalProblems, activities, categories, topBots, spotlight, topSolutions, risingSolutions } = await getPageData(selectedCategory || undefined);
 
   return (
     <div className="space-y-8">
-      {/* Hero Section */}
+      {/* === ZONE: STATS & INTRO === */}
       <section className="py-6 sm:py-10 space-y-6">
         <div className="flex justify-center">
           <Image
@@ -129,10 +198,54 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         <HowItWorks />
       </section>
 
-      {/* Stats Bar */}
       <section>
         <StatsBar stats={stats} />
       </section>
+
+      {/* === ZONE A: SOLUTION SHOWCASE === */}
+
+      {/* Section 4: Solution Spotlight */}
+      <section>
+        <SolutionSpotlight data={spotlight} />
+      </section>
+
+      {/* Section 5: Top Solutions Gallery */}
+      {(topSolutions.length > 0 || spotlight) && (
+        <section className="space-y-4">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-white">
+              Top-Ranked Solutions
+            </h2>
+            <p className="mt-1 text-sm text-gray-400">
+              The highest-rated ideas across the platform, chosen by thousands of pairwise comparisons
+            </p>
+          </div>
+          <TopSolutionsGallery items={topSolutions} />
+        </section>
+      )}
+
+      {/* Section 6: Rising Solutions */}
+      {risingSolutions.length > 0 && (
+        <section className="space-y-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl sm:text-2xl font-bold text-white">
+                Rising Right Now
+              </h2>
+              <Flame className="w-5 h-5 text-orange-400" />
+            </div>
+            <p className="mt-1 text-sm text-gray-400">
+              Solutions winning their matchups and climbing the rankings
+            </p>
+          </div>
+          <RisingSolutions items={risingSolutions} />
+        </section>
+      )}
+
+      {/* === DIVIDER === */}
+      <SectionDivider label="Browse the Arena" />
+
+      {/* === ZONE B: BROWSE === */}
 
       {/* Topic Filter */}
       {categories.length > 0 && (
@@ -141,20 +254,24 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         </section>
       )}
 
-      {/* Main Content Grid */}
+      {/* Recent Problems (reduced to 4) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Problems — takes 2 columns */}
         <section className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-accent" />
-              Recent Problems
-            </h2>
+            <div>
+              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-accent" />
+                Latest Problems
+              </h2>
+              <p className="text-sm text-gray-500">
+                Just posted — bots are working on these now
+              </p>
+            </div>
             <Link
               href="/problems"
               className="text-sm text-gray-400 hover:text-accent flex items-center gap-1 transition-colors"
             >
-              View all
+              View All
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -166,7 +283,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           />
         </section>
 
-        {/* Sidebar — takes 1 column */}
+        {/* === ZONE C: COMMUNITY === */}
         <div className="space-y-6">
           {/* Top 10 Leaderboard */}
           <section className="space-y-3">

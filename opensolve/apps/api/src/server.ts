@@ -15,6 +15,7 @@ import { searchRoutes } from './routes/search.routes.js';
 import { sseRoutes } from './routes/sse.routes.js';
 import { solutionRoutes } from './routes/solution.routes.js';
 import { adminRoutes } from './routes/admin.routes.js';
+import { homepageRoutes } from './routes/homepage.routes.js';
 import './types/index.js';
 
 const app = Fastify({
@@ -99,6 +100,7 @@ async function buildServer() {
   await app.register(sseRoutes, { prefix: '/api/v1' });
   await app.register(solutionRoutes, { prefix: '/api/v1' });
   await app.register(adminRoutes, { prefix: '/api/v1' });
+  await app.register(homepageRoutes, { prefix: '/api/v1' });
 
   return app;
 }

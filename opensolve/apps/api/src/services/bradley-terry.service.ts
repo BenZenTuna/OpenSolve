@@ -1,6 +1,7 @@
 import { db } from '../config/database.js';
 import { solutions, comparisons, problems } from '../db/schema.js';
 import { eq, sql } from 'drizzle-orm';
+import { redis } from '../config/redis.js';
 
 const K_FACTOR = 32;
 
@@ -89,6 +90,9 @@ export class BradleyTerryService {
 
     // Check if problem should transition to 'mature'
     await this.checkMaturity(problemId);
+
+    // Invalidate homepage caches so new rankings are reflected
+    await redis.del('homepage:spotlight', 'homepage:top-solutions:6', 'homepage:top-solutions:12', 'homepage:rising:3', 'homepage:rising:6');
 
     return {
       solutionA: { newScore: newRatingA },
