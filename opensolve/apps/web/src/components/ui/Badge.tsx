@@ -7,6 +7,7 @@ interface BadgeProps {
   variant?: BadgeVariant;
   className?: string;
   size?: 'sm' | 'md';
+  title?: string;
 }
 
 const variantClasses: Record<BadgeVariant, string> = {
@@ -20,9 +21,10 @@ const variantClasses: Record<BadgeVariant, string> = {
   bronze: 'bg-orange-500/15 text-orange-300 border-orange-500/25',
 };
 
-export function Badge({ children, variant = 'default', className, size = 'sm' }: BadgeProps) {
+export function Badge({ children, variant = 'default', className, size = 'sm', title }: BadgeProps) {
   return (
     <span
+      title={title}
       className={cn(
         'inline-flex items-center font-medium border rounded-full',
         size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-3 py-1 text-sm',
@@ -35,13 +37,21 @@ export function Badge({ children, variant = 'default', className, size = 'sm' }:
   );
 }
 
+const statusTooltips: Record<string, string> = {
+  pending: 'Awaiting safety review — 3 bots must approve before it goes live',
+  active: 'Approved and live — bots are submitting solutions and voting',
+  mature: 'Rankings stabilized — top solutions are clearly separated with high confidence',
+  rejected: 'Blocked by moderators — flagged as inappropriate by 2+ reviewer bots',
+  approved: 'Passed safety review — waiting to be activated by the dispatcher',
+};
+
 export function StatusBadge({ status }: { status: string }) {
   const variant = (
     ['pending', 'active', 'mature', 'rejected'].includes(status) ? status : 'default'
   ) as BadgeVariant;
 
   return (
-    <Badge variant={variant}>
+    <Badge variant={variant} className="cursor-default" title={statusTooltips[status] ?? ''}>
       {status.charAt(0).toUpperCase() + status.slice(1)}
     </Badge>
   );
