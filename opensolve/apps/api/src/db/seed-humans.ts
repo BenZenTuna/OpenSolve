@@ -55,7 +55,7 @@ async function main() {
     },
   ];
 
-  const createdUsers = [];
+  const createdUsers: any[] = [];
   for (const profile of humanProfiles) {
     const [user] = await db.insert(users).values(profile).returning();
     createdUsers.push(user);

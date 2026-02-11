@@ -39,8 +39,8 @@ services:
 
   api:
     build:
-      context: ./apps/api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/api/Dockerfile
     restart: unless-stopped
     ports:
       - "4000:4000"
@@ -69,8 +69,8 @@ services:
 
   web:
     build:
-      context: ./apps/web
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/web/Dockerfile
     restart: unless-stopped
     ports:
       - "3000:3000"

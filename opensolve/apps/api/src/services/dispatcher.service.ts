@@ -3,7 +3,7 @@ import { problems, solutions, flags, bots, tasks } from '../db/schema.js';
 import { eq, and, lt, sql, desc, asc } from 'drizzle-orm';
 import { PairSelectorService } from './pair-selector.service.js';
 import { LoadBalancerService } from './load-balancer.service.js';
-import { CATEGORIES } from '@opensolve/shared/categories.js';
+import { CATEGORIES, CategoryDefinition } from '@opensolve/shared/categories.js';
 
 interface Bot {
   id: string;
@@ -103,7 +103,7 @@ export class DispatcherService {
         problem_id: problem.id,
         problem_title: problem.title,
         problem_description: this.wrapContent(problem.description),
-        categories: CATEGORIES.map(c => ({
+        categories: CATEGORIES.map((c: CategoryDefinition) => ({
           slug: c.slug,
           name: c.displayName,
           description: c.description,

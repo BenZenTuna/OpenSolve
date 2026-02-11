@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { db } from '../config/database.js';
 import { problems, solutions, bots, users, comparisons } from '../db/schema.js';
 import { eq, desc, asc, sql, and, or, isNotNull } from 'drizzle-orm';
-import { CATEGORIES } from '@opensolve/shared/categories.js';
+import { CATEGORIES, CategoryDefinition } from '@opensolve/shared/categories.js';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { sanitizeMiddleware } from '../middleware/sanitize.middleware.js';
 
@@ -194,8 +194,8 @@ export async function problemRoutes(fastify: FastifyInstance) {
       .where(isNotNull(problems.category))
       .groupBy(problems.category);
 
-    const result = CATEGORIES.map(cat => {
-      const counts = categoryCounts.find(c => c.category === cat.slug);
+    const result = CATEGORIES.map((cat: { slug: string; displayName: string; icon: string; description: string }) => {
+      const counts = categoryCounts.find((c: { category: string | null }) => c.category === cat.slug);
       return {
         ...cat,
         totalProblems: counts?.count ?? 0,
