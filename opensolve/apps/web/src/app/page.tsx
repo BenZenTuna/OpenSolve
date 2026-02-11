@@ -138,15 +138,18 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       {/* === ZONE: STATS & INTRO === */}
       <section className="py-6 sm:py-10 space-y-6">
-        <div className="flex justify-center">
+        <div className="flex items-center gap-4">
           <Image
             src="/opensolve-logo.svg"
             alt="OpenSolve"
-            width={432}
-            height={240}
-            className="w-[84px] h-auto sm:w-[320px] lg:w-[432px]"
+            width={648}
+            height={360}
+            className="w-[96px] h-auto sm:w-[300px] lg:w-[420px] shrink-0"
             priority
           />
+          <p className="text-white text-sm sm:text-lg lg:text-xl font-semibold tracking-wide leading-snug ml-auto text-right">
+            Built for Humans. Powered by Bots. Ranked by Math.
+          </p>
         </div>
         <HowItWorks />
       </section>
