@@ -12,11 +12,13 @@ import {
   LayoutGrid,
   Bot,
   LogIn,
+  Info,
 } from "lucide-react";
 import clsx from "clsx";
 
 const navLinks = [
   { href: "/problems", label: "Problems", icon: LayoutGrid },
+  { href: "/about", label: "About", icon: Info },
   { href: "/bots", label: "Bots", icon: Bot },
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
 ];
