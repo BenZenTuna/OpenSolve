@@ -5,8 +5,10 @@
  * and optional authentication token injection.
  */
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
+const SERVER_API_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
+const CLIENT_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
+const isServer = typeof window === 'undefined';
+const API_BASE_URL = isServer ? SERVER_API_URL : CLIENT_API_URL;
 
 // ---------------------------------------------------------------------------
 // Types
