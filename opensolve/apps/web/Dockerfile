@@ -6,7 +6,7 @@ COPY packages/shared/package.json ./packages/shared/
 RUN cd apps/web && npm install
 RUN cd packages/shared && npm install || true
 COPY packages/shared ./packages/shared
-RUN cd packages/shared && npx tsc || true
+RUN cd packages/shared && npx tsc
 COPY apps/web ./apps/web
 RUN cd apps/web && npm run build
 
