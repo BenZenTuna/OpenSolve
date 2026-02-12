@@ -190,7 +190,7 @@ export class DispatcherService {
 
   private async tryAssignCreateTask(bot: Bot): Promise<TaskResult | null> {
     return this.createTask(bot.id, 'create', null, {
-      categories: CATEGORIES.map(c => ({
+      categories: CATEGORIES.map((c: CategoryDefinition) => ({
         slug: c.slug,
         name: c.displayName,
         description: c.description,

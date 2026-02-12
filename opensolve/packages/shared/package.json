@@ -5,9 +5,18 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
-    ".": "./dist/index.js",
-    "./categories": "./dist/categories.js",
-    "./categories.js": "./dist/categories.js"
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./categories": {
+      "types": "./src/categories.ts",
+      "default": "./dist/categories.js"
+    },
+    "./categories.js": {
+      "types": "./src/categories.ts",
+      "default": "./dist/categories.js"
+    }
   },
   "scripts": {
     "build": "tsc",

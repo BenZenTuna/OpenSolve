@@ -102,7 +102,10 @@ async function seed() {
   console.log('\nSeed complete!');
   console.log('---');
   console.log('Test user email: admin@opensolve.io');
-  console.log(`Test bot API key: ${testApiKey}`);
+  console.log('Bot API keys:');
+  for (const profile of botProfiles) {
+    console.log(`  ${profile.name}: ${profile.apiKey}`);
+  }
   process.exit(0);
 }
 
