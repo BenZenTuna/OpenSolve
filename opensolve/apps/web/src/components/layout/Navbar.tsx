@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
@@ -12,9 +12,18 @@ import {
   LayoutGrid,
   Bot,
   LogIn,
+  LogOut,
+  User,
   Info,
 } from "lucide-react";
 import clsx from "clsx";
+import { apiFetch } from "@/lib/api";
+
+interface AuthUser {
+  id: string;
+  displayName: string;
+  avatarUrl: string | null;
+}
 
 const navLinks = [
   { href: "/problems", label: "Problems", icon: LayoutGrid },
@@ -28,6 +37,26 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  useEffect(() => {
+    apiFetch<AuthUser>('/auth/me', { credentials: 'include', cache: 'no-store' })
+      .then(setUser)
+      .catch(() => setUser(null));
+  }, [pathname]);
+
+  const handleLogout = useCallback(async () => {
+    try {
+      await fetch(
+        (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1') + '/auth/logout',
+        { method: 'POST', credentials: 'include' }
+      );
+    } catch {}
+    setUser(null);
+    setUserMenuOpen(false);
+    window.location.href = '/';
+  }, []);
 
   const toggleMobileMenu = useCallback(() => {
     setMobileMenuOpen((prev) => !prev);
@@ -125,11 +154,44 @@ export function Navbar() {
 
             <div className="w-px h-6 bg-navy-700 mx-2" />
 
-            {/* Login button */}
-            <Link href="/auth/login" className="btn-primary text-sm">
-              <LogIn className="w-4 h-4" />
-              Sign In
-            </Link>
+            {user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setUserMenuOpen((prev) => !prev)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-navy-800 transition-colors"
+                >
+                  {user.avatarUrl ? (
+                    <Image src={user.avatarUrl} alt="" width={24} height={24} className="w-6 h-6 rounded-full" />
+                  ) : (
+                    <User className="w-5 h-5 text-accent" />
+                  )}
+                  <span className="max-w-[120px] truncate">{user.displayName}</span>
+                </button>
+                {userMenuOpen && (
+                  <div className="absolute right-0 mt-1 w-48 rounded-lg bg-navy-800 border border-navy-700 shadow-xl py-1 z-50">
+                    <Link
+                      href="/submit"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-navy-700 transition-colors"
+                    >
+                      Submit Problem
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-navy-700 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link href="/auth/login" className="btn-primary text-sm">
+                <LogIn className="w-4 h-4" />
+                Sign In
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu toggle */}
@@ -188,15 +250,41 @@ export function Navbar() {
 
             <div className="my-3 border-t border-surface-border" />
 
-            {/* Mobile sign in */}
-            <Link
-              href="/auth/login"
-              onClick={() => setMobileMenuOpen(false)}
-              className="btn-primary w-full justify-center"
-            >
-              <LogIn className="w-4 h-4" />
-              Sign In
-            </Link>
+            {user ? (
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-300">
+                  {user.avatarUrl ? (
+                    <Image src={user.avatarUrl} alt="" width={20} height={20} className="w-5 h-5 rounded-full" />
+                  ) : (
+                    <User className="w-5 h-5 text-accent" />
+                  )}
+                  <span className="truncate">{user.displayName}</span>
+                </div>
+                <Link
+                  href="/submit"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-gray-200 hover:bg-navy-800 transition-colors"
+                >
+                  Submit Problem
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-gray-200 hover:bg-navy-800 transition-colors"
+                >
+                  <LogOut className="w-5 h-5" />
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/auth/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="btn-primary w-full justify-center"
+              >
+                <LogIn className="w-4 h-4" />
+                Sign In
+              </Link>
+            )}
           </div>
         )}
       </nav>
