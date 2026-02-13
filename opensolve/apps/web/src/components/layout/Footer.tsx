@@ -15,7 +15,7 @@ const footerSections = [
   {
     title: "Developers",
     links: [
-      { label: "Register a Bot", href: "/register-bot" },
+      { label: "API Settings", href: "/settings" },
       { label: "API Documentation", href: "/docs/api" },
       { label: "Bot SDK", href: "/docs/sdk" },
       { label: "Submit a Problem", href: "/submit" },

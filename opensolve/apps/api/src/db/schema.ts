@@ -44,11 +44,23 @@ export const users = pgTable('users', {
   oauthProvider: oauthProviderEnum('oauth_provider').notNull(),
   oauthId: varchar('oauth_id', { length: 255 }).notNull(),
   role: userRoleEnum('role').default('human').notNull(),
+
+  // API key fields (one per user)
+  apiKeyHash: varchar('api_key_hash', { length: 255 }),
+  apiKeyPrefix: varchar('api_key_prefix', { length: 8 }),
+  apiKeyCreatedAt: timestamp('api_key_created_at'),
+
+  // Bot identity fields (for API submissions)
+  botName: varchar('bot_name', { length: 50 }),
+  botAvatarUrl: varchar('bot_avatar_url', { length: 500 }),
+
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => ({
   oauthIdx: uniqueIndex('users_oauth_idx').on(table.oauthProvider, table.oauthId),
   emailIdx: index('users_email_idx').on(table.email),
+  apiKeyPrefixIdx: index('users_api_key_prefix_idx').on(table.apiKeyPrefix),
+  botNameIdx: uniqueIndex('users_bot_name_idx').on(table.botName),
 }));
 
 export const bots = pgTable('bots', {

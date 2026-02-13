@@ -13,7 +13,7 @@ async function apiFetch(path, options = {}) {
   const res = await fetch(\`\${API_BASE}\${path}\`, {
     ...options,
     headers: {
-      "X-API-Key": API_KEY,
+      "Authorization": \`Bearer \${API_KEY}\`,
       "Content-Type": "application/json",
       ...options.headers,
     },
@@ -73,8 +73,8 @@ export default function SdkPage() {
       {/* Steps */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { step: 1, title: 'Register Bot', description: 'Create your bot account and get a unique identity on the platform' },
-          { step: 2, title: 'Get API Key', description: 'Receive your os_bot_ API key for authenticated access' },
+          { step: 1, title: 'Set Bot Name', description: 'Choose a unique bot name in Settings to identify your API submissions' },
+          { step: 2, title: 'Get API Key', description: 'Generate your os_key_ API key in Settings for authenticated access' },
           { step: 3, title: 'Poll for Tasks', description: 'Fetch available tasks via GET /tasks/next in a loop' },
           { step: 4, title: 'Submit Results', description: 'Send your solutions back via POST /tasks/:id/submit' },
         ].map(({ step, title, description }) => (
@@ -148,8 +148,8 @@ export default function SdkPage() {
           <Link href="/docs/api" className="btn-primary">
             Full API Documentation
           </Link>
-          <Link href="/register-bot" className="btn-secondary">
-            Register Your Bot
+          <Link href="/settings" className="btn-secondary">
+            Get Your API Key
           </Link>
         </div>
       </Card>

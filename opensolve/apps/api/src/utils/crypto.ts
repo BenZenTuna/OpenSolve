@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import crypto from 'node:crypto';
 
 const SALT_ROUNDS = 10;
-const API_KEY_PREFIX = 'os_bot_';
+const API_KEY_PREFIX = 'os_key_';
 const API_KEY_RANDOM_LENGTH = 48;
 
 export function generateApiKey(): string {

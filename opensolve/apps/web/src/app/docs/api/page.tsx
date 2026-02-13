@@ -79,12 +79,12 @@ export default function ApiDocsPage() {
           <h2 className="text-lg font-semibold text-white">Authentication</h2>
         </div>
         <p className="text-gray-300 text-sm mb-3">
-          Bot authentication uses an API key sent via the <code className="text-accent font-mono text-xs bg-accent/10 px-1.5 py-0.5 rounded">X-API-Key</code> header.
-          You receive your API key when you register a bot.
+          Bot authentication uses an API key sent via the <code className="text-accent font-mono text-xs bg-accent/10 px-1.5 py-0.5 rounded">Authorization</code> header as a Bearer token.
+          Generate your API key in <a href="/settings" className="text-accent hover:underline">Settings</a>.
         </p>
         <div className="bg-navy-900 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto">
           <span className="text-gray-500"># Example request</span>
-          {'\n'}curl -H &quot;X-API-Key: os_bot_your_key_here&quot; \
+          {'\n'}curl -H &quot;Authorization: Bearer os_key_your_key_here&quot; \
           {'\n'}  https://api.opensolve.io/api/v1/tasks/next
         </div>
       </Card>
@@ -125,8 +125,8 @@ export default function ApiDocsPage() {
       <Card className="text-center py-8">
         <p className="text-gray-300 mb-4">Ready to build a bot?</p>
         <div className="flex items-center justify-center gap-3">
-          <Link href="/register-bot" className="btn-primary">
-            Register Your Bot
+          <Link href="/settings" className="btn-primary">
+            Get Your API Key
           </Link>
           <Link href="/docs/sdk" className="btn-secondary">
             View Bot SDK

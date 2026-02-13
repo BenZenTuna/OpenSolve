@@ -19,12 +19,14 @@ const twitterCallbackSchema = z.object({
   code_verifier: z.string().optional(),
 });
 
-const registerBotSchema = z.object({
-  name: z.string().min(1).max(100),
-  description: z.string().max(500).optional(),
-  x_handle: z.string().min(1).max(100),
-  x_oauth_id: z.string().min(1).max(255),
-  avatar_url: z.string().url().max(500).optional(),
+const RESERVED_BOT_NAMES = ['admin', 'opensolve', 'system', 'moderator', 'official'];
+
+const botProfileSchema = z.object({
+  botName: z.string()
+    .min(2, 'Bot name must be at least 2 characters')
+    .max(50, 'Bot name must be at most 50 characters')
+    .regex(/^[a-zA-Z0-9_-]+$/, 'Bot name can only contain letters, numbers, underscores, and hyphens'),
+  avatarUrl: z.string().url().max(500).optional(),
 });
 
 export async function authRoutes(fastify: FastifyInstance) {
@@ -265,6 +267,9 @@ export async function authRoutes(fastify: FastifyInstance) {
       displayName: user.displayName,
       avatarUrl: user.avatarUrl,
       role: user.role,
+      botName: user.botName || null,
+      botAvatarUrl: user.botAvatarUrl || null,
+      hasApiKey: !!user.apiKeyHash,
       createdAt: user.createdAt,
     });
   });
@@ -275,118 +280,199 @@ export async function authRoutes(fastify: FastifyInstance) {
     return reply.code(200).send({ success: true });
   });
 
-  // ===== BOT REGISTRATION =====
+  // ===== USER BOT PROFILE & API KEY =====
 
-  // Register a new bot (requires human auth)
-  fastify.post('/bots/register', { preHandler: [authMiddleware] }, async (request, reply) => {
+  // Set or update bot profile (requires human auth)
+  fastify.put('/user/bot-profile', { preHandler: [authMiddleware] }, async (request, reply) => {
     const userId = request.user!.id;
-    const body = registerBotSchema.parse(request.body);
+    const body = botProfileSchema.parse(request.body);
+    const botNameLower = body.botName.toLowerCase();
 
-    // Check if X handle is already taken
-    const existingBot = await db
-      .select()
-      .from(bots)
-      .where(eq(bots.xHandle, body.x_handle))
-      .limit(1);
-
-    if (existingBot.length > 0) {
-      return reply.code(409).send({ error: 'X handle already registered to another bot' });
+    // Check reserved names
+    if (RESERVED_BOT_NAMES.includes(botNameLower)) {
+      return reply.code(400).send({ error: 'This bot name is reserved' });
     }
 
-    // Check if X OAuth ID is already taken
-    const existingXOauth = await db
-      .select()
-      .from(bots)
-      .where(eq(bots.xOauthId, body.x_oauth_id))
+    // Check if botName is already taken by another user
+    const [existingUser] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.botName, body.botName))
       .limit(1);
 
-    if (existingXOauth.length > 0) {
-      return reply.code(409).send({ error: 'X account already registered to another bot' });
+    if (existingUser && existingUser.id !== userId) {
+      return reply.code(409).send({ error: 'Bot name is already taken' });
     }
 
-    // Generate API key
+    // Check if botName matches any existing user display names
+    const [matchingDisplayName] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.displayName, body.botName))
+      .limit(1);
+
+    if (matchingDisplayName && matchingDisplayName.id !== userId) {
+      return reply.code(409).send({ error: 'This name is already in use' });
+    }
+
+    // Get current user to check if botName is changing
+    const [currentUser] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    // Update user record
+    await db.update(users)
+      .set({
+        botName: body.botName,
+        botAvatarUrl: body.avatarUrl || null,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
+
+    // Create or update virtual bot entry
+    const [existingBot] = await db
+      .select()
+      .from(bots)
+      .where(eq(bots.ownerId, userId))
+      .limit(1);
+
+    if (existingBot) {
+      // Update existing virtual bot
+      await db.update(bots)
+        .set({
+          name: body.botName,
+          avatarUrl: body.avatarUrl || null,
+          updatedAt: new Date(),
+        })
+        .where(eq(bots.id, existingBot.id));
+    } else {
+      // Create virtual bot entry
+      await db.insert(bots).values({
+        ownerId: userId,
+        name: body.botName,
+        avatarUrl: body.avatarUrl || null,
+        xHandle: `user_${userId.slice(0, 8)}`,
+        xOauthId: `user_${userId}`,
+        apiKeyHash: 'virtual_no_direct_auth',
+        apiKeyPrefix: 'virtual_',
+      });
+    }
+
+    return reply.code(200).send({
+      botName: body.botName,
+      botAvatarUrl: body.avatarUrl || null,
+      message: 'Bot profile updated',
+    });
+  });
+
+  // Generate API key (requires bot name set first)
+  fastify.post('/user/api-key', { preHandler: [authMiddleware] }, async (request, reply) => {
+    const userId = request.user!.id;
+
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    if (!user) {
+      return reply.code(404).send({ error: 'User not found' });
+    }
+
+    if (!user.botName) {
+      return reply.code(400).send({ error: 'Set a bot name in Settings before generating an API key' });
+    }
+
+    // Generate new key (revokes old one implicitly)
     const apiKey = generateApiKey();
-    const apiKeyHash = await hashApiKey(apiKey);
-    const apiKeyPrefix = getApiKeyPrefix(apiKey);
+    const hash = await hashApiKey(apiKey);
+    const prefix = getApiKeyPrefix(apiKey);
 
-    // Create bot
-    const [bot] = await db.insert(bots).values({
-      ownerId: userId,
-      name: body.name,
-      description: body.description || null,
-      avatarUrl: body.avatar_url || null,
-      xHandle: body.x_handle,
-      xOauthId: body.x_oauth_id,
-      apiKeyHash,
-      apiKeyPrefix,
-    }).returning();
+    await db.update(users)
+      .set({
+        apiKeyHash: hash,
+        apiKeyPrefix: prefix,
+        apiKeyCreatedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
 
-    // Return bot info + API key (shown ONCE)
     return reply.code(201).send({
-      bot: {
-        id: bot.id,
-        name: bot.name,
-        xHandle: bot.xHandle,
-        status: bot.status,
-        createdAt: bot.createdAt,
-      },
       api_key: apiKey,
       warning: 'Save this API key now. It will not be shown again.',
     });
   });
 
-  // Rotate API key (requires human auth)
-  fastify.post('/bots/:botId/rotate-key', { preHandler: [authMiddleware] }, async (request, reply) => {
-    const { botId } = request.params as { botId: string };
+  // Revoke API key
+  fastify.delete('/user/api-key', { preHandler: [authMiddleware] }, async (request, reply) => {
     const userId = request.user!.id;
 
-    // Verify ownership
-    const [bot] = await db
-      .select()
-      .from(bots)
-      .where(and(eq(bots.id, botId), eq(bots.ownerId, userId)))
+    await db.update(users)
+      .set({
+        apiKeyHash: null,
+        apiKeyPrefix: null,
+        apiKeyCreatedAt: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
+
+    return reply.code(200).send({ message: 'API key revoked' });
+  });
+
+  // Get API key status
+  fastify.get('/user/api-key', { preHandler: [authMiddleware] }, async (request, reply) => {
+    const userId = request.user!.id;
+
+    const [user] = await db
+      .select({
+        botName: users.botName,
+        hasApiKey: users.apiKeyHash,
+        apiKeyCreatedAt: users.apiKeyCreatedAt,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
       .limit(1);
 
-    if (!bot) {
-      return reply.code(404).send({ error: 'Bot not found or you are not the owner' });
+    if (!user) {
+      return reply.code(404).send({ error: 'User not found' });
     }
 
-    // Generate new API key
-    const apiKey = generateApiKey();
-    const apiKeyHash = await hashApiKey(apiKey);
-    const apiKeyPrefix = getApiKeyPrefix(apiKey);
-
-    await db.update(bots)
-      .set({ apiKeyHash, apiKeyPrefix, updatedAt: new Date() })
-      .where(eq(bots.id, botId));
-
     return reply.code(200).send({
-      api_key: apiKey,
-      warning: 'Save this API key now. It will not be shown again. The old key is now invalid.',
+      botName: user.botName || null,
+      hasApiKey: !!user.hasApiKey,
+      apiKeyCreatedAt: user.apiKeyCreatedAt || null,
     });
   });
 
-  // List user's bots
-  fastify.get('/bots/my', { preHandler: [authMiddleware] }, async (request, reply) => {
+  // Check bot name availability
+  fastify.get('/user/check-bot-name', { preHandler: [authMiddleware] }, async (request, reply) => {
     const userId = request.user!.id;
+    const { name } = request.query as { name?: string };
 
-    const userBots = await db
-      .select({
-        id: bots.id,
-        name: bots.name,
-        description: bots.description,
-        xHandle: bots.xHandle,
-        status: bots.status,
-        totalPoints: bots.totalPoints,
-        totalSolutions: bots.totalSolutions,
-        totalVotes: bots.totalVotes,
-        globalElo: bots.globalElo,
-        lastActiveAt: bots.lastActiveAt,
-        createdAt: bots.createdAt,
-      })
-      .from(bots)
-      .where(eq(bots.ownerId, userId));
+    if (!name || name.length < 2) {
+      return reply.code(400).send({ available: false, reason: 'Name must be at least 2 characters' });
+    }
 
-    return reply.code(200).send({ bots: userBots });
+    if (RESERVED_BOT_NAMES.includes(name.toLowerCase())) {
+      return reply.code(200).send({ available: false, reason: 'This name is reserved' });
+    }
+
+    if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
+      return reply.code(200).send({ available: false, reason: 'Only letters, numbers, underscores, and hyphens allowed' });
+    }
+
+    const [existingUser] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.botName, name))
+      .limit(1);
+
+    if (existingUser && existingUser.id !== userId) {
+      return reply.code(200).send({ available: false, reason: 'Name is already taken' });
+    }
+
+    return reply.code(200).send({ available: true });
   });
 }
