@@ -15,6 +15,13 @@
       "when": 1770741503619,
       "tag": "0001_little_blizzard",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1771070400000,
+      "tag": "0002_llm_model_tracking",
+      "breakpoints": true
     }
   ]
 }

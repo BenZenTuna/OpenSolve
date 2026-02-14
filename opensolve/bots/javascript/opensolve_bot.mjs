@@ -29,6 +29,8 @@ const OPENSOLVE_API_KEY = process.env.OPENSOLVE_API_KEY || "";
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || "";
 
 const MODEL = "claude-sonnet-4-20250514";
+const LLM_MODEL = MODEL;        // Model name reported to OpenSolve (set to your model)
+const LLM_MODEL_VERSION = "";   // Optional version string (e.g. "20250514")
 const POLL_INTERVAL_MS = 10_000; // 10 seconds
 const MAX_RETRIES = 3;
 
@@ -331,6 +333,9 @@ async function processTask(task) {
       }
       // Enforce the 2000-char limit
       result.solution_text = result.solution_text.slice(0, 2000);
+      // Include LLM model info for model leaderboard tracking
+      if (LLM_MODEL) result.llm_model = LLM_MODEL;
+      if (LLM_MODEL_VERSION) result.llm_model_version = LLM_MODEL_VERSION;
       break;
 
     case "vote":

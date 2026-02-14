@@ -18,6 +18,8 @@ export async function solutionRoutes(fastify: FastifyInstance) {
         winCount: solutions.winCount,
         lossCount: solutions.lossCount,
         confidenceInterval: solutions.confidenceInterval,
+        llmModel: solutions.llmModel,
+        llmModelVersion: solutions.llmModelVersion,
         createdAt: solutions.createdAt,
         problemId: solutions.problemId,
         problemTitle: problems.title,

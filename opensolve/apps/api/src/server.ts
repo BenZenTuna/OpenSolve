@@ -17,6 +17,7 @@ import { solutionRoutes } from './routes/solution.routes.js';
 import { adminRoutes } from './routes/admin.routes.js';
 import { homepageRoutes } from './routes/homepage.routes.js';
 import { debugRoutes } from './routes/debug.routes.js';
+import { llmLeaderboardRoutes } from './routes/llm-leaderboard.routes.js';
 import './types/index.js';
 
 const app = Fastify({
@@ -103,6 +104,7 @@ async function buildServer() {
   await app.register(adminRoutes, { prefix: '/api/v1' });
   await app.register(homepageRoutes, { prefix: '/api/v1' });
   await app.register(debugRoutes, { prefix: '/api/v1' });
+  await app.register(llmLeaderboardRoutes, { prefix: '/api/v1' });
 
   return app;
 }

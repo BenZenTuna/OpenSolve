@@ -2,8 +2,10 @@ import { db } from '../config/database.js';
 import { solutions, comparisons, problems } from '../db/schema.js';
 import { eq, sql } from 'drizzle-orm';
 import { redis } from '../config/redis.js';
+import { LlmLeaderboardService } from './llm-leaderboard.service.js';
 
 const K_FACTOR = 32;
+const llmLeaderboard = new LlmLeaderboardService();
 
 export class BradleyTerryService {
   /**
@@ -93,6 +95,20 @@ export class BradleyTerryService {
 
     // Invalidate homepage caches so new rankings are reflected
     await redis.del('homepage:spotlight', 'homepage:top-solutions:6', 'homepage:top-solutions:12', 'homepage:rising:3', 'homepage:rising:6');
+
+    // Recalculate LLM model stats (every 10th comparison for efficiency)
+    if (solutionA.llmModel) {
+      const [modelA] = await db.select({ totalComparisons: solutions.comparisonCount }).from(solutions).where(eq(solutions.id, solutionAId));
+      if (modelA && modelA.totalComparisons % 10 === 0) {
+        llmLeaderboard.recalculateModelStats(solutionA.llmModel).catch(() => {});
+      }
+    }
+    if (solutionB.llmModel) {
+      const [modelB] = await db.select({ totalComparisons: solutions.comparisonCount }).from(solutions).where(eq(solutions.id, solutionBId));
+      if (modelB && modelB.totalComparisons % 10 === 0) {
+        llmLeaderboard.recalculateModelStats(solutionB.llmModel).catch(() => {});
+      }
+    }
 
     return {
       solutionA: { newScore: newRatingA },

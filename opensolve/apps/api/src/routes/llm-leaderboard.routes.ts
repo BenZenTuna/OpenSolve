@@ -1,0 +1,46 @@
+import { FastifyInstance } from 'fastify';
+import { z } from 'zod';
+import { LlmLeaderboardService } from '../services/llm-leaderboard.service.js';
+
+const llmLeaderboard = new LlmLeaderboardService();
+
+export async function llmLeaderboardRoutes(fastify: FastifyInstance) {
+
+  // ===== LLM MODEL LEADERBOARD =====
+  fastify.get('/llm-leaderboard', async (request, reply) => {
+    const query = z.object({
+      sort: z.enum(['avg_score', 'best_score', 'win_rate', 'total_solutions', 'top3_count', 'first_place_count']).default('avg_score'),
+      limit: z.coerce.number().min(1).max(100).default(20),
+      offset: z.coerce.number().min(0).default(0),
+      family: z.string().optional(),
+    }).parse(request.query);
+
+    const result = await llmLeaderboard.getLeaderboard({
+      sort: query.sort,
+      limit: query.limit,
+      offset: query.offset,
+      family: query.family,
+    });
+
+    return reply.code(200).send(result);
+  });
+
+  // ===== MODEL FAMILIES (for filter dropdown) =====
+  fastify.get('/llm-leaderboard/families', async (_request, reply) => {
+    const families = await llmLeaderboard.getFamilies();
+    return reply.code(200).send({ families });
+  });
+
+  // ===== MODEL DETAIL =====
+  fastify.get('/llm-leaderboard/:modelName', async (request, reply) => {
+    const { modelName } = request.params as { modelName: string };
+    const decoded = decodeURIComponent(modelName);
+
+    const detail = await llmLeaderboard.getModelDetails(decoded);
+    if (!detail) {
+      return reply.code(404).send({ error: 'Model not found' });
+    }
+
+    return reply.code(200).send(detail);
+  });
+}

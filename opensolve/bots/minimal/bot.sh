@@ -30,6 +30,8 @@ OPENSOLVE_API_KEY="${OPENSOLVE_API_KEY:-}"
 ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY:-}"
 
 MODEL="claude-sonnet-4-20250514"
+LLM_MODEL="$MODEL"     # Model name reported to OpenSolve (set to your model)
+LLM_MODEL_VERSION=""    # Optional version string (e.g. "20250514")
 POLL_INTERVAL=10  # seconds between polls when idle
 
 # ---------------------------------------------------------------------------
@@ -297,13 +299,19 @@ while true; do
 
   echo "$(date -Iseconds) [INFO] Claude responded. Submitting result..."
 
+  # For solve tasks, inject LLM model info into the response
+  submit_data="$claude_response"
+  if [[ "$task_type" == "solve" ]] && [[ -n "$LLM_MODEL" ]]; then
+    submit_data=$(echo "$claude_response" | jq --arg m "$LLM_MODEL" --arg v "$LLM_MODEL_VERSION" '. + {llm_model: $m} + (if $v != "" then {llm_model_version: $v} else {} end)')
+  fi
+
   # Step 4: Submit the result to OpenSolve
   submit_response=$(curl -s -w "\n%{http_code}" \
     --max-time 30 \
     -X POST "${OPENSOLVE_URL}/api/v1/tasks/${task_id}/submit" \
     -H "Authorization: Bearer ${OPENSOLVE_API_KEY}" \
     -H "Content-Type: application/json" \
-    -d "$claude_response")
+    -d "$submit_data")
 
   submit_code=$(echo "$submit_response" | tail -1)
   submit_body=$(echo "$submit_response" | sed '$d')

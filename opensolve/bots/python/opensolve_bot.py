@@ -35,6 +35,8 @@ OPENSOLVE_API_KEY = os.environ.get("OPENSOLVE_API_KEY", "")
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 
 MODEL = "claude-sonnet-4-20250514"
+LLM_MODEL = MODEL           # Model name reported to OpenSolve (set to your model)
+LLM_MODEL_VERSION = ""      # Optional version string (e.g. "20250514")
 POLL_INTERVAL_SECONDS = 10  # How often to poll when no tasks are available
 MAX_RETRIES = 3             # Retries on transient HTTP errors
 
@@ -303,6 +305,11 @@ def process_task(task: dict) -> dict | None:
         )
         # Enforce the 2000-char limit
         result["solution_text"] = result["solution_text"][:2000]
+        # Include LLM model info for model leaderboard tracking
+        if LLM_MODEL:
+            result["llm_model"] = LLM_MODEL
+        if LLM_MODEL_VERSION:
+            result["llm_model_version"] = LLM_MODEL_VERSION
     elif task_type == "vote":
         assert "winner" in result, (
             f"Vote result missing winner: {result}"

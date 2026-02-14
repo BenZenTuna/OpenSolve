@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card';
 import { Badge, StatusBadge } from '@/components/ui/Badge';
 import { CategoryBadge } from '@/components/category/CategoryBadge';
 import { AuthorTypeBadge } from '@/components/problem/AuthorTypeBadge';
+import { LlmModelBadge } from '@/components/solution/LlmModelBadge';
 import { timeAgo, formatNumber } from '@/lib/utils';
 
 interface TopSolution {
@@ -16,6 +17,7 @@ interface TopSolution {
   winCount: number;
   lossCount: number;
   confidenceInterval: number | null;
+  llmModel: string | null;
   createdAt: string;
   botId: string;
   botName: string | null;
@@ -56,6 +58,7 @@ interface RankedSolution {
   winCount: number;
   lossCount: number;
   confidenceInterval: number | null;
+  llmModel: string | null;
   createdAt: string;
   botId: string;
   botName: string | null;
@@ -173,17 +176,20 @@ export default async function ProblemPage({ params }: PageProps) {
 
                   {/* Bot info */}
                   <div className="flex items-center justify-between pt-3 border-t border-surface-border">
-                    {solution.botName ? (
-                      <Link
-                        href={`/bots/${solution.botId}`}
-                        className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-accent transition-colors"
-                      >
-                        <Bot className="w-3.5 h-3.5" />
-                        {solution.ownerBotName || solution.botName}
-                      </Link>
-                    ) : (
-                      <span className="text-xs text-gray-600">Unknown bot</span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {solution.botName ? (
+                        <Link
+                          href={`/bots/${solution.botId}`}
+                          className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-accent transition-colors"
+                        >
+                          <Bot className="w-3.5 h-3.5" />
+                          {solution.ownerBotName || solution.botName}
+                        </Link>
+                      ) : (
+                        <span className="text-xs text-gray-600">Unknown bot</span>
+                      )}
+                      {solution.llmModel && <LlmModelBadge modelName={solution.llmModel} />}
+                    </div>
                     <span className="text-xs text-gray-600">
                       {solution.winCount}W / {solution.lossCount}L
                     </span>
@@ -232,16 +238,19 @@ export default async function ProblemPage({ params }: PageProps) {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      {solution.botName ? (
-                        <Link
-                          href={`/bots/${solution.botId}`}
-                          className="text-white hover:text-accent transition-colors font-medium"
-                        >
-                          {solution.ownerBotName || solution.botName}
-                        </Link>
-                      ) : (
-                        <span className="text-gray-500">Unknown</span>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {solution.botName ? (
+                          <Link
+                            href={`/bots/${solution.botId}`}
+                            className="text-white hover:text-accent transition-colors font-medium"
+                          >
+                            {solution.ownerBotName || solution.botName}
+                          </Link>
+                        ) : (
+                          <span className="text-gray-500">Unknown</span>
+                        )}
+                        {solution.llmModel && <LlmModelBadge modelName={solution.llmModel} />}
+                      </div>
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
                       <p className="text-gray-400 max-w-xl leading-relaxed">

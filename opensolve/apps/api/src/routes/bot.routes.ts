@@ -10,6 +10,7 @@ import { DispatcherService } from '../services/dispatcher.service.js';
 import { BradleyTerryService } from '../services/bradley-terry.service.js';
 import { ModerationService } from '../services/moderation.service.js';
 import { GamificationService } from '../services/gamification.service.js';
+import { LlmLeaderboardService } from '../services/llm-leaderboard.service.js';
 import { handleZodError } from '../utils/errors.js';
 import { detectPromptInjection } from '../utils/security.js';
 import { logger } from '../utils/logger.js';
@@ -18,6 +19,10 @@ const dispatcher = new DispatcherService();
 const bt = new BradleyTerryService();
 const moderation = new ModerationService();
 const gamification = new GamificationService();
+const llmLeaderboard = new LlmLeaderboardService();
+
+// LLM model name validation pattern
+const LLM_MODEL_PATTERN = /^[a-z0-9][a-z0-9._-]{0,98}[a-z0-9]$/;
 
 // Validation schemas
 const CATEGORY_SLUGS = [
@@ -35,6 +40,8 @@ const flagSubmitSchema = z.object({
 
 const solveSubmitSchema = z.object({
   solution_text: z.string().min(10).max(2000),
+  llm_model: z.string().max(100).optional(),
+  llm_model_version: z.string().max(50).optional(),
 });
 
 const voteSubmitSchema = z.object({
@@ -135,12 +142,30 @@ export async function botRoutes(fastify: FastifyInstance) {
               'Prompt injection pattern detected in solution_text'
             );
           }
+
+          // Validate and normalize LLM model name
+          let llmModel: string | null = null;
+          let llmModelVersion: string | null = null;
+          if (parsed.llm_model) {
+            const normalized = parsed.llm_model.trim().toLowerCase();
+            if (LLM_MODEL_PATTERN.test(normalized)) {
+              llmModel = normalized;
+              if (parsed.llm_model_version) {
+                llmModelVersion = parsed.llm_model_version.trim().slice(0, 50);
+              }
+            }
+          }
+
           // Create solution — blind, bot never sees other solutions
-          const [solution] = await db.insert(solutions).values({
+          const solutionValues: Record<string, unknown> = {
             problemId: task.problemId!,
             botId: bot.id,
             text: parsed.solution_text,
-          }).returning();
+          };
+          if (llmModel) solutionValues.llmModel = llmModel;
+          if (llmModelVersion) solutionValues.llmModelVersion = llmModelVersion;
+
+          const [solution] = await db.insert(solutions).values(solutionValues as any).returning();
 
           // Update problem solution count
           await db.update(problems)
@@ -152,6 +177,14 @@ export async function botRoutes(fastify: FastifyInstance) {
             .where(eq(problems.id, task.problemId!));
 
           await gamification.onSolve(bot.id, solution.id, task.problemId!);
+
+          // Record LLM model usage
+          if (llmModel) {
+            llmLeaderboard.recordModel(llmModel, llmModelVersion, bot.id).catch(err => {
+              logger.warn({ err, llmModel }, 'Failed to record LLM model');
+            });
+          }
+
           result = { solution_id: solution.id };
           break;
         }

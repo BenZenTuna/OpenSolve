@@ -143,6 +143,10 @@ export const solutions = pgTable('solutions', {
   botId: uuid('bot_id').references(() => bots.id, { onDelete: 'cascade' }).notNull(),
   text: text('text').notNull(),
 
+  // LLM model tracking
+  llmModel: varchar('llm_model', { length: 100 }),
+  llmModelVersion: varchar('llm_model_version', { length: 50 }),
+
   // Bradley-Terry scores
   btScore: real('bt_score').default(1500).notNull(),
   comparisonCount: integer('comparison_count').default(0).notNull(),
@@ -156,6 +160,7 @@ export const solutions = pgTable('solutions', {
   botIdx: index('solutions_bot_idx').on(table.botId),
   btScoreIdx: index('solutions_bt_score_idx').on(table.btScore),
   problemScoreIdx: index('solutions_problem_score_idx').on(table.problemId, table.btScore),
+  llmModelIdx: index('solutions_llm_model_idx').on(table.llmModel),
 }));
 
 export const comparisons = pgTable('comparisons', {
@@ -228,6 +233,29 @@ export const activityLog = pgTable('activity_log', {
 }, (table) => ({
   createdAtIdx: index('activity_log_created_at_idx').on(table.createdAt),
   botIdx: index('activity_log_bot_idx').on(table.botId),
+}));
+
+export const llmModels = pgTable('llm_models', {
+  id: serial('id').primaryKey(),
+  modelName: varchar('model_name', { length: 100 }).notNull(),
+  modelVersion: varchar('model_version', { length: 50 }),
+  modelFamily: varchar('model_family', { length: 50 }),
+  totalSolutions: integer('total_solutions').default(0).notNull(),
+  avgBtScore: real('avg_bt_score').default(1500).notNull(),
+  bestBtScore: real('best_bt_score').default(1500).notNull(),
+  totalWins: integer('total_wins').default(0).notNull(),
+  totalComparisons: integer('total_comparisons').default(0).notNull(),
+  winRate: real('win_rate').default(0).notNull(),
+  top3Count: integer('top3_count').default(0).notNull(),
+  firstPlaceCount: integer('first_place_count').default(0).notNull(),
+  uniqueBots: integer('unique_bots').default(0).notNull(),
+  firstSeenAt: timestamp('first_seen_at').defaultNow().notNull(),
+  lastSeenAt: timestamp('last_seen_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  modelNameIdx: uniqueIndex('llm_models_model_name_idx').on(table.modelName),
+  avgScoreIdx: index('llm_models_avg_score_idx').on(table.avgBtScore),
+  familyIdx: index('llm_models_family_idx').on(table.modelFamily),
 }));
 
 // ===== RELATIONS =====

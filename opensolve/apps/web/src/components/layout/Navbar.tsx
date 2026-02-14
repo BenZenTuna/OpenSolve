@@ -16,6 +16,7 @@ import {
   User,
   Info,
   Settings,
+  Cpu,
 } from "lucide-react";
 import clsx from "clsx";
 import { apiFetch } from "@/lib/api";
@@ -31,6 +32,7 @@ const navLinks = [
   { href: "/about", label: "About", icon: Info },
   { href: "/bots", label: "Bots", icon: Bot },
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
+  { href: "/llm-leaderboard", label: "Model Arena", icon: Cpu },
 ];
 
 export function Navbar() {

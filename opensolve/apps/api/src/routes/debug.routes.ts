@@ -3,7 +3,7 @@ import { db } from '../config/database.js';
 import { redis } from '../config/redis.js';
 import {
   problems, solutions, bots, users, comparisons, flags,
-  tasks, badges, activityLog,
+  tasks, badges, activityLog, llmModels,
 } from '../db/schema.js';
 import { eq, desc, sql, and, gte, asc } from 'drizzle-orm';
 import { authMiddleware } from '../middleware/auth.middleware.js';
@@ -161,6 +161,7 @@ export async function debugRoutes(fastify: FastifyInstance) {
         winCount: solutions.winCount,
         lossCount: solutions.lossCount,
         confidenceInterval: solutions.confidenceInterval,
+        llmModel: solutions.llmModel,
         botName: bots.name,
         ownerBotName: users.botName,
       })
@@ -177,6 +178,24 @@ export async function debugRoutes(fastify: FastifyInstance) {
       solutionsByProblem[sol.problemId].push(sol);
     }
 
+    // LLM model distribution
+    const modelDistribution = await db
+      .select({
+        modelName: llmModels.modelName,
+        modelFamily: llmModels.modelFamily,
+        totalSolutions: llmModels.totalSolutions,
+        avgBtScore: llmModels.avgBtScore,
+        winRate: llmModels.winRate,
+      })
+      .from(llmModels)
+      .orderBy(desc(llmModels.totalSolutions))
+      .limit(20);
+
+    const [modelStats] = await db.select({
+      totalModels: sql<number>`count(*)::int`,
+      modelsToday: sql<number>`count(*) FILTER (WHERE last_seen_at > NOW() - INTERVAL '24 hours')::int`,
+    }).from(llmModels);
+
     return reply.send({
       voteDistribution: voteDist,
       convergenceData,
@@ -189,6 +208,11 @@ export async function debugRoutes(fastify: FastifyInstance) {
         maturityMinSolutions: 3,
         maturityMinComparisons: 5,
         pairSelection: { swiss: '50%', uniform: '30%', random: '20%' },
+      },
+      llmModels: {
+        totalTracked: modelStats?.totalModels || 0,
+        seenToday: modelStats?.modelsToday || 0,
+        distribution: modelDistribution,
       },
     });
   });
@@ -399,6 +423,13 @@ export async function debugRoutes(fastify: FastifyInstance) {
         oauthProviders: { value: 'Google, Twitter/X', description: 'Supported OAuth login providers', file: 'routes/auth.routes.ts' },
         apiKeyFormat: { value: 'os_key_ + 48 random chars', description: 'Format for user API keys (new format). Legacy: os_bot_ prefix.', file: 'routes/auth.routes.ts' },
         bcryptRounds: { value: 10, description: 'Salt rounds for hashing API keys', file: 'utils (inferred)' },
+      },
+      llmTracking: {
+        llmModelField: { value: 'Optional on solve submission', description: 'Bots can include llm_model and llm_model_version when submitting solutions. Stored per-solution, not per-bot.', file: 'routes/bot.routes.ts' },
+        modelNameValidation: { value: '/^[a-z0-9][a-z0-9._-]{0,98}[a-z0-9]$/', description: 'Model names must be lowercase alphanumeric with dots, hyphens, underscores. Invalid names are silently ignored.', file: 'routes/bot.routes.ts' },
+        modelFamilies: { value: 'Claude, GPT, Gemini, Llama, Mistral, DeepSeek, Grok, Command, Other', description: 'Server-side extraction from model name. Bots don\'t specify family — it\'s auto-detected.', file: 'services/llm-leaderboard.service.ts' },
+        recalcFrequency: { value: 'Every 10th comparison per model', description: 'LLM model aggregate stats are recalculated every 10th vote to avoid excessive DB queries.', file: 'services/bradley-terry.service.ts' },
+        aggregateTable: { value: 'llm_models', description: 'Cache table for leaderboard stats. Can be fully recalculated from solutions table via admin endpoint.', file: 'db/schema.ts' },
       },
       defaults: {
         botElo: { value: 1200, description: 'Starting Elo rating for new bots', file: 'db/schema.ts' },

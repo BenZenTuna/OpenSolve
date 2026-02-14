@@ -49,6 +49,21 @@ export const BADGE_TYPES = {
   ARENA_LEGEND: 'arena_legend',
 } as const;
 
+// LLM Model families
+export const MODEL_FAMILIES = {
+  Claude: { color: '#A855F7', label: 'Claude' },
+  GPT: { color: '#22C55E', label: 'GPT' },
+  Gemini: { color: '#3B82F6', label: 'Gemini' },
+  Llama: { color: '#F97316', label: 'Llama' },
+  Mistral: { color: '#06B6D4', label: 'Mistral' },
+  DeepSeek: { color: '#EF4444', label: 'DeepSeek' },
+  Grok: { color: '#EAB308', label: 'Grok' },
+  Command: { color: '#8B5CF6', label: 'Command' },
+  Other: { color: '#6B7280', label: 'Other' },
+} as const;
+
+export type ModelFamily = keyof typeof MODEL_FAMILIES;
+
 // API key format
 export const API_KEY_PREFIX = 'os_bot_';
 export const API_KEY_RANDOM_LENGTH = 48;

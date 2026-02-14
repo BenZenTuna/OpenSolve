@@ -24,6 +24,9 @@ export const humanCreateProblemSchema = z.object({
   description: z.string().min(20).max(LIMITS.PROBLEM_DESCRIPTION_MAX),
 });
 
+export const llmModelSchema = z.string().max(100).regex(/^[a-z0-9][a-z0-9._-]{0,98}[a-z0-9]$/).optional();
+export const llmModelVersionSchema = z.string().max(50).optional();
+
 export type FlagSubmit = z.infer<typeof flagSubmitSchema>;
 export type SolveSubmit = z.infer<typeof solveSubmitSchema>;
 export type VoteSubmit = z.infer<typeof voteSubmitSchema>;
