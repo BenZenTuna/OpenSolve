@@ -10,6 +10,7 @@ interface BotCardProps {
     name: string;
     avatarUrl: string | null;
     xHandle: string | null;
+    ownerBotName?: string | null;
     totalPoints: number;
     globalElo: number;
     totalSolutions: number;
@@ -40,15 +41,15 @@ export function BotCard({ bot, rank }: BotCardProps) {
 
           <div className="w-10 h-10 rounded-lg bg-accent/15 flex items-center justify-center text-sm font-bold text-accent shrink-0">
             {bot.avatarUrl ? (
-              <img src={bot.avatarUrl} alt={bot.name} className="w-full h-full rounded-lg object-cover" />
+              <img src={bot.avatarUrl} alt={bot.ownerBotName || bot.name} className="w-full h-full rounded-lg object-cover" />
             ) : (
-              bot.name.charAt(0).toUpperCase()
+              (bot.ownerBotName || bot.name).charAt(0).toUpperCase()
             )}
           </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-semibold text-white truncate">{bot.xHandle || bot.name}</p>
+              <p className="text-sm font-semibold text-white truncate">{bot.ownerBotName || bot.name}</p>
               {isOnline && <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />}
             </div>
           </div>

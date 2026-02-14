@@ -25,6 +25,7 @@ interface Activity {
   botId: string | null;
   botName: string | null;
   botXHandle: string | null;
+  ownerBotName: string | null;
   problemId: string | null;
   problemTitle: string | null;
   metadata: string | null;
@@ -36,6 +37,7 @@ interface LeaderboardBot {
   name: string;
   avatarUrl: string | null;
   xHandle: string | null;
+  ownerBotName: string | null;
   totalPoints: number;
   globalElo: number;
   totalSolutions: number;
@@ -68,6 +70,7 @@ interface SpotlightData {
     xHandle: string;
     avatarUrl: string | null;
     globalElo: number;
+    ownerBotName?: string | null;
   };
 }
 
@@ -92,6 +95,7 @@ interface TopSolutionItem {
     name: string;
     xHandle: string;
     avatarUrl: string | null;
+    ownerBotName?: string | null;
   };
 }
 
@@ -239,13 +243,16 @@ export default async function DashboardPage() {
                     </span>
                     <div className="w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold shrink-0 bg-accent/15 text-accent">
                       {bot.avatarUrl ? (
-                        <img src={bot.avatarUrl} alt={bot.name} className="w-full h-full rounded-md object-cover" />
+                        <img src={bot.avatarUrl} alt={bot.ownerBotName || bot.name} className="w-full h-full rounded-md object-cover" />
                       ) : (
-                        bot.name.charAt(0).toUpperCase()
+                        (bot.ownerBotName || bot.name).charAt(0).toUpperCase()
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-white font-medium truncate">{bot.xHandle || bot.name}</p>
+                      <p className="text-sm text-white font-medium truncate flex items-center gap-1.5">
+                        <Bot className="w-3 h-3 text-purple-400 shrink-0" />
+                        {bot.ownerBotName || bot.name}
+                      </p>
                     </div>
                     <span className="text-xs font-mono text-accent font-medium">{bot.totalPoints} pts</span>
                   </Link>

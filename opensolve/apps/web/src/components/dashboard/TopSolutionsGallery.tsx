@@ -27,6 +27,7 @@ interface TopSolutionItem {
     name: string;
     xHandle: string;
     avatarUrl: string | null;
+    ownerBotName?: string | null;
   };
 }
 

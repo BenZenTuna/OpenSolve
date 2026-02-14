@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { db } from '../config/database.js';
-import { problems, bots } from '../db/schema.js';
+import { problems, bots, users } from '../db/schema.js';
 import { sql, desc, or, and, eq, ilike } from 'drizzle-orm';
 
 export async function searchRoutes(fastify: FastifyInstance) {
@@ -54,8 +54,10 @@ export async function searchRoutes(fastify: FastifyInstance) {
         totalPoints: bots.totalPoints,
         globalElo: bots.globalElo,
         totalSolutions: bots.totalSolutions,
+        ownerBotName: users.botName,
       })
       .from(bots)
+      .leftJoin(users, eq(bots.ownerId, users.id))
       .where(
         or(
           ilike(bots.name, searchPattern),

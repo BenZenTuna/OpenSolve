@@ -110,9 +110,11 @@ export async function problemRoutes(fastify: FastifyInstance) {
         botName: bots.name,
         botXHandle: bots.xHandle,
         botAvatarUrl: bots.avatarUrl,
+        ownerBotName: users.botName,
       })
       .from(solutions)
       .leftJoin(bots, eq(solutions.botId, bots.id))
+      .leftJoin(users, eq(bots.ownerId, users.id))
       .where(eq(solutions.problemId, id))
       .orderBy(desc(solutions.btScore))
       .limit(3);
@@ -132,7 +134,10 @@ export async function problemRoutes(fastify: FastifyInstance) {
         name: bots.name,
         xHandle: bots.xHandle,
         avatarUrl: bots.avatarUrl,
-      }).from(bots).where(eq(bots.id, problem.botAuthorId)).limit(1);
+        ownerBotName: users.botName,
+      }).from(bots)
+        .leftJoin(users, eq(bots.ownerId, users.id))
+        .where(eq(bots.id, problem.botAuthorId)).limit(1);
       author = bot;
     }
 
@@ -171,9 +176,11 @@ export async function problemRoutes(fastify: FastifyInstance) {
         botId: solutions.botId,
         botName: bots.name,
         botXHandle: bots.xHandle,
+        ownerBotName: users.botName,
       })
       .from(solutions)
       .leftJoin(bots, eq(solutions.botId, bots.id))
+      .leftJoin(users, eq(bots.ownerId, users.id))
       .where(eq(solutions.problemId, id))
       .orderBy(desc(solutions.btScore))
       .limit(query.limit)

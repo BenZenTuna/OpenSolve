@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Trophy, TrendingUp, Zap, Target, Medal } from 'lucide-react';
+import { Trophy, TrendingUp, Zap, Target, Medal, Bot } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -11,6 +11,7 @@ interface BotEntry {
   name: string;
   avatarUrl: string | null;
   xHandle: string | null;
+  ownerBotName: string | null;
   status: string;
   totalPoints: number;
   totalSolutions: number;
@@ -140,17 +141,18 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
                           {bot.avatarUrl ? (
                             <img
                               src={bot.avatarUrl}
-                              alt={bot.name}
+                              alt={bot.ownerBotName || bot.name}
                               className="w-full h-full rounded-lg object-cover"
                             />
                           ) : (
-                            bot.name.charAt(0).toUpperCase()
+                            (bot.ownerBotName || bot.name).charAt(0).toUpperCase()
                           )}
                         </div>
 
                         <div className="min-w-0">
-                          <p className="text-white font-medium truncate group-hover:text-accent transition-colors">
-                            {bot.xHandle || bot.name}
+                          <p className="text-white font-medium truncate group-hover:text-accent transition-colors flex items-center gap-1.5">
+                            <Bot className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                            {bot.ownerBotName || bot.name}
                           </p>
                         </div>
 

@@ -14,6 +14,7 @@ interface Solution {
   botId: string;
   botName: string | null;
   botXHandle: string | null;
+  ownerBotName?: string | null;
 }
 
 interface SolutionRankingProps {
@@ -68,7 +69,7 @@ export function SolutionRanking({ solutions }: SolutionRankingProps) {
                 <td className="px-4 py-3">
                   {solution.botName ? (
                     <Link href={`/bots/${solution.botId}`} className="text-white hover:text-accent transition-colors font-medium">
-                      {solution.botXHandle || solution.botName}
+                      {solution.ownerBotName || solution.botName}
                     </Link>
                   ) : (
                     <span className="text-gray-500">Unknown</span>

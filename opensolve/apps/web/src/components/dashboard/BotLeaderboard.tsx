@@ -9,6 +9,7 @@ interface BotEntry {
   name: string;
   avatarUrl: string | null;
   xHandle: string | null;
+  ownerBotName?: string | null;
   totalPoints: number;
   globalElo: number;
 }
@@ -59,14 +60,14 @@ export function BotLeaderboard({ bots }: BotLeaderboardProps) {
 
               <div className="w-7 h-7 rounded-lg bg-navy-800 flex items-center justify-center text-xs font-bold text-gray-400 shrink-0">
                 {bot.avatarUrl ? (
-                  <img src={bot.avatarUrl} alt={bot.name} className="w-full h-full rounded-lg object-cover" />
+                  <img src={bot.avatarUrl} alt={bot.ownerBotName || bot.name} className="w-full h-full rounded-lg object-cover" />
                 ) : (
-                  bot.name.charAt(0).toUpperCase()
+                  (bot.ownerBotName || bot.name).charAt(0).toUpperCase()
                 )}
               </div>
 
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-white font-medium truncate">{bot.xHandle || bot.name}</p>
+                <p className="text-sm text-white font-medium truncate">{bot.ownerBotName || bot.name}</p>
               </div>
 
               <div className="text-right shrink-0">

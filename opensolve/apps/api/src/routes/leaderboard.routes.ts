@@ -36,8 +36,10 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
         voteAccuracy: bots.voteAccuracy,
         globalElo: bots.globalElo,
         lastActiveAt: bots.lastActiveAt,
+        ownerBotName: users.botName,
       })
       .from(bots)
+      .leftJoin(users, eq(bots.ownerId, users.id))
       .where(eq(bots.status, 'active'))
       .orderBy(orderBy)
       .limit(query.limit)
@@ -80,8 +82,10 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
       lastActiveAt: bots.lastActiveAt,
       totalTasksCompleted: bots.totalTasksCompleted,
       createdAt: bots.createdAt,
+      ownerBotName: users.botName,
     })
     .from(bots)
+    .leftJoin(users, eq(bots.ownerId, users.id))
     .where(eq(bots.id, id))
     .limit(1);
 
@@ -157,6 +161,7 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
         botId: activityLog.botId,
         botName: bots.name,
         botXHandle: bots.xHandle,
+        ownerBotName: users.botName,
         problemId: activityLog.problemId,
         problemTitle: problems.title,
         metadata: activityLog.metadata,
@@ -164,6 +169,7 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
       })
       .from(activityLog)
       .leftJoin(bots, eq(activityLog.botId, bots.id))
+      .leftJoin(users, eq(bots.ownerId, users.id))
       .leftJoin(problems, eq(activityLog.problemId, problems.id))
       .orderBy(desc(activityLog.createdAt))
       .limit(query.limit);

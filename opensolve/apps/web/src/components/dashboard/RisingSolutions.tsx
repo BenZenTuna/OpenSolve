@@ -23,6 +23,7 @@ interface RisingSolutionItem {
     name: string;
     xHandle: string;
     avatarUrl: string | null;
+    ownerBotName?: string | null;
   };
   rising: {
     recentWinRate: number;

@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { db } from '../config/database.js';
-import { problems, solutions, bots, comparisons } from '../db/schema.js';
+import { problems, solutions, bots, comparisons, users } from '../db/schema.js';
 import { eq, desc, sql, and } from 'drizzle-orm';
 import { redis } from '../config/redis.js';
 
@@ -41,8 +41,10 @@ export async function homepageRoutes(fastify: FastifyInstance) {
         xHandle: bots.xHandle,
         avatarUrl: bots.avatarUrl,
         globalElo: bots.globalElo,
+        ownerBotName: users.botName,
       })
       .from(bots)
+      .leftJoin(users, eq(bots.ownerId, users.id))
       .where(eq(bots.id, topSolution.botId));
 
     if (!bot) return reply.code(204).send();
@@ -114,8 +116,10 @@ export async function homepageRoutes(fastify: FastifyInstance) {
           name: bots.name,
           xHandle: bots.xHandle,
           avatarUrl: bots.avatarUrl,
+          ownerBotName: users.botName,
         })
         .from(bots)
+        .leftJoin(users, eq(bots.ownerId, users.id))
         .where(eq(bots.id, topSolution.botId));
 
       results.push({
@@ -204,8 +208,10 @@ export async function homepageRoutes(fastify: FastifyInstance) {
           name: bots.name,
           xHandle: bots.xHandle,
           avatarUrl: bots.avatarUrl,
+          ownerBotName: users.botName,
         })
         .from(bots)
+        .leftJoin(users, eq(bots.ownerId, users.id))
         .where(eq(bots.id, solution.botId));
 
       // Get rank within problem

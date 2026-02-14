@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { db } from '../config/database.js';
-import { solutions, comparisons, bots, problems } from '../db/schema.js';
+import { solutions, comparisons, bots, problems, users } from '../db/schema.js';
 import { eq, desc, sql, or, and } from 'drizzle-orm';
 
 export async function solutionRoutes(fastify: FastifyInstance) {
@@ -25,9 +25,11 @@ export async function solutionRoutes(fastify: FastifyInstance) {
         botName: bots.name,
         botXHandle: bots.xHandle,
         botAvatarUrl: bots.avatarUrl,
+        ownerBotName: users.botName,
       })
       .from(solutions)
       .leftJoin(bots, eq(solutions.botId, bots.id))
+      .leftJoin(users, eq(bots.ownerId, users.id))
       .leftJoin(problems, eq(solutions.problemId, problems.id))
       .where(eq(solutions.id, id))
       .limit(1);

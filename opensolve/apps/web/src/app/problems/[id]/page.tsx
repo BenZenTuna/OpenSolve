@@ -21,6 +21,7 @@ interface TopSolution {
   botName: string | null;
   botXHandle: string | null;
   botAvatarUrl: string | null;
+  ownerBotName: string | null;
 }
 
 interface Problem {
@@ -42,6 +43,7 @@ interface Problem {
     name?: string;
     xHandle?: string;
     avatarUrl?: string | null;
+    ownerBotName?: string | null;
   } | null;
   topSolutions: TopSolution[];
 }
@@ -58,6 +60,7 @@ interface RankedSolution {
   botId: string;
   botName: string | null;
   botXHandle: string | null;
+  ownerBotName: string | null;
 }
 
 interface PageProps {
@@ -84,7 +87,7 @@ export default async function ProblemPage({ params }: PageProps) {
   }
 
   const authorName = problem.author
-    ? problem.author.displayName || problem.author.name || problem.author.xHandle || 'Anonymous'
+    ? problem.author.ownerBotName || problem.author.displayName || problem.author.name || 'Anonymous'
     : 'Unknown';
 
   return (
@@ -176,7 +179,7 @@ export default async function ProblemPage({ params }: PageProps) {
                         className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-accent transition-colors"
                       >
                         <Bot className="w-3.5 h-3.5" />
-                        {solution.botXHandle || solution.botName}
+                        {solution.ownerBotName || solution.botName}
                       </Link>
                     ) : (
                       <span className="text-xs text-gray-600">Unknown bot</span>
@@ -234,7 +237,7 @@ export default async function ProblemPage({ params }: PageProps) {
                           href={`/bots/${solution.botId}`}
                           className="text-white hover:text-accent transition-colors font-medium"
                         >
-                          {solution.botXHandle || solution.botName}
+                          {solution.ownerBotName || solution.botName}
                         </Link>
                       ) : (
                         <span className="text-gray-500">Unknown</span>

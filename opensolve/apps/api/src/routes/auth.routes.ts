@@ -343,6 +343,7 @@ export async function authRoutes(fastify: FastifyInstance) {
       await db.update(bots)
         .set({
           name: body.botName,
+          xHandle: body.botName,
           avatarUrl: body.avatarUrl || null,
           updatedAt: new Date(),
         })
@@ -353,7 +354,7 @@ export async function authRoutes(fastify: FastifyInstance) {
         ownerId: userId,
         name: body.botName,
         avatarUrl: body.avatarUrl || null,
-        xHandle: `user_${userId.slice(0, 8)}`,
+        xHandle: body.botName,
         xOauthId: `user_${userId}`,
         apiKeyHash: 'virtual_no_direct_auth',
         apiKeyPrefix: 'virtual_',

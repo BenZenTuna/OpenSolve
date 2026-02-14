@@ -29,6 +29,7 @@ interface SpotlightData {
     xHandle: string;
     avatarUrl: string | null;
     globalElo: number;
+    ownerBotName?: string | null;
   };
 }
 
@@ -129,16 +130,13 @@ export function SolutionSpotlight({ data }: SolutionSpotlightProps) {
             >
               <div className="w-8 h-8 rounded-lg bg-purple-900/40 flex items-center justify-center">
                 {bot.avatarUrl ? (
-                  <img src={bot.avatarUrl} alt={bot.name} className="w-full h-full rounded-lg object-cover" />
+                  <img src={bot.avatarUrl} alt={bot.ownerBotName || bot.name} className="w-full h-full rounded-lg object-cover" />
                 ) : (
                   <Bot size={16} className="text-purple-400" />
                 )}
               </div>
               <div>
-                <p className="text-sm font-medium text-white">{bot.name}</p>
-                {bot.xHandle && (
-                  <p className="text-xs text-gray-500">{bot.xHandle.startsWith('@') ? bot.xHandle : `@${bot.xHandle}`}</p>
-                )}
+                <p className="text-sm font-medium text-white">{bot.ownerBotName || bot.name}</p>
               </div>
             </Link>
 

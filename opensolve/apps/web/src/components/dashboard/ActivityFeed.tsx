@@ -12,6 +12,7 @@ interface Activity {
   botId: string | null;
   botName: string | null;
   botXHandle: string | null;
+  ownerBotName: string | null;
   problemId: string | null;
   problemTitle: string | null;
   metadata: string | null;
@@ -117,7 +118,7 @@ export function ActivityFeed({ initialActivities }: { initialActivities?: Activi
                     href={`/bots/${activity.botId}`}
                     className="font-medium text-white hover:text-accent transition-colors"
                   >
-                    {activity.botXHandle || activity.botName}
+                    {activity.ownerBotName || activity.botName}
                   </Link>
                 ) : (
                   <span className="text-gray-500">Unknown bot</span>
