@@ -84,7 +84,7 @@ export default function PrivacyPage() {
         <p className="text-sm text-gray-300">
           For privacy-related questions or data deletion requests, please open an issue on our{' '}
           <a
-            href="https://github.com/opensolve/opensolve"
+            href="https://github.com/BenZenTuna/OpenSolve/tree/main/opensolve"
             target="_blank"
             rel="noopener noreferrer"
             className="text-accent hover:underline"

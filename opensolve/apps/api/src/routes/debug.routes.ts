@@ -5,7 +5,7 @@ import {
   problems, solutions, bots, users, comparisons, flags,
   tasks, badges, activityLog, llmModels,
 } from '../db/schema.js';
-import { eq, desc, sql, and, gte, asc } from 'drizzle-orm';
+import { eq, desc, sql, and, gte, asc, isNotNull } from 'drizzle-orm';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 
 const DEBUG_SECRET = 'opensolve-debug-2026';
@@ -40,6 +40,8 @@ export async function debugRoutes(fastify: FastifyInstance) {
         problemId: activityLog.problemId,
         problemTitle: problems.title,
         solutionId: activityLog.solutionId,
+        llmModel: solutions.llmModel,
+        llmModelVersion: solutions.llmModelVersion,
         metadata: activityLog.metadata,
         createdAt: activityLog.createdAt,
       })
@@ -47,6 +49,7 @@ export async function debugRoutes(fastify: FastifyInstance) {
       .leftJoin(bots, eq(activityLog.botId, bots.id))
       .leftJoin(users, eq(bots.ownerId, users.id))
       .leftJoin(problems, eq(activityLog.problemId, problems.id))
+      .leftJoin(solutions, eq(activityLog.solutionId, solutions.id))
       .orderBy(desc(activityLog.createdAt))
       .limit(100);
 
@@ -74,6 +77,28 @@ export async function debugRoutes(fastify: FastifyInstance) {
       .from(problems)
       .orderBy(desc(problems.attentionScore))
       .limit(100);
+
+    // Models contributing per problem
+    const modelsByProblem = await db
+      .select({
+        problemId: solutions.problemId,
+        modelName: solutions.llmModel,
+      })
+      .from(solutions)
+      .where(isNotNull(solutions.llmModel));
+
+    // Group distinct models per problem
+    const modelsMap: Record<string, Set<string>> = {};
+    for (const row of modelsByProblem) {
+      if (!modelsMap[row.problemId]) modelsMap[row.problemId] = new Set();
+      if (row.modelName) modelsMap[row.problemId].add(row.modelName);
+    }
+
+    const problemsWithModels = allProblems.map((p) => ({
+      ...p,
+      modelsContributing: Array.from(modelsMap[p.id] || []),
+      modelCount: modelsMap[p.id]?.size || 0,
+    }));
 
     // Current task queue
     const activeTasks = await db
@@ -119,7 +144,7 @@ export async function debugRoutes(fastify: FastifyInstance) {
       .groupBy(problems.status);
 
     return reply.send({
-      problems: allProblems,
+      problems: problemsWithModels,
       activeTasks,
       trafficDistribution,
       totalHourlyTraffic: totalTraffic,
@@ -178,23 +203,56 @@ export async function debugRoutes(fastify: FastifyInstance) {
       solutionsByProblem[sol.problemId].push(sol);
     }
 
-    // LLM model distribution
-    const modelDistribution = await db
+    // LLM model stats — comprehensive
+    const top5ByScore = await db
+      .select({
+        modelName: llmModels.modelName,
+        modelFamily: llmModels.modelFamily,
+        avgBtScore: llmModels.avgBtScore,
+        winRate: llmModels.winRate,
+        totalSolutions: llmModels.totalSolutions,
+        firstPlaceCount: llmModels.firstPlaceCount,
+      })
+      .from(llmModels)
+      .orderBy(desc(llmModels.avgBtScore))
+      .limit(5);
+
+    const top5ByVolume = await db
       .select({
         modelName: llmModels.modelName,
         modelFamily: llmModels.modelFamily,
         totalSolutions: llmModels.totalSolutions,
         avgBtScore: llmModels.avgBtScore,
-        winRate: llmModels.winRate,
       })
       .from(llmModels)
       .orderBy(desc(llmModels.totalSolutions))
-      .limit(20);
+      .limit(5);
 
-    const [modelStats] = await db.select({
+    const [modelAggStats] = await db.select({
       totalModels: sql<number>`count(*)::int`,
       modelsToday: sql<number>`count(*) FILTER (WHERE last_seen_at > NOW() - INTERVAL '24 hours')::int`,
     }).from(llmModels);
+
+    const [solutionCounts] = await db.select({
+      withModel: sql<number>`count(*) FILTER (WHERE llm_model IS NOT NULL)::int`,
+      withoutModel: sql<number>`count(*) FILTER (WHERE llm_model IS NULL)::int`,
+      total: sql<number>`count(*)::int`,
+    }).from(solutions);
+
+    const adoptionRate = solutionCounts.total > 0
+      ? (solutionCounts.withModel / solutionCounts.total) * 100
+      : 0;
+
+    const familyDistribution = await db
+      .select({
+        family: llmModels.modelFamily,
+        modelCount: sql<number>`count(*)::int`,
+        totalSolutions: sql<number>`COALESCE(sum(${llmModels.totalSolutions}), 0)::int`,
+        avgScore: sql<number>`COALESCE(avg(${llmModels.avgBtScore}), 1500)::real`,
+      })
+      .from(llmModels)
+      .groupBy(llmModels.modelFamily)
+      .orderBy(desc(sql`sum(${llmModels.totalSolutions})`));
 
     return reply.send({
       voteDistribution: voteDist,
@@ -210,9 +268,14 @@ export async function debugRoutes(fastify: FastifyInstance) {
         pairSelection: { swiss: '50%', uniform: '30%', random: '20%' },
       },
       llmModels: {
-        totalTracked: modelStats?.totalModels || 0,
-        seenToday: modelStats?.modelsToday || 0,
-        distribution: modelDistribution,
+        totalTracked: modelAggStats?.totalModels || 0,
+        seenToday: modelAggStats?.modelsToday || 0,
+        top5ByScore,
+        top5ByVolume,
+        solutionsWithModel: solutionCounts.withModel,
+        solutionsWithoutModel: solutionCounts.withoutModel,
+        adoptionRate: Math.round(adoptionRate * 10) / 10,
+        familyDistribution,
       },
     });
   });
@@ -337,13 +400,129 @@ export async function debugRoutes(fastify: FastifyInstance) {
       tasksByBot[task.botId].push(task);
     }
 
+    // Last LLM model used per bot (most recent solution with model info)
+    const lastModelPerBot = await db.execute(sql`
+      SELECT DISTINCT ON (s.bot_id) s.bot_id, s.llm_model, s.llm_model_version, s.created_at
+      FROM solutions s
+      WHERE s.llm_model IS NOT NULL
+      ORDER BY s.bot_id, s.created_at DESC
+    `);
+    const lastModelRows = ((lastModelPerBot as { rows?: unknown[] }).rows ?? lastModelPerBot) as Array<{
+      bot_id: string; llm_model: string; llm_model_version: string | null; created_at: string;
+    }>;
+    const lastModelMap: Record<string, { llmModel: string; llmModelVersion: string | null }> = {};
+    for (const row of lastModelRows) {
+      lastModelMap[row.bot_id] = { llmModel: row.llm_model, llmModelVersion: row.llm_model_version };
+    }
+
     return reply.send({
-      bots: allBots,
+      bots: allBots.map((bot) => ({
+        ...bot,
+        lastModel: lastModelMap[bot.id] || null,
+      })),
       assignedTasks: tasksByBot,
       rateLimits: {
         globalPerHour: 200,
         perBotPerHour: 60,
       },
+    });
+  });
+
+  // ===== LLM MODELS (NEW) =====
+  fastify.get('/internal/debug/llm-models', async (_request, reply) => {
+    // All models sorted by avg BT score
+    const allModels = await db
+      .select()
+      .from(llmModels)
+      .orderBy(desc(llmModels.avgBtScore));
+
+    // Summary stats
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    const [summaryStats] = await db.select({
+      totalModels: sql<number>`count(*)::int`,
+      modelsToday: sql<number>`count(*) FILTER (WHERE last_seen_at >= ${today})::int`,
+      modelsThisWeek: sql<number>`count(*) FILTER (WHERE last_seen_at >= ${weekAgo})::int`,
+    }).from(llmModels);
+
+    const [solutionCounts] = await db.select({
+      withModel: sql<number>`count(*) FILTER (WHERE llm_model IS NOT NULL)::int`,
+      total: sql<number>`count(*)::int`,
+    }).from(solutions);
+
+    const adoptionRate = solutionCounts.total > 0
+      ? Math.round((solutionCounts.withModel / solutionCounts.total) * 1000) / 10
+      : 0;
+
+    // Distinct families
+    const families = await db
+      .select({ family: llmModels.modelFamily })
+      .from(llmModels)
+      .groupBy(llmModels.modelFamily);
+
+    // Most popular & best performing
+    const mostPopular = allModels.reduce((best, m) => (!best || m.totalSolutions > best.totalSolutions) ? m : best, allModels[0]);
+    const bestPerforming = allModels[0]; // already sorted by avgBtScore desc
+
+    // Recent model activity — last 20 solutions with model info
+    const recentActivity = await db
+      .select({
+        solutionId: solutions.id,
+        problemTitle: problems.title,
+        botName: bots.name,
+        ownerBotName: users.botName,
+        llmModel: solutions.llmModel,
+        llmModelVersion: solutions.llmModelVersion,
+        btScore: solutions.btScore,
+        createdAt: solutions.createdAt,
+      })
+      .from(solutions)
+      .leftJoin(problems, eq(solutions.problemId, problems.id))
+      .leftJoin(bots, eq(solutions.botId, bots.id))
+      .leftJoin(users, eq(bots.ownerId, users.id))
+      .where(isNotNull(solutions.llmModel))
+      .orderBy(desc(solutions.createdAt))
+      .limit(20);
+
+    return reply.send({
+      summary: {
+        totalModels: summaryStats?.totalModels || 0,
+        totalFamilies: families.length,
+        modelsSeenToday: summaryStats?.modelsToday || 0,
+        modelsSeenThisWeek: summaryStats?.modelsThisWeek || 0,
+        adoptionRate,
+        mostPopularModel: mostPopular?.modelName || '—',
+        bestPerformingModel: bestPerforming?.modelName || '—',
+        solutionsWithModel: solutionCounts.withModel,
+        solutionsTotal: solutionCounts.total,
+      },
+      models: allModels.map((m) => ({
+        modelName: m.modelName,
+        modelVersion: m.modelVersion,
+        modelFamily: m.modelFamily,
+        totalSolutions: m.totalSolutions,
+        avgBtScore: m.avgBtScore,
+        bestBtScore: m.bestBtScore,
+        totalWins: m.totalWins,
+        totalComparisons: m.totalComparisons,
+        winRate: m.winRate,
+        top3Count: m.top3Count,
+        firstPlaceCount: m.firstPlaceCount,
+        uniqueBots: m.uniqueBots,
+        firstSeenAt: m.firstSeenAt,
+        lastSeenAt: m.lastSeenAt,
+      })),
+      recentModelActivity: recentActivity.map((r) => ({
+        solutionId: r.solutionId,
+        problemTitle: r.problemTitle,
+        botName: r.ownerBotName || r.botName || 'unknown',
+        llmModel: r.llmModel,
+        llmModelVersion: r.llmModelVersion,
+        btScore: r.btScore,
+        createdAt: r.createdAt,
+      })),
     });
   });
 
@@ -427,9 +606,18 @@ export async function debugRoutes(fastify: FastifyInstance) {
       llmTracking: {
         llmModelField: { value: 'Optional on solve submission', description: 'Bots can include llm_model and llm_model_version when submitting solutions. Stored per-solution, not per-bot.', file: 'routes/bot.routes.ts' },
         modelNameValidation: { value: '/^[a-z0-9][a-z0-9._-]{0,98}[a-z0-9]$/', description: 'Model names must be lowercase alphanumeric with dots, hyphens, underscores. Invalid names are silently ignored.', file: 'routes/bot.routes.ts' },
-        modelFamilies: { value: 'Claude, GPT, Gemini, Llama, Mistral, DeepSeek, Grok, Command, Other', description: 'Server-side extraction from model name. Bots don\'t specify family — it\'s auto-detected.', file: 'services/llm-leaderboard.service.ts' },
+        modelNameMaxLength: { value: 100, description: 'Maximum characters for model name field', file: 'packages/shared/src/validation.ts' },
+        modelVersionMaxLength: { value: 50, description: 'Maximum characters for model version field', file: 'packages/shared/src/validation.ts' },
+        modelNameRequired: { value: false, description: 'Model name is optional — bots that don\'t send it still work fine', file: 'routes/bot.routes.ts' },
+        familyExtractionRules: {
+          value: 'claude→Claude, gpt→GPT, gemini→Gemini, llama→Llama, mistral→Mistral, deepseek→DeepSeek, grok→Grok, command→Command, fallback→Other',
+          description: 'Server-side extraction from model name. Bots don\'t specify family — it\'s auto-detected from model name pattern.',
+          file: 'services/llm-leaderboard.service.ts',
+        },
         recalcFrequency: { value: 'Every 10th comparison per model', description: 'LLM model aggregate stats are recalculated every 10th vote to avoid excessive DB queries.', file: 'services/bradley-terry.service.ts' },
         aggregateTable: { value: 'llm_models', description: 'Cache table for leaderboard stats. Can be fully recalculated from solutions table via admin endpoint.', file: 'db/schema.ts' },
+        normalization: { value: 'Trimmed + lowercased', description: 'Model names are trimmed and lowercased server-side before storage', file: 'routes/bot.routes.ts' },
+        modelNotVerified: { value: true, description: 'Model name is self-reported by bots. Platform does not verify the actual LLM used. Trust model same as LLM benchmarks.', file: 'routes/bot.routes.ts' },
       },
       defaults: {
         botElo: { value: 1200, description: 'Starting Elo rating for new bots', file: 'db/schema.ts' },

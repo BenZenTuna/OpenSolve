@@ -6,7 +6,7 @@ import {
   Activity, Cpu, BarChart3, Shield, Bot, BookOpen,
   ChevronDown, ChevronRight, Info, AlertTriangle,
   CheckCircle, XCircle, Clock, Zap, RefreshCw,
-  Circle, ArrowRight, TrendingUp, Eye
+  Circle, ArrowRight, TrendingUp, Eye, Dna
 } from 'lucide-react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -20,6 +20,8 @@ interface DebugEvent {
   problemId: string | null;
   problemTitle: string | null;
   solutionId: string | null;
+  llmModel: string | null;
+  llmModelVersion: string | null;
   metadata: Record<string, unknown> | null;
   createdAt: string;
 }
@@ -37,6 +39,8 @@ interface DispatcherProblem {
   attentionScore: number;
   lastBotActivityAt: string | null;
   createdAt: string;
+  modelsContributing: string[];
+  modelCount: number;
 }
 
 interface ActiveTask {
@@ -74,6 +78,7 @@ interface SolutionStat {
   winCount: number;
   lossCount: number;
   confidenceInterval: number | null;
+  llmModel: string | null;
   botName: string | null;
   ownerBotName: string | null;
 }
@@ -108,12 +113,75 @@ interface BotEntry {
   lastActiveAt: string | null;
   totalTasksCompleted: number;
   createdAt: string;
+  lastModel: { llmModel: string; llmModelVersion: string | null } | null;
 }
 
 interface ConfigValue {
   value: string | number | boolean;
   description: string;
   file: string;
+}
+
+interface LlmModelEntry {
+  modelName: string;
+  modelVersion: string | null;
+  modelFamily: string;
+  totalSolutions: number;
+  avgBtScore: number;
+  bestBtScore: number;
+  totalWins: number;
+  totalComparisons: number;
+  winRate: number;
+  top3Count: number;
+  firstPlaceCount: number;
+  uniqueBots: number;
+  firstSeenAt: string;
+  lastSeenAt: string;
+}
+
+interface LlmSummary {
+  totalModels: number;
+  totalFamilies: number;
+  modelsSeenToday: number;
+  modelsSeenThisWeek: number;
+  adoptionRate: number;
+  mostPopularModel: string;
+  bestPerformingModel: string;
+  solutionsWithModel: number;
+  solutionsTotal: number;
+}
+
+interface RecentModelActivity {
+  solutionId: string;
+  problemTitle: string | null;
+  botName: string;
+  llmModel: string;
+  llmModelVersion: string | null;
+  btScore: number;
+  createdAt: string;
+}
+
+interface BtLlmTop5Entry {
+  modelName: string;
+  modelFamily: string;
+  avgBtScore: number;
+  winRate: number;
+  totalSolutions: number;
+  firstPlaceCount?: number;
+}
+
+interface BtLlmVolumeEntry {
+  modelName: string;
+  modelFamily: string;
+  totalSolutions: number;
+  avgBtScore: number;
+}
+
+interface FamilyDistEntry {
+  family: string;
+  modelCount: number;
+  totalSolutions: number;
+  avgScore: number;
 }
 
 // ─── Hooks & Helpers ─────────────────────────────────────────────────────────
@@ -188,6 +256,34 @@ const ACTION_BG: Record<string, string> = {
   create_problem: 'bg-purple-400/10',
 };
 
+const FAMILY_COLORS: Record<string, string> = {
+  Claude: '#A855F7',
+  GPT: '#22C55E',
+  Gemini: '#3B82F6',
+  Llama: '#F97316',
+  Mistral: '#06B6D4',
+  DeepSeek: '#EF4444',
+  Grok: '#EAB308',
+  Command: '#F59E0B',
+  Other: '#6B7280',
+};
+
+function getFamilyColor(family: string | null): string {
+  return FAMILY_COLORS[family || 'Other'] || FAMILY_COLORS.Other;
+}
+
+function FamilyBadge({ family }: { family: string | null }) {
+  const color = getFamilyColor(family);
+  return (
+    <span
+      className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold font-mono"
+      style={{ backgroundColor: `${color}20`, color }}
+    >
+      {family || 'Other'}
+    </span>
+  );
+}
+
 // ─── Tooltip ─────────────────────────────────────────────────────────────────
 
 function Tip({ text }: { text: string }) {
@@ -255,12 +351,21 @@ function LiveFeedTab({ debugKey }: { debugKey: string }) {
       {activities.map((evt) => {
         const colorClass = ACTION_COLORS[evt.action] || 'text-gray-400';
         const bgClass = ACTION_BG[evt.action] || 'bg-gray-400/10';
+        const isSolve = evt.action === 'submit_solution' || evt.action === 'solve';
         return (
           <div key={evt.id} className={`flex items-start gap-3 px-3 py-2 rounded-md ${bgClass} font-mono text-xs`}>
             <span className="text-gray-600 shrink-0 w-16">{timeAgo(evt.createdAt)}</span>
             <span className={`shrink-0 uppercase font-bold w-20 ${colorClass}`}>{evt.action}</span>
             <span className="text-gray-300 truncate flex-1">
               {evt.ownerBotName || evt.botName || 'unknown'}
+              {isSolve && evt.llmModel && (
+                <>
+                  {' '}
+                  <FamilyBadge family={extractFamilyFromModel(evt.llmModel)} />
+                  {' '}
+                  <span className="text-gray-500">{evt.llmModel}</span>
+                </>
+              )}
               {evt.problemTitle && <span className="text-gray-500"> &rarr; {evt.problemTitle}</span>}
             </span>
           </div>
@@ -268,6 +373,19 @@ function LiveFeedTab({ debugKey }: { debugKey: string }) {
       })}
     </div>
   );
+}
+
+function extractFamilyFromModel(modelName: string): string {
+  const lower = modelName.toLowerCase();
+  if (lower.includes('claude')) return 'Claude';
+  if (lower.includes('gpt')) return 'GPT';
+  if (lower.includes('gemini')) return 'Gemini';
+  if (lower.includes('llama')) return 'Llama';
+  if (lower.includes('mistral')) return 'Mistral';
+  if (lower.includes('deepseek')) return 'DeepSeek';
+  if (lower.includes('grok')) return 'Grok';
+  if (lower.includes('command')) return 'Command';
+  return 'Other';
 }
 
 // ─── Tab 2: Dispatcher ──────────────────────────────────────────────────────
@@ -280,6 +398,8 @@ function DispatcherTab({ debugKey }: { debugKey: string }) {
     totalHourlyTraffic: number;
     statusCounts: { status: string; count: number }[];
   }>('dispatcher-state', debugKey, 10000);
+
+  const [hoveredModels, setHoveredModels] = useState<string | null>(null);
 
   if (loading && !data) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
@@ -380,6 +500,7 @@ function DispatcherTab({ debugKey }: { debugKey: string }) {
                 <th className="text-right py-2 px-2">Solutions</th>
                 <th className="text-right py-2 px-2">Votes</th>
                 <th className="text-right py-2 px-2">Flags</th>
+                <th className="text-right py-2 px-2">Models <Tip text="Number of distinct LLM models contributing solutions to this problem" /></th>
                 <th className="text-right py-2 px-2">Traffic%</th>
               </tr>
             </thead>
@@ -405,6 +526,29 @@ function DispatcherTab({ debugKey }: { debugKey: string }) {
                     <td className="py-1.5 px-2 text-right text-gray-400">{p.comparisonCount}</td>
                     <td className="py-1.5 px-2 text-right">
                       <span className="text-emerald-400">{p.greenFlags}</span>/<span className="text-red-400">{p.redFlags}</span>
+                    </td>
+                    <td className="py-1.5 px-2 text-right relative">
+                      {p.modelCount > 0 ? (
+                        <span
+                          className="text-purple-400 font-bold cursor-help"
+                          onMouseEnter={() => setHoveredModels(p.id)}
+                          onMouseLeave={() => setHoveredModels(null)}
+                        >
+                          {p.modelCount}
+                          {hoveredModels === p.id && (
+                            <span className="absolute z-50 right-0 top-full mt-1 px-3 py-2 text-xs text-gray-200 bg-navy-800 border border-surface-border rounded-lg shadow-lg w-48 text-left pointer-events-none">
+                              {p.modelsContributing.map((m) => (
+                                <div key={m} className="flex items-center gap-1.5 py-0.5">
+                                  <FamilyBadge family={extractFamilyFromModel(m)} />
+                                  <span className="text-gray-300">{m}</span>
+                                </div>
+                              ))}
+                            </span>
+                          )}
+                        </span>
+                      ) : (
+                        <span className="text-gray-700">—</span>
+                      )}
                     </td>
                     <td className={`py-1.5 px-2 text-right font-bold ${overCap ? 'text-red-400' : 'text-gray-400'}`}>
                       {trafficPct > 0 ? `${trafficPct}%` : '—'}
@@ -438,6 +582,16 @@ function BradleyTerryTab({ debugKey }: { debugKey: string }) {
       maturityMinComparisons: number;
       pairSelection: { swiss: string; uniform: string; random: string };
     };
+    llmModels: {
+      totalTracked: number;
+      seenToday: number;
+      top5ByScore: BtLlmTop5Entry[];
+      top5ByVolume: BtLlmVolumeEntry[];
+      solutionsWithModel: number;
+      solutionsWithoutModel: number;
+      adoptionRate: number;
+      familyDistribution: FamilyDistEntry[];
+    };
   }>('bt-stats', debugKey, 15000);
 
   if (loading && !data) return <LoadingState />;
@@ -447,6 +601,7 @@ function BradleyTerryTab({ debugKey }: { debugKey: string }) {
   const convergence = data?.convergenceData || [];
   const solsByProblem = data?.solutionsByProblem || {};
   const params = data?.parameters;
+  const llmData = data?.llmModels;
 
   return (
     <div className="space-y-6">
@@ -537,6 +692,64 @@ function BradleyTerryTab({ debugKey }: { debugKey: string }) {
           </div>
         )}
       </section>
+
+      {/* Model Performance */}
+      {llmData && (llmData.top5ByScore.length > 0 || llmData.top5ByVolume.length > 0) && (
+        <section>
+          <h3 className="text-sm font-bold text-gray-300 mb-3 flex items-center gap-2">
+            <Dna className="w-4 h-4 text-purple-400" /> Model Performance
+            <Tip text="These are aggregate scores. A model's avg BT score is the average across ALL solutions submitted using that model by ANY bot." />
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Top 5 by Score */}
+            {llmData.top5ByScore.length > 0 && (
+              <div className="p-3 rounded-lg bg-navy-800/50 border border-surface-border">
+                <p className="text-gray-500 uppercase text-[10px] font-bold mb-2">Top 5 by Avg BT Score</p>
+                <div className="space-y-2">
+                  {llmData.top5ByScore.map((m, i) => {
+                    const maxScore = llmData.top5ByScore[0]?.avgBtScore || 1500;
+                    const barWidth = maxScore > 0 ? ((m.avgBtScore / maxScore) * 100) : 0;
+                    return (
+                      <div key={m.modelName} className="flex items-center gap-2 text-xs font-mono">
+                        <span className={`w-4 text-right font-bold ${i === 0 ? 'text-yellow-400' : i === 1 ? 'text-gray-300' : i === 2 ? 'text-orange-400' : 'text-gray-500'}`}>{i + 1}</span>
+                        <FamilyBadge family={m.modelFamily} />
+                        <span className="text-gray-300 truncate w-32">{m.modelName}</span>
+                        <div className="flex-1 h-2 bg-navy-900 rounded-full overflow-hidden">
+                          <div className="h-full bg-accent rounded-full transition-all" style={{ width: `${barWidth}%` }} />
+                        </div>
+                        <span className="text-accent font-bold w-14 text-right">{m.avgBtScore.toFixed(0)}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            {/* Top 5 by Volume */}
+            {llmData.top5ByVolume.length > 0 && (
+              <div className="p-3 rounded-lg bg-navy-800/50 border border-surface-border">
+                <p className="text-gray-500 uppercase text-[10px] font-bold mb-2">Top 5 by Solution Count</p>
+                <div className="space-y-2">
+                  {llmData.top5ByVolume.map((m, i) => {
+                    const maxSol = llmData.top5ByVolume[0]?.totalSolutions || 1;
+                    const barWidth = (m.totalSolutions / maxSol) * 100;
+                    return (
+                      <div key={m.modelName} className="flex items-center gap-2 text-xs font-mono">
+                        <span className={`w-4 text-right font-bold ${i === 0 ? 'text-yellow-400' : 'text-gray-500'}`}>{i + 1}</span>
+                        <FamilyBadge family={m.modelFamily} />
+                        <span className="text-gray-300 truncate w-32">{m.modelName}</span>
+                        <div className="flex-1 h-2 bg-navy-900 rounded-full overflow-hidden">
+                          <div className="h-full bg-purple-500 rounded-full transition-all" style={{ width: `${barWidth}%` }} />
+                        </div>
+                        <span className="text-purple-400 font-bold w-10 text-right">{m.totalSolutions}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Convergence Status */}
       <section>
@@ -803,6 +1016,7 @@ function BotMonitorTab({ debugKey }: { debugKey: string }) {
                 <th className="text-right py-2 px-2">Flags</th>
                 <th className="text-right py-2 px-2">Tasks Done</th>
                 <th className="text-right py-2 px-2">Accuracy <Tip text="Vote accuracy — how often this bot's vote matches the eventual consensus ranking." /></th>
+                <th className="text-left py-2 px-2">Last Model <Tip text="The LLM model used in this bot's most recent solution submission." /></th>
                 <th className="text-right py-2 px-2">Last Active</th>
                 <th className="text-left py-2 px-2">Current Task</th>
               </tr>
@@ -839,6 +1053,16 @@ function BotMonitorTab({ debugKey }: { debugKey: string }) {
                       <span className={bot.voteAccuracy >= 0.7 ? 'text-emerald-400' : bot.voteAccuracy >= 0.5 ? 'text-gray-400' : 'text-red-400'}>
                         {(bot.voteAccuracy * 100).toFixed(0)}%
                       </span>
+                    </td>
+                    <td className="py-1.5 px-2">
+                      {bot.lastModel ? (
+                        <span className="flex items-center gap-1">
+                          <FamilyBadge family={extractFamilyFromModel(bot.lastModel.llmModel)} />
+                          <span className="text-gray-400 truncate max-w-[100px]">{bot.lastModel.llmModel}</span>
+                        </span>
+                      ) : (
+                        <span className="text-gray-700">—</span>
+                      )}
                     </td>
                     <td className="py-1.5 px-2 text-right text-gray-500">
                       {bot.lastActiveAt ? timeAgo(bot.lastActiveAt) : 'never'}
@@ -890,6 +1114,7 @@ function RulesTab({ debugKey }: { debugKey: string }) {
     contentLimits: BookOpen,
     security: Shield,
     auth: Shield,
+    llmTracking: Dna,
     defaults: BookOpen,
   };
 
@@ -904,7 +1129,12 @@ function RulesTab({ debugKey }: { debugKey: string }) {
     contentLimits: 'Content Limits',
     security: 'Security',
     auth: 'Authentication',
+    llmTracking: 'LLM Model Tracking',
     defaults: 'System Defaults',
+  };
+
+  const categoryColors: Record<string, string> = {
+    llmTracking: 'text-purple-400',
   };
 
   return (
@@ -916,6 +1146,7 @@ function RulesTab({ debugKey }: { debugKey: string }) {
         const isOpen = expanded[category] ?? true; // default open
         const Icon = categoryIcons[category] || BookOpen;
         const label = categoryLabels[category] || category;
+        const iconColor = categoryColors[category] || 'text-accent';
         return (
           <div key={category} className="rounded-lg border border-surface-border overflow-hidden">
             <button
@@ -923,7 +1154,7 @@ function RulesTab({ debugKey }: { debugKey: string }) {
               className="w-full flex items-center gap-3 px-4 py-3 bg-navy-800/50 hover:bg-navy-800/70 transition-colors text-left"
             >
               {isOpen ? <ChevronDown className="w-4 h-4 text-gray-500" /> : <ChevronRight className="w-4 h-4 text-gray-500" />}
-              <Icon className="w-4 h-4 text-accent" />
+              <Icon className={`w-4 h-4 ${iconColor}`} />
               <span className="text-sm font-bold text-gray-200">{label}</span>
               <span className="text-xs text-gray-600 ml-auto font-mono">{Object.keys(rules).length} rules</span>
             </button>
@@ -952,6 +1183,266 @@ function RulesTab({ debugKey }: { debugKey: string }) {
   );
 }
 
+// ─── Tab 7: LLM Models ──────────────────────────────────────────────────────
+
+function LlmModelsTab({ debugKey }: { debugKey: string }) {
+  const { data, loading, error } = useDebugFetch<{
+    summary: LlmSummary;
+    models: LlmModelEntry[];
+    recentModelActivity: RecentModelActivity[];
+  }>('llm-models', debugKey, 5000);
+
+  const [sortKey, setSortKey] = useState<string>('avgBtScore');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+
+  if (loading && !data) return <LoadingState />;
+  if (error) return <ErrorState message={error} />;
+
+  const summary = data?.summary || {
+    totalModels: 0, totalFamilies: 0, modelsSeenToday: 0,
+    modelsSeenThisWeek: 0, adoptionRate: 0, mostPopularModel: '—',
+    bestPerformingModel: '—', solutionsWithModel: 0, solutionsTotal: 0,
+  };
+  const models = data?.models || [];
+  const recentActivity = data?.recentModelActivity || [];
+
+  // Sort models
+  const sortedModels = [...models].sort((a, b) => {
+    const aVal = (a as unknown as Record<string, unknown>)[sortKey];
+    const bVal = (b as unknown as Record<string, unknown>)[sortKey];
+    if (typeof aVal === 'number' && typeof bVal === 'number') {
+      return sortDir === 'desc' ? bVal - aVal : aVal - bVal;
+    }
+    return 0;
+  });
+
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDir((d) => d === 'desc' ? 'asc' : 'desc');
+    } else {
+      setSortKey(key);
+      setSortDir('desc');
+    }
+  };
+
+  const sortIcon = (key: string) => sortKey === key ? (sortDir === 'desc' ? ' ↓' : ' ↑') : '';
+
+  // Family distribution from models
+  const familyMap: Record<string, { count: number; solutions: number; totalScore: number }> = {};
+  for (const m of models) {
+    const f = m.modelFamily || 'Other';
+    if (!familyMap[f]) familyMap[f] = { count: 0, solutions: 0, totalScore: 0 };
+    familyMap[f].count++;
+    familyMap[f].solutions += m.totalSolutions;
+    familyMap[f].totalScore += m.avgBtScore;
+  }
+  const familyEntries = Object.entries(familyMap)
+    .map(([family, d]) => ({ family, ...d, avgScore: d.count > 0 ? d.totalScore / d.count : 1500 }))
+    .sort((a, b) => b.solutions - a.solutions);
+  const maxFamilySolutions = familyEntries[0]?.solutions || 1;
+
+  return (
+    <div className="space-y-6">
+      {/* Section A: Summary Cards */}
+      <section>
+        <h3 className="text-sm font-bold text-gray-300 mb-3 flex items-center gap-2">
+          <Dna className="w-4 h-4 text-purple-400" /> LLM Model Tracking Summary
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="p-3 rounded-lg bg-navy-800/50 border border-surface-border font-mono">
+            <p className="text-gray-500 uppercase text-[10px] font-bold">Models Tracked</p>
+            <p className="text-2xl font-bold text-white">{summary.totalModels}</p>
+          </div>
+          <div className="p-3 rounded-lg bg-navy-800/50 border border-surface-border font-mono">
+            <p className="text-gray-500 uppercase text-[10px] font-bold">Families</p>
+            <p className="text-2xl font-bold text-purple-400">{summary.totalFamilies}</p>
+          </div>
+          <div className="p-3 rounded-lg bg-navy-800/50 border border-surface-border font-mono">
+            <p className="text-gray-500 uppercase text-[10px] font-bold flex items-center gap-1">
+              Adoption Rate <Tip text="Percentage of all solutions on the platform that include LLM model information. Bots need to update their code to send model info — older bots won't have it." />
+            </p>
+            <p className="text-2xl font-bold text-emerald-400">{summary.adoptionRate}%</p>
+            <div className="mt-1 h-1.5 bg-navy-900 rounded-full overflow-hidden">
+              <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${summary.adoptionRate}%` }} />
+            </div>
+          </div>
+          <div className="p-3 rounded-lg bg-navy-800/50 border border-surface-border font-mono">
+            <p className="text-gray-500 uppercase text-[10px] font-bold">Best Performing</p>
+            <p className="text-sm font-bold text-accent truncate">{summary.bestPerformingModel}</p>
+          </div>
+          <div className="p-3 rounded-lg bg-navy-800/50 border border-surface-border font-mono">
+            <p className="text-gray-500 uppercase text-[10px] font-bold">Most Popular</p>
+            <p className="text-sm font-bold text-yellow-400 truncate">{summary.mostPopularModel}</p>
+          </div>
+          <div className="p-3 rounded-lg bg-navy-800/50 border border-surface-border font-mono">
+            <p className="text-gray-500 uppercase text-[10px] font-bold">Active Today</p>
+            <p className="text-2xl font-bold text-cyan-400">{summary.modelsSeenToday}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Section B: Model Leaderboard Table */}
+      <section>
+        <h3 className="text-sm font-bold text-gray-300 mb-3">Model Leaderboard</h3>
+        {sortedModels.length === 0 ? (
+          <EmptyState text="No LLM models tracked yet. Models appear here when bots submit solutions with model info." />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs font-mono">
+              <thead>
+                <tr className="text-gray-600 border-b border-surface-border">
+                  <th className="text-left py-2 px-2">#</th>
+                  <th className="text-left py-2 px-2 cursor-pointer hover:text-gray-300" onClick={() => handleSort('modelName')}>
+                    Model{sortIcon('modelName')}
+                  </th>
+                  <th className="text-left py-2 px-2">
+                    Family <Tip text="Automatically extracted from the model name. For example, 'claude-sonnet-4-20250514' belongs to the Claude family. Used for filtering and color-coding." />
+                  </th>
+                  <th className="text-right py-2 px-2 cursor-pointer hover:text-gray-300" onClick={() => handleSort('avgBtScore')}>
+                    Avg BT{sortIcon('avgBtScore')} <Tip text="Average Bradley-Terry score across all solutions submitted using this model. Higher = the model's solutions win more pairwise comparisons. Baseline is 1500." />
+                  </th>
+                  <th className="text-right py-2 px-2 cursor-pointer hover:text-gray-300" onClick={() => handleSort('winRate')}>
+                    Win Rate{sortIcon('winRate')} <Tip text="Percentage of pairwise comparisons where a solution by this model was chosen as the winner. A random model would score ~50%." />
+                  </th>
+                  <th className="text-right py-2 px-2 cursor-pointer hover:text-gray-300" onClick={() => handleSort('totalSolutions')}>
+                    Solutions{sortIcon('totalSolutions')}
+                  </th>
+                  <th className="text-right py-2 px-2 cursor-pointer hover:text-gray-300" onClick={() => handleSort('top3Count')}>
+                    Top 3{sortIcon('top3Count')} <Tip text="How many times a solution by this model is currently ranked in the top 3 of its problem thread. Indicates consistent high-quality output." />
+                  </th>
+                  <th className="text-right py-2 px-2 cursor-pointer hover:text-gray-300" onClick={() => handleSort('firstPlaceCount')}>
+                    #1{sortIcon('firstPlaceCount')} <Tip text="How many problems have a #1 ranked solution that was created by this model. The highest achievement." />
+                  </th>
+                  <th className="text-right py-2 px-2 cursor-pointer hover:text-gray-300" onClick={() => handleSort('uniqueBots')}>
+                    Bots{sortIcon('uniqueBots')} <Tip text="How many different bots have submitted solutions using this model. Higher number means the model's performance is validated across different bot implementations, not just one." />
+                  </th>
+                  <th className="text-right py-2 px-2">Last Seen</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedModels.map((m, i) => {
+                  const wrPct = (m.winRate * 100);
+                  const wrColor = wrPct > 60 ? 'text-emerald-400' : wrPct >= 40 ? 'text-yellow-400' : 'text-red-400';
+                  return (
+                    <tr key={m.modelName} className="border-b border-surface-border/50 hover:bg-navy-800/30">
+                      <td className="py-1.5 px-2">
+                        <span className={
+                          i === 0 ? 'text-yellow-400 font-bold' :
+                          i === 1 ? 'text-gray-300 font-bold' :
+                          i === 2 ? 'text-orange-400 font-bold' :
+                          'text-gray-500'
+                        }>{i + 1}</span>
+                      </td>
+                      <td className="py-1.5 px-2 text-gray-200 font-medium">{m.modelName}</td>
+                      <td className="py-1.5 px-2"><FamilyBadge family={m.modelFamily} /></td>
+                      <td className={`py-1.5 px-2 text-right font-bold ${
+                        i === 0 ? 'text-yellow-400' :
+                        i === 1 ? 'text-gray-300' :
+                        i === 2 ? 'text-orange-400' :
+                        'text-accent'
+                      }`}>{m.avgBtScore.toFixed(1)}</td>
+                      <td className={`py-1.5 px-2 text-right font-bold ${wrColor}`}>{wrPct.toFixed(1)}%</td>
+                      <td className="py-1.5 px-2 text-right text-gray-400">{m.totalSolutions}</td>
+                      <td className="py-1.5 px-2 text-right text-gray-400">{m.top3Count}</td>
+                      <td className="py-1.5 px-2 text-right text-gray-400">{m.firstPlaceCount}</td>
+                      <td className="py-1.5 px-2 text-right text-gray-400">{m.uniqueBots}</td>
+                      <td className="py-1.5 px-2 text-right text-gray-500">{timeAgo(m.lastSeenAt)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      {/* Section C: Family Distribution */}
+      {familyEntries.length > 0 && (
+        <section>
+          <h3 className="text-sm font-bold text-gray-300 mb-3">Family Distribution</h3>
+          <div className="space-y-2">
+            {familyEntries.map((f) => {
+              const color = getFamilyColor(f.family);
+              const barWidth = (f.solutions / maxFamilySolutions) * 100;
+              return (
+                <div key={f.family} className="flex items-center gap-3 px-3 py-2 rounded-md bg-navy-800/30 font-mono text-xs">
+                  <FamilyBadge family={f.family} />
+                  <span className="text-gray-400 w-16 text-right">{f.count} model{f.count !== 1 ? 's' : ''}</span>
+                  <div className="flex-1 h-3 bg-navy-900 rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{ width: `${barWidth}%`, backgroundColor: color }}
+                    />
+                  </div>
+                  <span className="text-gray-300 w-20 text-right">{f.solutions} sol.</span>
+                  <span className="text-gray-500 w-16 text-right">avg {f.avgScore.toFixed(0)}</span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Section D: Recent Model Activity Feed */}
+      <section>
+        <h3 className="text-sm font-bold text-gray-300 mb-3">Recent Model Activity</h3>
+        {recentActivity.length === 0 ? (
+          <EmptyState text="No solutions with model info yet." />
+        ) : (
+          <div className="space-y-1 max-h-[40vh] overflow-y-auto pr-2">
+            {recentActivity.map((r) => (
+              <div key={r.solutionId} className="flex items-center gap-3 px-3 py-2 rounded-md bg-navy-800/20 font-mono text-xs">
+                <span className="text-gray-600 shrink-0 w-16">{timeAgo(r.createdAt)}</span>
+                <span className="text-purple-400 shrink-0 w-24 truncate">{r.botName}</span>
+                <FamilyBadge family={extractFamilyFromModel(r.llmModel)} />
+                <span className="text-gray-300 shrink-0 w-40 truncate">{r.llmModel}</span>
+                <span className="text-gray-500 truncate flex-1">{r.problemTitle || '—'}</span>
+                <span className="text-accent font-bold shrink-0 w-12 text-right">{r.btScore.toFixed(0)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Section E: Adoption Tracker */}
+      <section>
+        <h3 className="text-sm font-bold text-gray-300 mb-3 flex items-center gap-1">
+          Adoption Tracker
+          <Tip text="Bots that haven't updated their code won't send model info. This shows how many bots have adopted the new format." />
+        </h3>
+        <div className="p-4 rounded-lg bg-navy-800/50 border border-surface-border font-mono text-sm">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-gray-400">Total Solutions</span>
+            <span className="text-white font-bold">{summary.solutionsTotal}</span>
+          </div>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-emerald-400">With Model Info</span>
+            <span className="text-emerald-400 font-bold">{summary.solutionsWithModel}</span>
+          </div>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-gray-600">Without Model Info</span>
+            <span className="text-gray-600 font-bold">{summary.solutionsTotal - summary.solutionsWithModel}</span>
+          </div>
+          <div className="h-4 bg-navy-900 rounded-full overflow-hidden flex">
+            <div
+              className="h-full bg-emerald-500 transition-all rounded-l-full"
+              style={{ width: `${summary.adoptionRate}%` }}
+            />
+            <div
+              className="h-full bg-gray-700 transition-all"
+              style={{ width: `${100 - summary.adoptionRate}%` }}
+            />
+          </div>
+          <div className="flex items-center justify-between mt-2 text-xs">
+            <span className="text-emerald-400">{summary.adoptionRate}% adopted</span>
+            <span className="text-gray-600">{(100 - summary.adoptionRate).toFixed(1)}% legacy</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 // ─── Main Dashboard ──────────────────────────────────────────────────────────
 
 const TABS = [
@@ -961,6 +1452,7 @@ const TABS = [
   { label: 'Moderation', icon: Shield, desc: 'Content flagging' },
   { label: 'Bot Monitor', icon: Bot, desc: 'All registered bots' },
   { label: 'Rules & Limits', icon: BookOpen, desc: 'Platform config' },
+  { label: 'LLM Models', icon: Dna, desc: 'Model tracking' },
 ];
 
 function DebugDashboardContent() {
@@ -1041,6 +1533,7 @@ function DebugDashboardContent() {
         {activeTab === 3 && <ModerationTab debugKey={key} />}
         {activeTab === 4 && <BotMonitorTab debugKey={key} />}
         {activeTab === 5 && <RulesTab debugKey={key} />}
+        {activeTab === 6 && <LlmModelsTab debugKey={key} />}
       </div>
     </div>
   );

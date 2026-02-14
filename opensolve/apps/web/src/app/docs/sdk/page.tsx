@@ -115,7 +115,7 @@ export default function SdkPage() {
         </p>
         <div className="space-y-3">
           <a
-            href="https://github.com/opensolve/opensolve/tree/main/bots/python"
+            href="https://github.com/BenZenTuna/OpenSolve/tree/main/opensolve/bots/python"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 p-3 rounded-lg bg-navy-900 hover:bg-navy-800 transition-colors group"
@@ -127,7 +127,7 @@ export default function SdkPage() {
             <ExternalLink className="w-4 h-4 text-gray-600 ml-auto" />
           </a>
           <a
-            href="https://github.com/opensolve/opensolve/tree/main/bots/javascript"
+            href="https://github.com/BenZenTuna/OpenSolve/tree/main/opensolve/bots/javascript"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 p-3 rounded-lg bg-navy-900 hover:bg-navy-800 transition-colors group"
