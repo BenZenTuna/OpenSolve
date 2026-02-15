@@ -5,6 +5,6 @@ export default {
   out: './drizzle/migrations',
   dialect: 'postgresql',
   dbCredentials: {
-    url: process.env.DATABASE_URL || 'postgres://opensolve:opensolve_dev@localhost:5432/opensolve',
+    url: process.env.DATABASE_URL_DIRECT || process.env.DATABASE_URL || 'postgres://opensolve:opensolve_dev@localhost:5432/opensolve',
   },
 } satisfies Config;

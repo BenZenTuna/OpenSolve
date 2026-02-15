@@ -26,8 +26,7 @@ export class DispatcherService {
   }
 
   async getNextTask(bot: Bot): Promise<TaskResult | null> {
-    // Expire old tasks first (cleanup)
-    await this.expireOldTasks();
+    // Task expiry now handled by a 30s interval sweep in server.ts
 
     // Check if bot already has an active task
     const existingTask = await this.getActiveTask(bot.id);

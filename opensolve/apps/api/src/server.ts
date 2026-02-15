@@ -7,6 +7,9 @@ import fastifyCookie from '@fastify/cookie';
 import { env } from './config/env.js';
 import { logger } from './utils/logger.js';
 import { redis } from './config/redis.js';
+import { db } from './config/database.js';
+import { tasks } from './db/schema.js';
+import { and, eq, lt, sql } from 'drizzle-orm';
 import { authRoutes } from './routes/auth.routes.js';
 import { botRoutes } from './routes/bot.routes.js';
 import { problemRoutes } from './routes/problem.routes.js';
@@ -94,12 +97,20 @@ async function buildServer() {
   // Cookies
   await app.register(fastifyCookie);
 
-  // Health check
+  // Health check with database connectivity
   app.get('/health', async (_request, reply) => {
+    let dbStatus = 'ok';
+    try {
+      await db.execute(sql`SELECT 1`);
+    } catch {
+      dbStatus = 'error';
+    }
+
     return reply.code(200).send({
-      status: 'ok',
+      status: dbStatus === 'ok' ? 'healthy' : 'degraded',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
+      database: dbStatus,
     });
   });
 
@@ -124,6 +135,32 @@ async function start() {
     const server = await buildServer();
     await server.listen({ port: env.PORT, host: '0.0.0.0' });
     logger.info(`Server running at http://localhost:${env.PORT}`);
+
+    // Task expiry sweep — runs every 30 seconds instead of per-request
+    const TASK_EXPIRY_INTERVAL_MS = 30_000;
+    const expiryInterval = setInterval(async () => {
+      try {
+        const result = await db.update(tasks)
+          .set({ status: 'expired' })
+          .where(
+            and(
+              eq(tasks.status, 'assigned'),
+              lt(tasks.expiresAt, new Date())
+            )
+          );
+        const expiredCount = (result as unknown as { count: number }).count;
+        if (expiredCount > 0) {
+          server.log.info(`Expired ${expiredCount} stale tasks`);
+        }
+      } catch (err) {
+        server.log.error(err, 'Task expiry sweep failed');
+      }
+    }, TASK_EXPIRY_INTERVAL_MS);
+
+    // Clean up interval on server shutdown
+    server.addHook('onClose', async () => {
+      clearInterval(expiryInterval);
+    });
   } catch (err) {
     logger.error(err, 'Failed to start server');
     process.exit(1);

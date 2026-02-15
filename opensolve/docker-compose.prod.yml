@@ -6,6 +6,23 @@ services:
       POSTGRES_DB: opensolve
       POSTGRES_USER: opensolve
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-opensolve_prod}
+    # PostgreSQL tuning for 8GB RAM Hetzner server
+    command: >
+      postgres
+      -c max_connections=50
+      -c shared_buffers=2GB
+      -c effective_cache_size=6GB
+      -c work_mem=32MB
+      -c maintenance_work_mem=256MB
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c wal_buffers=64MB
+      -c checkpoint_completion_target=0.9
+      -c max_wal_size=2GB
+      -c min_wal_size=512MB
+      -c default_statistics_target=200
+      -c log_min_duration_statement=1000
+      -c idle_in_transaction_session_timeout=30000
     ports:
       - "5432:5432"
     volumes:
@@ -15,6 +32,26 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  pgbouncer:
+    image: edoburu/pgbouncer:1.22.0
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://opensolve:${POSTGRES_PASSWORD:-opensolve_prod}@postgres:5432/opensolve
+      POOL_MODE: transaction
+      DEFAULT_POOL_SIZE: 25
+      MAX_CLIENT_CONN: 2000
+      MAX_DB_CONNECTIONS: 40
+      RESERVE_POOL_SIZE: 5
+      RESERVE_POOL_TIMEOUT: 3
+      SERVER_IDLE_TIMEOUT: 300
+      LOG_CONNECTIONS: 0
+      LOG_DISCONNECTIONS: 0
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "6432:6432"
 
   redis:
     image: redis:7-alpine
@@ -45,14 +82,15 @@ services:
     ports:
       - "4000:4000"
     depends_on:
-      postgres:
-        condition: service_healthy
+      pgbouncer:
+        condition: service_started
       redis:
         condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: 4000
-      DATABASE_URL: postgresql://opensolve:${POSTGRES_PASSWORD:-opensolve_prod}@postgres:5432/opensolve
+      DATABASE_URL: postgresql://opensolve:${POSTGRES_PASSWORD:-opensolve_prod}@pgbouncer:6432/opensolve
+      DATABASE_URL_DIRECT: postgresql://opensolve:${POSTGRES_PASSWORD:-opensolve_prod}@postgres:5432/opensolve
       REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET:-change_me_in_production}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-3600}

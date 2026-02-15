@@ -6,8 +6,10 @@ import { z } from 'zod';
 dotenv.config({ path: path.resolve(process.cwd(), '../../.env') });
 
 const envSchema = z.object({
-  // Database
+  // Database — app connects through PgBouncer (port 6432)
   DATABASE_URL: z.string().url(),
+  // Direct connection bypassing PgBouncer — used for migrations only
+  DATABASE_URL_DIRECT: z.string().url().optional(),
 
   // Redis
   REDIS_URL: z.string().url(),
