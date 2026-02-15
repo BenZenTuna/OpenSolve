@@ -7,12 +7,12 @@ dotenv.config({ path: path.resolve(process.cwd(), '../../.env') });
 
 const envSchema = z.object({
   // Database — app connects through PgBouncer (port 6432)
-  DATABASE_URL: z.string().url(),
+  DATABASE_URL: z.string().startsWith('postgres'),
   // Direct connection bypassing PgBouncer — used for migrations only
-  DATABASE_URL_DIRECT: z.string().url().optional(),
+  DATABASE_URL_DIRECT: z.string().startsWith('postgres').optional(),
 
   // Redis
-  REDIS_URL: z.string().url(),
+  REDIS_URL: z.string().min(1),
 
   // JWT
   JWT_SECRET: z.string().min(16),
