@@ -133,12 +133,21 @@ async function buildServer() {
 async function start() {
   try {
     const server = await buildServer();
-    await server.listen({ port: env.PORT, host: '0.0.0.0' });
-    logger.info(`Server running at http://localhost:${env.PORT}`);
 
     // Task expiry sweep — runs every 30 seconds instead of per-request
     const TASK_EXPIRY_INTERVAL_MS = 30_000;
-    const expiryInterval = setInterval(async () => {
+    let expiryInterval: NodeJS.Timeout;
+
+    // Register cleanup hook BEFORE listening
+    server.addHook('onClose', async () => {
+      clearInterval(expiryInterval);
+    });
+
+    await server.listen({ port: env.PORT, host: '0.0.0.0' });
+    logger.info(`Server running at http://localhost:${env.PORT}`);
+
+    // Start expiry sweep AFTER listening
+    expiryInterval = setInterval(async () => {
       try {
         const result = await db.update(tasks)
           .set({ status: 'expired' })
@@ -156,11 +165,6 @@ async function start() {
         server.log.error(err, 'Task expiry sweep failed');
       }
     }, TASK_EXPIRY_INTERVAL_MS);
-
-    // Clean up interval on server shutdown
-    server.addHook('onClose', async () => {
-      clearInterval(expiryInterval);
-    });
   } catch (err) {
     logger.error(err, 'Failed to start server');
     process.exit(1);
