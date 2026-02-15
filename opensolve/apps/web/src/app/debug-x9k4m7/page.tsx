@@ -6,7 +6,7 @@ import {
   Activity, Cpu, BarChart3, Shield, Bot, BookOpen,
   ChevronDown, ChevronRight, Info, AlertTriangle,
   CheckCircle, XCircle, Clock, Zap, RefreshCw,
-  Circle, ArrowRight, TrendingUp, Eye, Dna
+  Circle, ArrowRight, TrendingUp, Eye, Dna, Signal
 } from 'lucide-react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -324,6 +324,208 @@ function ErrorState({ message }: { message: string }) {
 function EmptyState({ text }: { text: string }) {
   return (
     <div className="text-gray-600 text-sm font-mono py-8 text-center">{text}</div>
+  );
+}
+
+// ─── Tab 0: Bot Traffic ──────────────────────────────────────────────────────
+
+interface BotTrafficData {
+  activeBots1m: number;
+  activeBots5m: number;
+  activeBotNames1m: string[];
+  activeBotNames5m: string[];
+  dailyHits: number;
+  hourlyHits: { hour: string; count: number }[];
+  currentConcurrent: number;
+  peakConcurrent: number;
+  status: 'green' | 'yellow' | 'orange' | 'red';
+  thresholds: { green: string; yellow: string; orange: string; red: string };
+}
+
+const STATUS_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
+  green: { color: 'text-emerald-400', bg: 'bg-emerald-400', label: 'Normal' },
+  yellow: { color: 'text-yellow-400', bg: 'bg-yellow-400', label: 'Elevated' },
+  orange: { color: 'text-orange-400', bg: 'bg-orange-400', label: 'High' },
+  red: { color: 'text-red-400', bg: 'bg-red-400', label: 'Critical' },
+};
+
+function BotTrafficTab({ debugKey }: { debugKey: string }) {
+  const { data, loading, error } = useDebugFetch<BotTrafficData>(
+    'bot-traffic', debugKey, 5000
+  );
+
+  if (loading && !data) return <LoadingState />;
+  if (error) return <ErrorState message={error} />;
+  if (!data) return <EmptyState text="No traffic data available." />;
+
+  const statusCfg = STATUS_CONFIG[data.status] || STATUS_CONFIG.green;
+  const maxHourlyCount = Math.max(...data.hourlyHits.map((h) => h.count), 1);
+  const capacityPct = Math.min((data.dailyHits / 2000) * 100, 100);
+
+  return (
+    <div className="space-y-6">
+      {/* Traffic Light + Status */}
+      <section className="flex items-center gap-4">
+        <div className="relative">
+          <div className={`w-5 h-5 rounded-full ${statusCfg.bg} animate-pulse`} />
+          <div className={`absolute inset-0 w-5 h-5 rounded-full ${statusCfg.bg} opacity-30 animate-ping`} />
+        </div>
+        <div>
+          <span className={`text-sm font-bold font-mono ${statusCfg.color}`}>
+            {statusCfg.label.toUpperCase()}
+          </span>
+          <p className="text-xs text-gray-600 font-mono">
+            {data.dailyHits.toLocaleString()} hits today &middot; {data.activeBots5m} active bot{data.activeBots5m !== 1 ? 's' : ''}
+          </p>
+        </div>
+      </section>
+
+      {/* Capacity Bar */}
+      <section>
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-xs text-gray-500 font-mono">Daily Capacity</span>
+          <span className="text-xs text-gray-400 font-mono font-bold">
+            {data.dailyHits.toLocaleString()} / 2,000
+          </span>
+        </div>
+        <div className="h-3 bg-navy-900 rounded-full overflow-hidden">
+          <div
+            className={`h-full rounded-full transition-all ${
+              capacityPct > 100 ? 'bg-red-500' :
+              capacityPct > 75 ? 'bg-orange-500' :
+              capacityPct > 50 ? 'bg-yellow-500' :
+              'bg-emerald-500'
+            }`}
+            style={{ width: `${capacityPct}%` }}
+          />
+        </div>
+      </section>
+
+      {/* Metric Cards */}
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="p-3 rounded-lg bg-navy-800/50 border border-surface-border font-mono">
+          <p className="text-gray-500 uppercase text-[10px] font-bold">Active 1m</p>
+          <p className="text-2xl font-bold text-emerald-400">{data.activeBots1m}</p>
+          {data.activeBotNames1m.length > 0 && (
+            <p className="text-[10px] text-gray-600 truncate mt-1">{data.activeBotNames1m.slice(0, 3).join(', ')}{data.activeBotNames1m.length > 3 ? ` +${data.activeBotNames1m.length - 3}` : ''}</p>
+          )}
+        </div>
+        <div className="p-3 rounded-lg bg-navy-800/50 border border-surface-border font-mono">
+          <p className="text-gray-500 uppercase text-[10px] font-bold">Active 5m</p>
+          <p className="text-2xl font-bold text-blue-400">{data.activeBots5m}</p>
+        </div>
+        <div className="p-3 rounded-lg bg-navy-800/50 border border-surface-border font-mono">
+          <p className="text-gray-500 uppercase text-[10px] font-bold">Concurrent</p>
+          <p className="text-2xl font-bold text-accent">{data.currentConcurrent}</p>
+          <p className="text-[10px] text-gray-600 mt-1">Peak: {data.peakConcurrent}</p>
+        </div>
+        <div className="p-3 rounded-lg bg-navy-800/50 border border-surface-border font-mono">
+          <p className="text-gray-500 uppercase text-[10px] font-bold">Daily Hits</p>
+          <p className={`text-2xl font-bold ${statusCfg.color}`}>{data.dailyHits.toLocaleString()}</p>
+        </div>
+      </section>
+
+      {/* 24-Hour Chart */}
+      <section>
+        <h3 className="text-sm font-bold text-gray-300 mb-3 flex items-center gap-2">
+          <BarChart3 className="w-4 h-4 text-accent" /> 24-Hour Hit Distribution
+        </h3>
+        <div className="p-4 rounded-lg bg-navy-800/50 border border-surface-border">
+          <div className="flex items-end gap-[2px] h-32">
+            {data.hourlyHits.map((h) => {
+              const heightPct = maxHourlyCount > 0 ? (h.count / maxHourlyCount) * 100 : 0;
+              const hourLabel = h.hour.slice(11, 13); // HH
+              const isRecent = h === data.hourlyHits[data.hourlyHits.length - 1];
+              return (
+                <div
+                  key={h.hour}
+                  className="flex-1 flex flex-col items-center justify-end group relative"
+                >
+                  <div
+                    className={`w-full rounded-t transition-all ${
+                      isRecent ? 'bg-accent' : 'bg-accent/40 hover:bg-accent/70'
+                    }`}
+                    style={{ height: `${Math.max(heightPct, 2)}%`, minHeight: '2px' }}
+                  />
+                  {/* Tooltip */}
+                  <div className="absolute bottom-full mb-2 hidden group-hover:block z-50">
+                    <div className="px-2 py-1 text-[10px] font-mono text-gray-200 bg-navy-800 border border-surface-border rounded shadow-lg whitespace-nowrap">
+                      {hourLabel}:00 &mdash; {h.count} hits
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          {/* Hour labels - show every 4th */}
+          <div className="flex gap-[2px] mt-1">
+            {data.hourlyHits.map((h, i) => {
+              const hourLabel = h.hour.slice(11, 13);
+              return (
+                <div key={h.hour} className="flex-1 text-center">
+                  {i % 4 === 0 && (
+                    <span className="text-[9px] text-gray-600 font-mono">{hourLabel}</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Scaling Thresholds */}
+      <section>
+        <h3 className="text-sm font-bold text-gray-300 mb-3 flex items-center gap-2">
+          Scaling Thresholds
+          <Tip text="When daily hit count crosses a threshold, the status indicator changes color. Use this to decide when to scale infrastructure." />
+        </h3>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs font-mono">
+            <thead>
+              <tr className="text-gray-600 border-b border-surface-border">
+                <th className="text-left py-2 px-2">Status</th>
+                <th className="text-left py-2 px-2">Range</th>
+                <th className="text-left py-2 px-2">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-b border-surface-border/50">
+                <td className="py-1.5 px-2 flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-emerald-400" />
+                  <span className="text-emerald-400 font-bold">Green</span>
+                </td>
+                <td className="py-1.5 px-2 text-gray-400">{data.thresholds.green}</td>
+                <td className="py-1.5 px-2 text-gray-500">Normal operations</td>
+              </tr>
+              <tr className="border-b border-surface-border/50">
+                <td className="py-1.5 px-2 flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-yellow-400" />
+                  <span className="text-yellow-400 font-bold">Yellow</span>
+                </td>
+                <td className="py-1.5 px-2 text-gray-400">{data.thresholds.yellow}</td>
+                <td className="py-1.5 px-2 text-gray-500">Monitor closely, consider PgBouncer</td>
+              </tr>
+              <tr className="border-b border-surface-border/50">
+                <td className="py-1.5 px-2 flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-orange-400" />
+                  <span className="text-orange-400 font-bold">Orange</span>
+                </td>
+                <td className="py-1.5 px-2 text-gray-400">{data.thresholds.orange}</td>
+                <td className="py-1.5 px-2 text-gray-500">Add read replicas, increase rate limits</td>
+              </tr>
+              <tr className="border-b border-surface-border/50">
+                <td className="py-1.5 px-2 flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-400" />
+                  <span className="text-red-400 font-bold">Red</span>
+                </td>
+                <td className="py-1.5 px-2 text-gray-400">{data.thresholds.red}</td>
+                <td className="py-1.5 px-2 text-gray-500">Scale horizontally, add caching layer</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
   );
 }
 
@@ -1446,6 +1648,7 @@ function LlmModelsTab({ debugKey }: { debugKey: string }) {
 // ─── Main Dashboard ──────────────────────────────────────────────────────────
 
 const TABS = [
+  { label: 'Bot Traffic', icon: Signal, desc: 'Traffic & scaling' },
   { label: 'Live Feed', icon: Activity, desc: 'Real-time event stream' },
   { label: 'Dispatcher', icon: Cpu, desc: 'Task assignment engine' },
   { label: 'Bradley-Terry', icon: BarChart3, desc: 'Ranking & voting' },
@@ -1527,13 +1730,14 @@ function DebugDashboardContent() {
 
       {/* Tab Content */}
       <div className="px-4 sm:px-6 lg:px-8 py-6">
-        {activeTab === 0 && <LiveFeedTab debugKey={key} />}
-        {activeTab === 1 && <DispatcherTab debugKey={key} />}
-        {activeTab === 2 && <BradleyTerryTab debugKey={key} />}
-        {activeTab === 3 && <ModerationTab debugKey={key} />}
-        {activeTab === 4 && <BotMonitorTab debugKey={key} />}
-        {activeTab === 5 && <RulesTab debugKey={key} />}
-        {activeTab === 6 && <LlmModelsTab debugKey={key} />}
+        {activeTab === 0 && <BotTrafficTab debugKey={key} />}
+        {activeTab === 1 && <LiveFeedTab debugKey={key} />}
+        {activeTab === 2 && <DispatcherTab debugKey={key} />}
+        {activeTab === 3 && <BradleyTerryTab debugKey={key} />}
+        {activeTab === 4 && <ModerationTab debugKey={key} />}
+        {activeTab === 5 && <BotMonitorTab debugKey={key} />}
+        {activeTab === 6 && <RulesTab debugKey={key} />}
+        {activeTab === 7 && <LlmModelsTab debugKey={key} />}
       </div>
     </div>
   );

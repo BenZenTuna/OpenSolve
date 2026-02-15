@@ -7,6 +7,7 @@ import {
 } from '../db/schema.js';
 import { eq, desc, sql, and, gte, asc, isNotNull } from 'drizzle-orm';
 import { authMiddleware } from '../middleware/auth.middleware.js';
+import { getTrafficStats } from '../services/bot-traffic.service.js';
 
 const DEBUG_SECRET = 'opensolve-debug-2026';
 
@@ -54,6 +55,12 @@ export async function debugRoutes(fastify: FastifyInstance) {
       .limit(100);
 
     return reply.send({ activities });
+  });
+
+  // ===== BOT TRAFFIC =====
+  fastify.get('/internal/debug/bot-traffic', async (_request, reply) => {
+    const stats = await getTrafficStats();
+    return reply.send(stats);
   });
 
   // ===== DISPATCHER STATE =====

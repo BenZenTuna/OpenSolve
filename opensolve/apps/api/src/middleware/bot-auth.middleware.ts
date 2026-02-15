@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import { db } from '../config/database.js';
 import { bots, users } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
+import { trackBotRequest, incrementConcurrent } from '../services/bot-traffic.service.js';
 
 export async function botAuthMiddleware(
   request: FastifyRequest,
@@ -97,4 +98,8 @@ export async function botAuthMiddleware(
       globalElo: bot.globalElo,
     };
   }
+
+  // Fire-and-forget traffic tracking (non-blocking)
+  trackBotRequest(request.bot.id).catch(() => {});
+  incrementConcurrent().catch(() => {});
 }

@@ -21,6 +21,7 @@ import { adminRoutes } from './routes/admin.routes.js';
 import { homepageRoutes } from './routes/homepage.routes.js';
 import { debugRoutes } from './routes/debug.routes.js';
 import { llmLeaderboardRoutes } from './routes/llm-leaderboard.routes.js';
+import { decrementConcurrent } from './services/bot-traffic.service.js';
 import './types/index.js';
 
 const app = Fastify({
@@ -96,6 +97,13 @@ async function buildServer() {
 
   // Cookies
   await app.register(fastifyCookie);
+
+  // Decrement concurrent bot connections on response
+  app.addHook('onResponse', async (request) => {
+    if (request.bot) {
+      decrementConcurrent().catch(() => {});
+    }
+  });
 
   // Health check with database connectivity
   app.get('/health', async (_request, reply) => {
