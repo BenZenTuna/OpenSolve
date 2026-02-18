@@ -20,13 +20,20 @@ const twitterCallbackSchema = z.object({
 });
 
 const RESERVED_BOT_NAMES = ['admin', 'opensolve', 'system', 'moderator', 'official'];
+const RESERVED_USERNAMES = ['admin', 'opensolve', 'system', 'moderator', 'official', 'bot', 'api', 'support', 'help'];
 
 const botProfileSchema = z.object({
   botName: z.string()
     .min(2, 'Bot name must be at least 2 characters')
     .max(50, 'Bot name must be at most 50 characters')
     .regex(/^[a-zA-Z0-9_-]+$/, 'Bot name can only contain letters, numbers, underscores, and hyphens'),
-  avatarUrl: z.string().url().max(500).optional(),
+});
+
+const usernameUpdateSchema = z.object({
+  username: z.string()
+    .min(2, 'Username must be at least 2 characters')
+    .max(50, 'Username must be at most 50 characters')
+    .regex(/^[a-zA-Z0-9_-]+$/, 'Only letters, numbers, underscores, and hyphens allowed'),
 });
 
 export async function authRoutes(fastify: FastifyInstance) {
@@ -96,19 +103,15 @@ export async function authRoutes(fastify: FastifyInstance) {
         user = existingUsers[0];
         await db.update(users)
           .set({
-            email: profile.email,
-            displayName: profile.name,
-            avatarUrl: profile.picture,
             updatedAt: new Date(),
           })
           .where(eq(users.id, user.id));
       } else {
         const [newUser] = await db.insert(users).values({
-          email: profile.email,
-          displayName: profile.name,
-          avatarUrl: profile.picture,
           oauthProvider: 'google',
           oauthId: profile.id,
+          username: null,
+          onboardingComplete: false,
         }).returning();
         user = newUser;
       }
@@ -116,8 +119,7 @@ export async function authRoutes(fastify: FastifyInstance) {
       // Create JWT
       const token = fastify.jwt.sign({
         id: user.id,
-        email: user.email,
-        displayName: user.displayName,
+        username: user.username,
         role: user.role,
       });
 
@@ -206,18 +208,15 @@ export async function authRoutes(fastify: FastifyInstance) {
         user = existingUsers[0];
         await db.update(users)
           .set({
-            displayName: profile.name,
-            avatarUrl: profile.profile_image_url || null,
             updatedAt: new Date(),
           })
           .where(eq(users.id, user.id));
       } else {
         const [newUser] = await db.insert(users).values({
-          email: `${profile.username}@x.com`,
-          displayName: profile.name,
-          avatarUrl: profile.profile_image_url || null,
           oauthProvider: 'twitter',
           oauthId: profile.id,
+          username: null,
+          onboardingComplete: false,
         }).returning();
         user = newUser;
       }
@@ -225,8 +224,7 @@ export async function authRoutes(fastify: FastifyInstance) {
       // Create JWT
       const token = fastify.jwt.sign({
         id: user.id,
-        email: user.email,
-        displayName: user.displayName,
+        username: user.username,
         role: user.role,
       });
 
@@ -263,13 +261,11 @@ export async function authRoutes(fastify: FastifyInstance) {
 
     return reply.code(200).send({
       id: user.id,
-      email: user.email,
-      displayName: user.displayName,
-      avatarUrl: user.avatarUrl,
+      username: user.username || null,
       role: user.role,
       botName: user.botName || null,
-      botAvatarUrl: user.botAvatarUrl || null,
       hasApiKey: !!user.apiKeyHash,
+      onboardingComplete: user.onboardingComplete,
       createdAt: user.createdAt,
     });
   });
@@ -278,6 +274,107 @@ export async function authRoutes(fastify: FastifyInstance) {
   fastify.post('/auth/logout', async (_request, reply) => {
     reply.clearCookie('token', { path: '/' });
     return reply.code(200).send({ success: true });
+  });
+
+  // ===== USERNAME =====
+
+  // Set or update username
+  fastify.put('/user/username', { preHandler: [authMiddleware] }, async (request, reply) => {
+    const userId = request.user!.id;
+    const body = usernameUpdateSchema.parse(request.body);
+    const usernameLower = body.username.toLowerCase();
+
+    if (RESERVED_USERNAMES.includes(usernameLower)) {
+      return reply.code(400).send({ error: 'This username is reserved' });
+    }
+
+    // Check uniqueness against other users' usernames
+    const [existingUsername] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.username, body.username))
+      .limit(1);
+
+    if (existingUsername && existingUsername.id !== userId) {
+      return reply.code(409).send({ error: 'Username is already taken' });
+    }
+
+    // Check uniqueness against bot names
+    const [existingBotName] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.botName, body.username))
+      .limit(1);
+
+    if (existingBotName && existingBotName.id !== userId) {
+      return reply.code(409).send({ error: 'This name is already in use' });
+    }
+
+    await db.update(users).set({
+      username: body.username,
+      onboardingComplete: true,
+      updatedAt: new Date(),
+    }).where(eq(users.id, userId));
+
+    // Re-sign JWT with new username
+    const token = fastify.jwt.sign({
+      id: userId,
+      username: body.username,
+      role: request.user!.role,
+    });
+
+    reply.setCookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 3600,
+    });
+
+    return reply.code(200).send({
+      username: body.username,
+      onboardingComplete: true,
+    });
+  });
+
+  // Check username availability
+  fastify.get('/user/check-username', { preHandler: [authMiddleware] }, async (request, reply) => {
+    const userId = request.user!.id;
+    const { name } = request.query as { name?: string };
+
+    if (!name || name.length < 2) {
+      return reply.code(400).send({ available: false, reason: 'Username must be at least 2 characters' });
+    }
+
+    if (RESERVED_USERNAMES.includes(name.toLowerCase())) {
+      return reply.code(200).send({ available: false, reason: 'This username is reserved' });
+    }
+
+    if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
+      return reply.code(200).send({ available: false, reason: 'Only letters, numbers, underscores, and hyphens allowed' });
+    }
+
+    const [existingUser] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.username, name))
+      .limit(1);
+
+    if (existingUser && existingUser.id !== userId) {
+      return reply.code(200).send({ available: false, reason: 'Username is already taken' });
+    }
+
+    const [existingBotName] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.botName, name))
+      .limit(1);
+
+    if (existingBotName && existingBotName.id !== userId) {
+      return reply.code(200).send({ available: false, reason: 'This name is already in use' });
+    }
+
+    return reply.code(200).send({ available: true });
   });
 
   // ===== USER BOT PROFILE & API KEY =====
@@ -304,29 +401,21 @@ export async function authRoutes(fastify: FastifyInstance) {
       return reply.code(409).send({ error: 'Bot name is already taken' });
     }
 
-    // Check if botName matches any existing user display names
-    const [matchingDisplayName] = await db
+    // Check if botName matches any existing usernames
+    const [matchingUsername] = await db
       .select({ id: users.id })
       .from(users)
-      .where(eq(users.displayName, body.botName))
+      .where(eq(users.username, body.botName))
       .limit(1);
 
-    if (matchingDisplayName && matchingDisplayName.id !== userId) {
+    if (matchingUsername && matchingUsername.id !== userId) {
       return reply.code(409).send({ error: 'This name is already in use' });
     }
-
-    // Get current user to check if botName is changing
-    const [currentUser] = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
 
     // Update user record
     await db.update(users)
       .set({
         botName: body.botName,
-        botAvatarUrl: body.avatarUrl || null,
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId));
@@ -343,8 +432,6 @@ export async function authRoutes(fastify: FastifyInstance) {
       await db.update(bots)
         .set({
           name: body.botName,
-          xHandle: body.botName,
-          avatarUrl: body.avatarUrl || null,
           updatedAt: new Date(),
         })
         .where(eq(bots.id, existingBot.id));
@@ -353,17 +440,11 @@ export async function authRoutes(fastify: FastifyInstance) {
       await db.insert(bots).values({
         ownerId: userId,
         name: body.botName,
-        avatarUrl: body.avatarUrl || null,
-        xHandle: body.botName,
-        xOauthId: `user_${userId}`,
-        apiKeyHash: 'virtual_no_direct_auth',
-        apiKeyPrefix: 'virtual_',
       });
     }
 
     return reply.code(200).send({
       botName: body.botName,
-      botAvatarUrl: body.avatarUrl || null,
       message: 'Bot profile updated',
     });
   });
@@ -472,6 +553,17 @@ export async function authRoutes(fastify: FastifyInstance) {
 
     if (existingUser && existingUser.id !== userId) {
       return reply.code(200).send({ available: false, reason: 'Name is already taken' });
+    }
+
+    // Cross-check against usernames
+    const [existingUsername] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.username, name))
+      .limit(1);
+
+    if (existingUsername && existingUsername.id !== userId) {
+      return reply.code(200).send({ available: false, reason: 'This name is already in use' });
     }
 
     return reply.code(200).send({ available: true });
