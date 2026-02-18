@@ -38,27 +38,23 @@ export const problemCategoryEnum = pgEnum('problem_category', [
 
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
-  email: varchar('email', { length: 255 }).notNull(),
-  displayName: varchar('display_name', { length: 100 }).notNull(),
-  avatarUrl: varchar('avatar_url', { length: 500 }),
+  username: varchar('username', { length: 50 }),
   oauthProvider: oauthProviderEnum('oauth_provider').notNull(),
   oauthId: varchar('oauth_id', { length: 255 }).notNull(),
   role: userRoleEnum('role').default('human').notNull(),
-
-  // API key fields (one per user)
-  apiKeyHash: varchar('api_key_hash', { length: 255 }),
-  apiKeyPrefix: varchar('api_key_prefix', { length: 8 }),
-  apiKeyCreatedAt: timestamp('api_key_created_at'),
+  onboardingComplete: boolean('onboarding_complete').default(false).notNull(),
 
   // Bot identity fields (for API submissions)
   botName: varchar('bot_name', { length: 50 }),
-  botAvatarUrl: varchar('bot_avatar_url', { length: 500 }),
+  apiKeyHash: varchar('api_key_hash', { length: 255 }),
+  apiKeyPrefix: varchar('api_key_prefix', { length: 8 }),
+  apiKeyCreatedAt: timestamp('api_key_created_at'),
 
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => ({
   oauthIdx: uniqueIndex('users_oauth_idx').on(table.oauthProvider, table.oauthId),
-  emailIdx: index('users_email_idx').on(table.email),
+  usernameIdx: uniqueIndex('users_username_idx').on(table.username),
   apiKeyPrefixIdx: index('users_api_key_prefix_idx').on(table.apiKeyPrefix),
   botNameIdx: uniqueIndex('users_bot_name_idx').on(table.botName),
 }));
@@ -68,11 +64,6 @@ export const bots = pgTable('bots', {
   ownerId: uuid('owner_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
   name: varchar('name', { length: 100 }).notNull(),
   description: varchar('description', { length: 500 }),
-  avatarUrl: varchar('avatar_url', { length: 500 }),
-  xHandle: varchar('x_handle', { length: 100 }).notNull(),
-  xOauthId: varchar('x_oauth_id', { length: 255 }).notNull(),
-  apiKeyHash: varchar('api_key_hash', { length: 255 }).notNull(),
-  apiKeyPrefix: varchar('api_key_prefix', { length: 8 }).notNull(),
   status: botStatusEnum('status').default('active').notNull(),
 
   // Gamification
@@ -92,9 +83,6 @@ export const bots = pgTable('bots', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => ({
   ownerIdx: index('bots_owner_idx').on(table.ownerId),
-  xHandleIdx: uniqueIndex('bots_x_handle_idx').on(table.xHandle),
-  xOauthIdx: uniqueIndex('bots_x_oauth_idx').on(table.xOauthId),
-  apiKeyPrefixIdx: index('bots_api_key_prefix_idx').on(table.apiKeyPrefix),
   statusIdx: index('bots_status_idx').on(table.status),
   pointsIdx: index('bots_points_idx').on(table.totalPoints),
   lastActiveIdx: index('bots_last_active_idx').on(table.lastActiveAt),

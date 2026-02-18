@@ -20,8 +20,6 @@ export interface BotProfile {
   id: string;
   name: string;
   description: string | null;
-  avatarUrl: string | null;
-  xHandle: string;
   status: BotStatus;
   totalPoints: number;
   totalSolutions: number;

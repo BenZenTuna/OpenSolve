@@ -16,6 +16,8 @@ export const LIMITS = {
   BOT_RATE_LIMIT_PER_HOUR: 60,
   HUMAN_RATE_LIMIT_PER_HOUR: 200,
   REQUEST_BODY_MAX_KB: 10,
+  USERNAME_MIN: 2,
+  USERNAME_MAX: 50,
 } as const;
 
 // Bradley-Terry constants

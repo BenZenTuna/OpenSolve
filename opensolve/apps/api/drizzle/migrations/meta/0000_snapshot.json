@@ -1,5 +1,5 @@
 {
-  "id": "8979ace9-a558-48a1-bdae-54c0110a67b6",
+  "id": "9af14215-8e5d-45d4-b098-bf7e2d699fc8",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "6",
   "dialect": "postgresql",
@@ -232,36 +232,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "avatar_url": {
-          "name": "avatar_url",
-          "type": "varchar(500)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "x_handle": {
-          "name": "x_handle",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "x_oauth_id": {
-          "name": "x_oauth_id",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "api_key_hash": {
-          "name": "api_key_hash",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "api_key_prefix": {
-          "name": "api_key_prefix",
-          "type": "varchar(8)",
-          "primaryKey": false,
-          "notNull": true
-        },
         "status": {
           "name": "status",
           "type": "bot_status",
@@ -352,27 +322,6 @@
           "name": "bots_owner_idx",
           "columns": [
             "owner_id"
-          ],
-          "isUnique": false
-        },
-        "bots_x_handle_idx": {
-          "name": "bots_x_handle_idx",
-          "columns": [
-            "x_handle"
-          ],
-          "isUnique": true
-        },
-        "bots_x_oauth_idx": {
-          "name": "bots_x_oauth_idx",
-          "columns": [
-            "x_oauth_id"
-          ],
-          "isUnique": true
-        },
-        "bots_api_key_prefix_idx": {
-          "name": "bots_api_key_prefix_idx",
-          "columns": [
-            "api_key_prefix"
           ],
           "isUnique": false
         },
@@ -592,6 +541,13 @@
           "notNull": true,
           "default": "'none'"
         },
+        "suggested_category": {
+          "name": "suggested_category",
+          "type": "problem_category",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -648,6 +604,146 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
+    "public.llm_models": {
+      "name": "llm_models",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "model_name": {
+          "name": "model_name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "model_version": {
+          "name": "model_version",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "model_family": {
+          "name": "model_family",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "total_solutions": {
+          "name": "total_solutions",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "avg_bt_score": {
+          "name": "avg_bt_score",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1500
+        },
+        "best_bt_score": {
+          "name": "best_bt_score",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1500
+        },
+        "total_wins": {
+          "name": "total_wins",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "total_comparisons": {
+          "name": "total_comparisons",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "win_rate": {
+          "name": "win_rate",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "top3_count": {
+          "name": "top3_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "first_place_count": {
+          "name": "first_place_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "unique_bots": {
+          "name": "unique_bots",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "first_seen_at": {
+          "name": "first_seen_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "last_seen_at": {
+          "name": "last_seen_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "llm_models_model_name_idx": {
+          "name": "llm_models_model_name_idx",
+          "columns": [
+            "model_name"
+          ],
+          "isUnique": true
+        },
+        "llm_models_avg_score_idx": {
+          "name": "llm_models_avg_score_idx",
+          "columns": [
+            "avg_bt_score"
+          ],
+          "isUnique": false
+        },
+        "llm_models_family_idx": {
+          "name": "llm_models_family_idx",
+          "columns": [
+            "model_family"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "public.problems": {
       "name": "problems",
       "schema": "",
@@ -697,6 +793,26 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'pending'"
+        },
+        "category": {
+          "name": "category",
+          "type": "problem_category",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "category_assigned_by": {
+          "name": "category_assigned_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "category_confidence": {
+          "name": "category_confidence",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
         },
         "green_flags": {
           "name": "green_flags",
@@ -789,6 +905,13 @@
             "human_author_id"
           ],
           "isUnique": false
+        },
+        "problems_category_idx": {
+          "name": "problems_category_idx",
+          "columns": [
+            "category"
+          ],
+          "isUnique": false
         }
       },
       "foreignKeys": {
@@ -811,6 +934,19 @@
           "tableTo": "bots",
           "columnsFrom": [
             "bot_author_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "problems_category_assigned_by_bots_id_fk": {
+          "name": "problems_category_assigned_by_bots_id_fk",
+          "tableFrom": "problems",
+          "tableTo": "bots",
+          "columnsFrom": [
+            "category_assigned_by"
           ],
           "columnsTo": [
             "id"
@@ -850,6 +986,18 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "llm_model": {
+          "name": "llm_model",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "llm_model_version": {
+          "name": "llm_model_version",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
         },
         "bt_score": {
           "name": "bt_score",
@@ -921,6 +1069,13 @@
           "columns": [
             "problem_id",
             "bt_score"
+          ],
+          "isUnique": false
+        },
+        "solutions_llm_model_idx": {
+          "name": "solutions_llm_model_idx",
+          "columns": [
+            "llm_model"
           ],
           "isUnique": false
         }
@@ -1128,21 +1283,9 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "email": {
-          "name": "email",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "display_name": {
-          "name": "display_name",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "avatar_url": {
-          "name": "avatar_url",
-          "type": "varchar(500)",
+        "username": {
+          "name": "username",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": false
         },
@@ -1166,6 +1309,37 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'human'"
+        },
+        "onboarding_complete": {
+          "name": "onboarding_complete",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "bot_name": {
+          "name": "bot_name",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "api_key_hash": {
+          "name": "api_key_hash",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "api_key_prefix": {
+          "name": "api_key_prefix",
+          "type": "varchar(8)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "api_key_created_at": {
+          "name": "api_key_created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -1191,12 +1365,26 @@
           ],
           "isUnique": true
         },
-        "users_email_idx": {
-          "name": "users_email_idx",
+        "users_username_idx": {
+          "name": "users_username_idx",
           "columns": [
-            "email"
+            "username"
+          ],
+          "isUnique": true
+        },
+        "users_api_key_prefix_idx": {
+          "name": "users_api_key_prefix_idx",
+          "columns": [
+            "api_key_prefix"
           ],
           "isUnique": false
+        },
+        "users_bot_name_idx": {
+          "name": "users_bot_name_idx",
+          "columns": [
+            "bot_name"
+          ],
+          "isUnique": true
         }
       },
       "foreignKeys": {},
@@ -1250,6 +1438,24 @@
       "values": [
         "google",
         "twitter"
+      ]
+    },
+    "public.problem_category": {
+      "name": "problem_category",
+      "schema": "public",
+      "values": [
+        "science_technology",
+        "health_medicine",
+        "environment_climate",
+        "education_learning",
+        "business_economics",
+        "society_culture",
+        "governance_policy",
+        "urban_infrastructure",
+        "food_agriculture",
+        "safety_security",
+        "communication_media",
+        "space_exploration"
       ]
     },
     "public.problem_status": {

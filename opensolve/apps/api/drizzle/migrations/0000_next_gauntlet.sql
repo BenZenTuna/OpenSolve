@@ -29,6 +29,12 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ CREATE TYPE "public"."problem_category" AS ENUM('science_technology', 'health_medicine', 'environment_climate', 'education_learning', 'business_economics', 'society_culture', 'governance_policy', 'urban_infrastructure', 'food_agriculture', 'safety_security', 'communication_media', 'space_exploration');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  CREATE TYPE "public"."problem_status" AS ENUM('pending', 'approved', 'rejected', 'active', 'mature');
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -76,11 +82,6 @@ CREATE TABLE IF NOT EXISTS "bots" (
 	"owner_id" uuid NOT NULL,
 	"name" varchar(100) NOT NULL,
 	"description" varchar(500),
-	"avatar_url" varchar(500),
-	"x_handle" varchar(100) NOT NULL,
-	"x_oauth_id" varchar(255) NOT NULL,
-	"api_key_hash" varchar(255) NOT NULL,
-	"api_key_prefix" varchar(8) NOT NULL,
 	"status" "bot_status" DEFAULT 'active' NOT NULL,
 	"total_points" integer DEFAULT 0 NOT NULL,
 	"total_solutions" integer DEFAULT 0 NOT NULL,
@@ -111,7 +112,27 @@ CREATE TABLE IF NOT EXISTS "flags" (
 	"bot_id" uuid NOT NULL,
 	"verdict" "flag_verdict" NOT NULL,
 	"category" "flag_category" DEFAULT 'none' NOT NULL,
+	"suggested_category" "problem_category",
 	"created_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "llm_models" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"model_name" varchar(100) NOT NULL,
+	"model_version" varchar(50),
+	"model_family" varchar(50),
+	"total_solutions" integer DEFAULT 0 NOT NULL,
+	"avg_bt_score" real DEFAULT 1500 NOT NULL,
+	"best_bt_score" real DEFAULT 1500 NOT NULL,
+	"total_wins" integer DEFAULT 0 NOT NULL,
+	"total_comparisons" integer DEFAULT 0 NOT NULL,
+	"win_rate" real DEFAULT 0 NOT NULL,
+	"top3_count" integer DEFAULT 0 NOT NULL,
+	"first_place_count" integer DEFAULT 0 NOT NULL,
+	"unique_bots" integer DEFAULT 0 NOT NULL,
+	"first_seen_at" timestamp DEFAULT now() NOT NULL,
+	"last_seen_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "problems" (
@@ -122,6 +143,9 @@ CREATE TABLE IF NOT EXISTS "problems" (
 	"title" varchar(200) NOT NULL,
 	"description" text NOT NULL,
 	"status" "problem_status" DEFAULT 'pending' NOT NULL,
+	"category" "problem_category",
+	"category_assigned_by" uuid,
+	"category_confidence" real DEFAULT 0,
 	"green_flags" integer DEFAULT 0 NOT NULL,
 	"red_flags" integer DEFAULT 0 NOT NULL,
 	"solution_count" integer DEFAULT 0 NOT NULL,
@@ -137,6 +161,8 @@ CREATE TABLE IF NOT EXISTS "solutions" (
 	"problem_id" uuid NOT NULL,
 	"bot_id" uuid NOT NULL,
 	"text" text NOT NULL,
+	"llm_model" varchar(100),
+	"llm_model_version" varchar(50),
 	"bt_score" real DEFAULT 1500 NOT NULL,
 	"comparison_count" integer DEFAULT 0 NOT NULL,
 	"win_count" integer DEFAULT 0 NOT NULL,
@@ -162,12 +188,15 @@ CREATE TABLE IF NOT EXISTS "tasks" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"email" varchar(255) NOT NULL,
-	"display_name" varchar(100) NOT NULL,
-	"avatar_url" varchar(500),
+	"username" varchar(50),
 	"oauth_provider" "oauth_provider" NOT NULL,
 	"oauth_id" varchar(255) NOT NULL,
 	"role" "user_role" DEFAULT 'human' NOT NULL,
+	"onboarding_complete" boolean DEFAULT false NOT NULL,
+	"bot_name" varchar(50),
+	"api_key_hash" varchar(255),
+	"api_key_prefix" varchar(8),
+	"api_key_created_at" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
@@ -257,6 +286,12 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ ALTER TABLE "problems" ADD CONSTRAINT "problems_category_assigned_by_bots_id_fk" FOREIGN KEY ("category_assigned_by") REFERENCES "public"."bots"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  ALTER TABLE "solutions" ADD CONSTRAINT "solutions_problem_id_problems_id_fk" FOREIGN KEY ("problem_id") REFERENCES "public"."problems"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -297,9 +332,6 @@ CREATE INDEX IF NOT EXISTS "activity_log_bot_idx" ON "activity_log" ("bot_id");-
 CREATE INDEX IF NOT EXISTS "badges_bot_idx" ON "badges" ("bot_id");--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "badges_bot_badge_idx" ON "badges" ("bot_id","badge_type","tier");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "bots_owner_idx" ON "bots" ("owner_id");--> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS "bots_x_handle_idx" ON "bots" ("x_handle");--> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS "bots_x_oauth_idx" ON "bots" ("x_oauth_id");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "bots_api_key_prefix_idx" ON "bots" ("api_key_prefix");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "bots_status_idx" ON "bots" ("status");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "bots_points_idx" ON "bots" ("total_points");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "bots_last_active_idx" ON "bots" ("last_active_at");--> statement-breakpoint
@@ -309,17 +341,24 @@ CREATE INDEX IF NOT EXISTS "comparisons_pair_idx" ON "comparisons" ("solution_a_
 CREATE INDEX IF NOT EXISTS "comparisons_created_at_idx" ON "comparisons" ("created_at");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "flags_problem_idx" ON "flags" ("problem_id");--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "flags_bot_problem_idx" ON "flags" ("bot_id","problem_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "llm_models_model_name_idx" ON "llm_models" ("model_name");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "llm_models_avg_score_idx" ON "llm_models" ("avg_bt_score");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "llm_models_family_idx" ON "llm_models" ("model_family");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "problems_status_idx" ON "problems" ("status");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "problems_author_type_idx" ON "problems" ("author_type");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "problems_attention_score_idx" ON "problems" ("attention_score");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "problems_created_at_idx" ON "problems" ("created_at");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "problems_human_author_idx" ON "problems" ("human_author_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "problems_category_idx" ON "problems" ("category");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "solutions_problem_idx" ON "solutions" ("problem_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "solutions_bot_idx" ON "solutions" ("bot_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "solutions_bt_score_idx" ON "solutions" ("bt_score");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "solutions_problem_score_idx" ON "solutions" ("problem_id","bt_score");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "solutions_llm_model_idx" ON "solutions" ("llm_model");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "tasks_bot_idx" ON "tasks" ("bot_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "tasks_status_idx" ON "tasks" ("status");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "tasks_expires_idx" ON "tasks" ("expires_at");--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "users_oauth_idx" ON "users" ("oauth_provider","oauth_id");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "users_email_idx" ON "users" ("email");
+CREATE UNIQUE INDEX IF NOT EXISTS "users_username_idx" ON "users" ("username");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "users_api_key_prefix_idx" ON "users" ("api_key_prefix");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "users_bot_name_idx" ON "users" ("bot_name");

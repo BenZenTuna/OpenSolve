@@ -1,17 +1,16 @@
 import { db } from '../config/database.js';
 import { users, bots, problems } from './schema.js';
-import bcrypt from 'bcrypt';
 
 async function seed() {
   console.log('Seeding database...');
 
   // Create a test user
   const [testUser] = await db.insert(users).values({
-    email: 'admin@opensolve.ai',
-    displayName: 'OpenSolve Admin',
+    username: 'admin',
     oauthProvider: 'google',
     oauthId: 'seed-admin-001',
     role: 'admin',
+    onboardingComplete: true,
   }).returning();
   console.log('Created test user:', testUser.id);
 
@@ -20,47 +19,34 @@ async function seed() {
     {
       name: 'SeedBot Alpha',
       description: 'A reference bot for development and testing',
-      xHandle: '@seedbot_alpha',
-      xOauthId: 'seed-bot-x-001',
       apiKey: 'os_bot_test1234567890abcdef1234567890abcdef12345678',
       globalElo: 1450,
     },
     {
       name: 'DeepSolve AI',
       description: 'Deep reasoning engine specializing in complex multi-step problems',
-      xHandle: '@deepsolve_ai',
-      xOauthId: 'seed-bot-x-002',
       apiKey: 'os_bot_deep2234567890abcdef1234567890abcdef12345678',
       globalElo: 1380,
     },
     {
       name: 'LogicBot v2',
       description: 'Formal logic and structured analysis bot',
-      xHandle: '@logicbot_v2',
-      xOauthId: 'seed-bot-x-003',
       apiKey: 'os_bot_logi3234567890abcdef1234567890abcdef12345678',
       globalElo: 1320,
     },
     {
       name: 'NeuralSolve',
       description: 'Neural network-powered creative problem solver',
-      xHandle: '@neuralsolve',
-      xOauthId: 'seed-bot-x-004',
       apiKey: 'os_bot_neur4234567890abcdef1234567890abcdef12345678',
       globalElo: 1280,
     },
   ];
 
   for (const profile of botProfiles) {
-    const apiKeyHash = await bcrypt.hash(profile.apiKey, 10);
     const [bot] = await db.insert(bots).values({
       ownerId: testUser.id,
       name: profile.name,
       description: profile.description,
-      xHandle: profile.xHandle,
-      xOauthId: profile.xOauthId,
-      apiKeyHash,
-      apiKeyPrefix: profile.apiKey.slice(0, 8),
       globalElo: profile.globalElo,
     }).returning();
     console.log(`Created bot: ${profile.name} (${bot.id})`);
@@ -101,10 +87,10 @@ async function seed() {
 
   console.log('\nSeed complete!');
   console.log('---');
-  console.log('Test user email: admin@opensolve.ai');
-  console.log('Bot API keys:');
+  console.log('Test user: admin (seed-admin-001)');
+  console.log('Bots:');
   for (const profile of botProfiles) {
-    console.log(`  ${profile.name}: ${profile.apiKey}`);
+    console.log(`  ${profile.name}`);
   }
   process.exit(0);
 }

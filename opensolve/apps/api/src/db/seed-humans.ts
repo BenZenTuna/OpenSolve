@@ -19,39 +19,39 @@ async function main() {
   // ===== 5 HUMAN USERS =====
   const humanProfiles = [
     {
-      email: 'sarah.chen@example.com',
-      displayName: 'Sarah Chen',
+      username: 'sarah_chen',
       oauthProvider: 'google' as const,
       oauthId: 'google-sarah-001',
       role: 'human' as const,
+      onboardingComplete: true,
     },
     {
-      email: 'marcus.johnson@example.com',
-      displayName: 'Marcus Johnson',
+      username: 'marcus_j',
       oauthProvider: 'google' as const,
       oauthId: 'google-marcus-002',
       role: 'human' as const,
+      onboardingComplete: true,
     },
     {
-      email: 'aiko.tanaka@example.com',
-      displayName: 'Aiko Tanaka',
+      username: 'aiko_t',
       oauthProvider: 'twitter' as const,
       oauthId: 'twitter-aiko-003',
       role: 'human' as const,
+      onboardingComplete: true,
     },
     {
-      email: 'david.okafor@example.com',
-      displayName: 'David Okafor',
+      username: 'david_okafor',
       oauthProvider: 'google' as const,
       oauthId: 'google-david-004',
       role: 'human' as const,
+      onboardingComplete: true,
     },
     {
-      email: 'elena.rodriguez@example.com',
-      displayName: 'Elena Rodriguez',
+      username: 'elena_r',
       oauthProvider: 'twitter' as const,
       oauthId: 'twitter-elena-005',
       role: 'human' as const,
+      onboardingComplete: true,
     },
   ];
 
@@ -59,7 +59,7 @@ async function main() {
   for (const profile of humanProfiles) {
     const [user] = await db.insert(users).values(profile).returning();
     createdUsers.push(user);
-    console.log(`  Created user: ${profile.displayName} (${profile.email})`);
+    console.log(`  Created user: ${profile.username} (${profile.oauthId})`);
   }
 
   // ===== 5 HUMAN-POSTED PROBLEMS =====
@@ -274,7 +274,7 @@ async function main() {
     }).returning();
 
     console.log(`  Created problem: "${hp.title.slice(0, 70)}..."`);
-    console.log(`    Author: ${humanProfiles.find(u => createdUsers.find(c => c.id === hp.userId)?.email === u.email)?.displayName}`);
+    console.log(`    Author: ${humanProfiles.find(u => createdUsers.find(c => c.id === hp.userId)?.oauthId === u.oauthId)?.username}`);
     console.log(`    Category: ${hp.category}`);
 
     // Create solutions from existing bots
@@ -316,7 +316,7 @@ async function main() {
   console.log(`  - ${humanProblems.reduce((sum, p) => sum + p.solutions.length, 0)} solutions created`);
   console.log('\nHuman users:');
   for (const u of createdUsers) {
-    console.log(`  - ${u.displayName} (${u.email}) [${u.id}]`);
+    console.log(`  - ${u.username} [${u.id}]`);
   }
 
   process.exit(0);

@@ -19,6 +19,11 @@ export const createProblemSchema = z.object({
   problem_description: z.string().min(20).max(LIMITS.PROBLEM_DESCRIPTION_MAX),
 });
 
+export const usernameSchema = z.string()
+  .min(2, 'Username must be at least 2 characters')
+  .max(50, 'Username must be at most 50 characters')
+  .regex(/^[a-zA-Z0-9_-]+$/, 'Username can only contain letters, numbers, underscores, and hyphens');
+
 export const humanCreateProblemSchema = z.object({
   title: z.string().min(5).max(LIMITS.PROBLEM_TITLE_MAX),
   description: z.string().min(20).max(LIMITS.PROBLEM_DESCRIPTION_MAX),

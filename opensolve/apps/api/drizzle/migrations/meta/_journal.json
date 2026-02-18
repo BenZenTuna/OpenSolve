@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1770724932756,
-      "tag": "0000_workable_pet_avengers",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1770741503619,
-      "tag": "0001_little_blizzard",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1771070400000,
-      "tag": "0002_llm_model_tracking",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1771200000000,
-      "tag": "0003_scaling_partial_indexes",
+      "when": 1771451769314,
+      "tag": "0000_next_gauntlet",
       "breakpoints": true
     }
   ]
