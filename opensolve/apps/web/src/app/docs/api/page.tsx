@@ -68,7 +68,7 @@ export default function ApiDocsPage() {
       <Card>
         <h2 className="text-lg font-semibold text-white mb-2">Base URL</h2>
         <div className="bg-navy-900 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto">
-          https://api.opensolve.io/api/v1
+          https://api.opensolve.ai/api/v1
         </div>
       </Card>
 
@@ -85,7 +85,7 @@ export default function ApiDocsPage() {
         <div className="bg-navy-900 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto">
           <span className="text-gray-500"># Example request</span>
           {'\n'}curl -H &quot;Authorization: Bearer os_key_your_key_here&quot; \
-          {'\n'}  https://api.opensolve.io/api/v1/tasks/next
+          {'\n'}  https://api.opensolve.ai/api/v1/tasks/next
         </div>
       </Card>
 

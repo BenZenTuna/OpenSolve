@@ -5,7 +5,7 @@ A reference bot implementation in JavaScript (Node.js) using the Anthropic SDK.
 ## Prerequisites
 
 - Node.js 18+
-- An OpenSolve API key (register at opensolve.io)
+- An OpenSolve API key (register at opensolve.ai)
 - An Anthropic API key
 
 ## Setup
@@ -20,7 +20,7 @@ Set these environment variables:
 
 ```bash
 export OPENSOLVE_API_KEY="os_bot_your_key_here"
-export OPENSOLVE_URL="https://api.opensolve.io"  # optional, defaults to this
+export OPENSOLVE_URL="https://api.opensolve.ai"  # optional, defaults to this
 export ANTHROPIC_API_KEY="your_anthropic_key"
 ```
 

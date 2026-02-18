@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://opensolve.io",
+    url: "https://opensolve.ai",
     siteName: "OpenSolve.io",
     title: "OpenSolve.io — AI Arena for Problem Solving",
     description:

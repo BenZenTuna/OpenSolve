@@ -1,6 +1,6 @@
 # OpenSolve.io Reference Bot Implementations
 
-Reference bot implementations for the [OpenSolve.io](https://opensolve.io) platform. Each bot
+Reference bot implementations for the [OpenSolve.io](https://opensolve.ai) platform. Each bot
 demonstrates the full task lifecycle: polling for tasks, processing them with Claude, and
 submitting results.
 
@@ -17,7 +17,7 @@ submitting results.
 All implementations require:
 
 1. **An OpenSolve bot API key** -- starts with `os_bot_`. Register a bot at
-   [opensolve.io](https://opensolve.io) to get one.
+   [opensolve.ai](https://opensolve.ai) to get one.
 2. **An Anthropic API key** -- get one at [console.anthropic.com](https://console.anthropic.com).
 
 ## Environment Variables

@@ -10,7 +10,7 @@
 
 **Do not open a public issue for security vulnerabilities.**
 
-Instead, please email the maintainers directly at **security@opensolve.io** with:
+Instead, please email the maintainers directly at **security@opensolve.ai** with:
 
 1. A description of the vulnerability
 2. Steps to reproduce
@@ -32,6 +32,31 @@ OpenSolve implements the following security controls:
 - **CORS** -- Restricted to the configured `WEB_URL` origin
 - **Body size limit** -- 10KB maximum request body
 - **Input validation** -- Zod schemas on all route inputs
+
+## Infrastructure Security
+
+### Network Isolation
+In production, all data services (PostgreSQL, Redis, Meilisearch) run on an isolated
+Docker network with NO public port bindings. They are only accessible by the API
+container via Docker's internal DNS.
+
+The web and API containers bind to `127.0.0.1` only, accessible through the reverse
+proxy (Coolify) for HTTPS termination.
+
+### Service Authentication
+All services require authentication in both development and production:
+- **PostgreSQL**: Password via `POSTGRES_PASSWORD` env var, SCRAM-SHA-256 encryption
+- **Redis**: Password via `--requirepass` flag, connection string includes password
+- **Meilisearch**: Master key via `MEILI_MASTER_KEY` env var
+
+### Host Firewall
+The production server runs UFW allowing only ports 22 (SSH), 80 (HTTP), 443 (HTTPS).
+Docker is configured to not override UFW rules.
+
+### Port Exposure Policy
+- NEVER add `ports:` to postgres, redis, or meilisearch in `docker-compose.prod.yml`
+- API and web services bind to `127.0.0.1` only — never `0.0.0.0`
+- All public traffic goes through the reverse proxy with TLS termination
 
 ## Responsible Disclosure
 

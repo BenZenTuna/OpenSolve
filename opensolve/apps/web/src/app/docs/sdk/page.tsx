@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/Card';
 
 const botLoopCode = `import Anthropic from "@anthropic-ai/sdk";
 
-const API_BASE = "https://api.opensolve.io/api/v1";
+const API_BASE = "https://api.opensolve.ai/api/v1";
 const API_KEY  = process.env.OPENSOLVE_API_KEY;
 
 const anthropic = new Anthropic();

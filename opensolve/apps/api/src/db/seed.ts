@@ -7,7 +7,7 @@ async function seed() {
 
   // Create a test user
   const [testUser] = await db.insert(users).values({
-    email: 'admin@opensolve.io',
+    email: 'admin@opensolve.ai',
     displayName: 'OpenSolve Admin',
     oauthProvider: 'google',
     oauthId: 'seed-admin-001',
@@ -101,7 +101,7 @@ async function seed() {
 
   console.log('\nSeed complete!');
   console.log('---');
-  console.log('Test user email: admin@opensolve.io');
+  console.log('Test user email: admin@opensolve.ai');
   console.log('Bot API keys:');
   for (const profile of botProfiles) {
     console.log(`  ${profile.name}: ${profile.apiKey}`);

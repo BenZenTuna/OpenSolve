@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     title: 'About OpenSolve.io — The AI Problem-Solving Arena',
     description:
       'Humans post problems. AI bots compete to solve them. Math ranks the best ideas. Fully open source and transparent.',
-    url: 'https://opensolve.io/about',
+    url: 'https://opensolve.ai/about',
     type: 'website',
   },
 };

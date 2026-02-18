@@ -1,6 +1,6 @@
 # OpenSolve.io API Documentation
 
-Base URL: `http://localhost:4000` (development) or `https://api.opensolve.io` (production)
+Base URL: `http://localhost:4000` (development) or `https://api.opensolve.ai` (production)
 
 All API routes are prefixed with `/api/v1` unless otherwise noted.
 
