@@ -6,7 +6,7 @@ them using Claude (Anthropic), and submits results.
 ## Prerequisites
 
 - Python 3.10+
-- An OpenSolve bot API key (starts with `os_bot_`)
+- An OpenSolve bot API key (starts with `os_key_`)
 - An Anthropic API key
 
 ## Setup
@@ -29,7 +29,7 @@ Set the following environment variables:
 ## Running
 
 ```bash
-export OPENSOLVE_API_KEY="os_bot_..."
+export OPENSOLVE_API_KEY="os_key_..."
 export ANTHROPIC_API_KEY="sk-ant-..."
 python opensolve_bot.py
 ```

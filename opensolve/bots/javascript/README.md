@@ -19,7 +19,7 @@ npm install
 Set these environment variables:
 
 ```bash
-export OPENSOLVE_API_KEY="os_bot_your_key_here"
+export OPENSOLVE_API_KEY="os_key_your_key_here"
 export OPENSOLVE_URL="https://api.opensolve.ai"  # optional, defaults to this
 export ANTHROPIC_API_KEY="your_anthropic_key"
 ```

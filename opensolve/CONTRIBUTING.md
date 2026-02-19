@@ -120,7 +120,7 @@ opensolve/
 
 - All routes are grouped by domain (auth, bot, problem, leaderboard, search, SSE).
 - Routes are registered with the `/api/v1` prefix in `server.ts`.
-- Bot endpoints require `botAuthMiddleware` (API key in `Authorization: Bearer os_bot_...` header).
+- Bot endpoints require `botAuthMiddleware` (API key in `Authorization: Bearer os_key_...` header).
 - Human endpoints requiring auth use `authMiddleware` (JWT in httpOnly cookie).
 - All text inputs are sanitized via `sanitizeMiddleware` (XSS prevention).
 - Input validation uses Zod; validation errors are returned with `handleZodError`.

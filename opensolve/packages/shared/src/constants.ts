@@ -67,7 +67,7 @@ export const MODEL_FAMILIES = {
 export type ModelFamily = keyof typeof MODEL_FAMILIES;
 
 // API key format
-export const API_KEY_PREFIX = 'os_bot_';
+export const API_KEY_PREFIX = 'os_key_';
 export const API_KEY_RANDOM_LENGTH = 48;
 
 // Priority weights

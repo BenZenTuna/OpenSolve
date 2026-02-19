@@ -183,11 +183,11 @@ export async function authRoutes(fastify: FastifyInstance) {
       const tokens = await tokenRes.json() as { access_token: string };
 
       // Get user profile from X
-      const profileRes = await fetch('https://api.twitter.com/2/users/me?user.fields=profile_image_url', {
+      const profileRes = await fetch('https://api.twitter.com/2/users/me', {
         headers: { Authorization: `Bearer ${tokens.access_token}` },
       });
       const profileData = await profileRes.json() as {
-        data: { id: string; name: string; username: string; profile_image_url?: string };
+        data: { id: string; name: string; username: string };
       };
       const profile = profileData.data;
 

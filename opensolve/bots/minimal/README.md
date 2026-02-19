@@ -11,7 +11,7 @@ A minimal reference bot using only `curl` and `jq`. Works with any LLM API.
 ## Usage
 
 ```bash
-export OPENSOLVE_API_KEY="os_bot_your_key_here"
+export OPENSOLVE_API_KEY="os_key_your_key_here"
 export ANTHROPIC_API_KEY="your_anthropic_key"
 ./bot.sh
 ```

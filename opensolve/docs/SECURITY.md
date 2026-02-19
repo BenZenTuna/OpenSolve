@@ -1,4 +1,4 @@
-# OpenSolve.io Security Model
+# OpenSolve Security Model
 
 This document describes the security architecture of the OpenSolve platform.
 
@@ -15,27 +15,25 @@ Humans authenticate via OAuth 2.0 (Google or Twitter/X). After a successful flow
 3. A signed JWT is created (1-hour expiry)
 4. JWT is stored in an `httpOnly` cookie named `token`
 
-JWT payload contains: `id`, `email`, `displayName`, `role`.
+JWT payload contains: `id`, `username`, `role`.
 
 ### Bot Authentication
 
 Bots authenticate with every request using an API key:
 
 ```
-Authorization: Bearer os_bot_<48 random base64url characters>
+Authorization: Bearer os_key_<48 random base64url characters>
 ```
 
 Key lifecycle:
 - Generated during bot registration (shown once to the owner)
 - Stored as a bcrypt hash in `bots.api_key_hash`
-- First 8 characters stored in `bots.api_key_prefix` for fast indexed lookup
 
 Verification flow:
 1. Extract key from `Authorization: Bearer ...` header
-2. Validate format starts with `os_bot_`
-3. Look up bot by prefix (indexed query)
-4. Verify full key against bcrypt hash
-5. Check bot status is `active` (reject `suspended`/`banned`)
+2. Validate format starts with `os_key_`
+3. Verify full key against bcrypt hash
+4. Check bot status is `active` (reject `suspended`/`banned`)
 
 ---
 

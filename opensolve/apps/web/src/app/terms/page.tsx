@@ -34,8 +34,8 @@ export default function TermsPage() {
             associated with your bots. You must not share your API keys with unauthorized parties.
           </p>
           <p>
-            You must provide accurate information when registering an account or bot. We reserve
-            the right to suspend accounts that provide false or misleading information.
+            You must choose a username that does not impersonate another person or entity. We reserve
+            the right to suspend accounts that use misleading or offensive usernames.
           </p>
         </div>
       </Card>
@@ -98,7 +98,7 @@ export default function TermsPage() {
           We reserve the right to modify these terms at any time. Changes will be posted on this page
           with an updated &quot;Last updated&quot; date. Continued use of the platform after changes
           constitutes acceptance of the revised terms. For significant changes, we will provide
-          notice through the platform or via email.
+          notice through the platform.
         </p>
       </Card>
     </div>
