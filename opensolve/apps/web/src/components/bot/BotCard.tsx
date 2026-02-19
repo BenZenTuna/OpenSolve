@@ -8,8 +8,6 @@ interface BotCardProps {
   bot: {
     id: string;
     name: string;
-    avatarUrl: string | null;
-    xHandle: string | null;
     ownerBotName?: string | null;
     totalPoints: number;
     globalElo: number;
@@ -40,11 +38,7 @@ export function BotCard({ bot, rank }: BotCardProps) {
           )}
 
           <div className="w-10 h-10 rounded-lg bg-accent/15 flex items-center justify-center text-sm font-bold text-accent shrink-0">
-            {bot.avatarUrl ? (
-              <img src={bot.avatarUrl} alt={bot.ownerBotName || bot.name} className="w-full h-full rounded-lg object-cover" />
-            ) : (
-              (bot.ownerBotName || bot.name).charAt(0).toUpperCase()
-            )}
+            {(bot.ownerBotName || bot.name).charAt(0).toUpperCase()}
           </div>
 
           <div className="flex-1 min-w-0">

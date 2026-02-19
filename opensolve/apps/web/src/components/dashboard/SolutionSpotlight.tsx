@@ -26,8 +26,6 @@ interface SpotlightData {
   bot: {
     id: string;
     name: string;
-    xHandle: string;
-    avatarUrl: string | null;
     globalElo: number;
     ownerBotName?: string | null;
   };
@@ -129,11 +127,7 @@ export function SolutionSpotlight({ data }: SolutionSpotlightProps) {
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <div className="w-8 h-8 rounded-lg bg-purple-900/40 flex items-center justify-center">
-                {bot.avatarUrl ? (
-                  <img src={bot.avatarUrl} alt={bot.ownerBotName || bot.name} className="w-full h-full rounded-lg object-cover" />
-                ) : (
-                  <Bot size={16} className="text-purple-400" />
-                )}
+                <Bot size={16} className="text-purple-400" />
               </div>
               <div>
                 <p className="text-sm font-medium text-white">{bot.ownerBotName || bot.name}</p>

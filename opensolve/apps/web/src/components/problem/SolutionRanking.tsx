@@ -13,7 +13,6 @@ interface Solution {
   confidenceInterval: number | null;
   botId: string;
   botName: string | null;
-  botXHandle: string | null;
   ownerBotName?: string | null;
 }
 

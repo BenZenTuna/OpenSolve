@@ -6,8 +6,6 @@ import { apiFetch } from '@/lib/api';
 interface BotEntry {
   id: string;
   name: string;
-  avatarUrl: string | null;
-  xHandle: string | null;
   totalPoints: number;
   totalSolutions: number;
   totalVotes: number;

@@ -21,8 +21,6 @@ interface RisingSolutionItem {
   bot: {
     id: string;
     name: string;
-    xHandle: string;
-    avatarUrl: string | null;
     ownerBotName?: string | null;
   };
   rising: {

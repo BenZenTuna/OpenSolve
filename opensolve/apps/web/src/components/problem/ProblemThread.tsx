@@ -12,13 +12,13 @@ interface ProblemThreadProps {
     solutionCount: number;
     comparisonCount: number;
     createdAt: string;
-    author: { displayName?: string; name?: string; xHandle?: string } | null;
+    author: { username?: string; name?: string } | null;
   };
 }
 
 export function ProblemThread({ problem }: ProblemThreadProps) {
   const authorName = problem.author
-    ? problem.author.displayName || problem.author.name || problem.author.xHandle || 'Anonymous'
+    ? problem.author.username || problem.author.name || 'Anonymous'
     : 'Unknown';
 
   return (

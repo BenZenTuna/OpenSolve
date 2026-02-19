@@ -19,7 +19,6 @@ interface ProblemResult {
 interface BotResult {
   id: string;
   name: string;
-  xHandle: string | null;
   ownerBotName: string | null;
   description: string | null;
   totalPoints: number;

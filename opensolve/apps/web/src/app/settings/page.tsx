@@ -2,15 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Settings, Bot, Key, AlertCircle, CheckCircle, Loader2, Copy, Trash2 } from 'lucide-react';
+import { Settings, Bot, Key, AlertCircle, CheckCircle, Loader2, Copy, Trash2, User } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { apiFetch, apiUrl } from '@/lib/api';
 
 interface UserProfile {
   id: string;
-  displayName: string;
+  username: string | null;
   botName: string | null;
-  botAvatarUrl: string | null;
   hasApiKey: boolean;
 }
 
@@ -25,9 +24,16 @@ export default function SettingsPage() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Username editing
+  const [editingUsername, setEditingUsername] = useState(false);
+  const [newUsername, setNewUsername] = useState('');
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [usernameCheckMsg, setUsernameCheckMsg] = useState('');
+  const [savingUsername, setSavingUsername] = useState(false);
+  const [usernameMsg, setUsernameMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
   // Bot profile form
   const [botName, setBotName] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
   const [nameAvailable, setNameAvailable] = useState<boolean | null>(null);
   const [nameCheckMsg, setNameCheckMsg] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
@@ -47,7 +53,6 @@ export default function SettingsPage() {
         const me = await apiFetch<UserProfile>('/auth/me', { credentials: 'include', cache: 'no-store' });
         setUser(me);
         setBotName(me.botName || '');
-        setAvatarUrl(me.botAvatarUrl || '');
 
         const status = await apiFetch<ApiKeyStatus>('/user/api-key', { credentials: 'include', cache: 'no-store' });
         setKeyStatus(status);
@@ -59,6 +64,73 @@ export default function SettingsPage() {
     }
     load();
   }, [router]);
+
+  // Check username availability
+  const checkUsername = useCallback(async (name: string) => {
+    if (name.length < 2) {
+      setUsernameAvailable(null);
+      setUsernameCheckMsg('');
+      return;
+    }
+    if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
+      setUsernameAvailable(false);
+      setUsernameCheckMsg('Only letters, numbers, underscores, and hyphens');
+      return;
+    }
+    try {
+      const res = await apiFetch<{ available: boolean; reason?: string }>(
+        `/user/check-username?name=${encodeURIComponent(name)}`,
+        { credentials: 'include', cache: 'no-store' }
+      );
+      setUsernameAvailable(res.available);
+      setUsernameCheckMsg(res.available ? 'Available' : (res.reason || 'Not available'));
+    } catch {
+      setUsernameAvailable(null);
+      setUsernameCheckMsg('');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!editingUsername || !newUsername) {
+      setUsernameAvailable(null);
+      setUsernameCheckMsg('');
+      return;
+    }
+    if (newUsername === user?.username) {
+      setUsernameAvailable(null);
+      setUsernameCheckMsg('Current username');
+      return;
+    }
+    const timer = setTimeout(() => checkUsername(newUsername), 500);
+    return () => clearTimeout(timer);
+  }, [newUsername, editingUsername, user?.username, checkUsername]);
+
+  const handleSaveUsername = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUsername.trim() || usernameAvailable !== true) return;
+    setSavingUsername(true);
+    setUsernameMsg(null);
+    try {
+      const res = await fetch(apiUrl('/user/username'), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ username: newUsername.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setUsernameMsg({ type: 'error', text: data.error || 'Failed to update username' });
+      } else {
+        setUsernameMsg({ type: 'success', text: 'Username updated!' });
+        setUser(prev => prev ? { ...prev, username: data.username } : prev);
+        setEditingUsername(false);
+      }
+    } catch {
+      setUsernameMsg({ type: 'error', text: 'Network error' });
+    } finally {
+      setSavingUsername(false);
+    }
+  }, [newUsername, usernameAvailable]);
 
   // Check bot name availability
   const checkName = useCallback(async (name: string) => {
@@ -104,14 +176,14 @@ export default function SettingsPage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ botName: botName.trim(), avatarUrl: avatarUrl.trim() || undefined }),
+        body: JSON.stringify({ botName: botName.trim() }),
       });
       const data = await res.json();
       if (!res.ok) {
         setProfileMsg({ type: 'error', text: data.error || 'Failed to save' });
       } else {
         setProfileMsg({ type: 'success', text: 'Bot profile saved!' });
-        setUser(prev => prev ? { ...prev, botName: data.botName, botAvatarUrl: data.botAvatarUrl } : prev);
+        setUser(prev => prev ? { ...prev, botName: data.botName } : prev);
         setNameAvailable(null);
         setNameCheckMsg('Current name');
       }
@@ -120,7 +192,7 @@ export default function SettingsPage() {
     } finally {
       setSavingProfile(false);
     }
-  }, [botName, avatarUrl]);
+  }, [botName]);
 
   const handleGenerateKey = useCallback(async () => {
     setGeneratingKey(true);
@@ -194,9 +266,88 @@ export default function SettingsPage() {
           Settings
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          Manage your bot identity and API access
+          Manage your account, bot identity, and API access
         </p>
       </div>
+
+      {/* Username Section */}
+      <Card padding="lg">
+        <div className="flex items-center gap-2 mb-4">
+          <User className="w-5 h-5 text-accent" />
+          <h2 className="text-lg font-semibold text-white">Username</h2>
+        </div>
+
+        {usernameMsg && (
+          <div className={`flex items-center gap-2 p-3 rounded-lg text-sm mb-4 ${
+            usernameMsg.type === 'success'
+              ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+              : 'bg-red-500/10 border border-red-500/20 text-red-400'
+          }`}>
+            {usernameMsg.type === 'success' ? <CheckCircle className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
+            {usernameMsg.text}
+          </div>
+        )}
+
+        {editingUsername ? (
+          <form onSubmit={handleSaveUsername} className="space-y-3">
+            <div>
+              <input
+                type="text"
+                value={newUsername}
+                onChange={(e) => setNewUsername(e.target.value)}
+                placeholder="new-username"
+                className="input-base"
+                maxLength={30}
+                minLength={2}
+                autoFocus
+                disabled={savingUsername}
+              />
+              {usernameCheckMsg && (
+                <p className={`text-xs mt-1 ${
+                  usernameAvailable === true ? 'text-emerald-400' :
+                  usernameAvailable === false ? 'text-red-400' : 'text-gray-500'
+                }`}>
+                  {usernameCheckMsg}
+                </p>
+              )}
+              <p className="text-xs text-gray-600 mt-1">
+                2-30 characters. Letters, numbers, underscores, and hyphens only.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="submit"
+                disabled={savingUsername || !newUsername.trim() || newUsername.length < 2 || usernameAvailable !== true}
+                className="btn-primary"
+              >
+                {savingUsername ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
+                ) : (
+                  'Save'
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setEditingUsername(false); setUsernameMsg(null); }}
+                className="btn-secondary"
+                disabled={savingUsername}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="flex items-center justify-between">
+            <p className="text-gray-300">{user.username || 'Not set'}</p>
+            <button
+              onClick={() => { setEditingUsername(true); setNewUsername(user.username || ''); }}
+              className="btn-secondary text-sm"
+            >
+              Edit
+            </button>
+          </div>
+        )}
+      </Card>
 
       {/* Bot Identity Section */}
       <Card padding="lg">
@@ -246,22 +397,6 @@ export default function SettingsPage() {
             <p className="text-xs text-gray-600 mt-1">
               2-50 characters. Letters, numbers, underscores, and hyphens only.
             </p>
-          </div>
-
-          <div>
-            <label htmlFor="avatarUrl" className="block text-sm font-medium text-gray-300 mb-1.5">
-              Bot Avatar URL <span className="text-gray-600">(optional)</span>
-            </label>
-            <input
-              id="avatarUrl"
-              type="url"
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-              placeholder="https://example.com/my-bot-avatar.png"
-              className="input-base"
-              maxLength={500}
-              disabled={savingProfile}
-            />
           </div>
 
           <button

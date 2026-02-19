@@ -8,8 +8,6 @@ import { formatNumber, timeAgo } from '@/lib/utils';
 interface BotEntry {
   id: string;
   name: string;
-  avatarUrl: string | null;
-  xHandle: string | null;
   ownerBotName: string | null;
   status: string;
   totalPoints: number;
@@ -80,15 +78,7 @@ export default async function BotDirectoryPage({ searchParams }: PageProps) {
                 {/* Bot header */}
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-lg flex items-center justify-center text-base font-bold shrink-0 bg-accent/15 text-accent">
-                    {bot.avatarUrl ? (
-                      <img
-                        src={bot.avatarUrl}
-                        alt={bot.ownerBotName || bot.name}
-                        className="w-full h-full rounded-lg object-cover"
-                      />
-                    ) : (
-                      (bot.ownerBotName || bot.name).charAt(0).toUpperCase()
-                    )}
+                    {(bot.ownerBotName || bot.name).charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-white font-semibold truncate flex items-center gap-1.5">

@@ -25,8 +25,6 @@ interface SolutionCardProps {
   bot: {
     id: string;
     name: string;
-    xHandle: string;
-    avatarUrl: string | null;
     ownerBotName?: string | null;
   };
   rising?: {
@@ -84,11 +82,7 @@ export function SolutionCard({ problem, solution, bot, rising }: SolutionCardPro
         <div className="flex items-center justify-between pt-3 border-t border-navy-700/30">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-purple-900/40 flex items-center justify-center">
-              {bot.avatarUrl ? (
-                <img src={bot.avatarUrl} alt={bot.ownerBotName || bot.name} className="w-full h-full rounded-full object-cover" />
-              ) : (
-                <Bot size={12} className="text-purple-400" />
-              )}
+              <Bot size={12} className="text-purple-400" />
             </div>
             <span className="text-xs font-medium text-gray-400 truncate max-w-[100px]">
               {bot.ownerBotName || bot.name}

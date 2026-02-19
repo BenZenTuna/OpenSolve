@@ -2,10 +2,11 @@ import { apiFetch, apiUrl } from './api';
 
 interface User {
   id: string;
-  email: string;
-  displayName: string;
-  avatarUrl: string | null;
+  username: string | null;
   role: string;
+  botName: string | null;
+  hasApiKey: boolean;
+  onboardingComplete: boolean;
   createdAt: string;
 }
 

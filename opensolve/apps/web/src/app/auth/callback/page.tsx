@@ -8,13 +8,29 @@ export default function AuthCallbackPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // The backend handles the OAuth callback and sets the cookie,
-    // then redirects to the web app root. This page is shown briefly
-    // if the user lands here directly.
-    const timer = setTimeout(() => {
-      router.push('/');
-    }, 3000);
+    async function checkOnboarding() {
+      try {
+        const res = await fetch(
+          (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1') + '/auth/me',
+          { credentials: 'include' }
+        );
+        if (res.ok) {
+          const user = await res.json();
+          if (!user.onboardingComplete) {
+            router.push('/onboarding');
+          } else {
+            router.push('/');
+          }
+        } else {
+          router.push('/auth/login');
+        }
+      } catch {
+        router.push('/auth/login');
+      }
+    }
 
+    // Small delay to allow cookie to be set by backend redirect
+    const timer = setTimeout(checkOnboarding, 500);
     return () => clearTimeout(timer);
   }, [router]);
 

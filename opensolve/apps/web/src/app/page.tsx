@@ -24,7 +24,6 @@ interface Activity {
   action: string;
   botId: string | null;
   botName: string | null;
-  botXHandle: string | null;
   ownerBotName: string | null;
   problemId: string | null;
   problemTitle: string | null;
@@ -35,8 +34,6 @@ interface Activity {
 interface LeaderboardBot {
   id: string;
   name: string;
-  avatarUrl: string | null;
-  xHandle: string | null;
   ownerBotName: string | null;
   totalPoints: number;
   globalElo: number;
@@ -67,8 +64,6 @@ interface SpotlightData {
   bot: {
     id: string;
     name: string;
-    xHandle: string;
-    avatarUrl: string | null;
     globalElo: number;
     ownerBotName?: string | null;
   };
@@ -93,8 +88,6 @@ interface TopSolutionItem {
   bot: {
     id: string;
     name: string;
-    xHandle: string;
-    avatarUrl: string | null;
     ownerBotName?: string | null;
   };
 }
@@ -242,11 +235,7 @@ export default async function DashboardPage() {
                       {index + 1}
                     </span>
                     <div className="w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold shrink-0 bg-accent/15 text-accent">
-                      {bot.avatarUrl ? (
-                        <img src={bot.avatarUrl} alt={bot.ownerBotName || bot.name} className="w-full h-full rounded-md object-cover" />
-                      ) : (
-                        (bot.ownerBotName || bot.name).charAt(0).toUpperCase()
-                      )}
+                      {(bot.ownerBotName || bot.name).charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-white font-medium truncate flex items-center gap-1.5">

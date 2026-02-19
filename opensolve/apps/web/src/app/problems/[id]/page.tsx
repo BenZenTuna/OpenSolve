@@ -21,8 +21,6 @@ interface TopSolution {
   createdAt: string;
   botId: string;
   botName: string | null;
-  botXHandle: string | null;
-  botAvatarUrl: string | null;
   ownerBotName: string | null;
 }
 
@@ -41,10 +39,8 @@ interface Problem {
   updatedAt: string;
   author: {
     id: string;
-    displayName?: string;
+    username?: string;
     name?: string;
-    xHandle?: string;
-    avatarUrl?: string | null;
     ownerBotName?: string | null;
   } | null;
   topSolutions: TopSolution[];
@@ -62,7 +58,6 @@ interface RankedSolution {
   createdAt: string;
   botId: string;
   botName: string | null;
-  botXHandle: string | null;
   ownerBotName: string | null;
 }
 
@@ -90,7 +85,7 @@ export default async function ProblemPage({ params }: PageProps) {
   }
 
   const authorName = problem.author
-    ? problem.author.ownerBotName || problem.author.displayName || problem.author.name || 'Anonymous'
+    ? problem.author.ownerBotName || problem.author.username || problem.author.name || 'Anonymous'
     : 'Unknown';
 
   return (

@@ -42,8 +42,6 @@ interface BotProfile {
   id: string;
   name: string;
   description: string | null;
-  avatarUrl: string | null;
-  xHandle: string | null;
   ownerBotName: string | null;
   status: string;
   totalPoints: number;
@@ -111,15 +109,7 @@ export default async function BotProfilePage({ params }: PageProps) {
         <div className="flex flex-col sm:flex-row items-start gap-5">
           {/* Avatar */}
           <div className="w-16 h-16 rounded-xl bg-accent/15 flex items-center justify-center text-2xl font-bold text-accent shrink-0">
-            {bot.avatarUrl ? (
-              <img
-                src={bot.avatarUrl}
-                alt={bot.ownerBotName || bot.name}
-                className="w-full h-full rounded-xl object-cover"
-              />
-            ) : (
-              (bot.ownerBotName || bot.name).charAt(0).toUpperCase()
-            )}
+            {(bot.ownerBotName || bot.name).charAt(0).toUpperCase()}
           </div>
 
           <div className="flex-1 min-w-0">

@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   Search,
@@ -13,18 +13,18 @@ import {
   Bot,
   LogIn,
   LogOut,
-  User,
   Info,
   Settings,
   Cpu,
 } from "lucide-react";
 import clsx from "clsx";
 import { apiFetch } from "@/lib/api";
+import { DefaultAvatar } from "@/components/DefaultAvatar";
 
 interface AuthUser {
   id: string;
-  displayName: string;
-  avatarUrl: string | null;
+  username: string | null;
+  onboardingComplete: boolean;
 }
 
 const navLinks = [
@@ -37,6 +37,7 @@ const navLinks = [
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
@@ -45,9 +46,14 @@ export function Navbar() {
 
   useEffect(() => {
     apiFetch<AuthUser>('/auth/me', { credentials: 'include', cache: 'no-store' })
-      .then(setUser)
+      .then((u) => {
+        if (!u.onboardingComplete && pathname !== '/onboarding') {
+          router.push('/onboarding');
+        }
+        setUser(u);
+      })
       .catch(() => setUser(null));
-  }, [pathname]);
+  }, [pathname, router]);
 
   const handleLogout = useCallback(async () => {
     try {
@@ -74,6 +80,8 @@ export function Navbar() {
     },
     [searchQuery]
   );
+
+  const userLabel = user?.username || 'User';
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-surface-border backdrop-blur-xl bg-navy-950/80">
@@ -163,12 +171,8 @@ export function Navbar() {
                   onClick={() => setUserMenuOpen((prev) => !prev)}
                   className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-navy-800 transition-colors"
                 >
-                  {user.avatarUrl ? (
-                    <Image src={user.avatarUrl} alt="" width={24} height={24} className="w-6 h-6 rounded-full" />
-                  ) : (
-                    <User className="w-5 h-5 text-accent" />
-                  )}
-                  <span className="max-w-[120px] truncate">{user.displayName}</span>
+                  <DefaultAvatar name={userLabel} size="sm" />
+                  <span className="max-w-[120px] truncate">{userLabel}</span>
                 </button>
                 {userMenuOpen && (
                   <div className="absolute right-0 mt-1 w-48 rounded-lg bg-navy-800 border border-navy-700 shadow-xl py-1 z-50">
@@ -264,12 +268,8 @@ export function Navbar() {
             {user ? (
               <div className="space-y-1">
                 <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-300">
-                  {user.avatarUrl ? (
-                    <Image src={user.avatarUrl} alt="" width={20} height={20} className="w-5 h-5 rounded-full" />
-                  ) : (
-                    <User className="w-5 h-5 text-accent" />
-                  )}
-                  <span className="truncate">{user.displayName}</span>
+                  <DefaultAvatar name={userLabel} size="sm" />
+                  <span className="truncate">{userLabel}</span>
                 </div>
                 <Link
                   href="/submit"

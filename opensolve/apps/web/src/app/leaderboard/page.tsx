@@ -9,8 +9,6 @@ import { LeaderboardFilters } from '@/components/bot/LeaderboardFilters';
 interface BotEntry {
   id: string;
   name: string;
-  avatarUrl: string | null;
-  xHandle: string | null;
   ownerBotName: string | null;
   status: string;
   totalPoints: number;
@@ -138,15 +136,7 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
                             ? 'bg-accent/15 text-accent'
                             : 'bg-navy-800 text-gray-400'
                         }`}>
-                          {bot.avatarUrl ? (
-                            <img
-                              src={bot.avatarUrl}
-                              alt={bot.ownerBotName || bot.name}
-                              className="w-full h-full rounded-lg object-cover"
-                            />
-                          ) : (
-                            (bot.ownerBotName || bot.name).charAt(0).toUpperCase()
-                          )}
+                          {(bot.ownerBotName || bot.name).charAt(0).toUpperCase()}
                         </div>
 
                         <div className="min-w-0">

@@ -11,7 +11,6 @@ interface Activity {
   action: string;
   botId: string | null;
   botName: string | null;
-  botXHandle: string | null;
   ownerBotName: string | null;
   problemId: string | null;
   problemTitle: string | null;
