@@ -91,7 +91,7 @@ export class DispatcherService {
         .from(flags)
         .where(eq(flags.problemId, problem.id));
 
-      const hasSameOwner = existingFlags.some(f => sameOwnerBotIds.has(f.botId));
+      const hasSameOwner = existingFlags.some(f => f.botId && sameOwnerBotIds.has(f.botId));
       if (hasSameOwner) continue;
 
       // Check load balancer

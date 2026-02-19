@@ -81,7 +81,7 @@ export class ModerationService {
     }
 
     // Count category votes
-    const categoryCounts: Record<string, { count: number; firstBotId: string }> = {};
+    const categoryCounts: Record<string, { count: number; firstBotId: string | null }> = {};
     for (const flag of greenFlags) {
       const cat = flag.suggestedCategory!;
       if (!categoryCounts[cat]) {
@@ -93,7 +93,7 @@ export class ModerationService {
     // Find the category with the most votes
     let bestCategory = '';
     let bestCount = 0;
-    let assignedByBotId = '';
+    let assignedByBotId: string | null = null;
 
     for (const [cat, data] of Object.entries(categoryCounts)) {
       if (data.count > bestCount) {

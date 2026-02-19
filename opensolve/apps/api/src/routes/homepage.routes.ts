@@ -33,19 +33,21 @@ export async function homepageRoutes(fastify: FastifyInstance) {
 
     if (!topSolution) return reply.code(204).send();
 
-    // Get the bot that wrote it
-    const [bot] = await db
-      .select({
-        id: bots.id,
-        name: bots.name,
-        globalElo: bots.globalElo,
-        ownerBotName: users.botName,
-      })
-      .from(bots)
-      .leftJoin(users, eq(bots.ownerId, users.id))
-      .where(eq(bots.id, topSolution.botId));
-
-    if (!bot) return reply.code(204).send();
+    // Get the bot that wrote it (may be null if bot was deleted)
+    let bot: { id: string; name: string; globalElo: number; ownerBotName: string | null } | null = null;
+    if (topSolution.botId) {
+      const [foundBot] = await db
+        .select({
+          id: bots.id,
+          name: bots.name,
+          globalElo: bots.globalElo,
+          ownerBotName: users.botName,
+        })
+        .from(bots)
+        .leftJoin(users, eq(bots.ownerId, users.id))
+        .where(eq(bots.id, topSolution.botId));
+      bot = foundBot ?? null;
+    }
 
     const result = {
       problem: {
@@ -107,16 +109,20 @@ export async function homepageRoutes(fastify: FastifyInstance) {
 
       if (!topSolution) continue;
 
-      // Get bot info
-      const [bot] = await db
-        .select({
-          id: bots.id,
-          name: bots.name,
-          ownerBotName: users.botName,
-        })
-        .from(bots)
-        .leftJoin(users, eq(bots.ownerId, users.id))
-        .where(eq(bots.id, topSolution.botId));
+      // Get bot info (may be null if bot was deleted)
+      let bot: { id: string; name: string; ownerBotName: string | null } | null = null;
+      if (topSolution.botId) {
+        const [foundBot] = await db
+          .select({
+            id: bots.id,
+            name: bots.name,
+            ownerBotName: users.botName,
+          })
+          .from(bots)
+          .leftJoin(users, eq(bots.ownerId, users.id))
+          .where(eq(bots.id, topSolution.botId));
+        bot = foundBot ?? null;
+      }
 
       results.push({
         problem: {
@@ -197,16 +203,20 @@ export async function homepageRoutes(fastify: FastifyInstance) {
 
       if (!problem) continue;
 
-      // Get bot details
-      const [bot] = await db
-        .select({
-          id: bots.id,
-          name: bots.name,
-          ownerBotName: users.botName,
-        })
-        .from(bots)
-        .leftJoin(users, eq(bots.ownerId, users.id))
-        .where(eq(bots.id, solution.botId));
+      // Get bot details (may be null if bot was deleted)
+      let bot: { id: string; name: string; ownerBotName: string | null } | null = null;
+      if (solution.botId) {
+        const [foundBot] = await db
+          .select({
+            id: bots.id,
+            name: bots.name,
+            ownerBotName: users.botName,
+          })
+          .from(bots)
+          .leftJoin(users, eq(bots.ownerId, users.id))
+          .where(eq(bots.id, solution.botId));
+        bot = foundBot ?? null;
+      }
 
       // Get rank within problem
       const higherRanked = await db

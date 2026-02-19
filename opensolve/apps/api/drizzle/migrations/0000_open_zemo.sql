@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS "comparisons" (
 	"problem_id" uuid NOT NULL,
 	"solution_a_id" uuid NOT NULL,
 	"solution_b_id" uuid NOT NULL,
-	"voter_bot_id" uuid NOT NULL,
+	"voter_bot_id" uuid,
 	"winner" "vote_winner" NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS "comparisons" (
 CREATE TABLE IF NOT EXISTS "flags" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"problem_id" uuid NOT NULL,
-	"bot_id" uuid NOT NULL,
+	"bot_id" uuid,
 	"verdict" "flag_verdict" NOT NULL,
 	"category" "flag_category" DEFAULT 'none' NOT NULL,
 	"suggested_category" "problem_category",
@@ -159,7 +159,7 @@ CREATE TABLE IF NOT EXISTS "problems" (
 CREATE TABLE IF NOT EXISTS "solutions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"problem_id" uuid NOT NULL,
-	"bot_id" uuid NOT NULL,
+	"bot_id" uuid,
 	"text" text NOT NULL,
 	"llm_model" varchar(100),
 	"llm_model_version" varchar(50),
@@ -202,13 +202,13 @@ CREATE TABLE IF NOT EXISTS "users" (
 );
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "activity_log" ADD CONSTRAINT "activity_log_bot_id_bots_id_fk" FOREIGN KEY ("bot_id") REFERENCES "public"."bots"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "activity_log" ADD CONSTRAINT "activity_log_bot_id_bots_id_fk" FOREIGN KEY ("bot_id") REFERENCES "public"."bots"("id") ON DELETE set null ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "activity_log" ADD CONSTRAINT "activity_log_human_user_id_users_id_fk" FOREIGN KEY ("human_user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "activity_log" ADD CONSTRAINT "activity_log_human_user_id_users_id_fk" FOREIGN KEY ("human_user_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -256,7 +256,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "comparisons" ADD CONSTRAINT "comparisons_voter_bot_id_bots_id_fk" FOREIGN KEY ("voter_bot_id") REFERENCES "public"."bots"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "comparisons" ADD CONSTRAINT "comparisons_voter_bot_id_bots_id_fk" FOREIGN KEY ("voter_bot_id") REFERENCES "public"."bots"("id") ON DELETE set null ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -268,25 +268,25 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "flags" ADD CONSTRAINT "flags_bot_id_bots_id_fk" FOREIGN KEY ("bot_id") REFERENCES "public"."bots"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "flags" ADD CONSTRAINT "flags_bot_id_bots_id_fk" FOREIGN KEY ("bot_id") REFERENCES "public"."bots"("id") ON DELETE set null ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "problems" ADD CONSTRAINT "problems_human_author_id_users_id_fk" FOREIGN KEY ("human_author_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "problems" ADD CONSTRAINT "problems_human_author_id_users_id_fk" FOREIGN KEY ("human_author_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "problems" ADD CONSTRAINT "problems_bot_author_id_bots_id_fk" FOREIGN KEY ("bot_author_id") REFERENCES "public"."bots"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "problems" ADD CONSTRAINT "problems_bot_author_id_bots_id_fk" FOREIGN KEY ("bot_author_id") REFERENCES "public"."bots"("id") ON DELETE set null ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "problems" ADD CONSTRAINT "problems_category_assigned_by_bots_id_fk" FOREIGN KEY ("category_assigned_by") REFERENCES "public"."bots"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "problems" ADD CONSTRAINT "problems_category_assigned_by_bots_id_fk" FOREIGN KEY ("category_assigned_by") REFERENCES "public"."bots"("id") ON DELETE set null ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -298,7 +298,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "solutions" ADD CONSTRAINT "solutions_bot_id_bots_id_fk" FOREIGN KEY ("bot_id") REFERENCES "public"."bots"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "solutions" ADD CONSTRAINT "solutions_bot_id_bots_id_fk" FOREIGN KEY ("bot_id") REFERENCES "public"."bots"("id") ON DELETE set null ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

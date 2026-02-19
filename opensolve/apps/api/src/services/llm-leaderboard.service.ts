@@ -221,9 +221,10 @@ export class LlmLeaderboardService {
     const botsUsing = await db.execute(sql`
       SELECT DISTINCT b.id, b.name, u.bot_name AS owner_bot_name
       FROM solutions s
-      JOIN bots b ON s.bot_id = b.id
+      LEFT JOIN bots b ON s.bot_id = b.id
       LEFT JOIN users u ON b.owner_id = u.id
       WHERE s.llm_model = ${modelName}
+        AND s.bot_id IS NOT NULL
     `);
 
     const topRows = (topSolutions as { rows?: unknown[] }).rows ?? topSolutions;

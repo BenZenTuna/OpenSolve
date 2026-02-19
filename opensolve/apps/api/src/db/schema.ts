@@ -91,15 +91,15 @@ export const bots = pgTable('bots', {
 export const problems = pgTable('problems', {
   id: uuid('id').defaultRandom().primaryKey(),
   authorType: authorTypeEnum('author_type').notNull(),
-  humanAuthorId: uuid('human_author_id').references(() => users.id),
-  botAuthorId: uuid('bot_author_id').references(() => bots.id),
+  humanAuthorId: uuid('human_author_id').references(() => users.id, { onDelete: 'set null' }),
+  botAuthorId: uuid('bot_author_id').references(() => bots.id, { onDelete: 'set null' }),
   title: varchar('title', { length: 200 }).notNull(),
   description: text('description').notNull(),
   status: problemStatusEnum('status').default('pending').notNull(),
 
   // Category
   category: problemCategoryEnum('category'),
-  categoryAssignedBy: uuid('category_assigned_by').references(() => bots.id),
+  categoryAssignedBy: uuid('category_assigned_by').references(() => bots.id, { onDelete: 'set null' }),
   categoryConfidence: real('category_confidence').default(0),
 
   // Moderation counters
@@ -128,7 +128,7 @@ export const problems = pgTable('problems', {
 export const solutions = pgTable('solutions', {
   id: uuid('id').defaultRandom().primaryKey(),
   problemId: uuid('problem_id').references(() => problems.id, { onDelete: 'cascade' }).notNull(),
-  botId: uuid('bot_id').references(() => bots.id, { onDelete: 'cascade' }).notNull(),
+  botId: uuid('bot_id').references(() => bots.id, { onDelete: 'set null' }),
   text: text('text').notNull(),
 
   // LLM model tracking
@@ -156,7 +156,7 @@ export const comparisons = pgTable('comparisons', {
   problemId: uuid('problem_id').references(() => problems.id, { onDelete: 'cascade' }).notNull(),
   solutionAId: uuid('solution_a_id').references(() => solutions.id, { onDelete: 'cascade' }).notNull(),
   solutionBId: uuid('solution_b_id').references(() => solutions.id, { onDelete: 'cascade' }).notNull(),
-  voterBotId: uuid('voter_bot_id').references(() => bots.id, { onDelete: 'cascade' }).notNull(),
+  voterBotId: uuid('voter_bot_id').references(() => bots.id, { onDelete: 'set null' }),
   winner: voteWinnerEnum('winner').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => ({
@@ -169,7 +169,7 @@ export const comparisons = pgTable('comparisons', {
 export const flags = pgTable('flags', {
   id: uuid('id').defaultRandom().primaryKey(),
   problemId: uuid('problem_id').references(() => problems.id, { onDelete: 'cascade' }).notNull(),
-  botId: uuid('bot_id').references(() => bots.id, { onDelete: 'cascade' }).notNull(),
+  botId: uuid('bot_id').references(() => bots.id, { onDelete: 'set null' }),
   verdict: flagVerdictEnum('verdict').notNull(),
   category: flagCategoryEnum('category').default('none').notNull(),
   suggestedCategory: problemCategoryEnum('suggested_category'),
@@ -211,8 +211,8 @@ export const badges = pgTable('badges', {
 
 export const activityLog = pgTable('activity_log', {
   id: serial('id').primaryKey(),
-  botId: uuid('bot_id').references(() => bots.id),
-  humanUserId: uuid('human_user_id').references(() => users.id),
+  botId: uuid('bot_id').references(() => bots.id, { onDelete: 'set null' }),
+  humanUserId: uuid('human_user_id').references(() => users.id, { onDelete: 'set null' }),
   action: varchar('action', { length: 50 }).notNull(),
   problemId: uuid('problem_id').references(() => problems.id),
   solutionId: uuid('solution_id').references(() => solutions.id),

@@ -1,11 +1,12 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { db } from '../config/database.js';
-import { users, bots } from '../db/schema.js';
-import { eq, and } from 'drizzle-orm';
+import { users, bots, solutions, comparisons, flags, badges, problems, activityLog, tasks } from '../db/schema.js';
+import { eq, and, or } from 'drizzle-orm';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { generateApiKey, hashApiKey, getApiKeyPrefix, generateOAuthState, generateCodeVerifier, generateCodeChallenge } from '../utils/crypto.js';
 import { sanitizeMiddleware } from '../middleware/sanitize.middleware.js';
+import { redis } from '../config/redis.js';
 
 // Validation schemas
 const googleCallbackSchema = z.object({
@@ -613,5 +614,310 @@ export async function authRoutes(fastify: FastifyInstance) {
     }
 
     return reply.code(200).send({ available: true });
+  });
+
+  // ===== GDPR DATA EXPORT (Article 20) =====
+
+  fastify.get('/user/export', {
+    preHandler: [authMiddleware],
+    config: {
+      rateLimit: {
+        max: 5,
+        timeWindow: '1 hour',
+      }
+    }
+  }, async (request, reply) => {
+    const userId = request.user!.id;
+
+    try {
+      // 1. Fetch user record
+      const [user] = await db.select({
+        id: users.id,
+        username: users.username,
+        oauthProvider: users.oauthProvider,
+        onboardingComplete: users.onboardingComplete,
+        createdAt: users.createdAt,
+      }).from(users).where(eq(users.id, userId));
+
+      if (!user) {
+        return reply.status(404).send({ error: 'User not found' });
+      }
+
+      // 2. Fetch bot record (if exists)
+      const [bot] = await db.select()
+        .from(bots)
+        .where(eq(bots.ownerId, userId));
+
+      // 3. Build export object
+      const exportData: Record<string, unknown> = {
+        exportDate: new Date().toISOString(),
+        platform: 'OpenSolve (opensolve.ai)',
+        gdprNotice: 'This export contains all personal data associated with your account per GDPR Article 20.',
+
+        account: {
+          userId: user.id,
+          username: user.username,
+          oauthProvider: user.oauthProvider,
+          accountCreated: user.createdAt,
+          onboardingComplete: user.onboardingComplete,
+        },
+      };
+
+      if (bot) {
+        // 4a. Fetch badges
+        const botBadges = await db.select({
+          type: badges.badgeType,
+          tier: badges.tier,
+          earnedAt: badges.earnedAt,
+        }).from(badges).where(eq(badges.botId, bot.id));
+
+        exportData.botProfile = {
+          botId: bot.id,
+          botName: bot.name,
+          description: bot.description,
+          status: bot.status,
+          stats: {
+            totalPoints: bot.totalPoints,
+            totalSolutions: bot.totalSolutions,
+            totalVotes: bot.totalVotes,
+            totalFlags: bot.totalFlags,
+            totalProblemsCreated: bot.totalProblemsCreated,
+            globalElo: bot.globalElo,
+            voteAccuracy: bot.voteAccuracy,
+          },
+          badges: botBadges,
+        };
+
+        // 4b. Fetch solutions
+        const botSolutions = await db.select({
+          solutionId: solutions.id,
+          problemId: solutions.problemId,
+          problemTitle: problems.title,
+          text: solutions.text,
+          btScore: solutions.btScore,
+          comparisonCount: solutions.comparisonCount,
+          winCount: solutions.winCount,
+          lossCount: solutions.lossCount,
+          llmModel: solutions.llmModel,
+          llmModelVersion: solutions.llmModelVersion,
+          createdAt: solutions.createdAt,
+        })
+          .from(solutions)
+          .leftJoin(problems, eq(solutions.problemId, problems.id))
+          .where(eq(solutions.botId, bot.id));
+
+        exportData.solutionsSubmitted = botSolutions;
+
+        // 4c. Fetch votes cast
+        const botVotes = await db.select({
+          comparisonId: comparisons.id,
+          problemId: comparisons.problemId,
+          winner: comparisons.winner,
+          createdAt: comparisons.createdAt,
+        })
+          .from(comparisons)
+          .where(eq(comparisons.voterBotId, bot.id));
+
+        exportData.votesCast = botVotes;
+
+        // 4d. Fetch flags submitted
+        const botFlags = await db.select({
+          flagId: flags.id,
+          problemId: flags.problemId,
+          verdict: flags.verdict,
+          category: flags.category,
+          suggestedCategory: flags.suggestedCategory,
+          createdAt: flags.createdAt,
+        })
+          .from(flags)
+          .where(eq(flags.botId, bot.id));
+
+        exportData.flagsSubmitted = botFlags;
+      } else {
+        exportData.botProfile = null;
+        exportData.solutionsSubmitted = [];
+        exportData.votesCast = [];
+        exportData.flagsSubmitted = [];
+      }
+
+      // 5. Fetch human-authored problems
+      const humanProblems = await db.select({
+        problemId: problems.id,
+        title: problems.title,
+        description: problems.description,
+        status: problems.status,
+        category: problems.category,
+        createdAt: problems.createdAt,
+      })
+        .from(problems)
+        .where(eq(problems.humanAuthorId, userId));
+
+      exportData.problemsAuthored = humanProblems;
+
+      // 6. Fetch activity log entries [REVIEW FIX R3]
+      const userActivity = await db.select({
+        action: activityLog.action,
+        problemId: activityLog.problemId,
+        solutionId: activityLog.solutionId,
+        metadata: activityLog.metadata,
+        createdAt: activityLog.createdAt,
+      })
+        .from(activityLog)
+        .where(
+          bot
+            ? or(
+                eq(activityLog.botId, bot.id),
+                eq(activityLog.humanUserId, userId)
+              )
+            : eq(activityLog.humanUserId, userId)
+        );
+
+      exportData.activityLog = userActivity;
+
+      // 7. Set download headers
+      const filename = `opensolve-export-${user.username ?? 'user'}-${new Date().toISOString().slice(0, 10)}.json`;
+
+      reply.header('Content-Type', 'application/json');
+      reply.header('Content-Disposition', `attachment; filename="${filename}"`);
+
+      return reply.send(exportData);
+
+    } catch (err) {
+      request.log.error({ err }, 'Data export failed');
+      return reply.status(500).send({
+        error: 'Data export failed. Please try again.'
+      });
+    }
+  });
+
+  // ===== GDPR ACCOUNT DELETION (Article 17) =====
+
+  fastify.delete('/user/account', {
+    preHandler: [authMiddleware],
+    config: {
+      rateLimit: {                    // [REVIEW FIX R1]
+        max: 3,
+        timeWindow: '1 hour',
+      }
+    },
+    schema: {
+      body: {
+        type: 'object',
+        required: ['confirm'],
+        properties: {
+          confirm: { type: 'string', enum: ['DELETE'] }
+        }
+      }
+    }
+  }, async (request, reply) => {
+    const userId = request.user!.id;
+    const { confirm } = request.body as { confirm: string };
+
+    if (confirm !== 'DELETE') {
+      return reply.status(400).send({
+        error: "Send { confirm: 'DELETE' } to confirm account deletion."
+      });
+    }
+
+    try {
+      // Look up bot BEFORE transaction (need bot.id for Redis cleanup after commit)
+      const [bot] = await db.select({ id: bots.id })
+        .from(bots)
+        .where(eq(bots.ownerId, userId));
+
+      await db.transaction(async (tx) => {
+        if (bot) {
+          // 1. Nullify FK references on platform data (preserve ranking integrity)
+          await tx.update(solutions)
+            .set({ botId: null })
+            .where(eq(solutions.botId, bot.id));
+
+          await tx.update(comparisons)
+            .set({ voterBotId: null })
+            .where(eq(comparisons.voterBotId, bot.id));
+
+          await tx.update(flags)
+            .set({ botId: null })
+            .where(eq(flags.botId, bot.id));
+
+          // 2. Nullify bot references on problems
+          await tx.update(problems)
+            .set({ botAuthorId: null })
+            .where(eq(problems.botAuthorId, bot.id));
+
+          await tx.update(problems)
+            .set({ categoryAssignedBy: null })
+            .where(eq(problems.categoryAssignedBy, bot.id));
+
+          // 3. Nullify activity log bot references
+          await tx.update(activityLog)
+            .set({ botId: null })
+            .where(eq(activityLog.botId, bot.id));
+
+          // 4. Delete ephemeral/personal data
+          await tx.delete(tasks).where(eq(tasks.botId, bot.id));
+          await tx.delete(badges).where(eq(badges.botId, bot.id));
+
+          // 5. Delete the bot row
+          await tx.delete(bots).where(eq(bots.id, bot.id));
+        }
+
+        // 6. Nullify user references on problems and activity log
+        await tx.update(problems)
+          .set({ humanAuthorId: null })
+          .where(eq(problems.humanAuthorId, userId));
+
+        await tx.update(activityLog)
+          .set({ humanUserId: null })
+          .where(eq(activityLog.humanUserId, userId));
+
+        // 7. Delete the user row
+        await tx.delete(users).where(eq(users.id, userId));
+      });
+
+      // 8. Redis cleanup (best-effort, outside transaction)
+      if (bot) {
+        try {
+          await redis.zrem('bot:traffic:active', bot.id);
+        } catch (redisErr) {
+          request.log.warn({ err: redisErr }, 'Redis cleanup after deletion failed (non-fatal)');
+        }
+      }
+
+      // 9. Invalidate homepage caches
+      try {
+        await Promise.allSettled([
+          redis.del('homepage:spotlight'),
+          redis.del('homepage:top-solutions:6'),
+          redis.del('homepage:top-solutions:12'),
+          redis.del('homepage:rising:3'),
+          redis.del('homepage:rising:6'),
+        ]);
+      } catch (cacheErr) {
+        request.log.warn({ err: cacheErr }, 'Cache invalidation after deletion failed (non-fatal)');
+      }
+
+      // 10. Audit log: GDPR deletion record [REVIEW FIX R2 + R5]
+      request.log.info(
+        { userId, botId: bot?.id ?? null, ip: request.ip, action: 'account_deleted' },
+        'User account deleted successfully'
+      );
+
+      // 11. Clear ALL cookies — JWT + OAuth state cookies from FIX 5
+      reply.setCookie('token', '', cookieOptions(0));
+      reply.setCookie('oauth_state', '', cookieOptions(0));
+      reply.setCookie('oauth_twitter', '', cookieOptions(0));
+
+      return reply.status(200).send({
+        success: true,
+        message: 'Account and all associated data have been deleted.'
+      });
+
+    } catch (err) {
+      request.log.error({ err }, 'Account deletion failed');
+      return reply.status(500).send({
+        error: 'Account deletion failed. Please try again or contact support.'
+      });
+    }
   });
 }

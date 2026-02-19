@@ -1,5 +1,5 @@
 {
-  "id": "9af14215-8e5d-45d4-b098-bf7e2d699fc8",
+  "id": "a2703ed6-ef81-4024-a295-770d0b23fad3",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "6",
   "dialect": "postgresql",
@@ -85,7 +85,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "set null",
           "onUpdate": "no action"
         },
         "activity_log_human_user_id_users_id_fk": {
@@ -98,7 +98,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "set null",
           "onUpdate": "no action"
         },
         "activity_log_problem_id_problems_id_fk": {
@@ -398,7 +398,7 @@
           "name": "voter_bot_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "winner": {
           "name": "winner",
@@ -496,7 +496,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
@@ -524,7 +524,7 @@
           "name": "bot_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "verdict": {
           "name": "verdict",
@@ -597,7 +597,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
@@ -925,7 +925,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "set null",
           "onUpdate": "no action"
         },
         "problems_bot_author_id_bots_id_fk": {
@@ -938,7 +938,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "set null",
           "onUpdate": "no action"
         },
         "problems_category_assigned_by_bots_id_fk": {
@@ -951,7 +951,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
@@ -979,7 +979,7 @@
           "name": "bot_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "text": {
           "name": "text",
@@ -1104,7 +1104,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
