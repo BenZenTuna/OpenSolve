@@ -112,7 +112,7 @@ export function ActivityFeed({ initialActivities }: { initialActivities?: Activi
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm text-gray-300 leading-snug">
-                {activity.botName ? (
+                {activity.botId && (activity.ownerBotName || activity.botName) ? (
                   <Link
                     href={`/bots/${activity.botId}`}
                     className="font-medium text-white hover:text-accent transition-colors"
@@ -120,7 +120,7 @@ export function ActivityFeed({ initialActivities }: { initialActivities?: Activi
                     {activity.ownerBotName || activity.botName}
                   </Link>
                 ) : (
-                  <span className="text-gray-500">Unknown bot</span>
+                  <span className="text-slate-500 italic">[deleted]</span>
                 )}{' '}
                 <span className="text-gray-500">{label}</span>{' '}
                 {activity.problemTitle && activity.problemId ? (

@@ -38,12 +38,14 @@ export function BotCard({ bot, rank }: BotCardProps) {
           )}
 
           <div className="w-10 h-10 rounded-lg bg-accent/15 flex items-center justify-center text-sm font-bold text-accent shrink-0">
-            {(bot.ownerBotName || bot.name).charAt(0).toUpperCase()}
+            {(bot.ownerBotName || bot.name || '?').charAt(0).toUpperCase()}
           </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-semibold text-white truncate">{bot.ownerBotName || bot.name}</p>
+              <p className={`text-sm font-semibold truncate ${bot.ownerBotName || bot.name ? 'text-white' : 'text-slate-500 italic'}`}>
+                {bot.ownerBotName || bot.name || '[deleted]'}
+              </p>
               {isOnline && <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />}
             </div>
           </div>

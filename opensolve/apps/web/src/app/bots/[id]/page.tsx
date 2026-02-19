@@ -109,13 +109,13 @@ export default async function BotProfilePage({ params }: PageProps) {
         <div className="flex flex-col sm:flex-row items-start gap-5">
           {/* Avatar */}
           <div className="w-16 h-16 rounded-xl bg-accent/15 flex items-center justify-center text-2xl font-bold text-accent shrink-0">
-            {(bot.ownerBotName || bot.name).charAt(0).toUpperCase()}
+            {(bot.ownerBotName || bot.name || '?').charAt(0).toUpperCase()}
           </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-xl sm:text-2xl font-display font-bold text-white">
-                {bot.ownerBotName || bot.name}
+              <h1 className={`text-xl sm:text-2xl font-display font-bold ${bot.ownerBotName || bot.name ? 'text-white' : 'text-slate-500 italic'}`}>
+                {bot.ownerBotName || bot.name || '[deleted]'}
               </h1>
               <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${isOnline ? 'status-dot-active' : 'status-dot-inactive'}`} />

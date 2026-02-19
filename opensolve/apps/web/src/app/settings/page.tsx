@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Settings, Bot, Key, AlertCircle, CheckCircle, Loader2, Copy, Trash2, User } from 'lucide-react';
+import { Settings, Bot, Key, AlertCircle, CheckCircle, Loader2, Copy, Trash2, User, Download, ShieldAlert, X } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { apiFetch, apiUrl } from '@/lib/api';
 
@@ -46,6 +46,16 @@ export default function SettingsPage() {
   const [revokingKey, setRevokingKey] = useState(false);
   const [keyMsg, setKeyMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [copied, setCopied] = useState(false);
+
+  // Export state (FIX 2)
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  // Delete state (FIX 1)
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -247,6 +257,55 @@ export default function SettingsPage() {
       setTimeout(() => setCopied(false), 2000);
     }
   }, [generatedKey]);
+
+  const handleExportData = useCallback(async () => {
+    setIsExporting(true);
+    setExportError(null);
+    try {
+      const res = await fetch(apiUrl('/user/export'), {
+        credentials: 'include',
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Export failed');
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = res.headers.get('Content-Disposition')?.match(/filename="(.+)"/)?.[1]
+        ?? `opensolve-export-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setExportError(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setIsExporting(false);
+    }
+  }, []);
+
+  const handleDeleteAccount = useCallback(async () => {
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      const res = await fetch(apiUrl('/user/account'), {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ confirm: 'DELETE' }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Deletion failed');
+      }
+      window.location.href = '/';
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Something went wrong');
+      setIsDeleting(false);
+    }
+  }, []);
 
   if (loading) {
     return (
@@ -505,6 +564,146 @@ export default function SettingsPage() {
           </p>
         )}
       </Card>
+
+      {/* Your Data Section (FIX 2) */}
+      <div className="border border-blue-500/20 bg-blue-500/5 rounded-lg p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Download className="w-5 h-5 text-blue-400" />
+          <h2 className="text-lg font-semibold text-white">Your Data</h2>
+        </div>
+        <p className="text-sm text-gray-400 mb-4">
+          Download a copy of all your personal data stored on OpenSolve, including your profile, solutions, votes, and flags.
+        </p>
+
+        <button
+          onClick={handleExportData}
+          disabled={isExporting}
+          className="btn-primary"
+        >
+          {isExporting ? (
+            <><Loader2 className="w-4 h-4 animate-spin" /> Exporting...</>
+          ) : (
+            <><Download className="w-4 h-4" /> Export My Data</>
+          )}
+        </button>
+
+        {exportError && (
+          <div className="flex items-center gap-2 mt-3 text-sm text-red-400">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            {exportError}
+          </div>
+        )}
+      </div>
+
+      {/* Danger Zone (FIX 1) */}
+      <div className="border border-red-500/30 bg-red-500/5 rounded-lg p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <ShieldAlert className="w-5 h-5 text-red-400" />
+          <h2 className="text-lg font-semibold text-white">Danger Zone</h2>
+        </div>
+
+        <h3 className="text-sm font-medium text-red-400 mb-2">Delete Account</h3>
+        <p className="text-sm text-gray-400 mb-4">
+          This will permanently delete your account, your bot profile, and all associated data.
+          Your submitted solutions will be anonymized and kept for ranking integrity.
+          This action cannot be undone.
+        </p>
+
+        <button
+          onClick={() => setShowDeleteModal(true)}
+          className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition-colors inline-flex items-center gap-2"
+        >
+          <Trash2 className="w-4 h-4" />
+          Delete My Account
+        </button>
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-md rounded-xl border border-surface-border bg-navy-900 shadow-2xl p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-white">Are you sure?</h3>
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteConfirmText('');
+                  setDeleteError(null);
+                }}
+                className="p-1 rounded-lg hover:bg-navy-800 transition-colors text-gray-400"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="text-sm text-gray-300 space-y-2">
+              <p>This will permanently delete:</p>
+              <ul className="list-disc list-inside text-gray-400 space-y-1">
+                <li>Your user account and login</li>
+                <li>Your bot profile, stats, and badges</li>
+                <li>Your API key</li>
+              </ul>
+              <p className="text-gray-400">Your solutions will be anonymized (not deleted).</p>
+            </div>
+
+            <div className="text-sm text-blue-400 bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
+              Consider exporting your data first — you can download it from the &quot;Your Data&quot; section above.
+            </div>
+
+            <div>
+              <label htmlFor="deleteConfirm" className="block text-sm text-gray-400 mb-1.5">
+                Type <span className="font-mono font-bold text-white">DELETE</span> to confirm
+              </label>
+              <input
+                id="deleteConfirm"
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="Type DELETE to confirm"
+                className="input-base"
+                disabled={isDeleting}
+                autoComplete="off"
+              />
+            </div>
+
+            {deleteError && (
+              <div className="flex items-center gap-2 text-sm text-red-400">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                {deleteError}
+              </div>
+            )}
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteConfirmText('');
+                  setDeleteError(null);
+                }}
+                className="btn-secondary flex-1"
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleteConfirmText !== 'DELETE' || isDeleting}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center justify-center gap-2 ${
+                  deleteConfirmText === 'DELETE' && !isDeleting
+                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                    : 'bg-red-600/30 text-red-400/50 cursor-not-allowed'
+                }`}
+              >
+                {isDeleting ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Deleting...</>
+                ) : (
+                  'Permanently Delete'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

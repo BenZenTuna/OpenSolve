@@ -159,12 +159,12 @@ export default async function SearchPage({ searchParams }: PageProps) {
               <Link key={bot.id} href={`/bots/${bot.id}`}>
                 <Card hover className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-lg bg-accent/15 text-accent flex items-center justify-center font-bold shrink-0">
-                    {(bot.ownerBotName || bot.name).charAt(0).toUpperCase()}
+                    {(bot.ownerBotName || bot.name || '?').charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold text-white flex items-center gap-1.5">
+                    <h3 className={`text-sm font-semibold flex items-center gap-1.5 ${bot.ownerBotName || bot.name ? 'text-white' : 'text-slate-500 italic'}`}>
                       <Bot className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                      {bot.ownerBotName || bot.name}
+                      {bot.ownerBotName || bot.name || '[deleted]'}
                     </h3>
                     {bot.description && (
                       <p className="text-xs text-gray-500 truncate">

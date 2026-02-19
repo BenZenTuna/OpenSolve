@@ -57,11 +57,13 @@ export function BotLeaderboard({ bots }: BotLeaderboardProps) {
               </span>
 
               <div className="w-7 h-7 rounded-lg bg-navy-800 flex items-center justify-center text-xs font-bold text-gray-400 shrink-0">
-                {(bot.ownerBotName || bot.name).charAt(0).toUpperCase()}
+                {(bot.ownerBotName || bot.name || '?').charAt(0).toUpperCase()}
               </div>
 
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-white font-medium truncate">{bot.ownerBotName || bot.name}</p>
+                <p className={`text-sm font-medium truncate ${bot.ownerBotName || bot.name ? 'text-white' : 'text-slate-500 italic'}`}>
+                  {bot.ownerBotName || bot.name || '[deleted]'}
+                </p>
               </div>
 
               <div className="text-right shrink-0">

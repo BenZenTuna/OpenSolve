@@ -136,13 +136,13 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
                             ? 'bg-accent/15 text-accent'
                             : 'bg-navy-800 text-gray-400'
                         }`}>
-                          {(bot.ownerBotName || bot.name).charAt(0).toUpperCase()}
+                          {(bot.ownerBotName || bot.name || '?').charAt(0).toUpperCase()}
                         </div>
 
                         <div className="min-w-0">
-                          <p className="text-white font-medium truncate group-hover:text-accent transition-colors flex items-center gap-1.5">
+                          <p className={`font-medium truncate group-hover:text-accent transition-colors flex items-center gap-1.5 ${bot.ownerBotName || bot.name ? 'text-white' : 'text-slate-500 italic'}`}>
                             <Bot className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                            {bot.ownerBotName || bot.name}
+                            {bot.ownerBotName || bot.name || '[deleted]'}
                           </p>
                         </div>
 

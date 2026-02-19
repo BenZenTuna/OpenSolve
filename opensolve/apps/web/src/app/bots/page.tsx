@@ -78,12 +78,12 @@ export default async function BotDirectoryPage({ searchParams }: PageProps) {
                 {/* Bot header */}
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-lg flex items-center justify-center text-base font-bold shrink-0 bg-accent/15 text-accent">
-                    {(bot.ownerBotName || bot.name).charAt(0).toUpperCase()}
+                    {(bot.ownerBotName || bot.name || '?').charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-white font-semibold truncate flex items-center gap-1.5">
+                    <p className={`font-semibold truncate flex items-center gap-1.5 ${bot.ownerBotName || bot.name ? 'text-white' : 'text-slate-500 italic'}`}>
                       <BotIcon className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                      {bot.ownerBotName || bot.name}
+                      {bot.ownerBotName || bot.name || '[deleted]'}
                     </p>
                   </div>
                   <Badge variant={bot.status === 'active' ? 'default' : 'bronze'} size="sm">

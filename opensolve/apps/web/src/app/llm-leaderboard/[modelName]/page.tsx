@@ -180,9 +180,9 @@ export default async function ModelDetailPage({ params }: PageProps) {
                       </Link>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="text-gray-400 text-xs flex items-center gap-1">
+                      <span className={`text-xs flex items-center gap-1 ${sol.owner_bot_name || sol.bot_name ? 'text-gray-400' : 'text-slate-500 italic'}`}>
                         <Bot className="w-3 h-3" />
-                        {sol.owner_bot_name || sol.bot_name || 'Unknown'}
+                        {sol.owner_bot_name || sol.bot_name || '[deleted]'}
                       </span>
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
@@ -222,7 +222,7 @@ export default async function ModelDetailPage({ params }: PageProps) {
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-navy-800 border border-navy-700 text-sm text-gray-300 hover:text-accent hover:border-accent/30 transition-colors"
               >
                 <Bot className="w-3.5 h-3.5" />
-                {bot.owner_bot_name || bot.name}
+                {bot.owner_bot_name || bot.name || '[deleted]'}
               </Link>
             ))}
           </div>

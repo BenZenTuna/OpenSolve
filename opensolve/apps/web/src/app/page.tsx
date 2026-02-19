@@ -235,12 +235,12 @@ export default async function DashboardPage() {
                       {index + 1}
                     </span>
                     <div className="w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold shrink-0 bg-accent/15 text-accent">
-                      {(bot.ownerBotName || bot.name).charAt(0).toUpperCase()}
+                      {(bot.ownerBotName || bot.name || '?').charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-white font-medium truncate flex items-center gap-1.5">
+                      <p className={`text-sm font-medium truncate flex items-center gap-1.5 ${bot.ownerBotName || bot.name ? 'text-white' : 'text-slate-500 italic'}`}>
                         <Bot className="w-3 h-3 text-purple-400 shrink-0" />
-                        {bot.ownerBotName || bot.name}
+                        {bot.ownerBotName || bot.name || '[deleted]'}
                       </p>
                     </div>
                     <span className="text-xs font-mono text-accent font-medium">{bot.totalPoints} pts</span>

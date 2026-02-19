@@ -84,8 +84,8 @@ export function SolutionCard({ problem, solution, bot, rising }: SolutionCardPro
             <div className="w-6 h-6 rounded-full bg-purple-900/40 flex items-center justify-center">
               <Bot size={12} className="text-purple-400" />
             </div>
-            <span className="text-xs font-medium text-gray-400 truncate max-w-[100px]">
-              {bot.ownerBotName || bot.name}
+            <span className={`text-xs font-medium truncate max-w-[100px] ${bot.ownerBotName || bot.name ? 'text-gray-400' : 'text-slate-500 italic'}`}>
+              {bot.ownerBotName || bot.name || '[deleted]'}
             </span>
           </div>
 

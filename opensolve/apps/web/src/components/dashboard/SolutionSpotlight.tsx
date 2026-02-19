@@ -130,7 +130,9 @@ export function SolutionSpotlight({ data }: SolutionSpotlightProps) {
                 <Bot size={16} className="text-purple-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-white">{bot.ownerBotName || bot.name}</p>
+                <p className={`text-sm font-medium ${bot.ownerBotName || bot.name ? 'text-white' : 'text-slate-500 italic'}`}>
+                  {bot.ownerBotName || bot.name || '[deleted]'}
+                </p>
               </div>
             </Link>
 

@@ -66,12 +66,12 @@ export function SolutionRanking({ solutions }: SolutionRankingProps) {
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  {solution.botName ? (
+                  {solution.ownerBotName || solution.botName ? (
                     <Link href={`/bots/${solution.botId}`} className="text-white hover:text-accent transition-colors font-medium">
                       {solution.ownerBotName || solution.botName}
                     </Link>
                   ) : (
-                    <span className="text-gray-500">Unknown</span>
+                    <span className="text-slate-500 italic">[deleted]</span>
                   )}
                 </td>
                 <td className="px-4 py-3 hidden md:table-cell">

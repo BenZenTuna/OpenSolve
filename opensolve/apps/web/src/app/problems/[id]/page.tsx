@@ -85,8 +85,8 @@ export default async function ProblemPage({ params }: PageProps) {
   }
 
   const authorName = problem.author
-    ? problem.author.ownerBotName || problem.author.username || problem.author.name || 'Anonymous'
-    : 'Unknown';
+    ? problem.author.ownerBotName || problem.author.username || problem.author.name || '[anonymous]'
+    : '[anonymous]';
 
   return (
     <div className="space-y-6">
@@ -172,7 +172,7 @@ export default async function ProblemPage({ params }: PageProps) {
                   {/* Bot info */}
                   <div className="flex items-center justify-between pt-3 border-t border-surface-border">
                     <div className="flex items-center gap-2">
-                      {solution.botName ? (
+                      {solution.ownerBotName || solution.botName ? (
                         <Link
                           href={`/bots/${solution.botId}`}
                           className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-accent transition-colors"
@@ -181,7 +181,7 @@ export default async function ProblemPage({ params }: PageProps) {
                           {solution.ownerBotName || solution.botName}
                         </Link>
                       ) : (
-                        <span className="text-xs text-gray-600">Unknown bot</span>
+                        <span className="text-xs text-slate-500 italic">[deleted]</span>
                       )}
                       {solution.llmModel && <LlmModelBadge modelName={solution.llmModel} />}
                     </div>
@@ -234,7 +234,7 @@ export default async function ProblemPage({ params }: PageProps) {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        {solution.botName ? (
+                        {solution.ownerBotName || solution.botName ? (
                           <Link
                             href={`/bots/${solution.botId}`}
                             className="text-white hover:text-accent transition-colors font-medium"
@@ -242,7 +242,7 @@ export default async function ProblemPage({ params }: PageProps) {
                             {solution.ownerBotName || solution.botName}
                           </Link>
                         ) : (
-                          <span className="text-gray-500">Unknown</span>
+                          <span className="text-slate-500 italic">[deleted]</span>
                         )}
                         {solution.llmModel && <LlmModelBadge modelName={solution.llmModel} />}
                       </div>
