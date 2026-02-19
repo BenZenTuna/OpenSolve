@@ -4,7 +4,7 @@ import { users, bots } from '../db/schema.js';
 import { eq, and } from 'drizzle-orm';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth.middleware.js';
-import { generateApiKey, hashApiKey, getApiKeyPrefix } from '../utils/crypto.js';
+import { generateApiKey, hashApiKey, getApiKeyPrefix, generateOAuthState, generateCodeVerifier, generateCodeChallenge } from '../utils/crypto.js';
 import { sanitizeMiddleware } from '../middleware/sanitize.middleware.js';
 
 // Validation schemas
@@ -40,24 +40,55 @@ export async function authRoutes(fastify: FastifyInstance) {
   // Sanitize all inputs
   fastify.addHook('preHandler', sanitizeMiddleware);
 
+  function cookieOptions(maxAge: number) {
+    return {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
+      path: '/',
+      maxAge,
+    };
+  }
+
   // ===== GOOGLE OAUTH =====
 
   // Step 1: Redirect to Google
   fastify.get('/auth/google', async (_request, reply) => {
+    const state = generateOAuthState();
+    reply.setCookie('oauth_state', state, cookieOptions(600));
+
     const params = new URLSearchParams({
       client_id: process.env.GOOGLE_CLIENT_ID || '',
       redirect_uri: process.env.GOOGLE_CALLBACK_URL || '',
       response_type: 'code',
       scope: 'openid email profile',
       access_type: 'offline',
+      state,
     });
     return reply.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params}`);
   });
 
   // Step 2: Google callback
   fastify.get('/auth/google/callback', async (request, reply) => {
-    const query = request.query as Record<string, string>;
-    const { code } = googleCallbackSchema.parse(query);
+    const { code, state } = request.query as { code?: string; state?: string };
+    const cookieState = request.cookies?.oauth_state;
+
+    if (!state || !cookieState) {
+      return reply.status(400).send({
+        error: 'OAuth session expired or cookies are disabled. Please try again.'
+      });
+    }
+
+    if (state !== cookieState) {
+      request.log.warn({ state, cookieState }, 'OAuth state mismatch — possible CSRF');
+      return reply.status(403).send({
+        error: 'OAuth state mismatch. Please try logging in again.'
+      });
+    }
+
+    reply.setCookie('oauth_state', '', cookieOptions(0));
+
+    const parsed = googleCallbackSchema.parse({ code, state });
 
     try {
       // Exchange code for tokens
@@ -65,7 +96,7 @@ export async function authRoutes(fastify: FastifyInstance) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          code,
+          code: parsed.code,
           client_id: process.env.GOOGLE_CLIENT_ID,
           client_secret: process.env.GOOGLE_CLIENT_SECRET,
           redirect_uri: process.env.GOOGLE_CALLBACK_URL,
@@ -124,13 +155,7 @@ export async function authRoutes(fastify: FastifyInstance) {
       });
 
       // Set httpOnly cookie and redirect
-      reply.setCookie('token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/',
-        maxAge: 3600,
-      });
+      reply.setCookie('token', token, cookieOptions(3600));
 
       return reply.redirect(process.env.WEB_URL || 'http://localhost:3000');
     } catch (err) {
@@ -143,22 +168,55 @@ export async function authRoutes(fastify: FastifyInstance) {
 
   // Step 1: Redirect to Twitter
   fastify.get('/auth/twitter', async (_request, reply) => {
+    const state = generateOAuthState();
+    const codeVerifier = generateCodeVerifier();
+    const codeChallenge = generateCodeChallenge(codeVerifier);
+
+    reply.setCookie('oauth_twitter', JSON.stringify({ state, codeVerifier }), cookieOptions(600));
+
     const params = new URLSearchParams({
       response_type: 'code',
       client_id: process.env.TWITTER_CLIENT_ID || '',
       redirect_uri: process.env.TWITTER_CALLBACK_URL || '',
       scope: 'tweet.read users.read offline.access',
-      state: 'state',
-      code_challenge: 'challenge',
-      code_challenge_method: 'plain',
+      state,
+      code_challenge: codeChallenge,
+      code_challenge_method: 'S256',
     });
     return reply.redirect(`https://twitter.com/i/oauth2/authorize?${params}`);
   });
 
   // Step 2: Twitter callback
   fastify.get('/auth/twitter/callback', async (request, reply) => {
-    const query = request.query as Record<string, string>;
-    const { code } = twitterCallbackSchema.parse(query);
+    const { code, state } = request.query as { code?: string; state?: string };
+    const twitterCookie = request.cookies?.oauth_twitter;
+
+    if (!state || !twitterCookie) {
+      return reply.status(400).send({
+        error: 'OAuth session expired or cookies are disabled. Please try again.'
+      });
+    }
+
+    let storedState: string;
+    let codeVerifier: string;
+    try {
+      const parsed = JSON.parse(twitterCookie);
+      storedState = parsed.state;
+      codeVerifier = parsed.codeVerifier;
+    } catch {
+      return reply.status(400).send({ error: 'Invalid OAuth session. Please try again.' });
+    }
+
+    if (state !== storedState) {
+      request.log.warn({ state, storedState }, 'Twitter OAuth state mismatch — possible CSRF');
+      return reply.status(403).send({
+        error: 'OAuth state mismatch. Please try logging in again.'
+      });
+    }
+
+    reply.setCookie('oauth_twitter', '', cookieOptions(0));
+
+    const validated = twitterCallbackSchema.parse({ code, state });
 
     try {
       const clientId = process.env.TWITTER_CLIENT_ID || '';
@@ -173,10 +231,10 @@ export async function authRoutes(fastify: FastifyInstance) {
           Authorization: `Basic ${basicAuth}`,
         },
         body: new URLSearchParams({
-          code,
+          code: validated.code,
           grant_type: 'authorization_code',
           redirect_uri: process.env.TWITTER_CALLBACK_URL || '',
-          code_verifier: 'challenge',
+          code_verifier: codeVerifier,
         }),
       });
 
@@ -228,13 +286,7 @@ export async function authRoutes(fastify: FastifyInstance) {
         role: user.role,
       });
 
-      reply.setCookie('token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/',
-        maxAge: 3600,
-      });
+      reply.setCookie('token', token, cookieOptions(3600));
 
       return reply.redirect(process.env.WEB_URL || 'http://localhost:3000');
     } catch (err) {
@@ -272,7 +324,7 @@ export async function authRoutes(fastify: FastifyInstance) {
 
   // Logout
   fastify.post('/auth/logout', async (_request, reply) => {
-    reply.clearCookie('token', { path: '/' });
+    reply.setCookie('token', '', cookieOptions(0));
     return reply.code(200).send({ success: true });
   });
 
@@ -323,13 +375,7 @@ export async function authRoutes(fastify: FastifyInstance) {
       role: request.user!.role,
     });
 
-    reply.setCookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 3600,
-    });
+    reply.setCookie('token', token, cookieOptions(3600));
 
     return reply.code(200).send({
       username: body.username,
