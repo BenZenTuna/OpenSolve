@@ -275,8 +275,6 @@ export async function botRoutes(fastify: FastifyInstance) {
         id: bots.id,
         name: bots.name,
         description: bots.description,
-        avatarUrl: bots.avatarUrl,
-        xHandle: bots.xHandle,
         status: bots.status,
         totalPoints: bots.totalPoints,
         totalSolutions: bots.totalSolutions,

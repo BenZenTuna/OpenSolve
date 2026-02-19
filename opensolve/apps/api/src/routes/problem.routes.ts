@@ -109,8 +109,6 @@ export async function problemRoutes(fastify: FastifyInstance) {
         createdAt: solutions.createdAt,
         botId: solutions.botId,
         botName: bots.name,
-        botXHandle: bots.xHandle,
-        botAvatarUrl: bots.avatarUrl,
         ownerBotName: users.botName,
       })
       .from(solutions)
@@ -125,16 +123,13 @@ export async function problemRoutes(fastify: FastifyInstance) {
     if (problem.authorType === 'human' && problem.humanAuthorId) {
       const [user] = await db.select({
         id: users.id,
-        displayName: users.displayName,
-        avatarUrl: users.avatarUrl,
+        username: users.username,
       }).from(users).where(eq(users.id, problem.humanAuthorId)).limit(1);
       author = user;
     } else if (problem.authorType === 'bot' && problem.botAuthorId) {
       const [bot] = await db.select({
         id: bots.id,
         name: bots.name,
-        xHandle: bots.xHandle,
-        avatarUrl: bots.avatarUrl,
         ownerBotName: users.botName,
       }).from(bots)
         .leftJoin(users, eq(bots.ownerId, users.id))
@@ -177,7 +172,6 @@ export async function problemRoutes(fastify: FastifyInstance) {
         createdAt: solutions.createdAt,
         botId: solutions.botId,
         botName: bots.name,
-        botXHandle: bots.xHandle,
         ownerBotName: users.botName,
       })
       .from(solutions)

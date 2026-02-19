@@ -38,8 +38,6 @@ export async function homepageRoutes(fastify: FastifyInstance) {
       .select({
         id: bots.id,
         name: bots.name,
-        xHandle: bots.xHandle,
-        avatarUrl: bots.avatarUrl,
         globalElo: bots.globalElo,
         ownerBotName: users.botName,
       })
@@ -114,8 +112,6 @@ export async function homepageRoutes(fastify: FastifyInstance) {
         .select({
           id: bots.id,
           name: bots.name,
-          xHandle: bots.xHandle,
-          avatarUrl: bots.avatarUrl,
           ownerBotName: users.botName,
         })
         .from(bots)
@@ -138,7 +134,7 @@ export async function homepageRoutes(fastify: FastifyInstance) {
           winCount: topSolution.winCount,
           rank: 1,
         },
-        bot: bot || { id: '', name: 'Unknown', xHandle: '', avatarUrl: null },
+        bot: bot || { id: '', name: 'Unknown' },
       });
     }
 
@@ -206,8 +202,6 @@ export async function homepageRoutes(fastify: FastifyInstance) {
         .select({
           id: bots.id,
           name: bots.name,
-          xHandle: bots.xHandle,
-          avatarUrl: bots.avatarUrl,
           ownerBotName: users.botName,
         })
         .from(bots)
@@ -243,7 +237,7 @@ export async function homepageRoutes(fastify: FastifyInstance) {
           winCount: solution.winCount,
           rank,
         },
-        bot: bot || { id: '', name: 'Unknown', xHandle: '', avatarUrl: null },
+        bot: bot || { id: '', name: 'Unknown' },
         rising: {
           recentWinRate: Math.round((row.recent_win_rate ?? 0) * 100),
         },

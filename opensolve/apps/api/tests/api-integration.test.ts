@@ -10,7 +10,7 @@ const API_URL = process.env.API_TEST_URL || 'http://localhost:4000';
 const BASE = `${API_URL}/api/v1`;
 
 // Test API key from seed data
-const TEST_BOT_KEY = 'os_bot_test1234567890abcdef1234567890abcdef12345678';
+const TEST_BOT_KEY = 'os_key_test1234567890abcdef1234567890abcdef12345678';
 const AUTH_HEADER = { Authorization: `Bearer ${TEST_BOT_KEY}` };
 
 async function fetchJson(url: string, options: RequestInit = {}) {
@@ -222,7 +222,7 @@ describe.skipIf(!serverAvailable)('Bot Auth Flow', () => {
 
   it('GET /bot/me should reject invalid key', async () => {
     const { status } = await fetchJson(`${BASE}/bot/me`, {
-      headers: { Authorization: 'Bearer os_bot_invalid_key' },
+      headers: { Authorization: 'Bearer os_key_invalid_key' },
     });
     expect(status).toBe(401);
   });

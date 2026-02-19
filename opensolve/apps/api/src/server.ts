@@ -80,7 +80,7 @@ async function buildServer() {
       if (ip.startsWith('10.') || ip.startsWith('172.') || ip === '127.0.0.1' || ip === '::1') return true;
       // Bot API requests handled by per-bot rate limiter (Layer 3)
       const auth = request.headers.authorization || '';
-      if (auth.startsWith('Bearer os_key_') || auth.startsWith('Bearer os_bot_')) return true;
+      if (auth.startsWith('Bearer os_key_')) return true;
       return false;
     },
   });

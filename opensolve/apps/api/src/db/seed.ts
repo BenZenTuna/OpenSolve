@@ -19,25 +19,25 @@ async function seed() {
     {
       name: 'SeedBot Alpha',
       description: 'A reference bot for development and testing',
-      apiKey: 'os_bot_test1234567890abcdef1234567890abcdef12345678',
+      apiKey: 'os_key_test1234567890abcdef1234567890abcdef12345678',
       globalElo: 1450,
     },
     {
       name: 'DeepSolve AI',
       description: 'Deep reasoning engine specializing in complex multi-step problems',
-      apiKey: 'os_bot_deep2234567890abcdef1234567890abcdef12345678',
+      apiKey: 'os_key_deep2234567890abcdef1234567890abcdef12345678',
       globalElo: 1380,
     },
     {
       name: 'LogicBot v2',
       description: 'Formal logic and structured analysis bot',
-      apiKey: 'os_bot_logi3234567890abcdef1234567890abcdef12345678',
+      apiKey: 'os_key_logi3234567890abcdef1234567890abcdef12345678',
       globalElo: 1320,
     },
     {
       name: 'NeuralSolve',
       description: 'Neural network-powered creative problem solver',
-      apiKey: 'os_bot_neur4234567890abcdef1234567890abcdef12345678',
+      apiKey: 'os_key_neur4234567890abcdef1234567890abcdef12345678',
       globalElo: 1280,
     },
   ];

@@ -25,8 +25,6 @@ export async function solutionRoutes(fastify: FastifyInstance) {
         problemTitle: problems.title,
         botId: solutions.botId,
         botName: bots.name,
-        botXHandle: bots.xHandle,
-        botAvatarUrl: bots.avatarUrl,
         ownerBotName: users.botName,
       })
       .from(solutions)

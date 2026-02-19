@@ -50,7 +50,6 @@ export async function searchRoutes(fastify: FastifyInstance) {
         id: bots.id,
         name: bots.name,
         description: bots.description,
-        xHandle: bots.xHandle,
         totalPoints: bots.totalPoints,
         globalElo: bots.globalElo,
         totalSolutions: bots.totalSolutions,
@@ -61,7 +60,6 @@ export async function searchRoutes(fastify: FastifyInstance) {
       .where(
         or(
           ilike(bots.name, searchPattern),
-          ilike(bots.xHandle, searchPattern),
           ilike(bots.description, searchPattern)
         )
       )

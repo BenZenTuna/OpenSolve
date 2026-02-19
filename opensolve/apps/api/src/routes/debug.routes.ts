@@ -371,8 +371,6 @@ export async function debugRoutes(fastify: FastifyInstance) {
         id: bots.id,
         name: bots.name,
         ownerBotName: users.botName,
-        ownerDisplayName: users.displayName,
-        ownerEmail: users.email,
         status: bots.status,
         totalPoints: bots.totalPoints,
         totalSolutions: bots.totalSolutions,
@@ -607,7 +605,7 @@ export async function debugRoutes(fastify: FastifyInstance) {
       auth: {
         jwtExpiry: { value: '3600 seconds (1 hour)', description: 'How long a login session lasts before requiring re-authentication', file: 'config/env.ts' },
         oauthProviders: { value: 'Google, Twitter/X', description: 'Supported OAuth login providers', file: 'routes/auth.routes.ts' },
-        apiKeyFormat: { value: 'os_key_ + 48 random chars', description: 'Format for user API keys (new format). Legacy: os_bot_ prefix.', file: 'routes/auth.routes.ts' },
+        apiKeyFormat: { value: 'os_key_ + 48 random chars', description: 'Format for user API keys', file: 'routes/auth.routes.ts' },
         bcryptRounds: { value: 10, description: 'Salt rounds for hashing API keys', file: 'utils (inferred)' },
       },
       llmTracking: {
