@@ -62,7 +62,7 @@ export async function authRoutes(fastify: FastifyInstance) {
       client_id: process.env.GOOGLE_CLIENT_ID || '',
       redirect_uri: process.env.GOOGLE_CALLBACK_URL || '',
       response_type: 'code',
-      scope: 'openid email profile',
+      scope: 'openid',
       access_type: 'offline',
       state,
     });
@@ -105,18 +105,12 @@ export async function authRoutes(fastify: FastifyInstance) {
         }),
       });
 
-      const tokens = await tokenRes.json() as { access_token: string; id_token: string };
+      const tokens = await tokenRes.json() as { id_token: string };
 
-      // Get user profile
-      const profileRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-        headers: { Authorization: `Bearer ${tokens.access_token}` },
-      });
-      const profile = await profileRes.json() as {
-        id: string;
-        email: string;
-        name: string;
-        picture: string;
-      };
+      // Extract "sub" (Google user ID) from the ID token JWT payload
+      const payloadB64 = tokens.id_token.split('.')[1];
+      const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString()) as { sub: string };
+      const oauthId = payload.sub;
 
       // Upsert user
       const existingUsers = await db
@@ -125,7 +119,7 @@ export async function authRoutes(fastify: FastifyInstance) {
         .where(
           and(
             eq(users.oauthProvider, 'google'),
-            eq(users.oauthId, profile.id)
+            eq(users.oauthId, oauthId)
           )
         )
         .limit(1);
@@ -141,7 +135,7 @@ export async function authRoutes(fastify: FastifyInstance) {
       } else {
         const [newUser] = await db.insert(users).values({
           oauthProvider: 'google',
-          oauthId: profile.id,
+          oauthId: oauthId,
           username: null,
           onboardingComplete: false,
         }).returning();
