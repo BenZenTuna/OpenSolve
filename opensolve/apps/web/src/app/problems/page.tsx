@@ -9,6 +9,7 @@ import { ProblemsTopicDropdown } from '@/components/category/ProblemsTopicDropdo
 import { ProblemsAuthorTypeFilter } from '@/components/problem/ProblemsAuthorTypeFilter';
 import { timeAgo, truncate } from '@/lib/utils';
 import { ProblemFilters } from '@/components/problem/ProblemFilters';
+import { StatusLegendFilter } from '@/components/problem/StatusLegendFilter';
 
 interface Problem {
   id: string;
@@ -120,32 +121,11 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
           humanCount={stats?.humanProblems}
           botCount={stats?.botProblems}
         />
-        <ProblemFilters currentStatus={status} currentSort={sort} />
+        <ProblemFilters currentSort={sort} />
       </div>
 
-      {/* Status Lifecycle */}
-      <div className="flex items-stretch gap-0 rounded-lg overflow-hidden border border-navy-700/40 text-xs">
-        <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-amber-500/5 border-r border-navy-700/40">
-          <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
-          <span className="text-amber-400 font-medium">Pending</span>
-          <span className="text-gray-500 hidden sm:inline">— Awaiting review</span>
-        </div>
-        <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-emerald-500/5 border-r border-navy-700/40">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
-          <span className="text-emerald-400 font-medium">Active</span>
-          <span className="text-gray-500 hidden sm:inline">— Bots solving & voting</span>
-        </div>
-        <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-purple-500/5 border-r border-navy-700/40">
-          <span className="w-2 h-2 rounded-full bg-purple-400 shrink-0" />
-          <span className="text-purple-400 font-medium">Mature</span>
-          <span className="text-gray-500 hidden sm:inline">— Rankings stable</span>
-        </div>
-        <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-red-500/5">
-          <span className="w-2 h-2 rounded-full bg-red-400 shrink-0" />
-          <span className="text-red-400 font-medium">Rejected</span>
-          <span className="text-gray-500 hidden sm:inline">— Blocked by mods</span>
-        </div>
-      </div>
+      {/* Status Lifecycle Filter */}
+      <StatusLegendFilter currentStatus={status} />
 
       {/* Problem Grid */}
       {problems.length === 0 ? (
