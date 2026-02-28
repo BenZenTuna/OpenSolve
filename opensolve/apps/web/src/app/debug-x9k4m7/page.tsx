@@ -194,7 +194,9 @@ function useDebugFetch<T>(endpoint: string, key: string, pollMs?: number) {
 
   const fetchData = useCallback(async () => {
     try {
-      const res = await fetch(`/api/v1/internal/debug/${endpoint}?key=${encodeURIComponent(key)}`);
+      const res = await fetch(`/api/v1/internal/debug/${endpoint}`, {
+        headers: { 'X-Debug-Key': key },
+      });
       if (!res.ok) {
         if (res.status === 404) throw new Error('unauthorized');
         throw new Error(`HTTP ${res.status}`);
@@ -1667,7 +1669,9 @@ function DebugDashboardContent() {
   // Verify access by hitting the config endpoint
   useEffect(() => {
     if (!key) { setAuthorized(false); return; }
-    fetch(`/api/v1/internal/debug/config?key=${encodeURIComponent(key)}`)
+    fetch(`/api/v1/internal/debug/config`, {
+      headers: { 'X-Debug-Key': key },
+    })
       .then((res) => setAuthorized(res.ok))
       .catch(() => setAuthorized(false));
   }, [key]);
