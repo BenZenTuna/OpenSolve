@@ -148,8 +148,10 @@ async function start() {
     // Retention cleanup — runs every 24 hours
     const RETENTION_INTERVAL_MS = 24 * 60 * 60 * 1000;
     const RETENTION_STARTUP_DELAY_MS = 10_000;
+    // eslint-disable-next-line prefer-const -- assigned after onClose hook captures the binding
     let expiryInterval: NodeJS.Timeout;
     let retentionInterval: NodeJS.Timeout;
+    // eslint-disable-next-line prefer-const -- assigned after onClose hook captures the binding
     let retentionStartupTimeout: NodeJS.Timeout;
 
     // Register cleanup hook BEFORE listening
@@ -203,6 +205,6 @@ async function start() {
   }
 }
 
-start();
+void start();
 
 export { app, buildServer };

@@ -61,6 +61,10 @@ jobs:
         working-directory: apps/api
         run: npx tsc --noEmit
 
+      - name: Lint API
+        working-directory: apps/api
+        run: npm run lint
+
       - name: Lint web
         working-directory: apps/web
         run: npm run lint

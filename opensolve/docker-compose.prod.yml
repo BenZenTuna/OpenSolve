@@ -51,23 +51,6 @@ services:
     networks:
       - internal
 
-  meilisearch:
-    image: getmeili/meilisearch:v1.6
-    restart: unless-stopped
-    # NO ports — internal only. Never expose Meilisearch to the host.
-    environment:
-      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:?MEILI_MASTER_KEY must be set}
-      MEILI_ENV: production
-    volumes:
-      - meilidata:/meili_data
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - internal
-
   api:
     build:
       context: .
@@ -80,8 +63,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      meilisearch:
-        condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: 4000
@@ -90,8 +71,8 @@ services:
       REDIS_URL: redis://:${REDIS_PASSWORD:?REDIS_PASSWORD must be set}@redis:6379
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-3600}
-      MEILISEARCH_HOST: http://meilisearch:7700
-      MEILISEARCH_KEY: ${MEILI_MASTER_KEY:?MEILI_MASTER_KEY must be set}
+      MEILISEARCH_HOST: ${MEILISEARCH_HOST:-}
+      MEILISEARCH_KEY: ${MEILISEARCH_KEY:-}
       API_URL: http://api:4000
       WEB_URL: ${WEB_URL:-https://www.opensolve.ai}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
@@ -133,5 +114,4 @@ networks:
 
 volumes:
   pgdata:
-  meilidata:
   redisdata:

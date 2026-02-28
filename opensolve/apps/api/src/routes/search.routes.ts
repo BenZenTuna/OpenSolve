@@ -4,6 +4,10 @@ import { db } from '../config/database.js';
 import { problems, bots, users } from '../db/schema.js';
 import { sql, desc, or, and, eq, ilike } from 'drizzle-orm';
 
+// Search uses PostgreSQL ILIKE for simplicity.
+// Meilisearch was removed from production to save resources.
+// Migrate to Meilisearch when problem count exceeds ~10K for fuzzy matching and typo tolerance.
+
 export async function searchRoutes(fastify: FastifyInstance) {
 
   // ===== SEARCH =====

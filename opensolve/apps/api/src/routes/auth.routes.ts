@@ -56,7 +56,7 @@ export async function authRoutes(fastify: FastifyInstance) {
   // Step 1: Redirect to Google
   fastify.get('/auth/google', async (_request, reply) => {
     const state = generateOAuthState();
-    reply.setCookie('oauth_state', state, { ...cookieOptions(600), path: '/api/v1/auth', signed: true });
+    void reply.setCookie('oauth_state', state, { ...cookieOptions(600), path: '/api/v1/auth', signed: true });
 
     const params = new URLSearchParams({
       client_id: process.env.GOOGLE_CLIENT_ID || '',
@@ -93,7 +93,7 @@ export async function authRoutes(fastify: FastifyInstance) {
       });
     }
 
-    reply.clearCookie('oauth_state', { path: '/api/v1/auth' });
+    void reply.clearCookie('oauth_state', { path: '/api/v1/auth' });
 
     const parsed = googleCallbackSchema.parse({ code, state });
 
@@ -156,7 +156,7 @@ export async function authRoutes(fastify: FastifyInstance) {
       });
 
       // Set httpOnly cookie and redirect
-      reply.setCookie('token', token, cookieOptions(3600));
+      void reply.setCookie('token', token, cookieOptions(3600));
 
       return reply.redirect(process.env.WEB_URL || 'http://localhost:3000');
     } catch (err) {
@@ -173,7 +173,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     const codeVerifier = generateCodeVerifier();
     const codeChallenge = generateCodeChallenge(codeVerifier);
 
-    reply.setCookie('oauth_twitter', JSON.stringify({ state, codeVerifier }), { ...cookieOptions(600), path: '/api/v1/auth', signed: true });
+    void reply.setCookie('oauth_twitter', JSON.stringify({ state, codeVerifier }), { ...cookieOptions(600), path: '/api/v1/auth', signed: true });
 
     const params = new URLSearchParams({
       response_type: 'code',
@@ -220,7 +220,7 @@ export async function authRoutes(fastify: FastifyInstance) {
       });
     }
 
-    reply.clearCookie('oauth_twitter', { path: '/api/v1/auth' });
+    void reply.clearCookie('oauth_twitter', { path: '/api/v1/auth' });
 
     const validated = twitterCallbackSchema.parse({ code, state });
 
@@ -292,7 +292,7 @@ export async function authRoutes(fastify: FastifyInstance) {
         role: user.role,
       });
 
-      reply.setCookie('token', token, cookieOptions(3600));
+      void reply.setCookie('token', token, cookieOptions(3600));
 
       return reply.redirect(process.env.WEB_URL || 'http://localhost:3000');
     } catch (err) {
@@ -340,7 +340,7 @@ export async function authRoutes(fastify: FastifyInstance) {
       return reply.code(403).send({ error: 'Invalid request origin' });
     }
 
-    reply.setCookie('token', '', cookieOptions(0));
+    void reply.setCookie('token', '', cookieOptions(0));
     return reply.code(200).send({ success: true });
   });
 
@@ -391,7 +391,7 @@ export async function authRoutes(fastify: FastifyInstance) {
       role: request.user!.role,
     });
 
-    reply.setCookie('token', token, cookieOptions(3600));
+    void reply.setCookie('token', token, cookieOptions(3600));
 
     return reply.code(200).send({
       username: body.username,
@@ -792,8 +792,8 @@ export async function authRoutes(fastify: FastifyInstance) {
       // 7. Set download headers
       const filename = `opensolve-export-${user.username ?? 'user'}-${new Date().toISOString().slice(0, 10)}.json`;
 
-      reply.header('Content-Type', 'application/json');
-      reply.header('Content-Disposition', `attachment; filename="${filename}"`);
+      void reply.header('Content-Type', 'application/json');
+      void reply.header('Content-Disposition', `attachment; filename="${filename}"`);
 
       return reply.send(exportData);
 
@@ -919,9 +919,9 @@ export async function authRoutes(fastify: FastifyInstance) {
       );
 
       // 11. Clear ALL cookies — JWT + OAuth state cookies
-      reply.setCookie('token', '', cookieOptions(0));
-      reply.clearCookie('oauth_state', { path: '/api/v1/auth' });
-      reply.clearCookie('oauth_twitter', { path: '/api/v1/auth' });
+      void reply.setCookie('token', '', cookieOptions(0));
+      void reply.clearCookie('oauth_state', { path: '/api/v1/auth' });
+      void reply.clearCookie('oauth_twitter', { path: '/api/v1/auth' });
 
       return reply.status(200).send({
         success: true,
