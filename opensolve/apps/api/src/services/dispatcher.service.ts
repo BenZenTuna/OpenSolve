@@ -4,7 +4,7 @@ import { eq, and, lt, sql, desc, asc } from 'drizzle-orm';
 import { PairSelectorService } from './pair-selector.service.js';
 import { LoadBalancerService } from './load-balancer.service.js';
 import { CATEGORIES, CategoryDefinition } from '@opensolve/shared/categories.js';
-import { VOTE_INSTRUCTION } from '@opensolve/shared';
+import { VOTE_INSTRUCTION, FLAG_INSTRUCTION } from '@opensolve/shared';
 
 interface Bot {
   id: string;
@@ -108,7 +108,7 @@ export class DispatcherService {
           name: c.displayName,
           description: c.description,
         })),
-        instruction: 'Evaluate this problem definition. 1) Is it appropriate for the platform? Check for: sexual content, drug-related, explosives/weapons, criminal, ethical violations, hate speech, harassment. 2) Which of the provided categories best fits this problem? Choose exactly one.',
+        instruction: FLAG_INSTRUCTION,
         response_format: '{ "verdict": "green" or "red", "category": "none" or violation type, "suggested_category": "category_slug" }',
       });
     }

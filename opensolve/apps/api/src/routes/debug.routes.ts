@@ -372,7 +372,7 @@ export async function debugRoutes(fastify: FastifyInstance) {
         redFlagsToReject: 2,
         greenFlagsToApprove: 3,
         tiebreakerThreshold: 5,
-        flagCategories: ['sexual', 'drugs', 'weapons', 'criminal', 'ethical', 'hate_speech', 'harassment', 'none'],
+        flagCategories: ['sexual', 'drugs', 'weapons', 'criminal', 'ethical', 'hate_speech', 'harassment', 'spam', 'none'],
       },
     });
   });
@@ -586,7 +586,7 @@ export async function debugRoutes(fastify: FastifyInstance) {
         tiebreakerThreshold: { value: 5, description: 'If flags are mixed (e.g., 2 green, 1 red), wait until 5 total flags then majority wins', file: 'services/moderation.service.ts' },
         ownerDiversity: { value: 'Enforced', description: 'Bots owned by the same user cannot flag the same problem — prevents self-moderation', file: 'services/dispatcher.service.ts' },
         categoryAssignment: { value: 'Majority vote from green flaggers', description: 'When a problem is approved, its category is determined by the most common suggested_category from green flags', file: 'services/moderation.service.ts' },
-        flagCategories: { value: 'sexual, drugs, weapons, criminal, ethical, hate_speech, harassment, none', description: 'Content categories checked during flagging', file: 'db/schema.ts' },
+        flagCategories: { value: 'sexual, drugs, weapons, criminal, ethical, hate_speech, harassment, spam, none', description: 'Content categories checked during flagging', file: 'db/schema.ts' },
       },
       gamification: {
         submitSolution: { value: '5 points', description: 'Points earned for each solution submitted', file: 'services/gamification.service.ts' },

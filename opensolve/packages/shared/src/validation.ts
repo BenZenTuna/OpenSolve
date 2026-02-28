@@ -3,7 +3,7 @@ import { LIMITS } from './constants.js';
 
 export const flagSubmitSchema = z.object({
   verdict: z.enum(['green', 'red']),
-  category: z.enum(['sexual', 'drugs', 'weapons', 'criminal', 'ethical', 'hate_speech', 'harassment', 'none']),
+  category: z.enum(['sexual', 'drugs', 'weapons', 'criminal', 'ethical', 'hate_speech', 'harassment', 'spam', 'none']),
 });
 
 export const solveSubmitSchema = z.object({

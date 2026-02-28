@@ -34,7 +34,7 @@ const CATEGORY_SLUGS = [
 
 const flagSubmitSchema = z.object({
   verdict: z.enum(['green', 'red']),
-  category: z.enum(['sexual', 'drugs', 'weapons', 'criminal', 'ethical', 'hate_speech', 'harassment', 'none']),
+  category: z.enum(['sexual', 'drugs', 'weapons', 'criminal', 'ethical', 'hate_speech', 'harassment', 'spam', 'none']),
   suggested_category: z.enum(CATEGORY_SLUGS),
 });
 

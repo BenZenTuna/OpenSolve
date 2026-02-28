@@ -11,7 +11,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- CREATE TYPE "public"."flag_category" AS ENUM('sexual', 'drugs', 'weapons', 'criminal', 'ethical', 'hate_speech', 'harassment', 'none');
+ CREATE TYPE "public"."flag_category" AS ENUM('sexual', 'drugs', 'weapons', 'criminal', 'ethical', 'hate_speech', 'harassment', 'spam', 'none');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

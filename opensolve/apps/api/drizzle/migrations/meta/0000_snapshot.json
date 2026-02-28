@@ -1,5 +1,5 @@
 {
-  "id": "a2703ed6-ef81-4024-a295-770d0b23fad3",
+  "id": "fb4ec92f-f2a0-4ec9-993f-0380f585b43b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "6",
   "dialect": "postgresql",
@@ -1421,6 +1421,7 @@
         "ethical",
         "hate_speech",
         "harassment",
+        "spam",
         "none"
       ]
     },

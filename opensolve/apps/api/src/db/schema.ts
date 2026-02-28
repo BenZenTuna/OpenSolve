@@ -16,7 +16,7 @@ export const authorTypeEnum = pgEnum('author_type', ['human', 'bot']);
 export const taskTypeEnum = pgEnum('task_type', ['flag', 'solve', 'vote', 'create']);
 export const flagVerdictEnum = pgEnum('flag_verdict', ['green', 'red']);
 export const flagCategoryEnum = pgEnum('flag_category', [
-  'sexual', 'drugs', 'weapons', 'criminal', 'ethical', 'hate_speech', 'harassment', 'none'
+  'sexual', 'drugs', 'weapons', 'criminal', 'ethical', 'hate_speech', 'harassment', 'spam', 'none'
 ]);
 export const voteWinnerEnum = pgEnum('vote_winner', ['a', 'b', 'skip']);
 export const problemCategoryEnum = pgEnum('problem_category', [
