@@ -56,7 +56,7 @@ export async function authRoutes(fastify: FastifyInstance) {
   // Step 1: Redirect to Google
   fastify.get('/auth/google', async (_request, reply) => {
     const state = generateOAuthState();
-    reply.setCookie('oauth_state', state, cookieOptions(600));
+    reply.setCookie('oauth_state', state, { ...cookieOptions(600), path: '/api/v1/auth', signed: true });
 
     const params = new URLSearchParams({
       client_id: process.env.GOOGLE_CLIENT_ID || '',
@@ -72,13 +72,19 @@ export async function authRoutes(fastify: FastifyInstance) {
   // Step 2: Google callback
   fastify.get('/auth/google/callback', async (request, reply) => {
     const { code, state } = request.query as { code?: string; state?: string };
-    const cookieState = request.cookies?.oauth_state;
+    const rawStateCookie = request.cookies?.oauth_state;
 
-    if (!state || !cookieState) {
+    if (!state || !rawStateCookie) {
       return reply.status(400).send({
         error: 'OAuth session expired or cookies are disabled. Please try again.'
       });
     }
+
+    const stateCookie = request.unsignCookie(rawStateCookie);
+    if (!stateCookie.valid) {
+      return reply.status(403).send({ error: 'Invalid OAuth state cookie' });
+    }
+    const cookieState = stateCookie.value;
 
     if (state !== cookieState) {
       request.log.warn({ state, cookieState }, 'OAuth state mismatch — possible CSRF');
@@ -87,7 +93,7 @@ export async function authRoutes(fastify: FastifyInstance) {
       });
     }
 
-    reply.setCookie('oauth_state', '', cookieOptions(0));
+    reply.clearCookie('oauth_state', { path: '/api/v1/auth' });
 
     const parsed = googleCallbackSchema.parse({ code, state });
 
@@ -167,7 +173,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     const codeVerifier = generateCodeVerifier();
     const codeChallenge = generateCodeChallenge(codeVerifier);
 
-    reply.setCookie('oauth_twitter', JSON.stringify({ state, codeVerifier }), cookieOptions(600));
+    reply.setCookie('oauth_twitter', JSON.stringify({ state, codeVerifier }), { ...cookieOptions(600), path: '/api/v1/auth', signed: true });
 
     const params = new URLSearchParams({
       response_type: 'code',
@@ -184,18 +190,23 @@ export async function authRoutes(fastify: FastifyInstance) {
   // Step 2: Twitter callback
   fastify.get('/auth/twitter/callback', async (request, reply) => {
     const { code, state } = request.query as { code?: string; state?: string };
-    const twitterCookie = request.cookies?.oauth_twitter;
+    const rawTwitterCookie = request.cookies?.oauth_twitter;
 
-    if (!state || !twitterCookie) {
+    if (!state || !rawTwitterCookie) {
       return reply.status(400).send({
         error: 'OAuth session expired or cookies are disabled. Please try again.'
       });
     }
 
+    const twitterCookieResult = request.unsignCookie(rawTwitterCookie);
+    if (!twitterCookieResult.valid) {
+      return reply.status(403).send({ error: 'Invalid OAuth state cookie' });
+    }
+
     let storedState: string;
     let codeVerifier: string;
     try {
-      const parsed = JSON.parse(twitterCookie);
+      const parsed = JSON.parse(twitterCookieResult.value!);
       storedState = parsed.state;
       codeVerifier = parsed.codeVerifier;
     } catch {
@@ -209,7 +220,7 @@ export async function authRoutes(fastify: FastifyInstance) {
       });
     }
 
-    reply.setCookie('oauth_twitter', '', cookieOptions(0));
+    reply.clearCookie('oauth_twitter', { path: '/api/v1/auth' });
 
     const validated = twitterCallbackSchema.parse({ code, state });
 
@@ -318,7 +329,17 @@ export async function authRoutes(fastify: FastifyInstance) {
   });
 
   // Logout
-  fastify.post('/auth/logout', async (_request, reply) => {
+  fastify.post('/auth/logout', async (request, reply) => {
+    // CSRF protection: verify request comes from our own frontend
+    const origin = request.headers.origin || '';
+    const referer = request.headers.referer || '';
+    const allowedOrigin = process.env.WEB_URL || '';
+
+    const isValidOrigin = origin === allowedOrigin || referer.startsWith(allowedOrigin);
+    if (!isValidOrigin) {
+      return reply.code(403).send({ error: 'Invalid request origin' });
+    }
+
     reply.setCookie('token', '', cookieOptions(0));
     return reply.code(200).send({ success: true });
   });
@@ -897,10 +918,10 @@ export async function authRoutes(fastify: FastifyInstance) {
         'User account deleted successfully'
       );
 
-      // 11. Clear ALL cookies — JWT + OAuth state cookies from FIX 5
+      // 11. Clear ALL cookies — JWT + OAuth state cookies
       reply.setCookie('token', '', cookieOptions(0));
-      reply.setCookie('oauth_state', '', cookieOptions(0));
-      reply.setCookie('oauth_twitter', '', cookieOptions(0));
+      reply.clearCookie('oauth_state', { path: '/api/v1/auth' });
+      reply.clearCookie('oauth_twitter', { path: '/api/v1/auth' });
 
       return reply.status(200).send({
         success: true,

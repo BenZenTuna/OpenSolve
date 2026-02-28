@@ -94,8 +94,10 @@ async function buildServer() {
     },
   });
 
-  // Cookies
-  await app.register(fastifyCookie);
+  // Cookies (secret enables signed cookies for OAuth CSRF state)
+  await app.register(fastifyCookie, {
+    secret: env.JWT_SECRET,
+  });
 
   // Decrement concurrent bot connections on response
   app.addHook('onResponse', async (request) => {
