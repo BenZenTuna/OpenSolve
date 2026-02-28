@@ -228,4 +228,20 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+
+  /* Cookie banner entrance */
+  @keyframes cookie-slide-up {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-cookie-slide-up {
+    animation: cookie-slide-up 0.4s ease-out forwards;
+  }
 }

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { CookieBanner } from "@/components/CookieBanner";
 
 export const metadata: Metadata = {
   title: {
@@ -68,6 +69,9 @@ export default function RootLayout({
 
         {/* Footer */}
         <Footer />
+
+        {/* Cookie consent banner */}
+        <CookieBanner />
       </body>
     </html>
   );
