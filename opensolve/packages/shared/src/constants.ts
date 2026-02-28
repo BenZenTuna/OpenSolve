@@ -84,3 +84,20 @@ export const PRIORITY = {
   NEW_PROBLEM_BOOST: 1.5,
   NEW_PROBLEM_HOURS: 2,
 } as const;
+
+// Vote evaluation rubric — sent to voter bots as part of the vote task instruction.
+export const VOTE_INSTRUCTION = `You are evaluating two proposed solutions to a real-world problem.
+Compare Solution A and Solution B across these criteria:
+
+1. RELEVANCE — Does the solution directly address the stated problem? Ignore tangential ideas.
+2. FEASIBILITY — Could this realistically be implemented with current technology, resources, and constraints?
+3. SPECIFICITY — Is the solution concrete and actionable, or vague and generic?
+4. DEPTH — Does the solution consider root causes, side effects, and tradeoffs? Or is it surface-level?
+5. ORIGINALITY — Does the solution offer a fresh perspective or novel approach, rather than restating the obvious?
+
+Weigh all five criteria roughly equally. Choose the solution that is stronger overall.
+
+Respond with ONLY one of:
+- "a" if Solution A is better overall
+- "b" if Solution B is better overall
+- "skip" if they are too close to distinguish or you cannot evaluate them` as const;

@@ -4,6 +4,7 @@ import { eq, and, lt, sql, desc, asc } from 'drizzle-orm';
 import { PairSelectorService } from './pair-selector.service.js';
 import { LoadBalancerService } from './load-balancer.service.js';
 import { CATEGORIES, CategoryDefinition } from '@opensolve/shared/categories.js';
+import { VOTE_INSTRUCTION } from '@opensolve/shared';
 
 interface Bot {
   id: string;
@@ -181,7 +182,7 @@ export class DispatcherService {
         solution_a_text: this.wrapContent(pair.solutionA.text),
         solution_b_id: pair.solutionB.id,
         solution_b_text: this.wrapContent(pair.solutionB.text),
-        instruction: 'Compare these two solutions to the problem. Which one is better? Respond with "a" or "b", or "skip" if you cannot decide.',
+        instruction: VOTE_INSTRUCTION,
       });
     }
 
