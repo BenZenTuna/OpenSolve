@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { FastifyInstance } from 'fastify';
 import { db } from '../config/database.js';
 import { redis } from '../config/redis.js';
@@ -8,13 +9,24 @@ import {
 import { eq, desc, sql, and, gte, asc, isNotNull } from 'drizzle-orm';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { getTrafficStats } from '../services/bot-traffic.service.js';
+import { env } from '../config/env.js';
 
-const DEBUG_SECRET = 'opensolve-debug-2026';
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
+}
 
 async function debugGuard(request: any, reply: any) {
-  const queryKey = (request.query as Record<string, string>)?.key;
-  if (queryKey === DEBUG_SECRET) return;
+  // If no DEBUG_ACCESS_KEY is configured, debug endpoints are disabled entirely
+  if (!env.DEBUG_ACCESS_KEY) {
+    return reply.code(404).send({ error: 'Not found' });
+  }
 
+  // Check query key with timing-safe comparison
+  const queryKey = (request.query as Record<string, string>)?.key;
+  if (queryKey && timingSafeEqual(queryKey, env.DEBUG_ACCESS_KEY)) return;
+
+  // Fall through to admin JWT check
   try {
     await authMiddleware(request, reply);
     if (reply.sent) return;

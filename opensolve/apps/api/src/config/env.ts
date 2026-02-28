@@ -32,6 +32,9 @@ const envSchema = z.object({
   MEILISEARCH_HOST: z.string().default('http://localhost:7700'),
   MEILISEARCH_KEY: z.string().default(''),
 
+  // Debug dashboard access key (min 20 chars, omit to disable debug endpoints)
+  DEBUG_ACCESS_KEY: z.string().min(20).optional(),
+
   // App
   API_URL: z.string().default('http://localhost:4000'),
   WEB_URL: z.string().default('http://localhost:3000'),
