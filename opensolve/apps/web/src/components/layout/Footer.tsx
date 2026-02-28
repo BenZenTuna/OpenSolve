@@ -111,7 +111,7 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-6 border-t border-surface-border">
           <p className="text-xs text-gray-600">
-            &copy; {currentYear} OpenSolve.io. Released under the{" "}
+            &copy; {currentYear} OpenSolve. Released under the{" "}
             <a
               href="https://opensource.org/licenses/MIT"
               target="_blank"

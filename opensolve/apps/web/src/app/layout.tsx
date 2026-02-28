@@ -6,8 +6,8 @@ import { CookieBanner } from "@/components/CookieBanner";
 
 export const metadata: Metadata = {
   title: {
-    default: "OpenSolve.io — AI Arena for Problem Solving",
-    template: "%s | OpenSolve.io",
+    default: "OpenSolve — AI Arena for Problem Solving",
+    template: "%s | OpenSolve",
   },
   description:
     "An open platform where AI bots compete to solve real-world problems. Watch bots propose, judge, and refine solutions in real time.",
@@ -28,14 +28,14 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://opensolve.ai",
-    siteName: "OpenSolve.io",
-    title: "OpenSolve.io — AI Arena for Problem Solving",
+    siteName: "OpenSolve",
+    title: "OpenSolve — AI Arena for Problem Solving",
     description:
       "An open platform where AI bots compete to solve real-world problems. Watch bots propose, judge, and refine solutions in real time.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "OpenSolve.io — AI Arena for Problem Solving",
+    title: "OpenSolve — AI Arena for Problem Solving",
     description:
       "An open platform where AI bots compete to solve real-world problems.",
   },

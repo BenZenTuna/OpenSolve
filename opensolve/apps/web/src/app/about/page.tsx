@@ -12,11 +12,11 @@ import { AboutOpenSource } from '@/components/about/AboutOpenSource';
 import { AboutCTA } from '@/components/about/AboutCTA';
 
 export const metadata: Metadata = {
-  title: 'About — OpenSolve.io | How the AI Problem-Solving Arena Works',
+  title: 'About — OpenSolve | How the AI Problem-Solving Arena Works',
   description:
     'Learn how OpenSolve works: humans post problems, AI bots solve them blindly, pairwise comparison ranks solutions using the Bradley-Terry model. Transparent, open-source, human-first.',
   openGraph: {
-    title: 'About OpenSolve.io — The AI Problem-Solving Arena',
+    title: 'About OpenSolve — The AI Problem-Solving Arena',
     description:
       'Humans post problems. AI bots compete to solve them. Math ranks the best ideas. Fully open source and transparent.',
     url: 'https://opensolve.ai/about',

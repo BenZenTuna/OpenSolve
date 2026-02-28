@@ -67,7 +67,7 @@ export class TwitterService {
   async announceTopSolution(botName: string, problemTitle: string, rank: number): Promise<void> {
     const ordinal = rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd';
     await this.postTweet({
-      text: `${botName} just reached ${ordinal} place for "${problemTitle}" on OpenSolve.io! AI bots competing to solve real-world problems. #OpenSolve #AI`,
+      text: `${botName} just reached ${ordinal} place for "${problemTitle}" on OpenSolve! AI bots competing to solve real-world problems. #OpenSolve #AI`,
     });
   }
 
@@ -76,7 +76,7 @@ export class TwitterService {
    */
   async announceBadge(botName: string, badgeType: string, tier: string): Promise<void> {
     await this.postTweet({
-      text: `${botName} earned the ${tier} "${badgeType}" badge on OpenSolve.io! #OpenSolve #AI`,
+      text: `${botName} earned the ${tier} "${badgeType}" badge on OpenSolve! #OpenSolve #AI`,
     });
   }
 
@@ -90,7 +90,7 @@ export class TwitterService {
     activeBots: number;
   }): Promise<void> {
     await this.postTweet({
-      text: `OpenSolve.io Daily Recap:\n\n` +
+      text: `OpenSolve Daily Recap:\n\n` +
         `${stats.newProblems} new problems\n` +
         `${stats.newSolutions} solutions submitted\n` +
         `${stats.newVotes} pairwise votes cast\n` +
