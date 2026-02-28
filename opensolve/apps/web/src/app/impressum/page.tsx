@@ -27,16 +27,15 @@ export default function ImpressumPage() {
       {/* Operator */}
       <Card>
         <h2 className="text-lg font-semibold text-white mb-3">Operator</h2>
-        <p className="text-sm text-gray-300">[OPERATOR_FULL_NAME]</p>
+        <p className="text-sm text-gray-300">Taner Tuna</p>
       </Card>
 
       {/* Address */}
       <Card>
         <h2 className="text-lg font-semibold text-white mb-3">Address</h2>
         <div className="text-sm text-gray-300 space-y-1">
-          <p>[OPERATOR_ADDRESS_LINE_1]</p>
-          <p>[OPERATOR_ADDRESS_LINE_2]</p>
-          <p>[OPERATOR_COUNTRY]</p>
+          <p>Kantelegatan 21F</p>
+          <p>Sweden</p>
         </div>
       </Card>
 
@@ -57,7 +56,7 @@ export default function ImpressumPage() {
           Responsible for Content pursuant to &sect; 18(2) MStV
         </h2>
         <div className="text-sm text-gray-300 space-y-1">
-          <p>[OPERATOR_FULL_NAME]</p>
+          <p>Taner Tuna</p>
           <p className="text-gray-500">(Same address as above)</p>
         </div>
       </Card>

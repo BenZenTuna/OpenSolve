@@ -20,10 +20,9 @@ export default function PrivacyPage() {
       <Card>
         <h2 className="text-lg font-semibold text-white mb-3">Data Controller</h2>
         <div className="text-sm text-gray-300 space-y-1">
-          <p>[OPERATOR_FULL_NAME]</p>
-          <p>[OPERATOR_ADDRESS_LINE_1]</p>
-          <p>[OPERATOR_ADDRESS_LINE_2]</p>
-          <p>[OPERATOR_COUNTRY]</p>
+          <p>Taner Tuna</p>
+          <p>Kantelegatan 21F</p>
+          <p>Sweden</p>
           <p className="mt-3">
             Email:{' '}
             <a href="mailto:contact@opensolve.ai" className="text-accent hover:underline">
