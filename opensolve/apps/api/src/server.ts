@@ -22,6 +22,7 @@ import { homepageRoutes } from './routes/homepage.routes.js';
 import { debugRoutes } from './routes/debug.routes.js';
 import { llmLeaderboardRoutes } from './routes/llm-leaderboard.routes.js';
 import { decrementConcurrent } from './services/bot-traffic.service.js';
+import { runRetentionCleanup } from './services/retention.service.js';
 import './types/index.js';
 
 const app = Fastify({
@@ -144,11 +145,18 @@ async function start() {
 
     // Task expiry sweep — runs every 30 seconds instead of per-request
     const TASK_EXPIRY_INTERVAL_MS = 30_000;
+    // Retention cleanup — runs every 24 hours
+    const RETENTION_INTERVAL_MS = 24 * 60 * 60 * 1000;
+    const RETENTION_STARTUP_DELAY_MS = 10_000;
     let expiryInterval: NodeJS.Timeout;
+    let retentionInterval: NodeJS.Timeout;
+    let retentionStartupTimeout: NodeJS.Timeout;
 
     // Register cleanup hook BEFORE listening
     server.addHook('onClose', async () => {
       clearInterval(expiryInterval);
+      clearInterval(retentionInterval);
+      clearTimeout(retentionStartupTimeout);
     });
 
     await server.listen({ port: env.PORT, host: '0.0.0.0' });
@@ -173,6 +181,22 @@ async function start() {
         server.log.error(err, 'Task expiry sweep failed');
       }
     }, TASK_EXPIRY_INTERVAL_MS);
+
+    // Retention cleanup — initial run after 10s delay, then every 24 hours
+    retentionStartupTimeout = setTimeout(async () => {
+      try {
+        await runRetentionCleanup();
+      } catch (err) {
+        server.log.error(err, 'Retention cleanup failed');
+      }
+      retentionInterval = setInterval(async () => {
+        try {
+          await runRetentionCleanup();
+        } catch (err) {
+          server.log.error(err, 'Retention cleanup failed');
+        }
+      }, RETENTION_INTERVAL_MS);
+    }, RETENTION_STARTUP_DELAY_MS);
   } catch (err) {
     logger.error(err, 'Failed to start server');
     process.exit(1);

@@ -70,6 +70,12 @@ export type ModelFamily = keyof typeof MODEL_FAMILIES;
 export const API_KEY_PREFIX = 'os_key_';
 export const API_KEY_RANDOM_LENGTH = 48;
 
+// GDPR Article 5(1)(e) — data retention periods (days)
+export const RETENTION_ACTIVITY_LOG_DAYS = 90;
+export const RETENTION_COMPLETED_TASKS_DAYS = 30;
+export const RETENTION_EXPIRED_TASKS_DAYS = 7;
+export const RETENTION_REJECTED_PROBLEMS_DAYS = 30;
+
 // Priority weights
 export const PRIORITY = {
   HUMAN_PROBLEM_WEIGHT: 2.0,

@@ -9,6 +9,7 @@ import {
 import { eq, desc, sql, and, gte, asc, isNotNull } from 'drizzle-orm';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { getTrafficStats } from '../services/bot-traffic.service.js';
+import { runRetentionCleanup } from '../services/retention.service.js';
 import { env } from '../config/env.js';
 
 function timingSafeEqual(a: string, b: string): boolean {
@@ -643,5 +644,11 @@ export async function debugRoutes(fastify: FastifyInstance) {
         apiPort: { value: 4000, description: 'Default API server port', file: 'config/env.ts' },
       },
     });
+  });
+
+  // ===== RETENTION CLEANUP (MANUAL TRIGGER) =====
+  fastify.post('/internal/debug/retention-cleanup', async (_request, reply) => {
+    const result = await runRetentionCleanup();
+    return reply.send(result);
   });
 }
