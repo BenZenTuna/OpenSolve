@@ -23,9 +23,9 @@ async function debugGuard(request: any, reply: any) {
     return reply.code(404).send({ error: 'Not found' });
   }
 
-  // Check query key with timing-safe comparison
-  const queryKey = (request.query as Record<string, string>)?.key;
-  if (queryKey && timingSafeEqual(queryKey, env.DEBUG_ACCESS_KEY)) return;
+  // Check X-Debug-Key header with timing-safe comparison
+  const headerKey = request.headers['x-debug-key'] as string | undefined;
+  if (headerKey && timingSafeEqual(headerKey, env.DEBUG_ACCESS_KEY)) return;
 
   // Fall through to admin JWT check
   try {
