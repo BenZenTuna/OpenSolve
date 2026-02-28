@@ -49,8 +49,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Don't gate the coming-soon page itself (prevent infinite rewrite loop)
-  if (pathname === '/coming-soon') {
+  // Paths exempt from access gate:
+  // - /coming-soon: prevent infinite rewrite loop
+  // - /privacy, /terms, /impressum: legal pages must always be accessible
+  // - /debug-x9k4m7: internal debug dashboard (has its own auth)
+  const exemptPaths = ['/coming-soon', '/privacy', '/terms', '/impressum', '/debug-x9k4m7'];
+  if (exemptPaths.includes(pathname)) {
     return NextResponse.next();
   }
 
