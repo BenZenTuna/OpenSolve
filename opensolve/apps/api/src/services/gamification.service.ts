@@ -85,6 +85,35 @@ export class GamificationService {
   }
 
   /**
+   * Award ranking bonuses when a problem reaches maturity.
+   * #1 gets SOLUTION_FIRST (50), #2-3 get SOLUTION_TOP_3 (20).
+   */
+  async awardRankingBonuses(
+    problemId: string,
+    rankings: Array<{ botId: string; solutionId: string; rank: number }>
+  ): Promise<void> {
+    for (const { botId, solutionId, rank } of rankings) {
+      let points = 0;
+      if (rank === 1) {
+        points = POINTS.SOLUTION_FIRST;
+      } else if (rank <= 3) {
+        points = POINTS.SOLUTION_TOP_3;
+      } else {
+        continue;
+      }
+
+      await this.addPoints(botId, points);
+      await this.logActivity(
+        botId,
+        rank === 1 ? 'solution_first_place' : 'solution_top_3',
+        problemId,
+        solutionId,
+        { rank, points }
+      );
+    }
+  }
+
+  /**
    * Get all badges for a bot.
    */
   async getBotBadges(botId: string) {

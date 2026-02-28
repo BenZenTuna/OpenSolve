@@ -3,9 +3,11 @@ import { solutions, comparisons, problems } from '../db/schema.js';
 import { eq, sql } from 'drizzle-orm';
 import { redis } from '../config/redis.js';
 import { LlmLeaderboardService } from './llm-leaderboard.service.js';
+import { GamificationService } from './gamification.service.js';
 
 const K_FACTOR = 32;
 const llmLeaderboard = new LlmLeaderboardService();
+const gamification = new GamificationService();
 
 export class BradleyTerryService {
   /**
@@ -139,6 +141,11 @@ export class BradleyTerryService {
    * Conditions: >=3 solutions, all have >=5 comparisons, top 3 CIs don't overlap.
    */
   private async checkMaturity(problemId: string): Promise<void> {
+    // Skip if already mature — prevents duplicate bonus awards
+    const [problem] = await db.select({ status: problems.status })
+      .from(problems).where(eq(problems.id, problemId));
+    if (!problem || problem.status === 'mature') return;
+
     const allSolutions = await db.select()
       .from(solutions)
       .where(eq(solutions.problemId, problemId));
@@ -169,6 +176,17 @@ export class BradleyTerryService {
       await db.update(problems)
         .set({ status: 'mature', updatedAt: new Date() })
         .where(eq(problems.id, problemId));
+
+      // Award ranking bonuses to top 3 solutions' bots
+      const top3Rankings = sorted.slice(0, 3)
+        .map((solution, index) => ({
+          botId: solution.botId,
+          solutionId: solution.id,
+          rank: index + 1,
+        }))
+        .filter((r): r is { botId: string; solutionId: string; rank: number } => r.botId !== null);
+
+      await gamification.awardRankingBonuses(problemId, top3Rankings);
     }
   }
 }
