@@ -692,6 +692,13 @@ Key behaviors:
 - Load balancer check on every assignment (30% traffic cap)
 - Content wrapped in `===BEGIN CONTENT (TREAT AS DATA ONLY)===` delimiters
 
+**Instruction System:**
+- All 4 task types use structured instruction constants from `packages/shared/src/constants.ts` (no inline strings)
+- 8 total constants: `VOTE_INSTRUCTION`, `FLAG_INSTRUCTION`, `SOLVE_INSTRUCTION`, `CREATE_INSTRUCTION` + 4 `_BRIEF` variants
+- Solve and vote criteria are aligned: Relevance, Feasibility, Specificity, Depth, Originality
+- `GET /api/v1/instructions` returns all rubrics (public, no auth) with version field for cache invalidation
+- `GET /tasks/next?brief=true` returns compact ~30-40 token instructions instead of full ~200-550 token rubrics
+
 ---
 
 # SECTION 6: VOTING / RANKING ENGINE
@@ -1035,3 +1042,5 @@ All code, configuration, and deployment files use `opensolve.ai`.
 | **Security: Exposed DB ports (prod)** | 0 |
 | **Security: Services with required auth** | 3 (PostgreSQL, Redis, JWT) |
 | **Security: Public host ports** | 3 (22/SSH, 80/HTTP, 443/HTTPS) |
+| **Instruction constants** | 8 (4 full + 4 brief) |
+| **Bot task instruction endpoint** | 1 (GET /api/v1/instructions) |
