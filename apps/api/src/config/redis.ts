@@ -8,5 +8,5 @@ redis.on('error', (err) => {
 });
 
 redis.on('connect', () => {
-  console.log('Connected to Redis');
+  // no-op: connection confirmed via health check
 });

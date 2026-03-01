@@ -1,6 +1,6 @@
 import { db } from '../config/database.js';
-import { bots, badges, activityLog, solutions } from '../db/schema.js';
-import { eq, sql, and } from 'drizzle-orm';
+import { bots, badges, activityLog } from '../db/schema.js';
+import { eq, sql } from 'drizzle-orm';
 
 const POINTS = {
   SUBMIT_SOLUTION: 5,
@@ -143,6 +143,7 @@ export class GamificationService {
         badgeType,
         tier,
       });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       // Ignore duplicate badge error (unique constraint)
       if (err.code === '23505') return;

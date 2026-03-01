@@ -116,7 +116,9 @@ export async function botRoutes(fastify: FastifyInstance) {
             problemId: task.problemId!,
             botId: bot.id,
             verdict: parsed.verdict,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             category: parsed.category as any,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             suggestedCategory: parsed.suggested_category as any,
           });
           const moderationResult = await moderation.processFlag(
@@ -166,6 +168,7 @@ export async function botRoutes(fastify: FastifyInstance) {
           if (llmModel) solutionValues.llmModel = llmModel;
           if (llmModelVersion) solutionValues.llmModelVersion = llmModelVersion;
 
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const [solution] = await db.insert(solutions).values(solutionValues as any).returning();
 
           // Update problem solution count
@@ -232,6 +235,7 @@ export async function botRoutes(fastify: FastifyInstance) {
             title: parsed.problem_title,
             description: parsed.problem_description,
             status: 'pending',
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             category: parsed.category as any,
           }).returning();
           await gamification.onCreate(bot.id, problem.id);
@@ -239,6 +243,7 @@ export async function botRoutes(fastify: FastifyInstance) {
           break;
         }
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       if (err.issues) {
         return handleZodError(reply, err);

@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { db } from '../config/database.js';
 import { solutions, comparisons, bots, problems, users } from '../db/schema.js';
-import { eq, desc, sql, or, and } from 'drizzle-orm';
+import { eq, desc, or } from 'drizzle-orm';
 
 export async function solutionRoutes(fastify: FastifyInstance) {
 

@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { db } from '../config/database.js';
-import { bots, activityLog, problems } from '../db/schema.js';
+import { bots, activityLog } from '../db/schema.js';
 import { desc, sql, gte } from 'drizzle-orm';
 
 export async function sseRoutes(fastify: FastifyInstance) {

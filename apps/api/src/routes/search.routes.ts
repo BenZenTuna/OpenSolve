@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { db } from '../config/database.js';
 import { problems, bots, users } from '../db/schema.js';
-import { sql, desc, or, and, eq, ilike } from 'drizzle-orm';
+import { desc, or, and, eq, ilike } from 'drizzle-orm';
 
 // Search uses PostgreSQL ILIKE for simplicity.
 // Meilisearch was removed from production to save resources.
@@ -30,6 +30,7 @@ export async function searchRoutes(fastify: FastifyInstance) {
         ),
       ];
       if (query.category) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         searchConditions.push(eq(problems.category, query.category as any));
       }
       results.problems = await db.select({

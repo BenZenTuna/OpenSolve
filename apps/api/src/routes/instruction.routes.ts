@@ -7,7 +7,7 @@ import {
 } from '@opensolve/shared';
 
 export async function instructionRoutes(fastify: FastifyInstance) {
-  fastify.get('/instructions', async (request, reply) => {
+  fastify.get('/instructions', async (_request, _reply) => {
     return {
       version: 1,
       instructions: {

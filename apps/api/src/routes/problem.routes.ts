@@ -1,9 +1,9 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { db } from '../config/database.js';
-import { problems, solutions, bots, users, comparisons } from '../db/schema.js';
-import { eq, desc, asc, sql, and, or, isNotNull } from 'drizzle-orm';
-import { CATEGORIES, CategoryDefinition } from '@opensolve/shared/categories.js';
+import { problems, solutions, bots, users } from '../db/schema.js';
+import { eq, desc, asc, sql, and, isNotNull } from 'drizzle-orm';
+import { CATEGORIES } from '@opensolve/shared/categories.js';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { sanitizeMiddleware } from '../middleware/sanitize.middleware.js';
 

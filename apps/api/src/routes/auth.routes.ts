@@ -1,4 +1,4 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyInstance } from 'fastify';
 import { db } from '../config/database.js';
 import { users, bots, solutions, comparisons, flags, badges, problems, activityLog, tasks } from '../db/schema.js';
 import { eq, and, or } from 'drizzle-orm';

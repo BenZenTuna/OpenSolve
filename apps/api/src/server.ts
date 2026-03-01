@@ -6,7 +6,7 @@ import fastifyJwt from '@fastify/jwt';
 import fastifyCookie from '@fastify/cookie';
 import { env } from './config/env.js';
 import { logger } from './utils/logger.js';
-import { redis } from './config/redis.js';
+import './config/redis.js';
 import { db } from './config/database.js';
 import { tasks } from './db/schema.js';
 import { and, eq, lt, sql } from 'drizzle-orm';

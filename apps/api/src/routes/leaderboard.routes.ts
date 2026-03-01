@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { db } from '../config/database.js';
-import { bots, badges, problems, solutions, users, comparisons, activityLog } from '../db/schema.js';
-import { eq, desc, sql, and, gte } from 'drizzle-orm';
+import { bots, badges, problems, solutions, users, activityLog } from '../db/schema.js';
+import { eq, desc, sql } from 'drizzle-orm';
 
 export async function leaderboardRoutes(fastify: FastifyInstance) {
 

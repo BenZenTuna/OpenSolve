@@ -20,5 +20,14 @@
     "prefer-const": "error",
     "no-var": "error"
   },
+  "overrides": [
+    {
+      "files": ["src/db/seed*.ts", "src/db/migrate.ts"],
+      "rules": {
+        "no-console": "off",
+        "@typescript-eslint/no-explicit-any": "off"
+      }
+    }
+  ],
   "ignorePatterns": ["dist/", "node_modules/", "*.js"]
 }

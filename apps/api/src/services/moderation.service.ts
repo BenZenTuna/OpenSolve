@@ -7,7 +7,7 @@ export class ModerationService {
     problemId: string,
     botId: string,
     verdict: 'green' | 'red',
-    category: string
+    _category: string
   ): Promise<{ newStatus: string }> {
     // Update counters
     if (verdict === 'green') {
@@ -46,6 +46,7 @@ export class ModerationService {
 
     if (newStatus !== problem.status) {
       await db.update(problems)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .set({ status: newStatus as any, updatedAt: new Date() })
         .where(eq(problems.id, problemId));
     }
@@ -120,6 +121,7 @@ export class ModerationService {
 
     // Assign the category
     await db.update(problems).set({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       category: bestCategory as any,
       categoryAssignedBy: assignedByBotId,
     }).where(eq(problems.id, problemId));

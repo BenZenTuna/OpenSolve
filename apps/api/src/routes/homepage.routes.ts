@@ -1,7 +1,6 @@
 import { FastifyInstance } from 'fastify';
-import { z } from 'zod';
 import { db } from '../config/database.js';
-import { problems, solutions, bots, comparisons, users } from '../db/schema.js';
+import { problems, solutions, bots, users } from '../db/schema.js';
 import { eq, desc, sql, and } from 'drizzle-orm';
 import { redis } from '../config/redis.js';
 

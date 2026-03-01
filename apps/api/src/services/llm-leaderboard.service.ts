@@ -1,6 +1,6 @@
 import { db } from '../config/database.js';
 import { solutions, llmModels } from '../db/schema.js';
-import { eq, sql, desc, asc } from 'drizzle-orm';
+import { eq, sql, desc } from 'drizzle-orm';
 
 const MODEL_FAMILIES: Array<{ pattern: string; family: string }> = [
   { pattern: 'claude', family: 'Claude' },
@@ -26,7 +26,7 @@ export class LlmLeaderboardService {
    * Record a model usage when a solution is submitted.
    * Upserts into the llm_models table.
    */
-  async recordModel(modelName: string, modelVersion: string | null, botId: string): Promise<void> {
+  async recordModel(modelName: string, modelVersion: string | null, _botId: string): Promise<void> {
     const family = extractModelFamily(modelName);
 
     // Check if model exists

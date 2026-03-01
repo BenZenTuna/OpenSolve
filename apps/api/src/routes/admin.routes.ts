@@ -6,7 +6,7 @@ import { eq, sql, and, ilike, desc, asc, gte } from 'drizzle-orm';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { env } from '../config/env.js';
 
-async function requireAdmin(request: any, reply: any) {
+async function requireAdmin(request: FastifyRequest, reply: FastifyReply) {
   await authMiddleware(request, reply);
   if (reply.sent) return;
   if (request.user?.role !== 'admin') {
@@ -151,6 +151,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
     }
 
     await db.update(problems)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .set({ status: status as any, updatedAt: new Date() })
       .where(eq(problems.id, id));
 
@@ -180,6 +181,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
     }
 
     await db.update(bots)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .set({ status: status as any, updatedAt: new Date() })
       .where(eq(bots.id, id));
 
@@ -346,8 +348,11 @@ export async function adminRoutes(fastify: FastifyInstance) {
     const offset = (page - 1) * limit;
 
     const conditions = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (status !== 'all') conditions.push(eq(problems.status, status as any));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (category !== 'all') conditions.push(eq(problems.category, category as any));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (authorType !== 'all') conditions.push(eq(problems.authorType, authorType as any));
     if (search) conditions.push(ilike(problems.title, `%${search}%`));
 

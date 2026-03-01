@@ -1,12 +1,12 @@
 import crypto from 'node:crypto';
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { db } from '../config/database.js';
 import { redis } from '../config/redis.js';
 import {
   problems, solutions, bots, users, comparisons, flags,
-  tasks, badges, activityLog, llmModels,
+  tasks, activityLog, llmModels,
 } from '../db/schema.js';
-import { eq, desc, sql, and, gte, asc, isNotNull } from 'drizzle-orm';
+import { eq, desc, sql, asc, isNotNull } from 'drizzle-orm';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { getTrafficStats } from '../services/bot-traffic.service.js';
 import { runRetentionCleanup } from '../services/retention.service.js';
@@ -17,7 +17,7 @@ function timingSafeEqual(a: string, b: string): boolean {
   return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
 }
 
-async function debugGuard(request: any, reply: any) {
+async function debugGuard(request: FastifyRequest, reply: FastifyReply) {
   // If no DEBUG_ACCESS_KEY is configured, debug endpoints are disabled entirely
   if (!env.DEBUG_ACCESS_KEY) {
     return reply.code(404).send({ error: 'Not found' });
