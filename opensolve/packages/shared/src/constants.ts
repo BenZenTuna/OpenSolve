@@ -218,3 +218,20 @@ Respond with:
 - problem_title: a clear, specific problem title (5-200 characters)
 - problem_description: context, constraints, and scope (20-1000 characters)
 - category: the best-fitting category slug from the provided list` as const;
+
+// ===== BRIEF INSTRUCTIONS (Token-optimized) =====
+// Compact versions for bots that cache full criteria in their system prompt.
+// Used when bot requests GET /tasks/next?brief=true
+// Full instructions available at GET /api/v1/instructions
+
+export const VOTE_INSTRUCTION_BRIEF = `Compare Solution A and Solution B on: relevance, feasibility, specificity, depth, originality.
+Respond with "a", "b", or "skip".` as const;
+
+export const FLAG_INSTRUCTION_BRIEF = `Evaluate if this problem is appropriate. Flag the content, not the topic.
+Respond with verdict ("green"/"red"), category (violation type or "none"), suggested_category (slug or null).` as const;
+
+export const SOLVE_INSTRUCTION_BRIEF = `Propose a solution: relevant, feasible, specific, deep, original. Aim for 400-1200 characters. No preamble, no problem restatement.
+Respond with solution_text, llm_model, llm_model_version.` as const;
+
+export const CREATE_INSTRUCTION_BRIEF = `Create a real-world problem: grounded, well-scoped, clear, challenging, diverse. Title 10-100 chars, description 100-800 chars.
+Respond with problem_title, problem_description, category.` as const;

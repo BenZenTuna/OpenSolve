@@ -4,7 +4,12 @@ import { eq, and, lt, sql, desc, asc } from 'drizzle-orm';
 import { PairSelectorService } from './pair-selector.service.js';
 import { LoadBalancerService } from './load-balancer.service.js';
 import { CATEGORIES, CategoryDefinition } from '@opensolve/shared/categories.js';
-import { VOTE_INSTRUCTION, FLAG_INSTRUCTION, SOLVE_INSTRUCTION, CREATE_INSTRUCTION } from '@opensolve/shared';
+import {
+  VOTE_INSTRUCTION, VOTE_INSTRUCTION_BRIEF,
+  FLAG_INSTRUCTION, FLAG_INSTRUCTION_BRIEF,
+  SOLVE_INSTRUCTION, SOLVE_INSTRUCTION_BRIEF,
+  CREATE_INSTRUCTION, CREATE_INSTRUCTION_BRIEF,
+} from '@opensolve/shared';
 
 interface Bot {
   id: string;
@@ -26,7 +31,7 @@ export class DispatcherService {
     this.loadBalancer = new LoadBalancerService();
   }
 
-  async getNextTask(bot: Bot): Promise<TaskResult | null> {
+  async getNextTask(bot: Bot, brief: boolean = false): Promise<TaskResult | null> {
     // Task expiry now handled by a 30s interval sweep in server.ts
 
     // Check if bot already has an active task
@@ -34,25 +39,25 @@ export class DispatcherService {
     if (existingTask) return existingTask;
 
     // Priority 1: Flagging
-    const flagTask = await this.tryAssignFlagTask(bot);
+    const flagTask = await this.tryAssignFlagTask(bot, brief);
     if (flagTask) return flagTask;
 
     // Priority 2: Solution
-    const solveTask = await this.tryAssignSolveTask(bot);
+    const solveTask = await this.tryAssignSolveTask(bot, brief);
     if (solveTask) return solveTask;
 
     // Priority 3: Voting
-    const voteTask = await this.tryAssignVoteTask(bot);
+    const voteTask = await this.tryAssignVoteTask(bot, brief);
     if (voteTask) return voteTask;
 
     // Priority 4: Problem creation
-    const createTask = await this.tryAssignCreateTask(bot);
+    const createTask = await this.tryAssignCreateTask(bot, brief);
     if (createTask) return createTask;
 
     return null;
   }
 
-  private async tryAssignFlagTask(bot: Bot): Promise<TaskResult | null> {
+  private async tryAssignFlagTask(bot: Bot, brief: boolean): Promise<TaskResult | null> {
     // Get problem IDs this bot has already flagged
     const botFlaggedProblems = await db
       .select({ problemId: flags.problemId })
@@ -108,7 +113,7 @@ export class DispatcherService {
           name: c.displayName,
           description: c.description,
         })),
-        instruction: FLAG_INSTRUCTION,
+        instruction: brief ? FLAG_INSTRUCTION_BRIEF : FLAG_INSTRUCTION,
         response_format: '{ "verdict": "green" or "red", "category": "none" or violation type, "suggested_category": "category_slug" }',
       });
     }
@@ -116,7 +121,7 @@ export class DispatcherService {
     return null;
   }
 
-  private async tryAssignSolveTask(bot: Bot): Promise<TaskResult | null> {
+  private async tryAssignSolveTask(bot: Bot, brief: boolean): Promise<TaskResult | null> {
     // Get problems this bot already solved
     const botSolutions = await db
       .select({ problemId: solutions.problemId })
@@ -147,7 +152,7 @@ export class DispatcherService {
         problem_id: problem.id,
         problem_title: problem.title,
         problem_description: this.wrapContent(problem.description),
-        instruction: SOLVE_INSTRUCTION,
+        instruction: brief ? SOLVE_INSTRUCTION_BRIEF : SOLVE_INSTRUCTION,
         response_format: '{ "solution_text": "...", "llm_model": "your-model-name", "llm_model_version": "version" }',
       });
     }
@@ -155,7 +160,7 @@ export class DispatcherService {
     return null;
   }
 
-  private async tryAssignVoteTask(bot: Bot): Promise<TaskResult | null> {
+  private async tryAssignVoteTask(bot: Bot, brief: boolean): Promise<TaskResult | null> {
     // Find problems with at least 2 solutions
     const votableProblems = await db
       .select()
@@ -182,21 +187,21 @@ export class DispatcherService {
         solution_a_text: this.wrapContent(pair.solutionA.text),
         solution_b_id: pair.solutionB.id,
         solution_b_text: this.wrapContent(pair.solutionB.text),
-        instruction: VOTE_INSTRUCTION,
+        instruction: brief ? VOTE_INSTRUCTION_BRIEF : VOTE_INSTRUCTION,
       });
     }
 
     return null;
   }
 
-  private async tryAssignCreateTask(bot: Bot): Promise<TaskResult | null> {
+  private async tryAssignCreateTask(bot: Bot, brief: boolean): Promise<TaskResult | null> {
     return this.createTask(bot.id, 'create', null, {
       categories: CATEGORIES.map((c: CategoryDefinition) => ({
         slug: c.slug,
         name: c.displayName,
         description: c.description,
       })),
-      instruction: CREATE_INSTRUCTION,
+      instruction: brief ? CREATE_INSTRUCTION_BRIEF : CREATE_INSTRUCTION,
       response_format: '{ "problem_title": "...", "problem_description": "...", "category": "category_slug" }',
     });
   }

@@ -66,10 +66,11 @@ export async function botRoutes(fastify: FastifyInstance) {
   fastify.get('/tasks/next', async (request, reply) => {
     const bot = request.bot!;
 
+    const brief = (request.query as Record<string, string>)?.brief === 'true';
     const task = await dispatcher.getNextTask({
       id: bot.id,
       ownerId: bot.ownerId as string,
-    });
+    }, brief);
 
     if (!task) {
       return reply.code(204).send();
