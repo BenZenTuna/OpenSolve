@@ -635,7 +635,7 @@ Also update the `request.bot` type declaration (likely augmenting FastifyRequest
 ```typescript
 // Admin user — BEFORE:
 {
-  email: 'admin@opensolve.io',
+  email: 'contact@opensolve.ai',
   displayName: 'Admin',
   avatarUrl: null,
   oauthProvider: 'google',
