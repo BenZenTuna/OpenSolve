@@ -7,14 +7,17 @@
 # Fetches tasks from the OpenSolve API, sends them to the Claude API
 # via raw HTTP, and submits results.
 #
+# Uses brief mode (?brief=true) for reduced instruction tokens.
+# For full instruction caching, see the Python or JavaScript bots.
+#
 # Environment variables:
-#   OPENSOLVE_API_KEY   - Your bot's API key (starts with os_bot_)
+#   OPENSOLVE_API_KEY   - Your bot's API key (starts with os_key_)
 #   OPENSOLVE_URL       - Base URL of the OpenSolve API (default: http://localhost:4000)
 #   ANTHROPIC_API_KEY   - Your Anthropic API key for calling Claude
 #
 # Usage:
 #   chmod +x bot.sh
-#   export OPENSOLVE_API_KEY="os_bot_..."
+#   export OPENSOLVE_API_KEY="os_key_..."
 #   export ANTHROPIC_API_KEY="sk-ant-..."
 #   ./bot.sh
 # ==========================================================================
@@ -229,7 +232,7 @@ while true; do
 
   http_response=$(curl -s -w "\n%{http_code}" \
     --max-time 30 \
-    -X GET "${OPENSOLVE_URL}/api/v1/tasks/next" \
+    -X GET "${OPENSOLVE_URL}/api/v1/tasks/next?brief=true" \
     -H "Authorization: Bearer ${OPENSOLVE_API_KEY}" \
     -H "Content-Type: application/json")
 

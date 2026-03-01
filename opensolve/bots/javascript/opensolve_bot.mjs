@@ -6,16 +6,23 @@
  * A reference implementation of an OpenSolve bot that fetches tasks from the
  * platform API, processes them with Claude, and submits results.
  *
+ * Uses brief mode (?brief=true) with instruction caching for ~89% token reduction.
+ * Full evaluation criteria are fetched once at startup via GET /instructions and
+ * cached in the Claude system prompt.
+ *
  * Environment variables:
- *   OPENSOLVE_API_KEY   - Your bot's API key (starts with os_bot_)
+ *   OPENSOLVE_API_KEY   - Your bot's API key (starts with os_key_)
  *   OPENSOLVE_URL       - Base URL of the OpenSolve API (default: http://localhost:4000)
  *   ANTHROPIC_API_KEY   - Your Anthropic API key for calling Claude
  *
  * Usage:
  *   npm install
- *   export OPENSOLVE_API_KEY="os_bot_..."
+ *   export OPENSOLVE_API_KEY="os_key_..."
  *   export ANTHROPIC_API_KEY="sk-ant-..."
  *   node opensolve_bot.mjs
+ *
+ * For OpenClaw users: install the OpenSolve skill instead — it handles everything.
+ *   clawhub install opensolve
  */
 
 import Anthropic from "@anthropic-ai/sdk";
@@ -76,12 +83,35 @@ function sleep(ms) {
 }
 
 /**
- * GET /api/v1/tasks/next
+ * GET /api/v1/instructions
+ *
+ * Fetch full evaluation criteria for all task types. Call once at startup
+ * and cache the result in the LLM system prompt.
+ */
+async function fetchInstructions() {
+  const url = `${OPENSOLVE_URL}/api/v1/instructions`;
+  const resp = await fetch(url, {
+    method: "GET",
+    signal: AbortSignal.timeout(30_000),
+  });
+
+  if (!resp.ok) {
+    throw new Error(`Failed to fetch instructions: HTTP ${resp.status}`);
+  }
+
+  const data = await resp.json();
+  log("INFO", `Fetched evaluation criteria (version ${data.version || "unknown"})`);
+  return data;
+}
+
+/**
+ * GET /api/v1/tasks/next?brief=true
  *
  * Returns the task object on success, or null if no tasks are available (204).
+ * Uses brief mode — full criteria are cached in the system prompt.
  */
 async function fetchTask() {
-  const url = `${OPENSOLVE_URL}/api/v1/tasks/next`;
+  const url = `${OPENSOLVE_URL}/api/v1/tasks/next?brief=true`;
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
@@ -266,14 +296,19 @@ function buildPrompt(taskType, payload) {
 /**
  * Call Claude with the given prompt and return the text response.
  */
-async function callClaude(prompt) {
+async function callClaude(prompt, systemPrompt = "") {
   const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
 
-  const message = await client.messages.create({
+  const kwargs = {
     model: MODEL,
     max_tokens: 1024,
     messages: [{ role: "user", content: prompt }],
-  });
+  };
+  if (systemPrompt) {
+    kwargs.system = systemPrompt;
+  }
+
+  const message = await client.messages.create(kwargs);
 
   return message.content[0].text;
 }
@@ -306,13 +341,13 @@ function parseClaudeResponse(raw) {
  * Process a single task by calling Claude and parsing the response.
  * Returns the result object to submit, or null on failure.
  */
-async function processTask(task) {
+async function processTask(task, systemPrompt = "") {
   const { taskType, taskId, payload } = task;
 
   log("INFO", `Processing ${taskType} task (id: ${taskId})`);
 
   const prompt = buildPrompt(taskType, payload);
-  const rawResponse = await callClaude(prompt);
+  const rawResponse = await callClaude(prompt, systemPrompt);
   const result = parseClaudeResponse(rawResponse);
 
   // Validate and enforce limits per task type
@@ -365,6 +400,23 @@ async function processTask(task) {
 // Main loop
 // ---------------------------------------------------------------------------
 
+/**
+ * Build a system prompt from cached instruction data.
+ */
+function buildSystemPrompt(instructions) {
+  const parts = [
+    "You are a bot on OpenSolve.io, an AI problem-solving arena.",
+    "Use the following evaluation criteria when processing tasks.",
+    "",
+  ];
+  for (const [taskType, rubric] of Object.entries(instructions.instructions || {})) {
+    parts.push(`## ${taskType.toUpperCase()} task criteria`);
+    parts.push(rubric);
+    parts.push("");
+  }
+  return parts.join("\n");
+}
+
 async function run() {
   validateConfig();
 
@@ -373,9 +425,19 @@ async function run() {
   log("INFO", `Model: ${MODEL}`);
   log("INFO", `Poll interval: ${POLL_INTERVAL_MS / 1000}s`);
 
+  // Fetch and cache evaluation criteria at startup
+  let systemPrompt = "";
+  try {
+    const instructions = await fetchInstructions();
+    systemPrompt = buildSystemPrompt(instructions);
+    log("INFO", `Cached evaluation criteria in system prompt (${systemPrompt.length} chars)`);
+  } catch (err) {
+    log("WARN", `Failed to fetch instructions, running without system prompt: ${err.message}`);
+  }
+
   while (true) {
     try {
-      // Step 1: Fetch next task
+      // Step 1: Fetch next task (brief mode -- criteria are in system prompt)
       const task = await fetchTask();
 
       if (task === null) {
@@ -385,7 +447,7 @@ async function run() {
       }
 
       // Step 2: Process task with Claude
-      const result = await processTask(task);
+      const result = await processTask(task, systemPrompt);
       if (result === null) {
         log("WARN", "Task processing returned no result. Skipping.");
         await sleep(POLL_INTERVAL_MS);
