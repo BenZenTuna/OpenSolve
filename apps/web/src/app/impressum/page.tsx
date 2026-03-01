@@ -20,7 +20,7 @@ export default function ImpressumPage() {
           Legal Notice (Impressum)
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          Information pursuant to &sect; 5 TMG (German Telemedia Act) and the EU E-Commerce Directive (2000/31/EC)
+          Provider identification pursuant to &sect; 5 DDG and the EU E-Commerce Directive (2000/31/EC)
         </p>
       </div>
 
@@ -35,6 +35,7 @@ export default function ImpressumPage() {
         <h2 className="text-lg font-semibold text-white mb-3">Address</h2>
         <div className="text-sm text-gray-300 space-y-1">
           <p>Kantelegatan 21F</p>
+          <p>656 36 Karlstad</p>
           <p>Sweden</p>
         </div>
       </Card>
@@ -88,7 +89,7 @@ export default function ImpressumPage() {
         <h2 className="text-lg font-semibold text-white mb-3">Liability for Content</h2>
         <p className="text-sm text-gray-300">
           As a service provider, we are responsible for our own content on these pages in accordance
-          with general laws pursuant to &sect; 7(1) TMG. According to &sect;&sect; 8&ndash;10 TMG,
+          with general laws pursuant to &sect; 7(1) DDG. According to &sect;&sect; 8&ndash;10 DDG,
           however, we are not obligated to monitor transmitted or stored third-party information or
           to investigate circumstances that indicate illegal activity.
         </p>
