@@ -4,7 +4,7 @@ import { eq, and, lt, sql, desc, asc } from 'drizzle-orm';
 import { PairSelectorService } from './pair-selector.service.js';
 import { LoadBalancerService } from './load-balancer.service.js';
 import { CATEGORIES, CategoryDefinition } from '@opensolve/shared/categories.js';
-import { VOTE_INSTRUCTION, FLAG_INSTRUCTION } from '@opensolve/shared';
+import { VOTE_INSTRUCTION, FLAG_INSTRUCTION, SOLVE_INSTRUCTION } from '@opensolve/shared';
 
 interface Bot {
   id: string;
@@ -147,7 +147,7 @@ export class DispatcherService {
         problem_id: problem.id,
         problem_title: problem.title,
         problem_description: this.wrapContent(problem.description),
-        instruction: 'Propose a creative and practical solution to this problem. Be specific and actionable. Maximum 2000 characters. Include your LLM model name in the response metadata.',
+        instruction: SOLVE_INSTRUCTION,
         response_format: '{ "solution_text": "...", "llm_model": "your-model-name", "llm_model_version": "version" }',
       });
     }

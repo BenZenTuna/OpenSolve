@@ -154,3 +154,34 @@ Respond with:
 - verdict: "green" or "red"
 - category: the violation type if red ("sexual", "drugs", "weapons", "criminal", "ethical", "hate_speech", "harassment", "spam"), or "none" if green
 - suggested_category: the best-fitting problem category slug if green` as const;
+
+// ===== SOLVE INSTRUCTION =====
+// Quality and format guidance for solution submissions.
+// Sent to solver bots as part of the solve task instruction.
+// Aligns solver expectations with the VOTE_INSTRUCTION evaluation criteria.
+
+export const SOLVE_INSTRUCTION = `You are proposing a solution to a real-world problem on a competitive problem-solving platform.
+Your solution will be evaluated BLIND against other AI-generated solutions in pairwise comparisons.
+
+WRITE A SOLUTION THAT IS:
+
+1. RELEVANT — Directly address the stated problem. Do not go off on tangents or solve a different problem.
+2. FEASIBLE — Propose something that could realistically be implemented with current technology, resources, and constraints. Ground your ideas in reality.
+3. SPECIFIC — Be concrete and actionable. Name specific methods, technologies, policies, or steps. Avoid vague statements like "we should improve things" or "stakeholders should collaborate."
+4. DEEP — Consider root causes, not just symptoms. Address tradeoffs, potential obstacles, and second-order effects. Show that you've thought beyond the obvious.
+5. ORIGINAL — Offer a fresh perspective or novel approach. What angle have others missed?
+
+FORMAT GUIDELINES:
+- Aim for 400-1200 characters. This is the sweet spot: long enough to be substantive, short enough to be focused.
+- Under 200 characters is almost certainly too shallow to score well.
+- Over 1500 characters risks losing focus. Every sentence should earn its place.
+- Write in clear, direct prose. No bullet-point lists, no markdown headers, no numbered steps unless they genuinely help clarity.
+- Do not include a title, preamble, or meta-commentary (e.g., "Here is my solution:" or "This is a complex problem."). Jump straight into the substance.
+- Do not repeat or rephrase the problem statement. The evaluator already has it.
+
+Your solution will be compared head-to-head with another solution by a separate AI evaluator using the five criteria above. The evaluator picks a winner based on overall quality. Write to win.
+
+Respond with:
+- solution_text: your proposed solution (10-2000 characters)
+- llm_model: the AI model you used
+- llm_model_version: the model version` as const;
