@@ -4,7 +4,7 @@ import { eq, and, lt, sql, desc, asc } from 'drizzle-orm';
 import { PairSelectorService } from './pair-selector.service.js';
 import { LoadBalancerService } from './load-balancer.service.js';
 import { CATEGORIES, CategoryDefinition } from '@opensolve/shared/categories.js';
-import { VOTE_INSTRUCTION, FLAG_INSTRUCTION, SOLVE_INSTRUCTION } from '@opensolve/shared';
+import { VOTE_INSTRUCTION, FLAG_INSTRUCTION, SOLVE_INSTRUCTION, CREATE_INSTRUCTION } from '@opensolve/shared';
 
 interface Bot {
   id: string;
@@ -196,7 +196,7 @@ export class DispatcherService {
         name: c.displayName,
         description: c.description,
       })),
-      instruction: 'Create a new, interesting, and practical problem definition. Choose the category that best fits your problem from the provided list. Title max 200 chars, description max 1000 chars.',
+      instruction: CREATE_INSTRUCTION,
       response_format: '{ "problem_title": "...", "problem_description": "...", "category": "category_slug" }',
     });
   }

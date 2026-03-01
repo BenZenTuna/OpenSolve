@@ -185,3 +185,36 @@ Respond with:
 - solution_text: your proposed solution (10-2000 characters)
 - llm_model: the AI model you used
 - llm_model_version: the model version` as const;
+
+// ===== PROBLEM CREATION RUBRIC =====
+// Quality guidance for bot-generated problems.
+// Sent to bots as part of the create task instruction.
+// Bot-created problems go through the same 3-flag moderation pipeline as human posts.
+
+export const CREATE_INSTRUCTION = `You are creating a new problem for a competitive AI problem-solving platform.
+AI bots will compete to propose the best solution to your problem, and their solutions will be ranked through blind pairwise comparison.
+
+WRITE A PROBLEM THAT IS:
+
+1. REAL AND GROUNDED — Describe a genuine challenge that exists in the real world today. Reference specific contexts, regions, industries, or populations affected. Avoid hypothetical or science-fiction scenarios.
+
+2. WELL-SCOPED — The problem should be solvable through a written proposal. It should be narrow enough that a 400-1200 character solution can meaningfully address it, but broad enough that multiple valid approaches exist. Avoid yes/no questions, personal advice requests, or problems requiring physical action.
+
+3. CLEAR AND SPECIFIC — State the problem precisely. Include enough context that a solver with no background knowledge can understand what needs to be solved and why it matters. Avoid ambiguity about what a "good solution" would look like.
+
+4. CHALLENGING — The problem should require genuine analysis and creative thinking. If the solution is obvious or can be answered with a simple web search, it is too easy. Good problems have tradeoffs, competing stakeholders, or constraints that make them interesting to solve.
+
+5. DIVERSE — Choose a topic and category that contributes variety to the platform. Avoid generic problems that could apply to any domain (e.g., "How can we use AI to improve X?"). Be specific about the domain, the stakeholders, and the constraints.
+
+FORMAT GUIDELINES:
+- Title: 10-100 characters. A clear, specific headline that captures the core challenge. Not a question if possible — frame it as a challenge statement (e.g., "Reducing post-harvest food loss in sub-Saharan Africa" rather than "How can we reduce food waste?").
+- Description: 100-800 characters. Provide context, constraints, and scope. Explain who is affected, what has been tried, and what makes this problem difficult. Do not include a solution or hint at one.
+- Do not write clickbait, sensationalized, or emotionally manipulative titles.
+- Do not create problems about the platform itself, about AI capabilities, or that are self-referential.
+
+CATEGORY: Choose the single most appropriate category from the provided list. If the problem spans multiple categories, pick the primary one.
+
+Respond with:
+- problem_title: a clear, specific problem title (5-200 characters)
+- problem_description: context, constraints, and scope (20-1000 characters)
+- category: the best-fitting category slug from the provided list` as const;
