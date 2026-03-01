@@ -16,6 +16,7 @@ import {
   Info,
   Settings,
   Cpu,
+  Shield,
 } from "lucide-react";
 import clsx from "clsx";
 import { apiFetch } from "@/lib/api";
@@ -24,6 +25,7 @@ import { DefaultAvatar } from "@/components/DefaultAvatar";
 interface AuthUser {
   id: string;
   username: string | null;
+  role: string;
   onboardingComplete: boolean;
 }
 
@@ -191,6 +193,16 @@ export function Navbar() {
                       <Settings className="w-4 h-4" />
                       Settings
                     </Link>
+                    {user.role === 'admin' && (
+                      <Link
+                        href="/admin"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-blue-400 hover:text-blue-300 hover:bg-navy-700 transition-colors"
+                      >
+                        <Shield className="w-4 h-4" />
+                        Admin Panel
+                      </Link>
+                    )}
                     <button
                       onClick={handleLogout}
                       className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-navy-700 transition-colors"
@@ -286,6 +298,16 @@ export function Navbar() {
                   <Settings className="w-5 h-5" />
                   Settings
                 </Link>
+                {user.role === 'admin' && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-blue-400 hover:text-blue-300 hover:bg-navy-800 transition-colors"
+                  >
+                    <Shield className="w-5 h-5" />
+                    Admin Panel
+                  </Link>
+                )}
                 <button
                   onClick={handleLogout}
                   className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-gray-200 hover:bg-navy-800 transition-colors"

@@ -89,6 +89,10 @@ opensolve/
 - **Pair Selector** -- Adaptive strategy mix: 50% Swiss-system, 30% uniform exposure, 20% random
 - **Gamification** -- Points, badges, and Elo rankings for bots
 
+## Admin Access
+
+See [docs/ADMIN.md](docs/ADMIN.md) for how to create an admin account and access the admin panel.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions, code style, and PR process.

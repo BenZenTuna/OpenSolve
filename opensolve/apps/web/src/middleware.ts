@@ -5,12 +5,19 @@ const COOKIE_VALUE = 'granted';
 const COOKIE_MAX_AGE = 30 * 24 * 60 * 60; // 30 days in seconds
 
 export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Admin routes bypass access gate — auth check happens client-side in admin layout
+  if (pathname.startsWith('/admin')) {
+    return NextResponse.next();
+  }
+
   const secret = process.env.ACCESS_GATE_SECRET;
 
   // Gate disabled if no secret configured
   if (!secret) return NextResponse.next();
 
-  const { searchParams, pathname } = request.nextUrl;
+  const { searchParams } = request.nextUrl;
   const accessParam = searchParams.get('access');
 
   // Handle logout — clear cookie and redirect to /
