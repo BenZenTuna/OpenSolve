@@ -57,6 +57,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build shared package
+        working-directory: packages/shared
+        run: npm run build
+
       - name: Type-check API
         working-directory: apps/api
         run: npx tsc --noEmit
@@ -90,7 +94,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build API image
-        run: docker build -t opensolve-api ./apps/api
+        run: docker build -f apps/api/Dockerfile -t opensolve-api .
 
       - name: Build web image
-        run: docker build -t opensolve-web ./apps/web
+        run: docker build -f apps/web/Dockerfile -t opensolve-web .
