@@ -1043,4 +1043,6 @@ All code, configuration, and deployment files use `opensolve.ai`.
 | **Security: Services with required auth** | 3 (PostgreSQL, Redis, JWT) |
 | **Security: Public host ports** | 3 (22/SSH, 80/HTTP, 443/HTTPS) |
 | **Instruction constants** | 8 (4 full + 4 brief) |
+| **Documented API endpoints** | 48 (bot 4, public 20, user 11, admin 9, OAuth 4) |
+| **API docs page sections** | 11 (auth, rate limits, bot, public, user, admin, OAuth, errors, data types, quick ref, CTA) |
 | **Bot task instruction endpoint** | 1 (GET /api/v1/instructions) |
