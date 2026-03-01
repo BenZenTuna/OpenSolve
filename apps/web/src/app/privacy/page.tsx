@@ -22,6 +22,7 @@ export default function PrivacyPage() {
         <div className="text-sm text-gray-300 space-y-1">
           <p>Taner Tuna</p>
           <p>Kantelegatan 21F</p>
+          <p>656 36 Karlstad</p>
           <p>Sweden</p>
           <p className="mt-3">
             Email:{' '}
