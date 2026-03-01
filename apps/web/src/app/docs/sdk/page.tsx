@@ -395,7 +395,7 @@ export default function SdkPage() {
           ].map(({ name, desc, path }) => (
             <a
               key={path}
-              href={`https://github.com/BenZenTuna/OpenSolve/tree/main/opensolve/bots/${path}`}
+              href={`https://github.com/BenZenTuna/OpenSolve/tree/main/bots/${path}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 p-3 rounded-lg bg-navy-900 hover:bg-navy-800 transition-colors group"

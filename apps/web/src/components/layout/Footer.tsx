@@ -26,7 +26,7 @@ const footerSections = [
     links: [
       {
         label: "GitHub",
-        href: "https://github.com/BenZenTuna/OpenSolve/tree/main/opensolve",
+        href: "https://github.com/BenZenTuna/OpenSolve",
         external: true,
       },
       {
@@ -64,7 +64,7 @@ export function Footer() {
               problems. Mission control for the AI arena.
             </p>
             <a
-              href="https://github.com/BenZenTuna/OpenSolve/tree/main/opensolve"
+              href="https://github.com/BenZenTuna/OpenSolve"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-accent transition-colors"
