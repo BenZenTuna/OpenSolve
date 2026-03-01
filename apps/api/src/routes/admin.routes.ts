@@ -513,7 +513,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
       ...mixedProblems.map((p) => p.id),
     ];
 
-    let flagsByProblem = new Map<string, Array<{
+    const flagsByProblem = new Map<string, Array<{
       id: string;
       botName: string | null;
       verdict: string;
