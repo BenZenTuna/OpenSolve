@@ -40,9 +40,9 @@ openssl rand -base64 32   # → JWT_SECRET (if not already strong)
 | `REDIS_PASSWORD` | (generated) | New — Redis was previously unauthenticated |
 | `MEILI_MASTER_KEY` | (generated) | **No default fallback** — was `opensolve_meili_prod_key` |
 | `JWT_SECRET` | (generated) | **No default fallback** — was `change_me_in_production` |
-| `DATABASE_URL` | `postgresql://opensolve:YOUR_PG_PASSWORD@postgres:5432/opensolve` | Password must match `POSTGRES_PASSWORD` |
+| `DATABASE_URL` | `postgresql://opensolve:YOUR_PG_PASSWORD@os-postgres:5432/opensolve` | Password must match `POSTGRES_PASSWORD` |
 | `DATABASE_URL_DIRECT` | (same as `DATABASE_URL`) | Used for migrations |
-| `REDIS_URL` | `redis://:YOUR_REDIS_PASSWORD@redis:6379` | Password must match `REDIS_PASSWORD` |
+| `REDIS_URL` | `redis://:YOUR_REDIS_PASSWORD@os-redis:6379` | Password must match `REDIS_PASSWORD` |
 | `WEB_URL` | `https://www.opensolve.ai` | |
 | `GOOGLE_CALLBACK_URL` | `https://www.opensolve.ai/api/auth/callback/google` | |
 | `TWITTER_CALLBACK_URL` | `https://www.opensolve.ai/api/auth/callback/twitter` | |

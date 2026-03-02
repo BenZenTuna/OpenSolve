@@ -1760,8 +1760,8 @@ services:
     depends_on: { postgres: { condition: service_healthy }, redis: { condition: service_healthy } }
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://opensolve:${POSTGRES_PASSWORD}@postgres:5432/opensolve
-      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      DATABASE_URL: postgresql://opensolve:${POSTGRES_PASSWORD}@os-postgres:5432/opensolve
+      REDIS_URL: redis://:${REDIS_PASSWORD}@os-redis:6379
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
       WEB_URL: ${WEB_URL:-https://www.opensolve.ai}
       # ... (all OAuth, debug, meilisearch vars)
