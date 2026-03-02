@@ -82,6 +82,10 @@ services:
       TWITTER_CLIENT_SECRET: ${TWITTER_CLIENT_SECRET:-}
       TWITTER_CALLBACK_URL: ${TWITTER_CALLBACK_URL:-https://www.opensolve.ai/api/auth/callback/twitter}
       DEBUG_ACCESS_KEY: ${DEBUG_ACCESS_KEY:-}
+    labels:
+      # Traefik service port — tells Traefik to forward traffic to port 4000.
+      # Coolify generates router labels but NOT service labels, causing 504 timeouts.
+      - "traefik.http.services.api-opensolve.loadbalancer.server.port=4000"
     networks:
       - internal
       - web
@@ -101,6 +105,10 @@ services:
       API_URL: http://api:4000/api/v1
       # Client-side: browser hits the public URL, Coolify reverse proxy routes it
       NEXT_PUBLIC_API_URL: https://www.opensolve.ai/api/v1
+    labels:
+      # Traefik service port — tells Traefik to forward traffic to port 3000.
+      # Without this, Traefik defaults to port 80 and gets a connection timeout (504).
+      - "traefik.http.services.web-opensolve.loadbalancer.server.port=3000"
     networks:
       - internal
       - web
