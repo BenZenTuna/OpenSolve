@@ -1,8 +1,25 @@
 # GDPR Data Minimization Plan — OpenSolve Platform
 
-**Date:** 2026-02-18
+**Date:** 2026-02-18 (updated 2026-03-03)
 **Context:** Fresh database, no migration needed, private testing phase
 **Goal:** Remove all directly identifying personal data, implement pseudonymous user identity
+
+---
+
+## Email Storage (Added 2026-03-03)
+
+**Status:** IMPLEMENTED
+
+Email addresses are now collected from Google OAuth and stored in the `users` table.
+
+- **Legal basis:** Legitimate Interest (Art. 6(1)(f)) — see docs/LEGITIMATE-INTEREST-ASSESSMENT.md
+- **Purpose:** Service-critical notifications (privacy policy changes, security breaches, terms updates)
+- **Minimization measures:**
+  - Only email is collected from Google (not name, avatar, or other profile data)
+  - Email is used exclusively for service notifications — never marketing
+  - Deleted on account deletion (Art. 17)
+  - Exportable via data portability endpoint (Art. 20)
+- **Twitter/X OAuth removed:** Simplified to single provider (Google) to reduce data surface
 
 ---
 
@@ -11,14 +28,14 @@
 ### What We're Removing
 
 **`users` table — drop these columns:**
-- `email` — not used anywhere functionally
+- `email` — now re-added for service notifications (see Email Storage section above)
 - `displayName` — real name from OAuth provider, replaced by user-chosen `username`
 - `avatarUrl` — links to identifiable OAuth profile photos
 - `botAvatarUrl` — same concern
 
 **`bots` table — drop these columns:**
-- `xHandle` — legacy Twitter bot registration flow, no longer needed
-- `xOauthId` — legacy Twitter bot registration flow, no longer needed
+- `xHandle` — removed (legacy, no longer needed)
+- `xOauthId` — removed (legacy, no longer needed)
 - `apiKeyHash` — legacy bot-direct auth (`os_bot_` prefix), replaced by user-level API keys
 - `apiKeyPrefix` — legacy bot-direct auth, replaced by user-level API keys
 - `avatarUrl` — identifiable profile photos
@@ -231,21 +248,10 @@ const token = fastify.jwt.sign({
 });
 ```
 
-#### 4e. Twitter callback — apply the exact same 3 changes (4b, 4c, 4d):
+#### 4e. Twitter callback — REMOVED
 
-New user insert:
-```typescript
-const [newUser] = await db.insert(users).values({
-  oauthProvider: 'twitter',
-  oauthId: profile.id,
-  username: null,
-  onboardingComplete: false,
-}).returning();
-```
-
-Returning user update: just `{ updatedAt: new Date() }`
-
-JWT payload: `{ id, username, role }`
+Twitter/X OAuth has been completely removed from the platform (as of 2026-03-03).
+Only Google OAuth is supported.
 
 #### 4f. `GET /auth/me` — update response:
 
@@ -826,7 +832,7 @@ New layout:
 Replace the "Data Collected" section:
 
 **Data We Collect:**
-- OAuth provider name (Google or Twitter/X) — to identify which login service you used
+- OAuth provider name (Google) — to identify which login service you used
 - OAuth provider ID — an opaque identifier used solely to recognize you when you log in again
 - Username — a pseudonym you choose, visible on the platform
 - Bot name — a name you choose for your bot, visible on the platform
@@ -857,7 +863,7 @@ Replace the "Data Collected" section:
 
 **File: `docs/BOT_GUIDE.md`**
 - Update registration flow: sign up → choose username → set bot name → generate API key
-- Remove any mention of Twitter bot registration
+- Twitter/X OAuth has been fully removed from the platform
 
 **File: `bots/README.md` and `bots/javascript/README.md` and `bots/python/README.md`**
 - Update registration instructions
@@ -913,7 +919,7 @@ npm run dev
 | `role` | Platform metadata | No | Access control |
 | Activity data | Behavioral (pseudonymous) | Yes (linked to username/botName) | Platform function |
 
-**No directly identifying personal data is stored.** The oauthId is the only link back to a real identity, and only the OAuth provider (Google/Twitter) can resolve it — you cannot.
+**Minimal identifying personal data is stored.** The email address is stored for service-critical notifications under legitimate interest (Art. 6(1)(f)). The oauthId is an opaque link back to a real identity, and only Google can resolve it — you cannot. See docs/LEGITIMATE-INTEREST-ASSESSMENT.md for the full assessment.
 
 ---
 
