@@ -6,15 +6,15 @@
 # WHY THIS EXISTS:
 # Coolify generates Traefik router labels via Docker but does NOT create service port labels
 # or router-to-service bindings. The auto-generated routers point to non-existent services,
-# causing 504 Gateway Timeout. Our compose file defines the service port labels (which Coolify
-# doesn't strip), and THIS file defines routers that reference those services with higher
-# priority than Coolify's broken routers.
+# causing 504 Gateway Timeout. This file defines routers with higher priority that point to
+# our containers via stable Docker hostnames (os-web, os-api).
 #
 # HOW IT WORKS:
-# - service: web-opensolve@docker -> references the Docker service created by the compose label
-#   traefik.http.services.web-opensolve.loadbalancer.server.port=3000
-# - priority: 1000 -> wins over Coolify's auto-generated routers (default priority ~50)
-# - Traefik auto-discovers container IPs -> survives container recreations/redeploys
+# - The containers have fixed hostnames set in docker-compose.prod.yml (os-web, os-api)
+# - Traefik (coolify-proxy) shares the coolify Docker network with our containers
+# - Docker DNS resolves os-web -> container IP and os-api -> container IP automatically
+# - Hostnames survive container recreation — no hardcoded IPs needed
+# - priority: 1000 wins over Coolify's broken auto-generated routers (default ~50)
 #
 # TO DEPLOY: Run deploy/setup-traefik.sh on the production server, or manually:
 #   scp deploy/traefik/opensolve.yaml root@SERVER:/data/coolify/proxy/dynamic/opensolve.yaml
@@ -25,7 +25,7 @@ http:
       rule: "Host(`opensolve.ai`) || Host(`www.opensolve.ai`)"
       entryPoints:
         - https
-      service: web-opensolve@docker
+      service: web-opensolve
       tls:
         certResolver: letsencrypt
       middlewares:
@@ -36,7 +36,7 @@ http:
       rule: "Host(`opensolve.ai`) || Host(`www.opensolve.ai`)"
       entryPoints:
         - http
-      service: web-opensolve@docker
+      service: web-opensolve
       middlewares:
         - redirect-to-https
       priority: 1000
@@ -45,7 +45,7 @@ http:
       rule: "Host(`api.opensolve.ai`)"
       entryPoints:
         - https
-      service: api-opensolve@docker
+      service: api-opensolve
       tls:
         certResolver: letsencrypt
       middlewares:
@@ -56,10 +56,21 @@ http:
       rule: "Host(`api.opensolve.ai`)"
       entryPoints:
         - http
-      service: api-opensolve@docker
+      service: api-opensolve
       middlewares:
         - redirect-to-https
       priority: 1000
+
+  services:
+    web-opensolve:
+      loadBalancer:
+        servers:
+          - url: "http://os-web:3000"
+
+    api-opensolve:
+      loadBalancer:
+        servers:
+          - url: "http://os-api:4000"
 
   middlewares:
     redirect-to-https:

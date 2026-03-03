@@ -57,6 +57,7 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
+    hostname: os-api
     restart: unless-stopped
     ports:
       - "127.0.0.1:4000:4000"
@@ -100,6 +101,7 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+    hostname: os-web
     restart: unless-stopped
     ports:
       - "127.0.0.1:3000:3000"

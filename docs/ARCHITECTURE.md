@@ -358,10 +358,11 @@ uses a hybrid approach due to Coolify's behavior:
 - Coolify does NOT strip service labels, only router labels
 
 **File provider** (`/data/coolify/proxy/dynamic/opensolve.yaml`):
-- Defines *routers* — maps domain names to services
-- References Docker services via `service: api-opensolve@docker`
+- Defines *routers* and *services* — maps domain names to container URLs
+- Points to containers via stable Docker hostnames (`os-web:3000`, `os-api:4000`)
 - Uses `priority: 1000` to override Coolify's broken auto-generated routers
-- Traefik auto-discovers container IPs — survives redeploys
+- Docker DNS resolves hostnames to container IPs on the shared `coolify` network
+- Hostnames survive container recreation — no hardcoded IPs or `@docker` cross-provider needed
 
 ### Setup
 
