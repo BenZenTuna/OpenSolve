@@ -23,11 +23,6 @@ const envSchema = z.object({
   GOOGLE_CLIENT_SECRET: z.string().default(''),
   GOOGLE_CALLBACK_URL: z.string().default('http://localhost:3000/api/auth/callback/google'),
 
-  // OAuth - Twitter/X
-  TWITTER_CLIENT_ID: z.string().default(''),
-  TWITTER_CLIENT_SECRET: z.string().default(''),
-  TWITTER_CALLBACK_URL: z.string().default('http://localhost:3000/api/auth/callback/twitter'),
-
   // Meilisearch
   MEILISEARCH_HOST: z.string().default('http://localhost:7700'),
   MEILISEARCH_KEY: z.string().default(''),

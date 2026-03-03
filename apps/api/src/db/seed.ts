@@ -8,7 +8,8 @@ async function seed() {
   const [testUser] = await db.insert(users).values({
     username: 'admin',
     oauthProvider: 'google',
-    oauthId: 'seed-admin-001',
+    oauthId: '100000000000000001',
+    email: 'admin@example.com',
     role: 'admin',
     onboardingComplete: true,
   }).returning();

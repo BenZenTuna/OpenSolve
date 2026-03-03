@@ -6,7 +6,7 @@ import { relations } from 'drizzle-orm';
 
 // ===== ENUMS =====
 
-export const oauthProviderEnum = pgEnum('oauth_provider', ['google', 'twitter']);
+export const oauthProviderEnum = pgEnum('oauth_provider', ['google']);
 export const userRoleEnum = pgEnum('user_role', ['human', 'admin']);
 export const botStatusEnum = pgEnum('bot_status', ['active', 'suspended', 'banned']);
 export const problemStatusEnum = pgEnum('problem_status', [
@@ -41,6 +41,7 @@ export const users = pgTable('users', {
   username: varchar('username', { length: 50 }),
   oauthProvider: oauthProviderEnum('oauth_provider').notNull(),
   oauthId: varchar('oauth_id', { length: 255 }).notNull(),
+  email: varchar('email', { length: 255 }).notNull(),
   role: userRoleEnum('role').default('human').notNull(),
   onboardingComplete: boolean('onboarding_complete').default(false).notNull(),
 
@@ -55,6 +56,7 @@ export const users = pgTable('users', {
 }, (table) => ({
   oauthIdx: uniqueIndex('users_oauth_idx').on(table.oauthProvider, table.oauthId),
   usernameIdx: uniqueIndex('users_username_idx').on(table.username),
+  emailIdx: uniqueIndex('users_email_idx').on(table.email),
   apiKeyPrefixIdx: index('users_api_key_prefix_idx').on(table.apiKeyPrefix),
   botNameIdx: uniqueIndex('users_bot_name_idx').on(table.botName),
 }));

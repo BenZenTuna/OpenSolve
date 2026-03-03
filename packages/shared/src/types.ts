@@ -1,4 +1,4 @@
-export type OAuthProvider = 'google' | 'twitter';
+export type OAuthProvider = 'google';
 export type UserRole = 'human' | 'admin';
 export type BotStatus = 'active' | 'suspended' | 'banned';
 export type ProblemStatus = 'pending' | 'approved' | 'rejected' | 'active' | 'mature';

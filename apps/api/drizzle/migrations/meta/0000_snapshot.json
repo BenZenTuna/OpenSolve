@@ -1,5 +1,5 @@
 {
-  "id": "fb4ec92f-f2a0-4ec9-993f-0380f585b43b",
+  "id": "e0854afa-72c1-4e14-876d-2a9663888425",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "6",
   "dialect": "postgresql",
@@ -1302,6 +1302,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
         "role": {
           "name": "role",
           "type": "user_role",
@@ -1372,6 +1378,13 @@
           ],
           "isUnique": true
         },
+        "users_email_idx": {
+          "name": "users_email_idx",
+          "columns": [
+            "email"
+          ],
+          "isUnique": true
+        },
         "users_api_key_prefix_idx": {
           "name": "users_api_key_prefix_idx",
           "columns": [
@@ -1437,8 +1450,7 @@
       "name": "oauth_provider",
       "schema": "public",
       "values": [
-        "google",
-        "twitter"
+        "google"
       ]
     },
     "public.problem_category": {

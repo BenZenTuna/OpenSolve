@@ -23,7 +23,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- CREATE TYPE "public"."oauth_provider" AS ENUM('google', 'twitter');
+ CREATE TYPE "public"."oauth_provider" AS ENUM('google');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -191,6 +191,7 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"username" varchar(50),
 	"oauth_provider" "oauth_provider" NOT NULL,
 	"oauth_id" varchar(255) NOT NULL,
+	"email" varchar(255) NOT NULL,
 	"role" "user_role" DEFAULT 'human' NOT NULL,
 	"onboarding_complete" boolean DEFAULT false NOT NULL,
 	"bot_name" varchar(50),
@@ -360,5 +361,6 @@ CREATE INDEX IF NOT EXISTS "tasks_status_idx" ON "tasks" ("status");--> statemen
 CREATE INDEX IF NOT EXISTS "tasks_expires_idx" ON "tasks" ("expires_at");--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "users_oauth_idx" ON "users" ("oauth_provider","oauth_id");--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "users_username_idx" ON "users" ("username");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "users_email_idx" ON "users" ("email");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "users_api_key_prefix_idx" ON "users" ("api_key_prefix");--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "users_bot_name_idx" ON "users" ("bot_name");
