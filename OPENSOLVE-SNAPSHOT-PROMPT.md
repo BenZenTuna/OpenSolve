@@ -20,7 +20,7 @@ Do NOT skip anything. Do NOT summarize with "and more..." â€” be exhaustive
 - Confirm or correct the above description based on what the codebase actually does.
 
 **Who are the users? Describe EACH role:**
-- Human users (what can they do? post problems? vote? view?)
+- Human users — registration is via Google OAuth only (email stored as mandatory field). What can they do? post problems? vote? view?
 - AI bots/agents (how do they register? how do they receive tasks? what do they submit?)
 - Admins (what controls exist?)
 - Any other roles found in the code
@@ -35,7 +35,7 @@ Do NOT skip anything. Do NOT summarize with "and more..." â€” be exhaustive
 - What is the "end state" â€” when is a problem considered solved?
 
 **User Journeys â€” step by step for each user type:**
-- Human user: signup â†’ what they see â†’ what actions they take â†’ what outcome they get
+- Human user: Google OAuth signup (email captured) â†’ onboarding (username) â†’ what they see â†’ what actions they take â†’ what outcome they get
 - AI bot/agent: registration â†’ authentication â†’ receiving tasks â†’ submitting work â†’ getting scored
 - Admin/moderator: what controls/dashboards exist, what actions can they take
 
@@ -86,6 +86,8 @@ Document rules that govern how the platform behaves. Look for things like:
 - **CONFIRM: Is the database PostgreSQL?** Check docker-compose, .env, connection strings, or ORM config
 - Document the database connection setup (where is the DB hosted? inside Coolify? external?)
 - List any seed data or initial data scripts
+- **Verify the `users` table has an `email` column** (varchar 255, NOT NULL, unique index `users_email_idx`)
+- **Verify the `oauth_provider` enum is `['google']` only** (Twitter removed)
 
 ### SECTION 3: API ROUTES â€” COMPLETE LIST
 - Find EVERY API route/endpoint in the project
@@ -101,8 +103,7 @@ Document rules that govern how the platform behaves. Look for things like:
 
 ### SECTION 4: AUTHENTICATION & AUTHORIZATION
 - Document the COMPLETE auth setup:
-  - Google OAuth configuration (client ID setup, callback URLs, scopes)
-  - X (Twitter) OAuth configuration (same details)
+  - Google OAuth configuration (Google-only; Twitter/X removed) — client ID setup, callback URLs, scopes
   - Any other auth providers
 - How do human users log in? Copy the auth configuration code (NextAuth config, Supabase auth, custom JWT, etc.)
 - How do bots authenticate? (API key flow, OAuth, tokens?)
@@ -111,6 +112,35 @@ Document rules that govern how the platform behaves. Look for things like:
 - Session/token expiry settings
 - Any admin role checking logic
 - Copy ALL auth middleware files completely
+- **OAuth cookie security:** Document that the Google OAuth state cookie is signed (`signed: true`) and scoped to `/api/v1/auth`. Twitter OAuth has been removed.
+
+**Email storage verification:**
+```bash
+echo "=== Email column in schema ==="
+grep -n "email" apps/api/src/db/schema.ts | head -5
+echo "↑ Should show email varchar(255) NOT NULL + uniqueIndex"
+
+echo ""
+echo "=== OAuth provider enum ==="
+grep "oauthProviderEnum" apps/api/src/db/schema.ts
+echo "↑ Should show ['google'] only (no twitter)"
+
+echo ""
+echo "=== Email stored in Google callback ==="
+grep -n "email" apps/api/src/routes/auth.routes.ts | grep -v "//" | head -10
+echo "↑ Should show email being stored and returned"
+
+echo ""
+echo "=== Email in /auth/me response ==="
+grep -A15 "auth/me" apps/api/src/routes/auth.routes.ts | grep "email"
+echo "↑ Should show email in response object"
+
+echo ""
+echo "=== No Twitter routes ==="
+grep -c "auth/twitter" apps/api/src/routes/auth.routes.ts
+echo "↑ Should be 0"
+```
+
 - **IMPORTANT**: The platform currently uses `opensolve.io` as the domain in auth callbacks and all code. Document EVERY place where `opensolve.io` appears in the codebase (file + line number) because we will need to migrate to `opensolve.ai`
   - Run: `grep -rn "opensolve\.io" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" --include="*.json" --include="*.env*" --include="*.yml" --include="*.yaml" --include="*.toml" --include="*.md" .`
   - List every match with file path and line number
@@ -189,7 +219,7 @@ grep -rn "LIMIT\|MAX\|MIN\|RATE\|TIMEOUT\|THRESHOLD\|TARGET\|POINTS\|SCORE\|WEIG
 - What external services are used?
   - **Hosting**: Hetzner server with Coolify â€” document the Coolify configuration
   - **Database**: Confirm PostgreSQL â€” is it inside Coolify? Separate service?
-  - **Authentication**: Google OAuth, X (Twitter) OAuth â€” document provider setup
+  - **Authentication**: Google OAuth only (Twitter/X removed) â€” document provider setup
   - **Any others**: Redis, Elasticsearch, email service, CDN, etc.
 - GitHub integration â€” document how the repo is connected to deployment
   - Does Coolify auto-deploy on push? What branch?
@@ -367,8 +397,14 @@ echo "=== JWT secret defaults ==="
 grep -rn "JWT_SECRET\|jwt.*secret" --include="*.ts" --include="*.yml" . | grep -v node_modules | grep -v .next
 
 echo ""
-echo "=== OAuth PKCE security ==="
-grep -rn "code_challenge\|code_verifier" --include="*.ts" apps/api/src/
+echo "=== Signed OAuth cookies ==="
+grep -c "signed: true" apps/api/src/routes/auth.routes.ts
+echo "↑ Should be 1 (google state cookie only — twitter removed)"
+
+echo ""
+echo "=== unsignCookie usage ==="
+grep -c "unsignCookie" apps/api/src/routes/auth.routes.ts
+echo "↑ Should be 1 (google callback only — twitter removed)"
 
 echo ""
 echo "=== Hardcoded credentials ==="
@@ -376,7 +412,6 @@ grep -rn "password.*=.*['\"]" --include="*.ts" apps/api/src/ | grep -v node_modu
 ```
 
 Known issues to flag:
-- Is the OAuth PKCE implementation using a hardcoded challenge value instead of a random one?
 - Are debug endpoints using a hardcoded access key?
 - Are there any default/weak secrets that could be in production?
 - Is the rate limiter using in-memory store (resets on restart) vs Redis-backed?
@@ -420,6 +455,50 @@ Document the current state of regulatory compliance:
 - What personal data is collected per database table? (Map each table to GDPR data categories)
 - Are data subject rights endpoints implemented? (Account deletion, data export)
 - Is there a data retention policy?
+- Does the privacy policy disclose email collection and its legal basis (GDPR Art. 6(1)(f) legitimate interest)?
+- Does a Legitimate Interest Assessment exist? (`docs/LEGITIMATE-INTEREST-ASSESSMENT.md`)
+- Does the login page have an Art. 13 transparency notice about email storage?
+- Does the settings page display the user's email as read-only?
+- Is email included in the GDPR data export (Art. 20)?
+- Is email deleted on account deletion (Art. 17)?
+
+**Email & Compliance Verification:**
+```bash
+echo "=== LIA document exists ==="
+ls -la docs/LEGITIMATE-INTEREST-ASSESSMENT.md 2>/dev/null && echo "✅ Exists" || echo "❌ Missing"
+
+echo ""
+echo "=== Privacy policy covers email ==="
+grep -c -i "email address" apps/web/src/app/privacy/page.tsx
+echo "↑ Should be 3+ mentions"
+
+echo ""
+echo "=== Privacy policy states legitimate interest ==="
+grep -c -i "legitimate interest" apps/web/src/app/privacy/page.tsx
+echo "↑ Should be 1+"
+
+echo ""
+echo "=== Login page email disclosure ==="
+grep -c "service notification\|Privacy Policy" apps/web/src/app/auth/login/page.tsx
+echo "↑ Should be 1+ (transparency notice)"
+
+echo ""
+echo "=== Settings page email display ==="
+grep -c "email" apps/web/src/app/settings/page.tsx
+echo "↑ Should be 2+ (label + display)"
+
+echo ""
+echo "=== GDPR export includes email ==="
+grep -A20 "gdpr/export" apps/api/src/routes/auth.routes.ts | grep -c "email"
+echo "↑ Should be 1+"
+```
+
+**Compliance status:**
+- **Privacy policy:** YES (`/privacy`)
+- **Email disclosure at login:** YES (Art. 13 transparency notice on `/auth/login`)
+- **Legitimate Interest Assessment:** YES (`docs/LEGITIMATE-INTEREST-ASSESSMENT.md`)
+- **Email in GDPR export:** YES (included in `POST /auth/gdpr/export`)
+- **Email deleted on account deletion:** YES (cascade from user row deletion)
 
 **AI-Specific Regulation:**
 - Is AI-generated content labeled in the UI?
@@ -430,6 +509,19 @@ Document the current state of regulatory compliance:
 - Is there an Impressum / Legal Notice page? (May be required for EU-hosted services)
 - Is there a Hetzner Data Processing Agreement (DPA) in place?
 - What is the operator's legal structure? (Individual, company, etc.)
+
+### SECTION 18: SESSION CHANGE LOG
+
+Document the known applied sessions that have modified the codebase:
+
+- **Session 1:** Email schema — add mandatory email column to users, remove Twitter from OAuth enum
+- **Session 2:** Auth routes — remove Twitter OAuth, store email from Google, add email to /me and GDPR export, comprehensive tests
+- **Session 3:** Server cleanup — delete twitter.service.ts, remove all remaining Twitter references
+- **Session 4:** Frontend — Google-only login page, email display in settings, Twitter UI removal
+- **Session 5:** Legal pages — privacy policy email disclosure, terms update, Twitter removal
+- **Session 6:** Documentation — update API docs, SDK docs, skill file, reference bots, README
+- **Session 7:** Compliance — Legitimate Interest Assessment, GDPR plan update, master compliance test
+- **Session 8:** Snapshot prompt update — reflect email storage and Twitter removal in project documentation tooling
 
 ---
 
@@ -445,15 +537,17 @@ Rules:
 - Keep real values for all non-secret configuration (numbers, limits, enums, etc.)
 - If something from the list above doesn't exist in the project, write: `**NOT IMPLEMENTED** â€” This feature does not exist in the current codebase.`
 - At the end, add a section called "QUICK STATS" with counts:
-  - Total API routes
+  - Total API routes (note: reduced by 2 after Twitter auth removal)
   - Total DB tables
   - Total frontend pages
-  - Total environment variables
+  - Total environment variables (note: reduced by 3-4 after Twitter env vars removed)
+  - Total test files (note: increased by auth-email.test.ts, twitter-removed.test.ts)
   - Total TODO/FIXME comments found
   - Total places `opensolve.io` appears in the codebase
   - Lines of code (run `find . -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" | grep -v node_modules | grep -v .next | xargs wc -l 2>/dev/null | tail -1`)
   - Security: Number of exposed ports (should be 0 in prod compose, 3 via host firewall)
   - Security: Number of services with required auth (should be 3: postgres, redis, meilisearch)
+  - API service files (note: reduced by 1 after twitter.service.ts deleted)
 
 Target length: This document should be thorough. 2000-5000 lines is expected and fine. Don't trim for brevity.
 
