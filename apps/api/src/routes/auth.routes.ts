@@ -4,7 +4,7 @@ import { users, bots, solutions, comparisons, flags, badges, problems, activityL
 import { eq, and, or } from 'drizzle-orm';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth.middleware.js';
-import { generateApiKey, hashApiKey, getApiKeyPrefix, generateOAuthState, generateCodeVerifier, generateCodeChallenge } from '../utils/crypto.js';
+import { generateApiKey, hashApiKey, getApiKeyPrefix, generateOAuthState } from '../utils/crypto.js';
 import { sanitizeMiddleware } from '../middleware/sanitize.middleware.js';
 import { redis } from '../config/redis.js';
 
@@ -12,12 +12,6 @@ import { redis } from '../config/redis.js';
 const googleCallbackSchema = z.object({
   code: z.string(),
   state: z.string().optional(),
-});
-
-const twitterCallbackSchema = z.object({
-  code: z.string(),
-  state: z.string().optional(),
-  code_verifier: z.string().optional(),
 });
 
 const RESERVED_BOT_NAMES = ['admin', 'opensolve', 'system', 'moderator', 'official'];
@@ -62,7 +56,7 @@ export async function authRoutes(fastify: FastifyInstance) {
       client_id: process.env.GOOGLE_CLIENT_ID || '',
       redirect_uri: process.env.GOOGLE_CALLBACK_URL || '',
       response_type: 'code',
-      scope: 'openid',
+      scope: 'openid email',
       access_type: 'offline',
       state,
     });
@@ -113,10 +107,22 @@ export async function authRoutes(fastify: FastifyInstance) {
 
       const tokens = await tokenRes.json() as { id_token: string };
 
-      // Extract "sub" (Google user ID) from the ID token JWT payload
+      // Extract claims from the ID token JWT payload
       const payloadB64 = tokens.id_token.split('.')[1];
-      const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString()) as { sub: string };
+      const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString()) as {
+        sub: string;
+        email?: string;
+        email_verified?: boolean;
+      };
       const oauthId = payload.sub;
+      const googleEmail = payload.email;
+      const emailVerified = payload.email_verified;
+
+      if (!googleEmail || !emailVerified) {
+        return reply.code(400).send({
+          error: 'A verified email address is required. Please use a Google account with a verified email.',
+        });
+      }
 
       // Upsert user
       const existingUsers = await db
@@ -133,19 +139,31 @@ export async function authRoutes(fastify: FastifyInstance) {
       let user;
       if (existingUsers.length > 0) {
         user = existingUsers[0];
+        const updates: Record<string, unknown> = { updatedAt: new Date() };
+        if (user.email !== googleEmail) {
+          updates.email = googleEmail;
+        }
         await db.update(users)
-          .set({
-            updatedAt: new Date(),
-          })
+          .set(updates)
           .where(eq(users.id, user.id));
       } else {
-        const [newUser] = await db.insert(users).values({
-          oauthProvider: 'google',
-          oauthId: oauthId,
-          username: null,
-          onboardingComplete: false,
-        }).returning();
-        user = newUser;
+        try {
+          const [newUser] = await db.insert(users).values({
+            oauthProvider: 'google',
+            oauthId: oauthId,
+            email: googleEmail,
+            username: null,
+            onboardingComplete: false,
+          }).returning();
+          user = newUser;
+        } catch (error: any) {
+          if (error.code === '23505' && error.constraint?.includes('email')) {
+            return reply.code(409).send({
+              error: 'This email address is already associated with another account.',
+            });
+          }
+          throw error;
+        }
       }
 
       // Create JWT
@@ -161,142 +179,6 @@ export async function authRoutes(fastify: FastifyInstance) {
       return reply.redirect(process.env.WEB_URL || 'http://localhost:3000');
     } catch (err) {
       request.log.error(err, 'Google OAuth failed');
-      return reply.code(500).send({ error: 'OAuth authentication failed' });
-    }
-  });
-
-  // ===== TWITTER/X OAUTH =====
-
-  // Step 1: Redirect to Twitter
-  fastify.get('/auth/twitter', async (_request, reply) => {
-    const state = generateOAuthState();
-    const codeVerifier = generateCodeVerifier();
-    const codeChallenge = generateCodeChallenge(codeVerifier);
-
-    void reply.setCookie('oauth_twitter', JSON.stringify({ state, codeVerifier }), { ...cookieOptions(600), path: '/api/v1/auth', signed: true });
-
-    const params = new URLSearchParams({
-      response_type: 'code',
-      client_id: process.env.TWITTER_CLIENT_ID || '',
-      redirect_uri: process.env.TWITTER_CALLBACK_URL || '',
-      scope: 'tweet.read users.read offline.access',
-      state,
-      code_challenge: codeChallenge,
-      code_challenge_method: 'S256',
-    });
-    return reply.redirect(`https://twitter.com/i/oauth2/authorize?${params}`);
-  });
-
-  // Step 2: Twitter callback
-  fastify.get('/auth/twitter/callback', async (request, reply) => {
-    const { code, state } = request.query as { code?: string; state?: string };
-    const rawTwitterCookie = request.cookies?.oauth_twitter;
-
-    if (!state || !rawTwitterCookie) {
-      return reply.status(400).send({
-        error: 'OAuth session expired or cookies are disabled. Please try again.'
-      });
-    }
-
-    const twitterCookieResult = request.unsignCookie(rawTwitterCookie);
-    if (!twitterCookieResult.valid) {
-      return reply.status(403).send({ error: 'Invalid OAuth state cookie' });
-    }
-
-    let storedState: string;
-    let codeVerifier: string;
-    try {
-      const parsed = JSON.parse(twitterCookieResult.value!);
-      storedState = parsed.state;
-      codeVerifier = parsed.codeVerifier;
-    } catch {
-      return reply.status(400).send({ error: 'Invalid OAuth session. Please try again.' });
-    }
-
-    if (state !== storedState) {
-      request.log.warn({ state, storedState }, 'Twitter OAuth state mismatch — possible CSRF');
-      return reply.status(403).send({
-        error: 'OAuth state mismatch. Please try logging in again.'
-      });
-    }
-
-    void reply.clearCookie('oauth_twitter', { path: '/api/v1/auth' });
-
-    const validated = twitterCallbackSchema.parse({ code, state });
-
-    try {
-      const clientId = process.env.TWITTER_CLIENT_ID || '';
-      const clientSecret = process.env.TWITTER_CLIENT_SECRET || '';
-      const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-
-      // Exchange code for tokens
-      const tokenRes = await fetch('https://api.twitter.com/2/oauth2/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          Authorization: `Basic ${basicAuth}`,
-        },
-        body: new URLSearchParams({
-          code: validated.code,
-          grant_type: 'authorization_code',
-          redirect_uri: process.env.TWITTER_CALLBACK_URL || '',
-          code_verifier: codeVerifier,
-        }),
-      });
-
-      const tokens = await tokenRes.json() as { access_token: string };
-
-      // Get user profile from X
-      const profileRes = await fetch('https://api.twitter.com/2/users/me', {
-        headers: { Authorization: `Bearer ${tokens.access_token}` },
-      });
-      const profileData = await profileRes.json() as {
-        data: { id: string; name: string; username: string };
-      };
-      const profile = profileData.data;
-
-      // Upsert user
-      const existingUsers = await db
-        .select()
-        .from(users)
-        .where(
-          and(
-            eq(users.oauthProvider, 'twitter'),
-            eq(users.oauthId, profile.id)
-          )
-        )
-        .limit(1);
-
-      let user;
-      if (existingUsers.length > 0) {
-        user = existingUsers[0];
-        await db.update(users)
-          .set({
-            updatedAt: new Date(),
-          })
-          .where(eq(users.id, user.id));
-      } else {
-        const [newUser] = await db.insert(users).values({
-          oauthProvider: 'twitter',
-          oauthId: profile.id,
-          username: null,
-          onboardingComplete: false,
-        }).returning();
-        user = newUser;
-      }
-
-      // Create JWT
-      const token = fastify.jwt.sign({
-        id: user.id,
-        username: user.username,
-        role: user.role,
-      });
-
-      void reply.setCookie('token', token, cookieOptions(3600));
-
-      return reply.redirect(process.env.WEB_URL || 'http://localhost:3000');
-    } catch (err) {
-      request.log.error(err, 'Twitter OAuth failed');
       return reply.code(500).send({ error: 'OAuth authentication failed' });
     }
   });
@@ -320,6 +202,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     return reply.code(200).send({
       id: user.id,
       username: user.username || null,
+      email: user.email,
       role: user.role,
       botName: user.botName || null,
       hasApiKey: !!user.apiKeyHash,
@@ -649,6 +532,7 @@ export async function authRoutes(fastify: FastifyInstance) {
       const [user] = await db.select({
         id: users.id,
         username: users.username,
+        email: users.email,
         oauthProvider: users.oauthProvider,
         onboardingComplete: users.onboardingComplete,
         createdAt: users.createdAt,
@@ -672,6 +556,7 @@ export async function authRoutes(fastify: FastifyInstance) {
         account: {
           userId: user.id,
           username: user.username,
+          email: user.email,
           oauthProvider: user.oauthProvider,
           accountCreated: user.createdAt,
           onboardingComplete: user.onboardingComplete,
@@ -921,7 +806,6 @@ export async function authRoutes(fastify: FastifyInstance) {
       // 11. Clear ALL cookies — JWT + OAuth state cookies
       void reply.setCookie('token', '', cookieOptions(0));
       void reply.clearCookie('oauth_state', { path: '/api/v1/auth' });
-      void reply.clearCookie('oauth_twitter', { path: '/api/v1/auth' });
 
       return reply.status(200).send({
         success: true,
