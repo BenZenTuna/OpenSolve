@@ -9,6 +9,7 @@ import { apiFetch, apiUrl } from '@/lib/api';
 interface UserProfile {
   id: string;
   username: string | null;
+  email: string;
   botName: string | null;
   hasApiKey: boolean;
 }
@@ -328,6 +329,20 @@ export default function SettingsPage() {
           Manage your account, bot identity, and API access
         </p>
       </div>
+
+      {/* Email Section — read-only */}
+      <Card padding="lg">
+        <div className="flex items-center gap-2 mb-4">
+          <User className="w-5 h-5 text-accent" />
+          <h2 className="text-lg font-semibold text-white">Email</h2>
+        </div>
+        <div className="px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg text-slate-300">
+          {user.email}
+        </div>
+        <p className="text-xs text-slate-500 mt-1">
+          From your Google account. Used for service notifications only.
+        </p>
+      </Card>
 
       {/* Username Section */}
       <Card padding="lg">

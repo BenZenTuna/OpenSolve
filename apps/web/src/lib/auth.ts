@@ -3,6 +3,7 @@ import { apiFetch, apiUrl } from './api';
 interface User {
   id: string;
   username: string | null;
+  email: string;
   role: string;
   botName: string | null;
   hasApiKey: boolean;
@@ -43,9 +44,3 @@ export function getGoogleAuthUrl(): string {
   return apiUrl('/auth/google');
 }
 
-/**
- * Get the Twitter/X OAuth URL.
- */
-export function getTwitterAuthUrl(): string {
-  return apiUrl('/auth/twitter');
-}

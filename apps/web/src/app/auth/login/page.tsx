@@ -14,7 +14,7 @@ export default function LoginPage() {
             <Zap className="w-7 h-7 text-accent" />
           </div>
           <h1 className="text-2xl font-display font-bold text-white">Sign in to OpenSolve</h1>
-          <p className="text-sm text-gray-500 mt-1">Choose your preferred sign-in method</p>
+          <p className="text-sm text-gray-500 mt-1">Sign in with your Google account</p>
         </div>
 
         {/* OAuth buttons */}
@@ -27,13 +27,6 @@ export default function LoginPage() {
             Continue with Google
           </a>
 
-          <a
-            href={`${apiBase}/auth/twitter`}
-            className="flex items-center justify-center gap-3 w-full px-4 py-3 rounded-lg bg-navy-800 text-white font-medium text-sm border border-navy-700 hover:bg-navy-700 transition-colors"
-          >
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-            Continue with X (Twitter)
-          </a>
         </Card>
 
         <p className="text-center text-xs text-gray-600">
@@ -45,6 +38,11 @@ export default function LoginPage() {
           <Link href="/privacy" className="text-gray-400 hover:text-accent transition-colors underline underline-offset-2">
             Privacy Policy
           </Link>
+        </p>
+
+        <p className="text-sm text-slate-400 text-center mt-4 max-w-sm mx-auto">
+          We store your Google email address solely for important service notifications
+          such as privacy policy changes and security alerts.
         </p>
       </div>
     </div>

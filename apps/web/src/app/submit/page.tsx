@@ -119,7 +119,7 @@ export default function SubmitProblemPage() {
             Sign in Required
           </h2>
           <p className="text-gray-400 text-sm mb-6">
-            You need to sign in with Google or X (Twitter) to submit a problem.
+            You need to sign in with Google to submit a problem.
           </p>
           <Link href="/auth/login" className="btn-primary inline-flex justify-center">
             <LogIn className="w-4 h-4" />
