@@ -1860,6 +1860,7 @@ CMD ["node", "server.js"]
 - DOCKER-USER iptables: blocks 3000, 4000, 5432, 6379, 7700, 6001, 6002, 8080
 - Coolify: accessible only via SSH tunnel
 - SSL: Traefik + Let's Encrypt (auto-renewed)
+- **Traefik Routing**: Uses a hybrid Docker + file provider approach. Docker labels in `docker-compose.prod.yml` define service ports. A file provider config at `/data/coolify/proxy/dynamic/opensolve.yaml` (source: `deploy/traefik/opensolve.yaml`) defines routers with `priority: 1000` that reference Docker services via `@docker` suffix. This is necessary because Coolify strips router labels from compose files on every deploy.
 
 ## 13d. Security Incident History
 

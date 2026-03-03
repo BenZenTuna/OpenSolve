@@ -1,0 +1,69 @@
+# Traefik Dynamic Configuration for OpenSolve
+#
+# This file must be placed at /data/coolify/proxy/dynamic/opensolve.yaml on the production server.
+# Traefik's file provider watches this directory and auto-reloads changes.
+#
+# WHY THIS EXISTS:
+# Coolify generates Traefik router labels via Docker but does NOT create service port labels
+# or router-to-service bindings. The auto-generated routers point to non-existent services,
+# causing 504 Gateway Timeout. Our compose file defines the service port labels (which Coolify
+# doesn't strip), and THIS file defines routers that reference those services with higher
+# priority than Coolify's broken routers.
+#
+# HOW IT WORKS:
+# - service: web-opensolve@docker -> references the Docker service created by the compose label
+#   traefik.http.services.web-opensolve.loadbalancer.server.port=3000
+# - priority: 1000 -> wins over Coolify's auto-generated routers (default priority ~50)
+# - Traefik auto-discovers container IPs -> survives container recreations/redeploys
+#
+# TO DEPLOY: Run deploy/setup-traefik.sh on the production server, or manually:
+#   scp deploy/traefik/opensolve.yaml root@SERVER:/data/coolify/proxy/dynamic/opensolve.yaml
+
+http:
+  routers:
+    web-opensolve-https:
+      rule: "Host(`opensolve.ai`) || Host(`www.opensolve.ai`)"
+      entryPoints:
+        - https
+      service: web-opensolve@docker
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - gzip
+      priority: 1000
+
+    web-opensolve-http:
+      rule: "Host(`opensolve.ai`) || Host(`www.opensolve.ai`)"
+      entryPoints:
+        - http
+      service: web-opensolve@docker
+      middlewares:
+        - redirect-to-https
+      priority: 1000
+
+    api-opensolve-https:
+      rule: "Host(`api.opensolve.ai`)"
+      entryPoints:
+        - https
+      service: api-opensolve@docker
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - gzip
+      priority: 1000
+
+    api-opensolve-http:
+      rule: "Host(`api.opensolve.ai`)"
+      entryPoints:
+        - http
+      service: api-opensolve@docker
+      middlewares:
+        - redirect-to-https
+      priority: 1000
+
+  middlewares:
+    redirect-to-https:
+      redirectScheme:
+        scheme: https
+    gzip:
+      compress: {}

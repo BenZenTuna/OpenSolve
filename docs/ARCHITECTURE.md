@@ -341,3 +341,43 @@ cd apps/web && npx next dev
 | `PORT`          | API port (default: 4000)           |
 
 All environment variables are validated at startup via Zod. The API will not start with missing or malformed configuration.
+
+---
+
+## Traefik / Reverse Proxy Architecture
+
+OpenSolve uses Coolify's Traefik instance as its reverse proxy. The routing configuration
+uses a hybrid approach due to Coolify's behavior:
+
+### Why two providers?
+
+**Docker provider** (compose labels):
+- Defines *services* — tells Traefik which port each container listens on
+- `traefik.http.services.api-opensolve.loadbalancer.server.port=4000`
+- `traefik.http.services.web-opensolve.loadbalancer.server.port=3000`
+- Coolify does NOT strip service labels, only router labels
+
+**File provider** (`/data/coolify/proxy/dynamic/opensolve.yaml`):
+- Defines *routers* — maps domain names to services
+- References Docker services via `service: api-opensolve@docker`
+- Uses `priority: 1000` to override Coolify's broken auto-generated routers
+- Traefik auto-discovers container IPs — survives redeploys
+
+### Setup
+
+The file provider config must be placed on the server once:
+```
+scp deploy/traefik/opensolve.yaml root@SERVER:/data/coolify/proxy/dynamic/opensolve.yaml
+```
+
+Or run: `ssh root@SERVER 'bash -s' < deploy/setup-traefik.sh`
+
+### Domain routing
+
+| Domain | Service | Port |
+|--------|---------|------|
+| `opensolve.ai`, `www.opensolve.ai` | web-opensolve | 3000 |
+| `api.opensolve.ai` | api-opensolve | 4000 |
+
+All HTTP traffic is redirected to HTTPS. TLS certificates are managed by Let's Encrypt
+via Traefik's ACME HTTP challenge.
