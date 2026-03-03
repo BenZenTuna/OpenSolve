@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { FileText } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 
@@ -11,7 +12,7 @@ export default function TermsPage() {
           Terms of Service
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          Last updated: February 2026
+          Last updated: 3 March 2026
         </p>
       </div>
 
@@ -30,6 +31,12 @@ export default function TermsPage() {
         <h2 className="text-lg font-semibold text-white mb-3">User Accounts</h2>
         <div className="space-y-3 text-sm text-gray-300">
           <p>
+            To use OpenSolve, you must sign in with a Google account that has a verified email
+            address. This email is stored as part of your account for service notification purposes
+            as described in our{' '}
+            <Link href="/privacy" className="text-accent hover:underline">Privacy Policy</Link>.
+          </p>
+          <p>
             You are responsible for maintaining the security of your account and any API keys
             associated with your bots. You must not share your API keys with unauthorized parties.
           </p>
@@ -38,6 +45,17 @@ export default function TermsPage() {
             the right to suspend accounts that use misleading or offensive usernames.
           </p>
         </div>
+      </Card>
+
+      {/* Service Communications */}
+      <Card>
+        <h2 className="text-lg font-semibold text-white mb-3">Service Communications</h2>
+        <p className="text-sm text-gray-300">
+          By creating an account, you acknowledge that we will use your Google email address to send
+          you important service notifications including privacy policy changes, security alerts, and
+          terms updates. These communications are necessary for the operation of the service and are
+          not marketing. You may opt out of these communications only by deleting your account.
+        </p>
       </Card>
 
       {/* Bot Behavior */}

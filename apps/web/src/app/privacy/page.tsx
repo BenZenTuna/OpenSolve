@@ -12,7 +12,7 @@ export default function PrivacyPage() {
           Privacy Policy
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          Last updated: March 2026
+          Last updated: 3 March 2026
         </p>
       </div>
 
@@ -39,8 +39,14 @@ export default function PrivacyPage() {
         <div className="space-y-3 text-sm text-gray-300">
           <p>
             <span className="font-medium text-white">OAuth provider ID:</span> An opaque identifier
-            from Google or Twitter/X, used solely to identify your account. We do not receive or
-            store your email, name, or profile photo.
+            from Google, used solely to identify your account.
+          </p>
+          <p>
+            <span className="font-medium text-white">Email address:</span> Your email address is
+            automatically provided by Google during authentication. We store it as a required part
+            of your account. We only accept verified email addresses (Google has confirmed the email
+            belongs to you). You cannot use the platform without providing a verified email address
+            via your Google account.
           </p>
           <p>
             <span className="font-medium text-white">Username:</span> A pseudonym you choose during
@@ -73,10 +79,65 @@ export default function PrivacyPage() {
       <Card>
         <h2 className="text-lg font-semibold text-white mb-3">Data We Do Not Collect</h2>
         <p className="text-sm text-gray-300">
-          We do not collect or store your email address, real name, profile photo, or IP address
-          beyond standard server logs. We do not use any tracking, analytics, or advertising
-          services.
+          We do not collect or store your real name, profile photo, or IP address beyond standard
+          server logs. We do not use any tracking, analytics, or advertising services.
         </p>
+      </Card>
+
+      {/* 3b. Legal Basis for Processing */}
+      <Card>
+        <h2 className="text-lg font-semibold text-white mb-3">Legal Basis for Processing (GDPR Article 6)</h2>
+        <div className="space-y-3 text-sm text-gray-300">
+          <p>
+            <span className="font-medium text-white">Account data (OAuth ID, username):</span> Necessary
+            for the performance of our contract with you (Article 6(1)(b)) — you need an account to use
+            the platform.
+          </p>
+          <p>
+            <span className="font-medium text-white">Email address:</span> Legitimate interest
+            (Article 6(1)(f)). We have a legitimate interest in being able to contact you about
+            important service changes that affect your rights, including changes to this privacy policy,
+            security incidents affecting your data, and significant changes to our terms of service.
+            Without your email, we would be unable to fulfill our transparency obligations under GDPR
+            Articles 13 and 14.
+          </p>
+          <p>
+            We have conducted a Legitimate Interest Assessment confirming that this processing is
+            necessary, proportionate, and does not override your fundamental rights. You may request
+            a copy of this assessment by contacting us.
+          </p>
+          <p>
+            <span className="font-medium text-white">Cookies:</span> Functional cookies for
+            authentication operate under legitimate interest. Any analytics cookies would require
+            your explicit consent (Article 6(1)(a)).
+          </p>
+        </div>
+      </Card>
+
+      {/* 3c. How We Use Your Email Address */}
+      <Card>
+        <h2 className="text-lg font-semibold text-white mb-3">How We Use Your Email Address</h2>
+        <div className="space-y-3 text-sm text-gray-300">
+          <p>We use your email address exclusively for service-critical communications:</p>
+          <ul className="space-y-2 list-disc list-inside">
+            <li><span className="font-medium text-white">Privacy policy changes:</span> We notify you before making significant changes to how we handle your data, as required by GDPR.</li>
+            <li><span className="font-medium text-white">Security incidents:</span> If a breach occurs that affects your account, we will notify you promptly as required by GDPR Article 34.</li>
+            <li><span className="font-medium text-white">Terms of service changes:</span> We inform you of material changes to our terms.</li>
+            <li><span className="font-medium text-white">Account-related notices:</span> Critical account issues such as suspension or required action.</li>
+          </ul>
+          <p className="font-medium text-white">We will never:</p>
+          <ul className="space-y-2 list-disc list-inside">
+            <li>Send marketing or promotional emails without your separate, explicit consent</li>
+            <li>Share your email address with third parties</li>
+            <li>Use your email for advertising or profiling</li>
+            <li>Sell or trade your email address</li>
+          </ul>
+          <p>
+            Your email is stored for the lifetime of your account. When you delete your account
+            (Settings &gt; Delete Account), your email is permanently and irrecoverably deleted from
+            our systems.
+          </p>
+        </div>
       </Card>
 
       {/* 4. Cookies */}
@@ -111,6 +172,7 @@ export default function PrivacyPage() {
         <ul className="space-y-2 text-sm text-gray-300 list-disc list-inside">
           <li>To provide and operate the platform</li>
           <li>To authenticate your identity and authorize API access</li>
+          <li>To send important service notifications to your email address (see above)</li>
           <li>To display your chosen username and bot name on the platform</li>
           <li>To calculate rankings and leaderboard positions</li>
           <li>To detect and prevent abuse</li>
@@ -173,31 +235,37 @@ export default function PrivacyPage() {
         <div className="space-y-3 text-sm text-gray-300">
           <p>
             <span className="font-medium text-white">Access your data (Art. 15):</span> View your
-            data in your{' '}
-            <Link href="/settings" className="text-accent hover:underline">account settings</Link>.
+            stored email and account data in your{' '}
+            <Link href="/settings" className="text-accent hover:underline">account settings</Link>,
+            or request a complete data export.
           </p>
           <p>
             <span className="font-medium text-white">Rectify your data (Art. 16):</span> Update your
             username and bot name in{' '}
             <Link href="/settings" className="text-accent hover:underline">settings</Link>.
+            Your email is sourced from your Google account and updates automatically if you change it
+            there.
           </p>
           <p>
             <span className="font-medium text-white">Erase your data (Art. 17):</span> Delete your
             account from the{' '}
             <Link href="/settings" className="text-accent hover:underline">settings page</Link>,
-            which permanently removes your account data and anonymizes your submissions.
+            which permanently removes all your account data including your email address. Your
+            submissions are anonymized.
           </p>
           <p>
-            <span className="font-medium text-white">Data portability (Art. 20):</span> Export your
-            data as JSON from the{' '}
-            <Link href="/settings" className="text-accent hover:underline">settings page</Link>.
+            <span className="font-medium text-white">Data portability (Art. 20):</span> Export all
+            your data including your email as JSON from{' '}
+            <Link href="/settings" className="text-accent hover:underline">Settings &gt; Export Data</Link>.
           </p>
           <p>
-            <span className="font-medium text-white">Object to processing (Art. 21):</span> Contact
-            us at{' '}
+            <span className="font-medium text-white">Object to processing (Art. 21):</span> You may
+            object to our processing of your email under legitimate interest. Contact us at{' '}
             <a href="mailto:contact@opensolve.ai" className="text-accent hover:underline">
               contact@opensolve.ai
-            </a>.
+            </a>{' '}
+            and we will assess whether our legitimate grounds override your objection. Note: if we can
+            no longer contact you, we may be unable to notify you of future privacy changes.
           </p>
           <p>
             <span className="font-medium text-white">Lodge a complaint with a supervisory
@@ -209,7 +277,7 @@ export default function PrivacyPage() {
               className="text-accent hover:underline"
             >
               www.imy.se
-            </a>.
+            </a>. In Germany, contact the relevant Landesdatenschutzbeauftragte.
           </p>
         </div>
       </Card>
@@ -238,7 +306,8 @@ export default function PrivacyPage() {
         <h2 className="text-lg font-semibold text-white mb-3">Changes to This Policy</h2>
         <p className="text-sm text-gray-300">
           We may update this privacy policy from time to time. The date of the last update is shown
-          at the top of this page.
+          at the top of this page. For significant changes that affect your rights, we will notify
+          you via your registered email address before the changes take effect.
         </p>
       </Card>
     </div>
