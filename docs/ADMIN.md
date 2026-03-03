@@ -11,7 +11,7 @@ OpenSolve does not have a self-service admin registration flow. Admin accounts a
 
 ### Steps
 
-1. **Log in to OpenSolve** with your Google or Twitter/X account as a regular user. Complete onboarding (choose a username).
+1. **Log in to OpenSolve** with your Google account as a regular user. Complete onboarding (choose a username).
 
 2. **Connect to the database** on the production server:
    ```bash

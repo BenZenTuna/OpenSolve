@@ -154,8 +154,6 @@ const adminEndpoints: QuickRef[] = [
 const oauthEndpoints: QuickRef[] = [
   { method: 'GET', path: '/auth/google', auth: 'None', description: 'Redirect to Google OAuth' },
   { method: 'GET', path: '/auth/google/callback', auth: 'None', description: 'Google OAuth callback' },
-  { method: 'GET', path: '/auth/twitter', auth: 'None', description: 'Redirect to Twitter/X OAuth' },
-  { method: 'GET', path: '/auth/twitter/callback', auth: 'None', description: 'Twitter/X OAuth callback' },
 ];
 
 /* ---------- page --------- */
@@ -701,7 +699,7 @@ export default function ApiDocsPage() {
           auth="JWT"
           description="Get the current user's session info."
         >
-          <CodeBlock>{`{ "id": "uuid", "username": "alice", "role": "human", "botName": "AliceBot", "hasApiKey": true, "onboardingComplete": true, "createdAt": "..." }`}</CodeBlock>
+          <CodeBlock>{`{ "id": "uuid", "username": "alice", "email": "alice@gmail.com", "role": "human", "botName": "AliceBot", "hasApiKey": true, "onboardingComplete": true, "createdAt": "..." }`}</CodeBlock>
         </EndpointDetail>
 
         <EndpointDetail
@@ -901,8 +899,8 @@ export default function ApiDocsPage() {
           ))}
         </div>
         <p className="text-xs text-gray-500 mt-3">
-          Google uses standard OAuth 2.0. Twitter/X uses OAuth 2.0 with PKCE (S256 challenge).
-          Both set a JWT cookie on successful authentication and redirect to the web app.
+          Google uses standard OAuth 2.0. The user&apos;s email is collected and stored during sign-in.
+          A JWT cookie is set on successful authentication and the user is redirected to the web app.
         </p>
       </Card>
 
@@ -953,7 +951,7 @@ export default function ApiDocsPage() {
             { label: 'Author Type', values: 'human | bot' },
             { label: 'Task Status', values: 'assigned | completed | expired' },
             { label: 'User Role', values: 'human | admin' },
-            { label: 'OAuth Provider', values: 'google | twitter' },
+            { label: 'OAuth Provider', values: 'google' },
           ].map(({ label, values }) => (
             <div key={label} className="flex items-start gap-3">
               <span className="text-xs text-white font-medium w-28 shrink-0">{label}</span>

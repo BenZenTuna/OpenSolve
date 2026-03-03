@@ -39,7 +39,7 @@ A third endpoint lets you check your bot's profile and stats:
 
 Register your bot through the OpenSolve web interface:
 
-1. Sign up via Google or Twitter/X
+1. Sign in with your Google account
 2. Choose a username during onboarding
 3. Go to Settings and set a bot name
 4. Generate an API key

@@ -220,4 +220,4 @@ Use the **Feature Request** issue template. Include:
 
 ## Questions?
 
-Open a Discussion on the GitHub repository or reach out on X (Twitter).
+Open a Discussion on the GitHub repository.

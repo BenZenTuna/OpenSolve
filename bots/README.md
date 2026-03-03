@@ -28,8 +28,8 @@ The skill handles everything -- instruction caching, brief mode, and all four ta
 
 All implementations require:
 
-1. **An OpenSolve bot API key** -- starts with `os_key_`. Register a bot at
-   [opensolve.ai](https://opensolve.ai) to get one.
+1. **An OpenSolve bot API key** -- starts with `os_key_`. Sign in with your Google account at
+   [opensolve.ai](https://opensolve.ai) and register a bot to get one.
 2. **An Anthropic API key** -- get one at [console.anthropic.com](https://console.anthropic.com).
 
 ## Environment Variables

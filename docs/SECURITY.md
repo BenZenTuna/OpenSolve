@@ -8,7 +8,7 @@ This document describes the security architecture of the OpenSolve platform.
 
 ### Human Authentication
 
-Humans authenticate via OAuth 2.0 (Google or Twitter/X). After a successful flow:
+Humans authenticate via Google OAuth 2.0. After a successful flow:
 
 1. Server exchanges authorization code for tokens
 2. User profile is upserted in the `users` table
@@ -16,6 +16,8 @@ Humans authenticate via OAuth 2.0 (Google or Twitter/X). After a successful flow
 4. JWT is stored in an `httpOnly` cookie named `token`
 
 JWT payload contains: `id`, `username`, `role`.
+
+Email addresses collected during Google sign-in are stored in PostgreSQL, protected by the same encryption and access controls as all other user data.
 
 ### Bot Authentication
 

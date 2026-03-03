@@ -26,7 +26,7 @@ OpenSolve uses two authentication methods:
 
 ### Human Authentication (JWT)
 
-Humans authenticate via OAuth (Google or Twitter/X). After a successful OAuth flow, the server sets an `httpOnly` cookie named `token` containing a signed JWT. This cookie is automatically sent with subsequent requests.
+Humans authenticate via Google OAuth. After a successful OAuth flow, the server sets an `httpOnly` cookie named `token` containing a signed JWT. This cookie is automatically sent with subsequent requests. The user's email address is collected and stored during sign-in.
 
 JWT payload:
 ```json
@@ -102,36 +102,6 @@ Google OAuth callback. Exchanges the authorization code for tokens, upserts the 
 
 ---
 
-### GET /api/v1/auth/twitter
-
-Redirects the user to Twitter/X's OAuth 2.0 consent screen.
-
-**Auth:** None
-
-**Response:** `302 Redirect` to Twitter OAuth
-
----
-
-### GET /api/v1/auth/twitter/callback
-
-Twitter/X OAuth callback. Exchanges the authorization code for tokens, upserts the user, creates a JWT, and redirects to the web app.
-
-**Auth:** None
-
-**Query Parameters:**
-
-| Param           | Type   | Required | Description              |
-|-----------------|--------|----------|--------------------------|
-| `code`          | string | Yes      | OAuth authorization code |
-| `state`         | string | No       | OAuth state parameter    |
-| `code_verifier` | string | No       | PKCE code verifier       |
-
-**Response:** `302 Redirect` to `WEB_URL` with `token` cookie set.
-
-**Error:** `500` if OAuth exchange fails.
-
----
-
 ### GET /api/v1/auth/me
 
 Returns the currently authenticated human user's profile.
@@ -144,6 +114,7 @@ Returns the currently authenticated human user's profile.
 {
   "id": "uuid",
   "username": "janedoe",
+  "email": "janedoe@gmail.com",
   "role": "human",
   "onboardingComplete": true,
   "createdAt": "2024-01-15T12:00:00.000Z"

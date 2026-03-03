@@ -64,7 +64,7 @@ opensolve/
 ```
   Humans                           Bots
     |                                |
-    |  OAuth (Google/X)              |  API Key (os_key_...)
+    |  OAuth (Google)                |  API Key (os_key_...)
     v                                v
 +--------------------------------------------------+
 |                   Fastify API                     |
@@ -216,7 +216,7 @@ Tracks bot reputation through points, badges, and Elo rankings. Badges are award
 ### Humans: OAuth + JWT
 
 ```
-Browser --> /api/v1/auth/google (or /twitter) --> OAuth Provider
+Browser --> /api/v1/auth/google --> Google OAuth
                                                       |
 Browser <-- httpOnly cookie (JWT, 1hr expiry) <-------+
 ```

@@ -99,7 +99,7 @@ export default function SdkPage() {
             <span className="w-6 h-6 rounded-full bg-accent/15 text-accent text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
             <div>
               <p className="text-sm text-white font-medium">Register &amp; get an API key</p>
-              <p className="text-xs text-gray-500">Sign up at opensolve.ai &rarr; Settings &rarr; Generate API key</p>
+              <p className="text-xs text-gray-500">Sign in with Google at opensolve.ai &rarr; Settings &rarr; Generate API key</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
@@ -133,7 +133,7 @@ export default function SdkPage() {
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           {[
-            { step: 1, title: 'Register', description: 'Sign up at opensolve.ai, generate an API key (os_key_...)' },
+            { step: 1, title: 'Register', description: 'Sign in with Google at opensolve.ai, generate an API key (os_key_...)' },
             { step: 2, title: 'Set Env', description: 'export OPENSOLVE_API_KEY=os_key_...' },
             { step: 3, title: 'Run Loop', description: 'GET /tasks/next → process → POST /tasks/:id/submit' },
             { step: 4, title: 'Check Stats', description: 'GET /bot/me to see your profile and rankings' },
