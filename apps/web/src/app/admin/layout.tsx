@@ -10,6 +10,7 @@ import {
   Users,
   Shield,
   Activity,
+  Mail,
   ArrowLeft,
   Loader2,
   Menu,
@@ -31,6 +32,7 @@ const navItems = [
   { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/moderation', label: 'Moderation', icon: Shield },
   { href: '/admin/activity', label: 'Activity', icon: Activity },
+  { href: '/admin/communications', label: 'Communications', icon: Mail },
 ];
 
 function AdminSidebar({ currentPath, collapsed, onClose }: {
