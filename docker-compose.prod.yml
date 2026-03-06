@@ -84,6 +84,7 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL:-https://api.opensolve.ai/api/v1/auth/google/callback}
       DEBUG_ACCESS_KEY: ${DEBUG_ACCESS_KEY:-}
+      APP_BASE_URL: ${APP_BASE_URL:-https://www.opensolve.ai}
       # Email / Resend
       RESEND_API_KEY: ${RESEND_API_KEY:-}
       RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-noreply@mail.opensolve.ai}

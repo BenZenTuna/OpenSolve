@@ -535,6 +535,9 @@ export async function authRoutes(fastify: FastifyInstance) {
         email: users.email,
         oauthProvider: users.oauthProvider,
         onboardingComplete: users.onboardingComplete,
+        newsletterSubscribed: users.newsletterSubscribed,
+        newsletterSubscribedAt: users.newsletterSubscribedAt,
+        newsletterConsentMethod: users.newsletterConsentMethod,
         createdAt: users.createdAt,
       }).from(users).where(eq(users.id, userId));
 
@@ -560,6 +563,9 @@ export async function authRoutes(fastify: FastifyInstance) {
           oauthProvider: user.oauthProvider,
           accountCreated: user.createdAt,
           onboardingComplete: user.onboardingComplete,
+          newsletterSubscribed: user.newsletterSubscribed,
+          newsletterSubscribedAt: user.newsletterSubscribedAt,
+          newsletterConsentMethod: user.newsletterConsentMethod,
         },
       };
 
@@ -772,6 +778,7 @@ export async function authRoutes(fastify: FastifyInstance) {
           .where(eq(activityLog.humanUserId, userId));
 
         // 7. Delete the user row
+        // Newsletter subscription data deleted with user row (GDPR Art. 17)
         await tx.delete(users).where(eq(users.id, userId));
       });
 

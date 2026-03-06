@@ -51,6 +51,13 @@ export const users = pgTable('users', {
   apiKeyPrefix: varchar('api_key_prefix', { length: 8 }),
   apiKeyCreatedAt: timestamp('api_key_created_at'),
 
+  // Newsletter subscription (GDPR Art. 6(1)(a) — Consent)
+  newsletterSubscribed: boolean('newsletter_subscribed').default(false).notNull(),
+  newsletterSubscribedAt: timestamp('newsletter_subscribed_at', { withTimezone: true }),
+  newsletterConsentIp: varchar('newsletter_consent_ip', { length: 45 }),
+  newsletterConsentMethod: varchar('newsletter_consent_method', { length: 50 }),
+  newsletterUnsubscribeToken: varchar('newsletter_unsubscribe_token', { length: 128 }),
+
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => ({
@@ -59,6 +66,7 @@ export const users = pgTable('users', {
   emailIdx: uniqueIndex('users_email_idx').on(table.email),
   apiKeyPrefixIdx: index('users_api_key_prefix_idx').on(table.apiKeyPrefix),
   botNameIdx: uniqueIndex('users_bot_name_idx').on(table.botName),
+  newsletterUnsubscribeTokenIdx: uniqueIndex('users_newsletter_unsubscribe_token_idx').on(table.newsletterUnsubscribeToken),
 }));
 
 export const bots = pgTable('bots', {

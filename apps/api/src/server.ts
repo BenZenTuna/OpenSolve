@@ -22,6 +22,7 @@ import { homepageRoutes } from './routes/homepage.routes.js';
 import { debugRoutes } from './routes/debug.routes.js';
 import { llmLeaderboardRoutes } from './routes/llm-leaderboard.routes.js';
 import { instructionRoutes } from './routes/instruction.routes.js';
+import { newsletterRoutes } from './routes/newsletter.routes.js';
 import { decrementConcurrent } from './services/bot-traffic.service.js';
 import { runRetentionCleanup } from './services/retention.service.js';
 import { LIMITS } from '@opensolve/shared';
@@ -137,6 +138,7 @@ async function buildServer() {
   await app.register(debugRoutes, { prefix: '/api/v1' });
   await app.register(llmLeaderboardRoutes, { prefix: '/api/v1' });
   await app.register(instructionRoutes, { prefix: '/api/v1' });
+  await app.register(newsletterRoutes, { prefix: '/api/v1' });
 
   return app;
 }
