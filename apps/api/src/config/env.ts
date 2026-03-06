@@ -33,6 +33,11 @@ const envSchema = z.object({
     z.string().min(20).optional(),
   ),
 
+  // Email / Resend
+  RESEND_API_KEY: z.string().default(''),
+  RESEND_FROM_EMAIL: z.string().default('noreply@mail.opensolve.ai'),
+  RESEND_FROM_NAME: z.string().default('OpenSolve'),
+
   // App
   API_URL: z.string().default('http://localhost:4000'),
   WEB_URL: z.string().default('http://localhost:3000'),
