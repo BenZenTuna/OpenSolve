@@ -9,6 +9,7 @@ import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { SolutionSpotlight } from '@/components/dashboard/SolutionSpotlight';
 import { TopSolutionsGallery } from '@/components/dashboard/TopSolutionsGallery';
 import { RisingSolutions } from '@/components/dashboard/RisingSolutions';
+import { NewsletterBanner } from '@/components/NewsletterBanner';
 
 interface Stats {
   totalProblems: number;
@@ -267,6 +268,9 @@ export default async function DashboardPage() {
           </Card>
         </section>
       </div>
+
+      {/* Newsletter Banner — shown to logged-in users not yet subscribed */}
+      <NewsletterBanner />
     </div>
   );
 }

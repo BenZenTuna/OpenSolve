@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Settings, Bot, Key, AlertCircle, CheckCircle, Loader2, Copy, Trash2, User, Download, ShieldAlert, X } from 'lucide-react';
+import { Settings, Bot, Key, AlertCircle, CheckCircle, Loader2, Copy, Trash2, User, Download, ShieldAlert, X, Mail } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { apiFetch, apiUrl } from '@/lib/api';
 
@@ -58,6 +58,15 @@ export default function SettingsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
+  // Newsletter state
+  const [newsletterLoading, setNewsletterLoading] = useState(true);
+  const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
+  const [newsletterSubscribedAt, setNewsletterSubscribedAt] = useState<string | null>(null);
+  const [newsletterPending, setNewsletterPending] = useState(false);
+  const [newsletterBusy, setNewsletterBusy] = useState(false);
+  const [newsletterMsg, setNewsletterMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [showUnsubConfirm, setShowUnsubConfirm] = useState(false);
+
   useEffect(() => {
     async function load() {
       try {
@@ -67,6 +76,15 @@ export default function SettingsPage() {
 
         const status = await apiFetch<ApiKeyStatus>('/user/api-key', { credentials: 'include', cache: 'no-store' });
         setKeyStatus(status);
+
+        try {
+          const nl = await apiFetch<{ subscribed: boolean; subscribedAt: string | null }>('/newsletter/status', { credentials: 'include', cache: 'no-store' });
+          setNewsletterSubscribed(nl.subscribed);
+          setNewsletterSubscribedAt(nl.subscribedAt);
+        } catch {
+          // Newsletter status fetch failed — leave defaults
+        }
+        setNewsletterLoading(false);
       } catch {
         router.push('/auth/login');
       } finally {
@@ -308,6 +326,63 @@ export default function SettingsPage() {
     }
   }, []);
 
+  const handleNewsletterSubscribe = useCallback(async () => {
+    setNewsletterBusy(true);
+    setNewsletterMsg(null);
+    try {
+      const res = await fetch(apiUrl('/newsletter/subscribe'), {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (res.ok) {
+        setNewsletterPending(true);
+        if (newsletterPending) {
+          setNewsletterMsg({ type: 'success', text: 'Confirmation email resent' });
+        }
+      } else if (res.status === 409) {
+        // Already subscribed — refresh status
+        const nl = await apiFetch<{ subscribed: boolean; subscribedAt: string | null }>('/newsletter/status', { credentials: 'include', cache: 'no-store' });
+        setNewsletterSubscribed(nl.subscribed);
+        setNewsletterSubscribedAt(nl.subscribedAt);
+        setNewsletterPending(false);
+        setNewsletterMsg({ type: 'success', text: 'Already subscribed' });
+      } else if (res.status === 429) {
+        setNewsletterMsg({ type: 'error', text: 'Please wait before requesting another email' });
+      } else {
+        const data = await res.json().catch(() => null);
+        setNewsletterMsg({ type: 'error', text: data?.error || 'Something went wrong' });
+      }
+    } catch {
+      setNewsletterMsg({ type: 'error', text: 'Network error' });
+    } finally {
+      setNewsletterBusy(false);
+    }
+  }, [newsletterPending]);
+
+  const handleNewsletterUnsubscribe = useCallback(async () => {
+    setNewsletterBusy(true);
+    setNewsletterMsg(null);
+    try {
+      const res = await fetch(apiUrl('/newsletter/unsubscribe'), {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (res.ok) {
+        setNewsletterSubscribed(false);
+        setNewsletterSubscribedAt(null);
+        setShowUnsubConfirm(false);
+        setNewsletterMsg({ type: 'success', text: "You've been unsubscribed." });
+      } else {
+        const data = await res.json().catch(() => null);
+        setNewsletterMsg({ type: 'error', text: data?.error || 'Something went wrong' });
+      }
+    } catch {
+      setNewsletterMsg({ type: 'error', text: 'Network error' });
+    } finally {
+      setNewsletterBusy(false);
+    }
+  }, []);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -419,6 +494,139 @@ export default function SettingsPage() {
             >
               Edit
             </button>
+          </div>
+        )}
+      </Card>
+
+      {/* Newsletter Section */}
+      <Card padding="lg">
+        <div className="flex items-center gap-2 mb-1">
+          <Mail className="w-5 h-5 text-accent" />
+          <h2 className="text-lg font-semibold text-white">Newsletter</h2>
+        </div>
+        <p className="text-sm text-gray-500 mb-4">
+          Stay informed about platform updates, new features, and important announcements.
+        </p>
+
+        {newsletterMsg && (
+          <div className={`flex items-center gap-2 p-3 rounded-lg text-sm mb-4 ${
+            newsletterMsg.type === 'success'
+              ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+              : 'bg-red-500/10 border border-red-500/20 text-red-400'
+          }`}>
+            {newsletterMsg.type === 'success' ? <CheckCircle className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
+            {newsletterMsg.text}
+          </div>
+        )}
+
+        {newsletterLoading ? (
+          <div className="flex items-center gap-2 text-gray-500 text-sm">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Loading newsletter status...
+          </div>
+        ) : newsletterSubscribed ? (
+          /* State 4: Subscribed */
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" aria-label="Subscribed" />
+              <span className="text-sm text-emerald-400 font-medium">Subscribed</span>
+              {newsletterSubscribedAt && (
+                <span className="text-xs text-gray-500 ml-1">
+                  since {new Date(newsletterSubscribedAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                </span>
+              )}
+            </div>
+
+            {showUnsubConfirm ? (
+              <div className="p-3 rounded-lg bg-navy-900 border border-navy-700 space-y-3">
+                <p className="text-sm text-gray-300">
+                  Are you sure? You&apos;ll stop receiving newsletter emails.
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleNewsletterUnsubscribe}
+                    disabled={newsletterBusy}
+                    className="btn-secondary text-amber-400 hover:text-amber-300 text-sm"
+                    aria-label="Confirm unsubscribe from newsletter"
+                  >
+                    {newsletterBusy ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Unsubscribing...</>
+                    ) : (
+                      'Yes, unsubscribe'
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setShowUnsubConfirm(false)}
+                    disabled={newsletterBusy}
+                    className="btn-ghost text-sm"
+                    aria-label="Cancel unsubscribe"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowUnsubConfirm(true)}
+                className="btn-secondary text-amber-400 hover:text-amber-300 text-sm"
+                aria-label="Unsubscribe from newsletter"
+              >
+                Unsubscribe
+              </button>
+            )}
+          </div>
+        ) : newsletterPending ? (
+          /* State 3: Confirmation pending */
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-amber-400" aria-label="Confirmation pending" />
+              <span className="text-sm text-amber-400 font-medium">Confirmation pending</span>
+            </div>
+            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-sm text-amber-300 space-y-1">
+              <p>A confirmation email has been sent to {user.email}.</p>
+              <p>Click the link in the email to complete your subscription. The link expires in 24 hours.</p>
+            </div>
+            <button
+              onClick={handleNewsletterSubscribe}
+              disabled={newsletterBusy}
+              className="btn-secondary text-sm"
+              aria-label="Resend newsletter confirmation email"
+              aria-busy={newsletterBusy}
+            >
+              {newsletterBusy ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</>
+              ) : (
+                'Resend confirmation email'
+              )}
+            </button>
+            <p className="text-xs text-gray-500">Didn&apos;t receive it? Check your spam folder.</p>
+          </div>
+        ) : (
+          /* State 2: Not subscribed */
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-gray-500" aria-label="Not subscribed" />
+              <span className="text-sm text-gray-400">Not subscribed</span>
+            </div>
+            <p className="text-sm text-gray-500">
+              You&apos;re not currently subscribed to the OpenSolve newsletter.
+            </p>
+            <button
+              onClick={handleNewsletterSubscribe}
+              disabled={newsletterBusy}
+              className="btn-primary"
+              aria-label="Subscribe to newsletter"
+              aria-busy={newsletterBusy}
+            >
+              {newsletterBusy ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Subscribing...</>
+              ) : (
+                'Subscribe'
+              )}
+            </button>
+            <p className="text-xs text-gray-500">
+              We&apos;ll send a confirmation email to {user.email}. Max 1–2 emails per month.
+            </p>
           </div>
         )}
       </Card>
