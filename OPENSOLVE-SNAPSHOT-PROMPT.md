@@ -87,6 +87,19 @@ Document rules that govern how the platform behaves. Look for things like:
 - Document the database connection setup (where is the DB hosted? inside Coolify? external?)
 - List any seed data or initial data scripts
 - **Verify the `users` table has an `email` column** (varchar 255, NOT NULL, unique index `users_email_idx`)
+  - **Verify newsletter subscription columns exist on `users` table:**
+```bash
+    echo "=== Newsletter columns in schema ==="
+    grep -n "newsletter" apps/api/src/db/schema.ts
+    echo "↑ Should show: newsletterSubscribed (bool), newsletterSubscribedAt (timestamptz),"
+    echo "  newsletterConsentIp (varchar 45), newsletterConsentMethod (varchar 50),"
+    echo "  newsletterUnsubscribeToken (varchar 128, unique)"
+
+    echo ""
+    echo "=== Newsletter migration SQL exists ==="
+    ls -la apps/api/drizzle/migrations/newsletter_subscription.sql 2>/dev/null \
+      && echo "✅ Exists" || echo "❌ Missing"
+```
 - **Verify the `oauth_provider` enum is `['google']` only** (Twitter removed)
 
 ### SECTION 3: API ROUTES â€” COMPLETE LIST
@@ -99,7 +112,30 @@ Document rules that govern how the platform behaves. Look for things like:
   - Any middleware applied (auth, rate limiting, validation)
   - Error responses
 - Check these locations: `/app/api/`, `/pages/api/`, `/src/routes/`, `/routes/`, `/server/`, `/api/`
-- Group them logically (Auth routes, Bot routes, Problem routes, Voting routes, Admin routes, etc.)
+- Group them logically (Auth routes, Bot routes, Problem routes, Voting routes,
+    Admin routes, Newsletter routes, Admin Email routes, etc.)
+
+```bash
+echo "=== Newsletter routes ==="
+grep -n "newsletter" apps/api/src/routes/newsletter.routes.ts | head -20
+echo "↑ Expected routes: POST /subscribe, GET /confirm, POST /unsubscribe,"
+echo "  GET /unsubscribe (public token), GET /status"
+
+echo ""
+echo "=== Admin email routes ==="
+ls -la apps/api/src/routes/admin.email.routes.ts 2>/dev/null \
+  && echo "✅ Exists" || echo "❌ Missing"
+grep -n "router\.\|fastify\." apps/api/src/routes/admin.email.routes.ts 2>/dev/null | head -20
+echo "↑ Expected: GET /stats, GET /subscribers, POST /send-important,"
+echo "  POST /broadcast, POST /confirmation-token, GET /history"
+
+echo ""
+echo "=== Token utilities ==="
+ls -la apps/api/src/utils/newsletter-tokens.ts 2>/dev/null \
+  && echo "✅ Exists" || echo "❌ Missing"
+grep -n "export" apps/api/src/utils/newsletter-tokens.ts 2>/dev/null
+echo "↑ Expected exports: generateConfirmToken, verifyConfirmToken, generateUnsubscribeToken"
+```
 
 ### SECTION 4: AUTHENTICATION & AUTHORIZATION
 - Document the COMPLETE auth setup:
@@ -208,6 +244,56 @@ grep -rn "LIMIT\|MAX\|MIN\|RATE\|TIMEOUT\|THRESHOLD\|TARGET\|POINTS\|SCORE\|WEIG
 
 ### SECTION 10: FRONTEND PAGES & COMPONENTS
 - List ALL pages/routes in the frontend (file-based routing structure)
+- **Newsletter and email-related frontend pages added in Session D:**
+```bash
+    echo "=== Newsletter confirm page ==="
+    ls -la apps/web/src/app/newsletter/confirm/page.tsx 2>/dev/null \
+      && echo "✅ Exists" || echo "❌ Missing"
+
+    echo ""
+    echo "=== Public unsubscribe page ==="
+    ls -la apps/web/src/app/unsubscribe/page.tsx 2>/dev/null \
+      && echo "✅ Exists" || echo "❌ Missing"
+
+    echo ""
+    echo "=== Newsletter banner component ==="
+    ls -la apps/web/src/components/NewsletterBanner.tsx 2>/dev/null \
+      && echo "✅ Exists" || echo "❌ Missing"
+
+    echo ""
+    echo "=== Admin communications page ==="
+    ls -la apps/web/src/app/admin/communications/page.tsx 2>/dev/null \
+      && echo "✅ Exists" || echo "❌ Missing"
+
+    echo ""
+    echo "=== Unsubscribe page has no login redirect ==="
+    grep -n "redirect\|router.push.*login\|router.push.*auth" \
+      apps/web/src/app/unsubscribe/page.tsx 2>/dev/null
+    echo "↑ Must be empty — unsubscribe cannot require login (UWG §7)"
+
+    echo ""
+    echo "=== Confirm and unsubscribe pages are noindex ==="
+    grep -c "noindex" apps/web/src/app/newsletter/confirm/page.tsx 2>/dev/null
+    grep -c "noindex" apps/web/src/app/unsubscribe/page.tsx 2>/dev/null
+    echo "↑ Both should be 1"
+```
+
+    Copy the COMPLETE contents of:
+    - apps/web/src/app/newsletter/confirm/page.tsx
+    - apps/web/src/app/unsubscribe/page.tsx
+    - apps/web/src/components/NewsletterBanner.tsx
+    - apps/web/src/app/admin/communications/page.tsx
+
+    Also copy these compliance documents in full:
+    - docs/NEWSLETTER-CONSENT-ASSESSMENT.md
+    - docs/LEGITIMATE-INTEREST-ASSESSMENT.md (to capture the carve-out addition)
+
+    Also document the newsletter section added to the settings page:
+```bash
+    echo "=== Newsletter section in settings ==="
+    grep -n "newsletter\|Newsletter" apps/web/src/app/settings/page.tsx | head -20
+    echo "↑ Should show: status fetch, subscribe/unsubscribe handlers, 4 UI states"
+```
 - For each page, describe: what it shows, what data it fetches, key user actions
 - Note which pages are public vs authenticated
 - Note any real-time features (WebSocket, SSE, polling)
@@ -220,17 +306,104 @@ grep -rn "LIMIT\|MAX\|MIN\|RATE\|TIMEOUT\|THRESHOLD\|TARGET\|POINTS\|SCORE\|WEIG
   - **Hosting**: Hetzner server with Coolify â€” document the Coolify configuration
   - **Database**: Confirm PostgreSQL â€” is it inside Coolify? Separate service?
   - **Authentication**: Google OAuth only (Twitter/X removed) â€” document provider setup
-  - **Any others**: Redis, Elasticsearch, email service, CDN, etc.
+  - **Resend domain verification**: Document whether opensolve.ai domain is verified
+    in Resend for sending from noreply@mail.opensolve.ai
+    - Check: does docs/RESEND-SETUP.md exist?
+    - Run: ls -la docs/RESEND-SETUP.md 2>/dev/null && echo "✅ Exists" || echo "❌ Missing"
+  - **Email delivery**: Resend (resend.com) — document the email service setup
+    - Is apps/api/src/services/email.service.ts present?
+    - Is apps/api/src/email/templates.ts present?
+    - What methods does EmailService expose? (sendImportantMessage, sendNewsletterBroadcast,
+      sendNewsletterConfirm, sendUnsubscribeConfirm)
+    - What templates exist? (importantMessageTemplate, newsletterTemplate,
+      newsletterConfirmTemplate, unsubscribeConfirmTemplate)
+    - What from-address is configured? (RESEND_FROM_EMAIL env var)
+    - Run: grep -n "RESEND\|resend" apps/api/src/services/email.service.ts | head -20
+  - **Any others**: Redis (rate limiting + admin confirmation tokens), CDN, etc.
 - GitHub integration â€” document how the repo is connected to deployment
   - Does Coolify auto-deploy on push? What branch?
   - Show the git remote configuration
 - Any background job processing (cron jobs, scheduled tasks)
 - Any third-party APIs integrated
 
+### SECTION 11b: EMAIL INFRASTRUCTURE
+
+Document the complete email sending infrastructure added in Sessions A–D.
+
+**EmailService (apps/api/src/services/email.service.ts):**
+```bash
+echo "=== EmailService methods ==="
+grep -n "async\|public\|private" apps/api/src/services/email.service.ts | head -30
+
+echo ""
+echo "=== Resend SDK import ==="
+grep -n "resend\|Resend" apps/api/src/services/email.service.ts | head -5
+
+echo ""
+echo "=== Error handling pattern ==="
+grep -n "catch\|try\|error" apps/api/src/services/email.service.ts | head -10
+
+echo ""
+echo "=== Rate limit between sends (50ms delay) ==="
+grep -n "sleep\|delay\|setTimeout\|50" apps/api/src/services/email.service.ts | head -5
+```
+
+Copy the COMPLETE apps/api/src/services/email.service.ts file.
+
+**Email Templates (apps/api/src/email/templates.ts):**
+```bash
+echo "=== Template exports ==="
+grep -n "export function\|export const" apps/api/src/email/templates.ts
+echo "↑ Expected: importantMessageTemplate, newsletterTemplate,"
+echo "  newsletterConfirmTemplate, unsubscribeConfirmTemplate"
+```
+
+Copy the COMPLETE apps/api/src/email/templates.ts file.
+
+**Newsletter Token Utilities (apps/api/src/utils/newsletter-tokens.ts):**
+Copy the COMPLETE apps/api/src/utils/newsletter-tokens.ts file.
+
+**Newsletter Routes (apps/api/src/routes/newsletter.routes.ts):**
+Copy the COMPLETE apps/api/src/routes/newsletter.routes.ts file.
+
+**Admin Email Routes (apps/api/src/routes/admin.email.routes.ts):**
+Copy the COMPLETE apps/api/src/routes/admin.email.routes.ts file.
+
+**Redis usage for admin confirmation tokens:**
+```bash
+echo "=== Admin token Redis keys ==="
+grep -n "admin:email:confirm" apps/api/src/routes/admin.email.routes.ts
+echo "↑ Should show Redis set/get/del for one-time confirmation tokens"
+
+echo ""
+echo "=== Token TTL ==="
+grep -n "600\|EX\|expire\|ttl" apps/api/src/routes/admin.email.routes.ts | head -5
+echo "↑ Should show 600 second (10 minute) TTL"
+```
+
+**RESEND-SETUP.md:**
+Copy the COMPLETE docs/RESEND-SETUP.md file.
+
+---
+
 ### SECTION 12: DEPLOYMENT & INFRASTRUCTURE DETAILS
 - **Coolify setup**: What does the Coolify deployment configuration look like?
   - Show any `docker-compose.yml`, `Dockerfile`, or Coolify-specific config files
   - Environment variables set in Coolify (names only, values as `<REDACTED>`)
+  - **Email-related environment variables added in Sessions A–D:**
+```bash
+    echo "=== Resend env vars in .env.example ==="
+    grep -n "RESEND\|APP_BASE_URL\|FROM_EMAIL\|FROM_NAME" apps/api/.env.example
+
+    echo ""
+    echo "=== Resend vars in docker-compose.prod.yml ==="
+    grep -n "RESEND\|APP_BASE_URL" docker-compose.prod.yml
+```
+    Variables that must be present:
+    - RESEND_API_KEY — Resend API key (sending access only), stored as Coolify secret
+    - RESEND_FROM_EMAIL — noreply@mail.opensolve.ai
+    - RESEND_FROM_NAME — OpenSolve
+    - APP_BASE_URL — https://www.opensolve.ai (used to build confirm/unsubscribe URLs)
   - Build commands and start commands
   - Resource limits, health checks
 - **Domain configuration**:
@@ -491,6 +664,89 @@ echo ""
 echo "=== GDPR export includes email ==="
 grep -A20 "gdpr/export" apps/api/src/routes/auth.routes.ts | grep -c "email"
 echo "↑ Should be 1+"
+
+echo "=== Newsletter columns exist in schema ==="
+grep -c "newsletterSubscribed\|newsletter_subscribed" apps/api/src/db/schema.ts
+echo "↑ Should be 1+"
+
+echo ""
+echo "=== Double opt-in enforced (subscribe != confirm) ==="
+grep -n "newsletter_subscribed.*=.*true\|newsletterSubscribed.*true" \
+  apps/api/src/routes/newsletter.routes.ts | head -5
+echo "↑ Should only appear in the /confirm route, NOT in /subscribe route"
+
+echo ""
+echo "=== Consent IP stored only at confirmation ==="
+grep -n "newsletter_consent_ip\|newsletterConsentIp" \
+  apps/api/src/routes/newsletter.routes.ts | head -10
+echo "↑ Should ONLY appear in GET /confirm handler (not POST /subscribe)"
+
+echo ""
+echo "=== Unsubscribe token rotation on re-subscribe ==="
+grep -n "generateUnsubscribeToken" apps/api/src/routes/newsletter.routes.ts
+echo "↑ Should appear in /confirm handler"
+
+echo ""
+echo "=== Newsletter export in GDPR data export ==="
+grep -n "newsletter" apps/api/src/routes/auth.routes.ts | grep -i "export\|gdpr"
+echo "↑ Should show newsletterSubscribed and newsletterSubscribedAt in export"
+
+echo ""
+echo "=== Newsletter fields cleared on account anonymisation ==="
+grep -n "newsletter" apps/api/src/routes/auth.routes.ts | grep -i "null\|false\|delete\|anon"
+echo "↑ Should show newsletter fields being cleared on account deletion/anonymisation"
+
+echo ""
+echo "=== Resend DPA note in docs ==="
+grep -c -i "dpa\|standard contractual\|SCC" docs/RESEND-SETUP.md 2>/dev/null
+echo "↑ Should be 1+ (Resend DPA referenced)"
+
+echo ""
+echo "=== Newsletter Consent Assessment exists ==="
+ls -la docs/NEWSLETTER-CONSENT-ASSESSMENT.md 2>/dev/null \
+  && echo "✅ Exists" || echo "❌ MISSING — compliance gap"
+
+echo ""
+echo "=== LIA has newsletter carve-out ==="
+grep -c -i "newsletter\|NEWSLETTER-CONSENT" docs/LEGITIMATE-INTEREST-ASSESSMENT.md
+echo "↑ Should be 1+"
+
+echo ""
+echo "=== Privacy policy covers newsletter ==="
+grep -c -i "newsletter" apps/web/src/app/privacy/page.tsx
+echo "↑ Should be 8+"
+
+echo ""
+echo "=== Privacy policy has Art. 6(1)(a) consent basis ==="
+grep -c "6(1)(a)" apps/web/src/app/privacy/page.tsx
+echo "↑ Should be 1+"
+
+echo ""
+echo "=== Privacy policy references Resend and SCCs ==="
+grep -c -i "resend" apps/web/src/app/privacy/page.tsx
+grep -c -i "standard contractual\|SCC" apps/web/src/app/privacy/page.tsx
+echo "↑ Both should be 1+"
+
+echo ""
+echo "=== Privacy policy has open tracking disclosure ==="
+grep -c -i "open tracking\|tracking pixel" apps/web/src/app/privacy/page.tsx
+echo "↑ Should be 1"
+
+echo ""
+echo "=== Terms has newsletter section ==="
+grep -c -i "newsletter" apps/web/src/app/terms/page.tsx
+echo "↑ Should be 3+"
+
+echo ""
+echo "=== Login page has newsletter disclosure ==="
+grep -c -i "newsletter" apps/web/src/app/auth/login/page.tsx
+echo "↑ Should be 1"
+
+echo ""
+echo "=== GDPR export excludes security-only newsletter fields ==="
+grep -n "newsletterConsentIp\|newsletterUnsubscribeToken" \
+  apps/api/src/routes/auth.routes.ts | grep -v "//"
+echo "↑ Must be empty — these fields must not appear uncommented in export"
 ```
 
 **Compliance status:**
@@ -499,6 +755,22 @@ echo "↑ Should be 1+"
 - **Legitimate Interest Assessment:** YES (`docs/LEGITIMATE-INTEREST-ASSESSMENT.md`)
 - **Email in GDPR export:** YES (included in `POST /auth/gdpr/export`)
 - **Email deleted on account deletion:** YES (cascade from user row deletion)
+
+**Newsletter Consent Compliance:**
+- **Legal basis**: GDPR Art. 6(1)(a) — Consent (separate from Art. 6(1)(f) LI for service notifications)
+- **Consent mechanism**: Double opt-in — user requests subscription, receives email,
+  clicks confirmation link. Subscription only active after confirmation.
+- **Consent record**: newsletter_consent_ip, newsletter_consent_method,
+  newsletter_subscribed_at stored in PostgreSQL
+- **Withdrawal**: One-click unsubscribe from every newsletter email footer (no login)
+  + Settings page toggle
+- **German UWG §7**: Double opt-in + one-click unsubscribe = compliant
+- **Resend as data processor**: US-based, EU sending infrastructure (Ireland eu-west-1),
+  SCCs/DPA required — documented in docs/RESEND-SETUP.md
+
+| Newsletter Consent Assessment | DONE | `docs/NEWSLETTER-CONSENT-ASSESSMENT.md` — documents double opt-in, UWG §7, 3-year retention |
+| Resend DPA / SCCs | DONE | Disclosed in privacy policy; Resend DPA signed at resend.com/legal |
+| Email open tracking | DONE | Disabled in Resend dashboard; disclosed in privacy policy |
 
 **AI-Specific Regulation:**
 - Is AI-generated content labeled in the UI?
@@ -522,6 +794,33 @@ Document the known applied sessions that have modified the codebase:
 - **Session 6:** Documentation — update API docs, SDK docs, skill file, reference bots, README
 - **Session 7:** Compliance — Legitimate Interest Assessment, GDPR plan update, master compliance test
 - **Session 8:** Snapshot prompt update — reflect email storage and Twitter removal in project documentation tooling
+- **Session A (Email Infrastructure):** EmailService wrapper around Resend SDK,
+  4 HTML templates (important, newsletter, confirm, unsubscribe-confirm), RESEND-SETUP.md,
+  RESEND_API_KEY + RESEND_FROM_EMAIL + RESEND_FROM_NAME + APP_BASE_URL env vars
+- **Session B (Newsletter Subscription):** 5 newsletter columns on users table,
+  migration SQL, newsletter-tokens.ts (confirm token + unsubscribe token),
+  5 API routes (/subscribe, /confirm, /unsubscribe POST+GET, /status)
+- **Session C (Admin Email Panel):** admin.email.routes.ts with 6 endpoints,
+  Redis one-time confirmation token system, /admin/communications page (4 tabs:
+  Important Messages, Newsletter Broadcast, Send History, Subscribers)
+- **Session D (Frontend Email UI):** Newsletter section in settings page (4 UI states:
+  loading/not-subscribed/pending/subscribed), /newsletter/confirm page (public, noindex),
+  /unsubscribe page (public, noindex, no login required), NewsletterBanner component
+- **Session E (Compliance & Legal):** Privacy policy newsletter sections (data
+  collected, Art. 6(1)(a) consent basis, Resend as data processor, retention,
+  withdrawal of consent, open tracking disclosure), Terms of Service newsletter
+  section, docs/NEWSLETTER-CONSENT-ASSESSMENT.md created,
+  docs/LEGITIMATE-INTEREST-ASSESSMENT.md updated with newsletter carve-out,
+  login page newsletter disclosure, compliance-newsletter.test.ts
+
+**Session Summary:**
+| Session | Changes |
+|---------|---------|
+| Email Infrastructure (A) | Resend SDK, EmailService, 4 HTML email templates, RESEND-SETUP.md |
+| Newsletter Subscription (B) | 5 newsletter DB columns, newsletter-tokens.ts, 5 newsletter API routes, migration SQL |
+| Admin Email Panel (C) | 6 admin email API endpoints, Redis one-time confirmation tokens, /admin/communications page with 4 tabs |
+| Frontend Email UI (D) | Newsletter section in settings (4 states), /newsletter/confirm page, /unsubscribe page, NewsletterBanner component |
+| Compliance & Legal (E) | Privacy policy newsletter additions, Terms newsletter section, Newsletter Consent Assessment doc, LIA carve-out, login page disclosure, compliance tests |
 
 ---
 
@@ -537,17 +836,25 @@ Rules:
 - Keep real values for all non-secret configuration (numbers, limits, enums, etc.)
 - If something from the list above doesn't exist in the project, write: `**NOT IMPLEMENTED** â€” This feature does not exist in the current codebase.`
 - At the end, add a section called "QUICK STATS" with counts:
-  - Total API routes (note: reduced by 2 after Twitter auth removal)
+  - Total API routes (note: +5 newsletter routes, +6 admin email routes since last snapshot)
   - Total DB tables
   - Total frontend pages
-  - Total environment variables (note: reduced by 3-4 after Twitter env vars removed)
-  - Total test files (note: increased by auth-email.test.ts, twitter-removed.test.ts)
+  - Total environment variables (note: +4 added: RESEND_API_KEY, RESEND_FROM_EMAIL, RESEND_FROM_NAME, APP_BASE_URL)
+  - Total test files (note: +2 added: email.test.ts, newsletter.test.ts, admin.email.test.ts)
   - Total TODO/FIXME comments found
   - Total places `opensolve.io` appears in the codebase
   - Lines of code (run `find . -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" | grep -v node_modules | grep -v .next | xargs wc -l 2>/dev/null | tail -1`)
   - Security: Number of exposed ports (should be 0 in prod compose, 3 via host firewall)
   - Security: Number of services with required auth (should be 3: postgres, redis, meilisearch)
-  - API service files (note: reduced by 1 after twitter.service.ts deleted)
+  - API service files (note: +1 added: email.service.ts)
+  - Email templates: 4 (importantMessage, newsletter, newsletterConfirm, unsubscribeConfirm)
+  - Newsletter API routes: 5 (subscribe, confirm, unsubscribe-auth, unsubscribe-token, status)
+  - Admin email API routes: 6 (stats, subscribers, send-important, broadcast, confirmation-token, history)
+  - New frontend pages: 2 (/newsletter/confirm, /unsubscribe)
+  - New frontend components: 1 (NewsletterBanner)
+  - New utility files: 1 (newsletter-tokens.ts)
+  - New documentation files: 2 (RESEND-SETUP.md, NEWSLETTER-CONSENT-ASSESSMENT.md)
+  - Newsletter compliance: Double opt-in ✅, One-click unsubscribe ✅, Consent record ✅, Privacy policy updated ✅, Consent assessment documented ✅, Open tracking disabled ✅
 
 Target length: This document should be thorough. 2000-5000 lines is expected and fine. Don't trim for brevity.
 
