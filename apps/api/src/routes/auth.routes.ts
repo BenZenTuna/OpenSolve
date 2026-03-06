@@ -538,6 +538,8 @@ export async function authRoutes(fastify: FastifyInstance) {
         newsletterSubscribed: users.newsletterSubscribed,
         newsletterSubscribedAt: users.newsletterSubscribedAt,
         newsletterConsentMethod: users.newsletterConsentMethod,
+        // newsletterConsentIp: internal compliance record, not exported (not user-facing data)
+        // newsletterUnsubscribeToken: security token, never exported
         createdAt: users.createdAt,
       }).from(users).where(eq(users.id, userId));
 

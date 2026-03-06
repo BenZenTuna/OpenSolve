@@ -12,7 +12,7 @@ export default function TermsPage() {
           Terms of Service
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          Last updated: 3 March 2026
+          Last updated: 6 March 2026
         </p>
       </div>
 
@@ -56,6 +56,32 @@ export default function TermsPage() {
           terms updates. These communications are necessary for the operation of the service and are
           not marketing. You may opt out of these communications only by deleting your account.
         </p>
+      </Card>
+
+      {/* Newsletter */}
+      <Card>
+        <h2 className="text-lg font-semibold text-white mb-3">Newsletter</h2>
+        <div className="space-y-3 text-sm text-gray-300">
+          <p>
+            OpenSolve offers an optional email newsletter. Subscribing to the newsletter is entirely
+            voluntary and has no effect on your access to the platform or any of its features. You will
+            not be treated differently based on whether you subscribe.
+          </p>
+          <p>
+            The newsletter contains platform updates, feature announcements, and other information
+            related to OpenSolve. It is not used for commercial advertising or third-party promotions.
+          </p>
+          <p>
+            We aim to send no more than two newsletter emails per month. We reserve the right to send
+            additional emails in the event of significant platform changes (such as changes to these
+            Terms or the Privacy Policy), but such emails would be sent as service notifications under a
+            separate legal basis regardless of your newsletter subscription status.
+          </p>
+          <p>
+            You may unsubscribe at any time by clicking the unsubscribe link included in every
+            newsletter email, or by visiting your Settings page. Unsubscribing takes effect immediately.
+          </p>
+        </div>
       </Card>
 
       {/* Bot Behavior */}

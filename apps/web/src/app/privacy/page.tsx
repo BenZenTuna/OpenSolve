@@ -12,7 +12,7 @@ export default function PrivacyPage() {
           Privacy Policy
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          Last updated: 3 March 2026
+          Last updated: 6 March 2026
         </p>
       </div>
 
@@ -72,6 +72,14 @@ export default function PrivacyPage() {
             <span className="font-medium text-white">Activity logs:</span> Pseudonymous records of
             platform actions, retained for 90 days for debugging and abuse prevention.
           </p>
+          <p>
+            <span className="font-medium text-white">Newsletter subscription data:</span> When you
+            choose to subscribe to the OpenSolve newsletter, we additionally collect and store: your
+            subscription status and the date and time you confirmed your subscription, your IP address
+            at the time of confirmation (used as a consent record), and the method by which you
+            subscribed (e.g. Settings page). This data is collected only if you actively subscribe. It
+            is not collected for users who do not subscribe.
+          </p>
         </div>
       </Card>
 
@@ -110,6 +118,33 @@ export default function PrivacyPage() {
             <span className="font-medium text-white">Cookies:</span> Functional cookies for
             authentication operate under legitimate interest. Any analytics cookies would require
             your explicit consent (Article 6(1)(a)).
+          </p>
+          <p>
+            <span className="font-medium text-white">Newsletter — Article 6(1)(a) Consent:</span> If
+            you subscribe to the OpenSolve newsletter, we process your email address and subscription
+            data on the legal basis of your freely given, specific, informed, and unambiguous consent
+            (GDPR Article 6(1)(a)).
+          </p>
+          <p>
+            Consent is obtained through a double opt-in process: you must click a confirmation link
+            sent to your email address before your subscription becomes active. This confirms that the
+            subscription was intentional and that you have access to the email address provided.
+          </p>
+          <p>You may withdraw your consent at any time by:</p>
+          <ul className="space-y-2 list-disc list-inside">
+            <li>Clicking the unsubscribe link in any newsletter email (no login required), or</li>
+            <li>Toggling off the newsletter subscription in your Settings page.</li>
+          </ul>
+          <p>
+            Withdrawal of consent does not affect the lawfulness of processing carried out before
+            withdrawal. After unsubscribing, you will no longer receive newsletter emails. Your consent
+            record (subscription date, IP, method) will be retained for three years as evidence of prior
+            consent, after which it will be deleted. This retention period reflects the applicable
+            limitation period under German law (UWG §7).
+          </p>
+          <p>
+            Note: Withdrawal of newsletter consent has no effect on your account or on service
+            notifications, which are sent under a separate legal basis (legitimate interest, Art. 6(1)(f)).
           </p>
         </div>
       </Card>
@@ -198,6 +233,51 @@ export default function PrivacyPage() {
         </p>
       </Card>
 
+      {/* 7b. Data Processors */}
+      <Card>
+        <h2 className="text-lg font-semibold text-white mb-3">Data Processors</h2>
+        <div className="space-y-3 text-sm text-gray-300">
+          <p>
+            <span className="font-medium text-white">Hetzner Online GmbH (Hosting):</span> Our servers
+            are hosted in Germany by Hetzner Online GmbH. A Data Processing Agreement pursuant to GDPR
+            Article 28 is in place.
+          </p>
+          <p>
+            <span className="font-medium text-white">Resend, Inc. (Email Delivery):</span> We use
+            Resend, Inc. (resend.com) to deliver emails to you, including service notifications and, if
+            you have subscribed, newsletter emails. When we send you an email, your email address and
+            name are transmitted to Resend&apos;s systems for delivery.
+          </p>
+          <p>
+            Resend, Inc. is headquartered in San Francisco, California, United States. Email delivery
+            infrastructure operates from EU servers (Ireland, AWS eu-west-1). However, as Resend&apos;s
+            control plane and company are US-based, this constitutes a transfer of personal data to a
+            third country under GDPR Chapter V.
+          </p>
+          <p>
+            This transfer is governed by Standard Contractual Clauses (SCCs) as provided by Resend. We
+            have signed Resend&apos;s Data Processing Agreement available at resend.com/legal.
+          </p>
+          <p>
+            Resend&apos;s privacy policy:{' '}
+            <a
+              href="https://resend.com/legal/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-accent hover:underline"
+            >
+              resend.com/legal/privacy-policy
+            </a>
+          </p>
+          <p>
+            We have configured Resend to use &quot;Sending access only&quot; API permissions. We do not
+            use Resend for analytics, tracking, or any purpose other than email delivery.
+          </p>
+          {/* TODO: Confirm with Taner whether email open tracking is disabled in Resend configuration,
+              then add explicit disclosure here about tracking pixel status */}
+        </div>
+      </Card>
+
       {/* 8. Data Retention */}
       <Card>
         <h2 className="text-lg font-semibold text-white mb-3">Data Retention</h2>
@@ -222,6 +302,17 @@ export default function PrivacyPage() {
             <span className="font-medium text-white">Problems and solutions:</span> retained as part
             of the public platform record; anonymized (author reference removed) upon account
             deletion.
+          </p>
+          <p>
+            <span className="font-medium text-white">Newsletter subscription data:</span> subscription
+            status, consent timestamp, consent IP, and consent method are retained while you are
+            subscribed. If you unsubscribe, your subscription status is cleared immediately. Your
+            consent record (IP, method, timestamp) is retained for three years from your last
+            subscription confirmation as evidence of consent, then permanently deleted.
+          </p>
+          <p>
+            <span className="font-medium text-white">Newsletter unsubscribe token:</span> deleted
+            immediately on unsubscribe and rotated on each new subscription.
           </p>
         </div>
       </Card>
@@ -259,13 +350,22 @@ export default function PrivacyPage() {
             <Link href="/settings" className="text-accent hover:underline">Settings &gt; Export Data</Link>.
           </p>
           <p>
+            <span className="font-medium text-white">Withdraw consent (Art. 7(3)):</span> Where
+            processing is based on your consent (newsletter subscription), you may withdraw consent at
+            any time without affecting your account. You can unsubscribe via the link in any newsletter
+            email or from your Settings page. Withdrawal takes effect immediately.
+          </p>
+          <p>
             <span className="font-medium text-white">Object to processing (Art. 21):</span> You may
             object to our processing of your email under legitimate interest. Contact us at{' '}
             <a href="mailto:contact@opensolve.ai" className="text-accent hover:underline">
               contact@opensolve.ai
             </a>{' '}
             and we will assess whether our legitimate grounds override your objection. Note: if we can
-            no longer contact you, we may be unable to notify you of future privacy changes.
+            no longer contact you, we may be unable to notify you of future privacy changes. The right
+            to object (Art. 21) applies to processing based on legitimate interest (service
+            notifications). For newsletter emails, the relevant right is withdrawal of consent
+            (Art. 7(3)), not the right to object.
           </p>
           <p>
             <span className="font-medium text-white">Lodge a complaint with a supervisory

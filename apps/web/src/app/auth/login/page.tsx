@@ -42,7 +42,8 @@ export default function LoginPage() {
 
         <p className="text-sm text-slate-400 text-center mt-4 max-w-sm mx-auto">
           We store your Google email address solely for important service notifications
-          such as privacy policy changes and security alerts.
+          such as privacy policy changes and security alerts. You can optionally subscribe to the
+          OpenSolve newsletter from your Settings page.
         </p>
       </div>
     </div>
