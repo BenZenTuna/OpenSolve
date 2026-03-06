@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, AlertCircle, Loader2, Mail } from 'lucide-react';
-import { apiUrl } from '@/lib/api';
+
 
 type ConfirmState = 'idle' | 'loading' | 'success' | 'expired' | 'invalid' | 'error';
 
@@ -18,9 +18,7 @@ export default function NewsletterConfirmPage() {
     setState('loading');
 
     try {
-      const res = await fetch(apiUrl(`/newsletter/confirm?token=${encodeURIComponent(token)}`), {
-        credentials: 'include',
-      });
+      const res = await fetch(`/api/v1/newsletter/confirm?token=${encodeURIComponent(token)}`);
 
       if (res.ok) {
         setState('success');
