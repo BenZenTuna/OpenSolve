@@ -48,7 +48,7 @@ export async function newsletterRoutes(fastify: FastifyInstance) {
 
     // Generate confirmation token and URL
     const token = generateConfirmToken(userId, user.email);
-    const confirmUrl = `${env.WEB_URL}/newsletter/confirm?token=${encodeURIComponent(token)}`;
+    const confirmUrl = `${env.APP_BASE_URL}/newsletter/confirm?token=${encodeURIComponent(token)}`;
 
     // Send confirmation email
     const result = await emailService.sendNewsletterConfirm({

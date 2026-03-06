@@ -13,6 +13,7 @@ vi.mock('../src/config/env.js', () => ({
     JWT_SECRET: 'test-secret-that-is-at-least-16-chars-long',
     API_URL: 'http://localhost:4000',
     WEB_URL: 'http://localhost:3000',
+    APP_BASE_URL: 'http://localhost:3000',
   },
 }));
 
