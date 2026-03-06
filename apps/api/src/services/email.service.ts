@@ -84,6 +84,10 @@ export class EmailService {
     let failed = 0;
     const errors: string[] = [];
 
+    // Scale note: individual sends with 50ms delay works well up to ~200 subscribers
+    // (~10 seconds). At 500+ subscribers consider migrating to Resend Batch API
+    // (resend.com/docs/api-reference/emails/send-batch) or a background job queue.
+    // Revisit when subscriber count approaches 300.
     for (const recipient of params.recipients) {
       const unsubscribeUrl = `${params.baseUrl}/unsubscribe?token=${recipient.unsubscribeToken}`;
       const html = newsletterTemplate({

@@ -102,10 +102,8 @@ export async function newsletterRoutes(fastify: FastifyInstance) {
     // Generate unsubscribe token
     const unsubscribeToken = generateUnsubscribeToken();
 
-    // Get client IP (behind Traefik: x-forwarded-for)
-    const clientIp = (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim()
-      || request.ip
-      || 'unknown';
+    // Client IP — trustProxy is enabled so request.ip returns real IP from X-Forwarded-For
+    const clientIp = request.ip || 'unknown';
 
     // Update user record
     await db.update(users)

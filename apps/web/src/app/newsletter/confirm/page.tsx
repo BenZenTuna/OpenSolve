@@ -1,59 +1,37 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, AlertCircle, Loader2, Mail } from 'lucide-react';
 import { apiUrl } from '@/lib/api';
 
-type ConfirmState = 'loading' | 'success' | 'expired' | 'invalid' | 'error';
+type ConfirmState = 'idle' | 'loading' | 'success' | 'expired' | 'invalid' | 'error';
 
 export default function NewsletterConfirmPage() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
-  const [state, setState] = useState<ConfirmState>(token ? 'loading' : 'invalid');
+  const [state, setState] = useState<ConfirmState>(token ? 'idle' : 'invalid');
 
-  useEffect(() => {
-    if (!token) return;
-
-    let cancelled = false;
-
-    async function confirm() {
-      try {
-        const res = await fetch(apiUrl(`/newsletter/confirm?token=${encodeURIComponent(token!)}`), {
-          credentials: 'include',
-        });
-
-        if (cancelled) return;
-
-        if (res.ok) {
-          setState('success');
-        } else if (res.status === 400) {
-          setState('expired');
-        } else {
-          setState('error');
-        }
-      } catch {
-        if (!cancelled) setState('error');
-      }
-    }
-
-    confirm();
-    return () => { cancelled = true; };
-  }, [token]);
-
-  const handleRetry = () => {
+  const handleConfirm = async () => {
     if (!token) return;
     setState('loading');
-    fetch(apiUrl(`/newsletter/confirm?token=${encodeURIComponent(token)}`), {
-      credentials: 'include',
-    })
-      .then(res => {
-        if (res.ok) setState('success');
-        else if (res.status === 400) setState('expired');
-        else setState('error');
-      })
-      .catch(() => setState('error'));
+
+    try {
+      const res = await fetch(apiUrl(`/newsletter/confirm?token=${encodeURIComponent(token)}`), {
+        credentials: 'include',
+      });
+
+      if (res.ok) {
+        setState('success');
+      } else if (res.status === 400) {
+        setState('expired');
+      } else {
+        setState('error');
+      }
+    } catch {
+      setState('error');
+    }
   };
 
   return (
@@ -64,6 +42,25 @@ export default function NewsletterConfirmPage() {
       </head>
       <div className="flex items-center justify-center min-h-[60vh] px-4">
         <div className="max-w-md w-full text-center space-y-6">
+          {state === 'idle' && (
+            <div className="space-y-4">
+              <Mail className="w-14 h-14 text-accent mx-auto" />
+              <h1 className="text-2xl font-display font-bold text-white">Confirm your newsletter subscription</h1>
+              <p className="text-gray-400">
+                Click the button below to confirm you want to receive
+                OpenSolve newsletter emails.
+              </p>
+              <div className="flex flex-col items-center gap-3 pt-2">
+                <button onClick={handleConfirm} className="btn-primary">
+                  Confirm my subscription
+                </button>
+              </div>
+              <p className="text-xs text-gray-500">
+                This link expires 24 hours after it was sent.
+              </p>
+            </div>
+          )}
+
           {state === 'loading' && (
             <div className="space-y-4">
               <Loader2 className="w-10 h-10 text-accent animate-spin mx-auto" />
@@ -129,7 +126,7 @@ export default function NewsletterConfirmPage() {
                 We couldn&apos;t confirm your subscription. Please try again.
               </p>
               <div className="flex flex-col items-center gap-3 pt-2">
-                <button onClick={handleRetry} className="btn-primary">
+                <button onClick={handleConfirm} className="btn-primary">
                   Try Again
                 </button>
                 <Link href="/" className="text-sm text-gray-400 hover:text-accent transition-colors">

@@ -37,6 +37,7 @@ const app = Fastify({
       : undefined,
   },
   bodyLimit: 10 * 1024, // 10KB max body size
+  trustProxy: true, // Behind Traefik — request.ip returns real client IP from X-Forwarded-For
 });
 
 async function buildServer() {
