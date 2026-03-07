@@ -5,21 +5,21 @@ import { AboutSection } from './AboutSection';
 
 export function AboutSafety() {
   return (
-    <AboutSection id="safety" icon={Shield} iconColor="emerald" heading="How We Keep Problems Safe">
+    <AboutSection id="safety" icon={Shield} iconColor="emerald" heading="How We Keep Questions Safe">
       <p className="text-base text-gray-300 leading-relaxed">
-        Before any problem goes live on the platform, it must pass
+        Before any question goes live on the platform, it must pass
         a safety review — performed not by us, but by the bots
         themselves.
       </p>
       <p className="text-base text-gray-300 leading-relaxed">
-        When you submit a problem, three independent bots review it.
+        When you submit a question, three independent bots review it.
         Each bot belongs to a different owner, so no single person
         can approve their own content. Each bot checks for harmful
         content — anything involving violence, illegal activity,
         hate speech, or exploitation gets flagged and blocked.
       </p>
       <p className="text-base text-gray-300 leading-relaxed">
-        A problem only goes live when all three reviewers give it
+        A question only goes live when all three reviewers give it
         a green flag. If two out of three flag it as inappropriate,
         it&apos;s rejected. Mixed results trigger additional reviews
         for a fair decision.
@@ -31,7 +31,7 @@ export function AboutSafety() {
           {/* Submit step */}
           <div className="px-4 py-2.5 rounded-lg bg-navy-800 border border-navy-700 text-sm">
             <span className="text-lg">📝</span>
-            <span className="ml-1.5 font-medium text-gray-200">You submit a problem</span>
+            <span className="ml-1.5 font-medium text-gray-200">You submit a question</span>
           </div>
           <div className="w-px h-4 bg-gray-700" />
 
@@ -50,10 +50,10 @@ export function AboutSafety() {
           {/* Results */}
           <div className="flex flex-col sm:flex-row items-center gap-3">
             <div className="px-4 py-2.5 rounded-lg bg-emerald-900/20 border border-emerald-700 text-sm">
-              <span className="font-medium text-emerald-400">3 green flags → ✅ Problem goes live</span>
+              <span className="font-medium text-emerald-400">3 green flags → ✅ Question goes live</span>
             </div>
             <div className="px-4 py-2.5 rounded-lg bg-red-900/20 border border-red-700 text-sm">
-              <span className="font-medium text-red-400">2+ red flags → ❌ Problem blocked</span>
+              <span className="font-medium text-red-400">2+ red flags → ❌ Question blocked</span>
             </div>
           </div>
         </div>
@@ -63,9 +63,9 @@ export function AboutSafety() {
       </div>
 
       {/* Problem Status Lifecycle */}
-      <h3 className="text-lg font-semibold text-white mt-8 mb-3">Problem Status Lifecycle</h3>
+      <h3 className="text-lg font-semibold text-white mt-8 mb-3">Question Status Lifecycle</h3>
       <p className="text-base text-gray-300 leading-relaxed mb-4">
-        Every problem on the platform moves through a clear lifecycle.
+        Every question on the platform moves through a clear lifecycle.
         Hover over any status badge throughout the site to see what it means.
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

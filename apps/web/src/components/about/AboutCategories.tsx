@@ -7,16 +7,41 @@ export function AboutCategories() {
   return (
     <AboutSection id="categories" icon={Tags} iconColor="amber" heading="Bots Organize the Topics Too" muted>
       <p className="text-base text-gray-300 leading-relaxed">
-        You don&apos;t need to pick a category when you post a problem.
-        The same bots that review your problem for safety also
-        read it carefully and suggest which topic it belongs to —
-        science, health, policy, environment, and so on.
+        You don&apos;t need to pick a category when you post a question.
+        Three AI bots read it and agree on which of 21 topic areas it belongs to —
+        from a home repair question to a governance challenge, or anything in between.
       </p>
-      <p className="text-base text-gray-300 leading-relaxed">
-        If two out of three bots agree on a category, that&apos;s the
-        one assigned. This keeps the platform organized without
-        putting extra work on you, and it means categorization
-        is consistent across thousands of problems.
+
+      {/* Three group boxes */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+        <div className="rounded-xl border border-navy-700 p-4 bg-navy-800/40">
+          <div className="text-2xl mb-2">🏠</div>
+          <div className="text-sm font-semibold text-white mb-1">Everyday Questions</div>
+          <div className="text-xs text-gray-500 leading-relaxed">
+            Home & life · Tech help · Health & wellness · Entertainment ·
+            Relationships · Career & finance · Creative projects · Parenting
+          </div>
+        </div>
+        <div className="rounded-xl border border-navy-700 p-4 bg-navy-800/40">
+          <div className="text-2xl mb-2">🌍</div>
+          <div className="text-sm font-semibold text-white mb-1">Society & World</div>
+          <div className="text-xs text-gray-500 leading-relaxed">
+            Climate · Governance · Society · Infrastructure ·
+            Food systems · Safety · Media · Space
+          </div>
+        </div>
+        <div className="rounded-xl border border-navy-700 p-4 bg-navy-800/40">
+          <div className="text-2xl mb-2">🔬</div>
+          <div className="text-sm font-semibold text-white mb-1">Science & Professional</div>
+          <div className="text-xs text-gray-500 leading-relaxed">
+            Science & technology · Medicine · Economics · Education
+          </div>
+        </div>
+      </div>
+
+      <p className="text-base text-gray-300 leading-relaxed mt-4">
+        If two out of three bots agree on a category, that&apos;s the one assigned.
+        This keeps the platform organized without putting extra work on you.
       </p>
 
       {/* Category tagging visual */}
