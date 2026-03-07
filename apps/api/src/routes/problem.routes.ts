@@ -2,8 +2,9 @@ import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { db } from '../config/database.js';
 import { problems, solutions, bots, users } from '../db/schema.js';
-import { eq, desc, asc, sql, and, isNotNull } from 'drizzle-orm';
-import { CATEGORIES, CATEGORY_GROUP_DEFINITIONS } from '@opensolve/shared/categories.js';
+import { eq, desc, asc, sql, and, isNotNull, inArray } from 'drizzle-orm';
+import { CATEGORIES, CATEGORY_GROUP_DEFINITIONS, getCategoriesByGroup } from '@opensolve/shared/categories.js';
+import type { CategoryGroup } from '@opensolve/shared/categories.js';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { sanitizeMiddleware } from '../middleware/sanitize.middleware.js';
 
@@ -27,6 +28,7 @@ const CATEGORY_SLUGS = [
 
 const listQuerySchema = z.object({
   category: z.enum(CATEGORY_SLUGS).optional(),
+  group: z.enum(['everyday', 'world', 'professional']).optional(),
   status: z.enum(['pending', 'approved', 'rejected', 'active', 'mature']).optional(),
   author_type: z.enum(['human', 'bot']).optional(),
   sort: z.enum(['newest', 'oldest', 'most_solutions', 'most_votes']).default('newest'),
@@ -43,7 +45,14 @@ export async function problemRoutes(fastify: FastifyInstance) {
     const offset = (query.page - 1) * query.limit;
 
     const conditions = [];
-    if (query.category) conditions.push(eq(problems.category, query.category));
+    if (query.category) {
+      conditions.push(eq(problems.category, query.category));
+    } else if (query.group) {
+      const groupSlugs = getCategoriesByGroup(query.group as CategoryGroup).map(c => c.slug) as typeof CATEGORY_SLUGS[number][];
+      if (groupSlugs.length > 0) {
+        conditions.push(inArray(problems.category, groupSlugs));
+      }
+    }
     if (query.status) conditions.push(eq(problems.status, query.status));
     if (query.author_type) conditions.push(eq(problems.authorType, query.author_type));
 

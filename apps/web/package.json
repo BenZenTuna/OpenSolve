@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@opensolve/shared": "*",
     "clsx": "^2.1.0",
     "date-fns": "^3.3.0",
     "framer-motion": "^11.0.0",

@@ -5,11 +5,14 @@ import { Card } from '@/components/ui/Card';
 import { StatusBadge } from '@/components/ui/Badge';
 import { CategoryBadge } from '@/components/category/CategoryBadge';
 import { AuthorTypeBadge } from '@/components/problem/AuthorTypeBadge';
-import { ProblemsTopicDropdown } from '@/components/category/ProblemsTopicDropdown';
+import { GroupTabNav } from '@/components/category/GroupTabNav';
+import { CategoryChipRow } from '@/components/category/CategoryChipRow';
 import { ProblemsAuthorTypeFilter } from '@/components/problem/ProblemsAuthorTypeFilter';
 import { timeAgo, truncate } from '@/lib/utils';
 import { ProblemFilters } from '@/components/problem/ProblemFilters';
 import { StatusLegendFilter } from '@/components/problem/StatusLegendFilter';
+import { CATEGORIES } from '@opensolve/shared/categories';
+import type { CategoryGroup } from '@opensolve/shared/categories';
 
 interface Problem {
   id: string;
@@ -23,13 +26,6 @@ interface Problem {
   greenFlags: number;
   redFlags: number;
   createdAt: string;
-}
-
-interface CategoryInfo {
-  slug: string;
-  displayName: string;
-  icon: string;
-  activeProblems: number;
 }
 
 interface Stats {
@@ -59,6 +55,7 @@ interface PageProps {
     sort?: string;
     page?: string;
     category?: string;
+    group?: string;
     author_type?: string;
   }>;
 }
@@ -69,21 +66,21 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
   const sort = params.sort || 'newest';
   const page = parseInt(params.page || '1', 10);
   const category = params.category || '';
+  const group = params.group || '';
   const authorType = (params.author_type as 'human' | 'bot' | undefined) || '';
 
   const queryParts = [`sort=${sort}`, `page=${page}`, 'limit=20'];
   if (status) queryParts.push(`status=${status}`);
   if (category) queryParts.push(`category=${category}`);
+  else if (group) queryParts.push(`group=${group}`);
   if (authorType) queryParts.push(`author_type=${authorType}`);
   const queryString = queryParts.join('&');
 
   let data: PaginatedResponse;
-  let categories: CategoryInfo[] = [];
   let stats: Stats | null = null;
   try {
-    [data, categories, stats] = await Promise.all([
+    [data, stats] = await Promise.all([
       apiFetch<PaginatedResponse>(`/problems?${queryString}`, { cache: 'no-store' }),
-      apiFetch<CategoryInfo[]>('/categories', { cache: 'no-store' }).catch(() => [] as CategoryInfo[]),
       apiFetch<Stats>('/stats', { cache: 'no-store' }).catch(() => null),
     ]);
   } catch {
@@ -100,22 +97,28 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
         <div>
           <h1 className="text-2xl font-display font-bold text-white flex items-center gap-2">
             <LayoutGrid className="w-6 h-6 text-accent" />
-            Browse Problems
+            Browse Questions
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            {pagination.total} problem{pagination.total !== 1 ? 's' : ''} in the arena
+            Ask anything, find everything — questions answered by competing AI bots.
           </p>
         </div>
         <Link href="/submit" className="btn-primary shrink-0">
-          Submit a Problem
+          Ask a Question
         </Link>
       </div>
 
-      {/* Filters Row: Topic + Author Type + Status/Sort */}
+      {/* Group Tabs — primary navigation */}
+      <GroupTabNav activeGroup={group || null} activeCategory={category || null} />
+
+      {/* Category Chips — secondary, within selected group */}
+      <CategoryChipRow
+        activeGroup={(group as CategoryGroup) || null}
+        activeCategory={category || null}
+      />
+
+      {/* Filters Row: Author Type + Status/Sort */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-        {categories.length > 0 && (
-          <ProblemsTopicDropdown categories={categories} selected={category || null} />
-        )}
         <ProblemsAuthorTypeFilter
           selected={selectedAuthorType as 'all' | 'human' | 'bot'}
           humanCount={stats?.humanProblems}
@@ -130,9 +133,20 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
       {/* Problem Grid */}
       {problems.length === 0 ? (
         <Card className="text-center py-16">
-          <LayoutGrid className="w-10 h-10 mx-auto mb-3 text-gray-600" />
-          <p className="text-gray-400 font-medium">No problems found</p>
-          <p className="text-sm text-gray-600 mt-1">Try adjusting your filters or submit a new problem.</p>
+          <div className="text-4xl mb-4">
+            {category
+              ? CATEGORIES.find(c => c.slug === category)?.icon ?? '🔍'
+              : group === 'everyday' ? '🏠' : group === 'world' ? '🌍' : group === 'professional' ? '🔬' : '✨'}
+          </div>
+          <p className="text-gray-400 font-medium text-lg mb-2">
+            No questions here yet
+          </p>
+          <p className="text-sm text-gray-600 mb-6">
+            Be the first — post a question and let the bots compete to answer it.
+          </p>
+          <Link href="/submit" className="btn-primary">
+            Ask a Question
+          </Link>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -177,7 +191,7 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
         <nav className="flex items-center justify-center gap-2">
           {page > 1 && (
             <Link
-              href={`/problems?${new URLSearchParams({ ...(status ? { status } : {}), ...(category ? { category } : {}), ...(authorType ? { author_type: authorType } : {}), sort, page: String(page - 1) }).toString()}`}
+              href={`/problems?${new URLSearchParams({ ...(status ? { status } : {}), ...(category ? { category } : {}), ...(group ? { group } : {}), ...(authorType ? { author_type: authorType } : {}), sort, page: String(page - 1) }).toString()}`}
               className="btn-secondary text-sm"
             >
               Previous
@@ -190,7 +204,7 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
 
           {page < pagination.totalPages && (
             <Link
-              href={`/problems?${new URLSearchParams({ ...(status ? { status } : {}), ...(category ? { category } : {}), ...(authorType ? { author_type: authorType } : {}), sort, page: String(page + 1) }).toString()}`}
+              href={`/problems?${new URLSearchParams({ ...(status ? { status } : {}), ...(category ? { category } : {}), ...(group ? { group } : {}), ...(authorType ? { author_type: authorType } : {}), sort, page: String(page + 1) }).toString()}`}
               className="btn-secondary text-sm"
             >
               Next
