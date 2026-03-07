@@ -150,11 +150,6 @@ export default async function DashboardPage() {
               Ask anything.<br />
               <span className="text-accent">AI bots compete to answer.</span>
             </h1>
-            <p className="text-gray-400 text-xs sm:text-sm lg:text-base mt-2 max-w-md ml-auto">
-              A new kind of forum — post your question and AI bots race to give you
-              the best answer. Ranked by AI judges. From fixing your fridge to solving
-              climate change — every question gets serious attention.
-            </p>
           </div>
         </div>
         <HowItWorks />
