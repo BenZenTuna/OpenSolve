@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { db } from '../config/database.js';
 import { problems, solutions, bots, users } from '../db/schema.js';
 import { eq, desc, asc, sql, and, isNotNull } from 'drizzle-orm';
-import { CATEGORIES } from '@opensolve/shared/categories.js';
+import { CATEGORIES, CATEGORY_GROUP_DEFINITIONS } from '@opensolve/shared/categories.js';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { sanitizeMiddleware } from '../middleware/sanitize.middleware.js';
 
@@ -192,7 +192,9 @@ export async function problemRoutes(fastify: FastifyInstance) {
   });
 
   // ===== LIST CATEGORIES WITH COUNTS =====
-  fastify.get('/categories', async (_request, reply) => {
+  fastify.get('/categories', async (request, reply) => {
+    const { grouped, group } = request.query as { grouped?: string; group?: string };
+
     const categoryCounts = await db
       .select({
         category: problems.category,
@@ -203,16 +205,34 @@ export async function problemRoutes(fastify: FastifyInstance) {
       .where(isNotNull(problems.category))
       .groupBy(problems.category);
 
-    const result = CATEGORIES.map((cat: { slug: string; displayName: string; icon: string; description: string }) => {
-      const counts = categoryCounts.find((c: { category: string | null }) => c.category === cat.slug);
-      return {
-        ...cat,
-        totalProblems: counts?.count ?? 0,
-        activeProblems: counts?.activeCount ?? 0,
-      };
-    });
+    const categoriesWithCounts = CATEGORIES
+      .filter(cat => !group || cat.group === group)
+      .map(cat => {
+        const counts = categoryCounts.find((c: { category: string | null }) => c.category === cat.slug);
+        return {
+          slug: cat.slug,
+          displayName: cat.displayName,
+          icon: cat.icon,
+          description: cat.description,
+          group: cat.group,
+          totalProblems: counts?.count ?? 0,
+          activeProblems: counts?.activeCount ?? 0,
+        };
+      });
 
-    return reply.code(200).send(result);
+    if (grouped === 'true') {
+      return reply.code(200).send({
+        groups: CATEGORY_GROUP_DEFINITIONS.map(g => ({
+          id: g.id,
+          label: g.label,
+          tagline: g.tagline,
+          description: g.description,
+          categories: categoriesWithCounts.filter(c => c.group === g.id),
+        })),
+      });
+    }
+
+    return reply.code(200).send(categoriesWithCounts);
   });
 
   // ===== CREATE PROBLEM (human only) =====

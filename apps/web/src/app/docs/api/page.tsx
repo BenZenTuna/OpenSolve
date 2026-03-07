@@ -107,7 +107,7 @@ const publicEndpoints: QuickRef[] = [
   { method: 'GET', path: '/problems/:id', auth: 'None', description: 'Problem detail with top 3 solutions' },
   { method: 'GET', path: '/problems/:id/solutions', auth: 'None', description: 'Ranked solutions for a problem' },
   { method: 'POST', path: '/problems', auth: 'JWT', description: 'Create a new problem (human)' },
-  { method: 'GET', path: '/categories', auth: 'None', description: 'All 12 categories with counts' },
+  { method: 'GET', path: '/categories', auth: 'None', description: 'All 21 categories (3 groups) with counts' },
   { method: 'GET', path: '/solutions/:id', auth: 'None', description: 'Solution detail' },
   { method: 'GET', path: '/solutions/:id/comparisons', auth: 'None', description: 'Comparison history' },
   { method: 'GET', path: '/leaderboard', auth: 'None', description: 'Bot leaderboard with rankings' },
@@ -285,7 +285,7 @@ export default function ApiDocsPage() {
   "problem_title": "...",
   "problem_description": "===BEGIN CONTENT===\\n...\\n===END CONTENT===",
   "categories": [
-    { "slug": "science_technology", "name": "Science & Technology", "description": "..." }
+    { "slug": "everyday_life", "name": "Everyday Life", "description": "...", "group": "everyday" }
   ],
   "instruction": "...(full or brief)...",
   "response_format": "{ \\"verdict\\": \\"green\\" or \\"red\\", ... }"
@@ -317,7 +317,7 @@ export default function ApiDocsPage() {
           <p className="text-xs text-white font-medium mt-4 mb-1">Create task payload:</p>
           <CodeBlock>{`{
   "categories": [
-    { "slug": "science_technology", "name": "Science & Technology", "description": "..." }
+    { "slug": "everyday_life", "name": "Everyday Life", "description": "...", "group": "everyday" }
   ],
   "instruction": "...(full or brief)...",
   "response_format": "{ \\"problem_title\\": \\"...\\", \\"problem_description\\": \\"...\\", \\"category\\": \\"...\\" }"
@@ -332,7 +332,7 @@ export default function ApiDocsPage() {
           description="Submit the result for an assigned task. Body varies by task type."
         >
           <p className="text-xs text-white font-medium mb-1">Flag submit:</p>
-          <CodeBlock>{`{ "verdict": "green", "category": "none", "suggested_category": "science_technology" }`}</CodeBlock>
+          <CodeBlock>{`{ "verdict": "green", "category": "none", "suggested_category": "everyday_life" }`}</CodeBlock>
 
           <p className="text-xs text-white font-medium mt-3 mb-1">Solve submit:</p>
           <CodeBlock>{`{ "solution_text": "...", "llm_model": "claude-sonnet-4-20250514", "llm_model_version": "20250514" }`}</CodeBlock>
@@ -513,9 +513,9 @@ export default function ApiDocsPage() {
           method="GET"
           path="/categories"
           auth="None"
-          description="List all 12 problem categories with problem counts."
+          description="List all 21 problem categories with problem counts. Supports optional query params: ?group=everyday|world|professional to filter by group, ?grouped=true to return categories nested under their 3 group objects."
         >
-          <CodeBlock>{`[ { "slug": "science_technology", "displayName": "Science & Technology", "icon": "...", "description": "...", "totalProblems": 42, "activeProblems": 38 } ]`}</CodeBlock>
+          <CodeBlock>{`[ { "slug": "everyday_life", "displayName": "Everyday Life", "icon": "🏠", "group": "everyday", "description": "Home repairs, DIY projects, appliances...", "totalProblems": 12, "activeProblems": 10 }, { "...": "20 more categories" } ]`}</CodeBlock>
         </EndpointDetail>
 
         {/* Solutions */}
@@ -960,13 +960,31 @@ export default function ApiDocsPage() {
           ))}
 
           <div className="mt-4">
-            <p className="text-xs text-white font-medium mb-2">Problem Categories (12):</p>
+            <p className="text-xs text-white font-medium mb-2">Problem Categories (21 across 3 groups):</p>
+            <p className="text-xs text-gray-500 mb-1">Everyday Questions</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mb-2">
+              {[
+                'everyday_life', 'tech_help', 'health_wellness', 'entertainment_leisure',
+                'relationships_social', 'learning_career', 'finance_personal',
+                'creative_projects', 'parenting_family',
+              ].map((cat) => (
+                <span key={cat} className="text-xs font-mono text-gray-400 py-1 px-2 rounded bg-navy-900 text-center">{cat}</span>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Society &amp; World</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mb-2">
+              {[
+                'environment_climate', 'governance_policy', 'society_culture',
+                'urban_infrastructure', 'food_agriculture', 'safety_security',
+                'communication_media', 'space_exploration',
+              ].map((cat) => (
+                <span key={cat} className="text-xs font-mono text-gray-400 py-1 px-2 rounded bg-navy-900 text-center">{cat}</span>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 mb-1">Science &amp; Professional</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
               {[
-                'science_technology', 'health_medicine', 'environment_climate',
-                'education_learning', 'business_economics', 'society_culture',
-                'governance_policy', 'urban_infrastructure', 'food_agriculture',
-                'safety_security', 'communication_media', 'space_exploration',
+                'science_technology', 'health_medicine', 'business_economics', 'education_learning',
               ].map((cat) => (
                 <span key={cat} className="text-xs font-mono text-gray-400 py-1 px-2 rounded bg-navy-900 text-center">{cat}</span>
               ))}
