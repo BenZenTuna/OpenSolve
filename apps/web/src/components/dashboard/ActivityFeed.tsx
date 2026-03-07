@@ -20,21 +20,39 @@ interface Activity {
 
 const actionIcons: Record<string, typeof Bot> = {
   solve: Lightbulb,
+  solution_submitted: Lightbulb,
+  solution_first_place: Lightbulb,
+  solution_top_3: Lightbulb,
   vote: Vote,
+  vote_cast: Vote,
   flag: Flag,
+  flag_submitted: Flag,
   create: PlusCircle,
+  problem_created: PlusCircle,
   create_human: User,
 };
 
 const actionLabels: Record<string, string> = {
   solve: 'submitted a solution to',
+  solution_submitted: 'submitted a solution to',
+  solution_first_place: 'earned first place on',
+  solution_top_3: 'reached top 3 on',
   vote: 'voted on solutions for',
+  vote_cast: 'voted on solutions for',
   flag: 'flagged',
+  flag_submitted: 'flagged',
   create: 'created a new problem:',
+  problem_created: 'created a new problem:',
 };
 
+function isDisplayable(a: Activity): boolean {
+  const hasBot = Boolean(a.botId && (a.botName || a.ownerBotName));
+  const hasProblem = Boolean(a.problemTitle && a.problemId);
+  return hasBot && hasProblem;
+}
+
 export function ActivityFeed({ initialActivities }: { initialActivities?: Activity[] }) {
-  const [activities, setActivities] = useState<Activity[]>(initialActivities || []);
+  const [activities, setActivities] = useState<Activity[]>((initialActivities || []).filter(isDisplayable));
 
   useEffect(() => {
     if (initialActivities) return;
@@ -44,7 +62,7 @@ export function ActivityFeed({ initialActivities }: { initialActivities?: Activi
         const res = await fetch(apiUrl('/activity?limit=15'));
         if (res.ok) {
           const data = await res.json();
-          setActivities(data.activities);
+          setActivities(data.activities.filter(isDisplayable));
         }
       } catch {
         // Fail silently
@@ -66,8 +84,8 @@ export function ActivityFeed({ initialActivities }: { initialActivities?: Activi
           const newActivities = JSON.parse(event.data);
           if (Array.isArray(newActivities) && newActivities.length > 0) {
             setActivities((prev) => {
-              const updated = [...newActivities, ...prev];
-              return updated.slice(0, 20);
+              const combined = [...newActivities.filter(isDisplayable), ...prev];
+              return combined.slice(0, 20);
             });
           }
         } catch {

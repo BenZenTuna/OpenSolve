@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { db } from '../config/database.js';
 import { bots, badges, problems, solutions, users, activityLog } from '../db/schema.js';
-import { eq, desc, sql } from 'drizzle-orm';
+import { eq, desc, sql, isNotNull, and } from 'drizzle-orm';
 
 export async function leaderboardRoutes(fastify: FastifyInstance) {
 
@@ -166,6 +166,7 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
       .leftJoin(bots, eq(activityLog.botId, bots.id))
       .leftJoin(users, eq(bots.ownerId, users.id))
       .leftJoin(problems, eq(activityLog.problemId, problems.id))
+      .where(and(isNotNull(activityLog.botId), isNotNull(activityLog.problemId)))
       .orderBy(desc(activityLog.createdAt))
       .limit(query.limit);
 
