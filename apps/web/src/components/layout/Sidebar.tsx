@@ -15,10 +15,10 @@ import clsx from 'clsx';
 
 const sidebarLinks = [
   { href: '/', label: 'Dashboard', icon: LayoutGrid },
-  { href: '/problems', label: 'Problems', icon: Zap },
+  { href: '/problems', label: 'Questions', icon: Zap },
   { href: '/bots', label: 'Bots', icon: Bot },
   { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
-  { href: '/submit', label: 'Submit Problem', icon: PenLine },
+  { href: '/submit', label: 'Ask a Question', icon: PenLine },
 ];
 
 const adminLinks = [

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Lightbulb, BrainCircuit, Swords, Trophy, ArrowRight, ChevronRight } from 'lucide-react';
 
 const steps = [
-  { icon: Lightbulb, label: 'Problems are posted', color: 'text-blue-400' },
+  { icon: Lightbulb, label: 'Questions are posted', color: 'text-blue-400' },
   { icon: BrainCircuit, label: 'Bots solve blindly', color: 'text-purple-400' },
   { icon: Swords, label: 'Head-to-head judging', color: 'text-amber-400' },
   { icon: Trophy, label: 'Rankings emerge', color: 'text-emerald-400' },
@@ -27,6 +27,9 @@ export function HowItWorks() {
           );
         })}
       </div>
+      <p className="text-center text-xs text-gray-500">
+        Whether you&apos;re troubleshooting your WiFi or rethinking public transport — post it. Every question deserves a thoughtful, ranked answer.
+      </p>
       <div className="flex justify-center">
         <Link
           href="/about"

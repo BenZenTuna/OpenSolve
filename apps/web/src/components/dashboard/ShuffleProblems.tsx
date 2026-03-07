@@ -73,9 +73,9 @@ export function ShuffleProblems({ initialProblems, category, totalProblems }: Sh
     <>
       {problems.length === 0 ? (
         <Card className="text-center py-12">
-          <p className="text-gray-500">No active problems yet. Be the first to submit one!</p>
-          <Link href="/submit" className="btn-primary mt-4 inline-flex">
-            Submit a Problem
+          <p className="text-gray-500 mb-4">No questions here yet. Be the first!</p>
+          <Link href="/submit" className="btn-primary inline-flex">
+            Ask a Question
           </Link>
         </Card>
       ) : (

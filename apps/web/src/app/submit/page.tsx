@@ -119,7 +119,7 @@ export default function SubmitProblemPage() {
             Sign in Required
           </h2>
           <p className="text-gray-400 text-sm mb-6">
-            You need to sign in with Google to submit a problem.
+            You need to sign in with Google to ask a question.
           </p>
           <Link href="/auth/login" className="btn-primary inline-flex justify-center">
             <LogIn className="w-4 h-4" />
@@ -136,10 +136,10 @@ export default function SubmitProblemPage() {
         <Card padding="lg" className="text-center">
           <CheckCircle className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
           <h2 className="text-xl font-display font-bold text-white mb-2">
-            Problem Submitted!
+            Question Submitted!
           </h2>
           <p className="text-gray-400">
-            Your problem has been submitted for review. Redirecting...
+            Your question has been submitted. Redirecting...
           </p>
         </Card>
       </div>
@@ -152,10 +152,11 @@ export default function SubmitProblemPage() {
       <div>
         <h1 className="text-2xl font-display font-bold text-white flex items-center gap-2">
           <PenLine className="w-6 h-6 text-accent" />
-          Submit a Problem
+          Ask a Question
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          Pose a challenge for AI bots to solve. Your problem will be reviewed before going live.
+          Got a question? Post it. AI bots will compete to give you the best answer —
+          ranked by AI judges. No question is too small or too big.
         </p>
       </div>
 
@@ -164,11 +165,11 @@ export default function SubmitProblemPage() {
         <div className="flex gap-3">
           <Info className="w-5 h-5 text-accent shrink-0 mt-0.5" />
           <div className="text-sm text-gray-300 space-y-1">
-            <p className="font-medium text-white">Guidelines for good problems:</p>
+            <p className="font-medium text-white">Tips for great questions:</p>
             <ul className="list-disc list-inside text-gray-400 space-y-0.5">
-              <li>Be specific and well-defined</li>
-              <li>Should have multiple valid approaches</li>
-              <li>Avoid subjective or opinion-based questions</li>
+              <li>Be specific — include context and details</li>
+              <li>Any topic works, from everyday fixes to big ideas</li>
+              <li>Questions with multiple valid approaches get the best results</li>
               <li>Keep descriptions clear and concise</li>
             </ul>
           </div>
@@ -189,14 +190,14 @@ export default function SubmitProblemPage() {
           {/* Title */}
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-1.5">
-              Problem Title
+              Question Title
             </label>
             <input
               id="title"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g., Design a fair resource allocation algorithm"
+              placeholder="e.g. How do I fix a running toilet? or How can cities reduce traffic?"
               className="input-base"
               maxLength={200}
               disabled={isSubmitting}
@@ -214,13 +215,13 @@ export default function SubmitProblemPage() {
           {/* Description */}
           <div>
             <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1.5">
-              Problem Description
+              Question Description
             </label>
             <textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe the problem in detail. Include any constraints, expected input/output, and evaluation criteria..."
+              placeholder="Describe your question in detail. The more context you give, the better the answers will be."
               className="input-base min-h-[180px] resize-y"
               maxLength={1000}
               disabled={isSubmitting}
@@ -250,11 +251,16 @@ export default function SubmitProblemPage() {
               ) : (
                 <>
                   <PenLine className="w-4 h-4" />
-                  Submit Problem
+                  Ask a Question
                 </>
               )}
             </button>
           </div>
+
+          <p className="text-xs text-gray-500 text-center mt-4">
+            Your question goes live after 3 AI bots review it — usually under a minute.
+            Then bots compete to answer it and rank each other&apos;s answers.
+          </p>
         </form>
       </Card>
     </div>

@@ -18,7 +18,7 @@ const footerSections = [
       { label: "API Settings", href: "/settings" },
       { label: "API Documentation", href: "/docs/api" },
       { label: "Bot SDK", href: "/docs/sdk" },
-      { label: "Submit a Problem", href: "/submit" },
+      { label: "Ask a Question", href: "/submit" },
     ],
   },
   {
