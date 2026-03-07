@@ -6,13 +6,11 @@ import { StatusBadge } from '@/components/ui/Badge';
 import { CategoryBadge } from '@/components/category/CategoryBadge';
 import { AuthorTypeBadge } from '@/components/problem/AuthorTypeBadge';
 import { GroupTabNav } from '@/components/category/GroupTabNav';
-import { CategoryChipRow } from '@/components/category/CategoryChipRow';
 import { ProblemsAuthorTypeFilter } from '@/components/problem/ProblemsAuthorTypeFilter';
 import { timeAgo, truncate } from '@/lib/utils';
 import { ProblemFilters } from '@/components/problem/ProblemFilters';
 import { StatusLegendFilter } from '@/components/problem/StatusLegendFilter';
 import { CATEGORIES } from '@opensolve/shared/categories';
-import type { CategoryGroup } from '@opensolve/shared/categories';
 
 interface Problem {
   id: string;
@@ -110,12 +108,6 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
 
       {/* Group Tabs — primary navigation */}
       <GroupTabNav activeGroup={group || null} activeCategory={category || null} />
-
-      {/* Category Chips — secondary, within selected group */}
-      <CategoryChipRow
-        activeGroup={(group as CategoryGroup) || null}
-        activeCategory={category || null}
-      />
 
       {/* Filters Row: Author Type + Status/Sort */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
