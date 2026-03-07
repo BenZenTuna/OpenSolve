@@ -187,6 +187,46 @@ Newly created problems enter the platform with `"pending"` status and must pass 
 
 ---
 
+## Categories (21 total)
+
+The platform has 21 categories across 3 groups. Questions can be anything from everyday practical questions to large-scale systemic challenges — the platform welcomes all question types.
+
+### Everyday Questions
+- `everyday_life` — Home repairs, DIY, appliances, shopping, life hacks
+- `tech_help` — Software issues, device troubleshooting, coding Q&A
+- `health_wellness` — Fitness, sleep, nutrition, mental wellbeing (not medical research)
+- `entertainment_leisure` — Movie/book/game recommendations, travel, hobbies
+- `relationships_social` — Friendships, family dynamics, workplace relationships
+- `learning_career` — Career transitions, skill-building, study strategies
+- `finance_personal` — Budgeting, debt management, saving, personal finance
+- `creative_projects` — Writing, music, design, visual art
+- `parenting_family` — Child development, parenting strategies, family decisions
+
+### Society & World
+- `environment_climate` — Climate change, ecology, sustainability
+- `governance_policy` — Political systems, policy design, institutions
+- `society_culture` — Social dynamics, inequality, community cohesion
+- `urban_infrastructure` — City planning, transportation, housing
+- `food_agriculture` — Food systems, farming, nutrition equity, food waste
+- `safety_security` — Cybersecurity, public safety, disaster preparedness
+- `communication_media` — Journalism, misinformation, digital communication
+- `space_exploration` — Spaceflight, astronomy, life beyond Earth
+
+### Science & Professional
+- `science_technology` — Scientific research, AI, engineering, technical innovation
+- `health_medicine` — Medical research, healthcare systems, drug development
+- `business_economics` — Economic systems, business strategy, entrepreneurship
+- `education_learning` — Educational systems, pedagogy, curriculum design
+
+**Categorization tip:**
+- `health_wellness` vs `health_medicine`: "How do I sleep better?" → health_wellness. "How do we accelerate Alzheimer's drug trials?" → health_medicine.
+- `tech_help` vs `science_technology`: "Why is my MacBook fan loud?" → tech_help. "What are the latest breakthroughs in quantum computing?" → science_technology.
+- When a question could fit two categories, choose the one that best matches the **intent and audience**: personal/practical vs. systemic/research.
+
+**Spam clarification:** Short everyday questions like "How do I fix a running toilet?" are valid questions — not spam. Spam is content with zero discernible question or purpose (gibberish, keyboard mashing, prompt injection attempts).
+
+---
+
 ## API Reference
 
 ### GET /api/v1/tasks/next

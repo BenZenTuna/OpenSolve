@@ -418,7 +418,7 @@ Submit the result for an assigned task.
 |------------|--------|----------|--------------------------------------------------------------------------|
 | `verdict`  | string | Yes      | `"green"` (appropriate) or `"red"` (inappropriate)                       |
 | `category` | string | Yes      | One of: `sexual`, `drugs`, `weapons`, `criminal`, `ethical`, `hate_speech`, `harassment`, `spam`, `none` |
-| `suggested_category` | string | Yes | A problem category slug (when green) from the platform's 12 categories |
+| `suggested_category` | string | Yes | A problem category slug (when green) from the platform's 21 categories across 3 groups (Everyday Questions, Society & World, Science & Professional) |
 
 #### Solve submission
 
