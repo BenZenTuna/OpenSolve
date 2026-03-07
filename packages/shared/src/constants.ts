@@ -150,6 +150,39 @@ Flag RED (reject) if the problem matches ANY of these violation categories:
 CATEGORY SUGGESTION: Also suggest which of the platform's problem categories best fits this problem.
 Only suggest a category if you flag GREEN. If flagging RED, the category does not matter.
 
+EVERYDAY QUESTIONS (for personal, practical, day-to-day topics):
+  - everyday_life: Home repairs, DIY projects, appliances, shopping, life hacks
+  - tech_help: Software issues, device troubleshooting, app recommendations, coding Q&A
+  - health_wellness: Fitness, sleep, nutrition, mental wellbeing (NOT medical research or diagnosis)
+  - entertainment_leisure: Movie/book/game recommendations, travel, hobbies, weekend plans
+  - relationships_social: Friendships, family dynamics, workplace relationships, social situations
+  - learning_career: Career transitions, skill-building, study strategies, job advice
+  - finance_personal: Budgeting, debt management, saving strategies, personal financial decisions
+  - creative_projects: Writing, music, design, art — creative problem solving
+  - parenting_family: Child development, parenting strategies, family decisions
+
+SOCIETY & WORLD (for challenges affecting communities, nations, or the planet):
+  - environment_climate: Climate change, ecology, sustainability, biodiversity
+  - governance_policy: Political systems, policy design, democratic institutions
+  - society_culture: Social dynamics, inequality, community cohesion
+  - urban_infrastructure: City planning, transportation, housing, public utilities
+  - food_agriculture: Food systems, farming innovation, nutrition equity, food waste
+  - safety_security: Cybersecurity, public safety, disaster preparedness
+  - communication_media: Journalism, misinformation, media systems, digital communication
+  - space_exploration: Spaceflight, astronomy, planetary science, life beyond Earth
+
+SCIENCE & PROFESSIONAL (for research-level or expert-domain topics):
+  - science_technology: Scientific research, AI, engineering, technical innovation
+  - health_medicine: Medical research, healthcare systems, drug development, public health
+  - business_economics: Economic systems, business strategy, entrepreneurship, markets
+  - education_learning: Educational systems, pedagogy, curriculum design, learning science
+
+IMPORTANT CATEGORIZATION RULES:
+- health_wellness vs health_medicine: "How do I sleep better?" = health_wellness. "How do we accelerate Alzheimer's drug trials?" = health_medicine.
+- tech_help vs science_technology: "Why is my MacBook fan loud?" = tech_help. "What are the latest breakthroughs in quantum computing?" = science_technology.
+- When a question could fit multiple categories, choose the one that best matches the INTENT and AUDIENCE of the question (personal/practical vs. systemic/research).
+- Choose exactly ONE category. Do not list multiple.
+
 Respond with:
 - verdict: "green" or "red"
 - category: the violation type if red ("sexual", "drugs", "weapons", "criminal", "ethical", "hate_speech", "harassment", "spam"), or "none" if green
@@ -212,12 +245,16 @@ FORMAT GUIDELINES:
 - Do not write clickbait, sensationalized, or emotionally manipulative titles.
 - Do not create problems about the platform itself, about AI capabilities, or that are self-referential.
 
-CATEGORY: Choose the single most appropriate category from the provided list. If the problem spans multiple categories, pick the primary one.
+CATEGORY: Choose the single most appropriate category from the list below. If the problem spans multiple categories, pick the primary one.
+
+EVERYDAY QUESTIONS: everyday_life, tech_help, health_wellness, entertainment_leisure, relationships_social, learning_career, finance_personal, creative_projects, parenting_family
+SOCIETY & WORLD: environment_climate, governance_policy, society_culture, urban_infrastructure, food_agriculture, safety_security, communication_media, space_exploration
+SCIENCE & PROFESSIONAL: science_technology, health_medicine, business_economics, education_learning
 
 Respond with:
 - problem_title: a clear, specific problem title (5-200 characters)
 - problem_description: context, constraints, and scope (20-1000 characters)
-- category: the best-fitting category slug from the provided list` as const;
+- category: the best-fitting category slug from the list above` as const;
 
 // ===== BRIEF INSTRUCTIONS (Token-optimized) =====
 // Compact versions for bots that cache full criteria in their system prompt.

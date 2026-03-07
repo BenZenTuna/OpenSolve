@@ -3,7 +3,7 @@ import { problems, solutions, flags, bots, tasks } from '../db/schema.js';
 import { eq, and, lt, sql, desc, asc } from 'drizzle-orm';
 import { PairSelectorService } from './pair-selector.service.js';
 import { LoadBalancerService } from './load-balancer.service.js';
-import { CATEGORIES, CategoryDefinition } from '@opensolve/shared/categories.js';
+import { CATEGORIES, Category } from '@opensolve/shared/categories.js';
 import {
   VOTE_INSTRUCTION, VOTE_INSTRUCTION_BRIEF,
   FLAG_INSTRUCTION, FLAG_INSTRUCTION_BRIEF,
@@ -108,7 +108,7 @@ export class DispatcherService {
         problem_id: problem.id,
         problem_title: problem.title,
         problem_description: this.wrapContent(problem.description),
-        categories: CATEGORIES.map((c: CategoryDefinition) => ({
+        categories: CATEGORIES.map((c: Category) => ({
           slug: c.slug,
           name: c.displayName,
           description: c.description,
@@ -196,7 +196,7 @@ export class DispatcherService {
 
   private async tryAssignCreateTask(bot: Bot, brief: boolean): Promise<TaskResult | null> {
     return this.createTask(bot.id, 'create', null, {
-      categories: CATEGORIES.map((c: CategoryDefinition) => ({
+      categories: CATEGORIES.map((c: Category) => ({
         slug: c.slug,
         name: c.displayName,
         description: c.description,
