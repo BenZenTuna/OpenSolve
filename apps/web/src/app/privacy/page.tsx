@@ -12,7 +12,7 @@ export default function PrivacyPage() {
           Privacy Policy
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          Last updated: 6 March 2026
+          Last updated: 7 March 2026
         </p>
       </div>
 
@@ -240,7 +240,15 @@ export default function PrivacyPage() {
           <p>
             <span className="font-medium text-white">Hetzner Online GmbH (Hosting):</span> Our servers
             are hosted in Germany by Hetzner Online GmbH. A Data Processing Agreement pursuant to GDPR
-            Article 28 is in place.
+            Article 28 is in place. Hetzner&apos;s privacy policy is available at{' '}
+            <a
+              href="https://www.hetzner.com/legal/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-accent hover:underline"
+            >
+              hetzner.com/legal/privacy-policy
+            </a>.
           </p>
           <p>
             <span className="font-medium text-white">Resend, Inc. (Email Delivery):</span> We use
@@ -271,10 +279,40 @@ export default function PrivacyPage() {
           </p>
           <p>
             We have configured Resend to use &quot;Sending access only&quot; API permissions. We do not
-            use Resend for analytics, tracking, or any purpose other than email delivery.
+            use Resend for analytics, tracking, or any purpose other than email delivery. Open tracking
+            is disabled, click tracking is disabled, and no tracking pixels are embedded in any emails
+            sent by OpenSolve. We do not monitor whether recipients open or click links in our emails.
           </p>
-          {/* TODO: Confirm with Taner whether email open tracking is disabled in Resend configuration,
-              then add explicit disclosure here about tracking pixel status */}
+        </div>
+      </Card>
+
+      {/* 7c. Affiliate Links & Advertising */}
+      <Card>
+        <h2 className="text-lg font-semibold text-white mb-3">Affiliate Links &amp; Advertising</h2>
+        <div className="space-y-3 text-sm text-gray-300">
+          <p>
+            The OpenSolve newsletter may include sponsored content (labeled &quot;Advertisement&quot; or
+            &quot;Anzeige&quot;) and affiliate links (marked with *). If you make a purchase through an
+            affiliate link, OpenSolve earns a small commission at no additional cost to you.
+          </p>
+          <p>
+            When you click an affiliate link, you are redirected through an affiliate network (for example,
+            Amazon Associates or impact.com) which independently processes data such as your IP address and
+            click timestamp to attribute the referral. This processing is governed by the affiliate
+            network&apos;s own privacy policy. OpenSolve does not receive personal data from affiliate
+            networks — we receive only aggregated, anonymized commission data.
+          </p>
+          <p>
+            Subscriber email addresses and personal data are never shared with advertisers or affiliate
+            partners. All advertising content is selected and placed by OpenSolve. No subscriber data
+            leaves our systems as part of the advertising or affiliate process.
+          </p>
+          <p>
+            Processing in connection with newsletter delivery, including editions containing sponsored
+            content and affiliate links, is based on your consent under GDPR Article 6(1)(a), provided
+            during the double opt-in subscription process. You may withdraw this consent at any time by
+            unsubscribing.
+          </p>
         </div>
       </Card>
 

@@ -7,7 +7,7 @@
 **Processing activity:** Storage and use of user email addresses obtained via Google OAuth
 **Legal basis claimed:** GDPR Article 6(1)(f) — Legitimate Interest
 
-**Scope note:** This assessment covers legitimate interest processing of email addresses for service notifications and platform communications only. It explicitly excludes newsletter communications, which are processed under a separate legal basis (GDPR Art. 6(1)(a) — Consent). See docs/NEWSLETTER-CONSENT-ASSESSMENT.md for the newsletter consent assessment.
+**Scope note:** This assessment covers legitimate interest processing of email addresses for service notifications and platform communications only. It explicitly excludes newsletter communications — including advertising, sponsored content, and affiliate link processing — which are processed under a separate legal basis (GDPR Art. 6(1)(a) — Consent). See docs/NEWSLETTER-CONSENT-ASSESSMENT.md for the newsletter consent assessment.
 
 ---
 
