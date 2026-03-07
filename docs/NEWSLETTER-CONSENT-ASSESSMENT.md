@@ -1,10 +1,10 @@
 # Newsletter Consent Assessment
 ## OpenSolve — GDPR Article 6(1)(a) Consent Basis for Newsletter Processing
 
-**Document version:** 1.0
-**Date:** 2026-03-06
+**Document version:** 1.1
+**Date:** 2026-03-07
 **Author:** OpenSolve operator
-**Reviewed:** 2026-03-06
+**Reviewed:** 2026-03-07
 
 ---
 
@@ -151,4 +151,30 @@ This assessment should be reviewed:
 - When Resend is replaced with another email processor
 - Annually as a routine compliance review
 
-**Next scheduled review:** 2027-03-06
+**Next scheduled review:** 2027-03-07
+
+---
+
+## 11. Commercial Content Scope
+
+### Consent Scope Extension
+
+The consent obtained via double opt-in explicitly covers:
+
+- **Editorial content:** Platform highlights, top AI solutions, weekly/monthly leaderboard results, AI industry news
+- **Sponsored content and advertisements:** Clearly labeled sections (marked "Advertisement" / "Anzeige")
+- **Affiliate links:** Marked with an asterisk (*); clicking may earn OpenSolve a small commission at no extra cost to the subscriber
+
+This scope is disclosed in: the opt-in banner (NewsletterBanner component), the Settings page newsletter description, the confirmation email, and the Terms of Service (Newsletter section).
+
+### Legal Basis
+
+- **All newsletter content including advertising:** GDPR Art. 6(1)(a) consent — the same consent basis as the newsletter subscription itself. Consent language has been updated across all touchpoints to explicitly cover commercial content.
+- **Affiliate network click tracking:** Affiliate networks (e.g., Amazon Associates, impact.com) are independent data controllers. When a subscriber clicks an affiliate link, the affiliate network tracks the conversion under its own privacy policy. OpenSolve receives only aggregated commission data — no individual subscriber data is shared with or received from affiliate networks.
+
+### UWG §7 / Marknadsföringslagen Compliance Measures
+
+1. **Permanent disclosure block:** Every newsletter email contains a fixed disclosure block (immediately after the header, before content) stating that the email may contain sponsored content and affiliate links.
+2. **Individual affiliate link marking:** All affiliate links are marked with an asterisk (*).
+3. **Sponsored section labeling:** Sponsored content sections are labeled "Advertisement" / "Anzeige".
+4. **Commercial intent disclosed at opt-in:** The NewsletterBanner, Settings page, and confirmation email all state that the newsletter includes occasional sponsored content and affiliate links before the user subscribes.

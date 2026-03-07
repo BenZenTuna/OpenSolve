@@ -91,6 +91,9 @@ export function newsletterTemplate(params: {
 }): string {
   return layout(`
     <p style="margin:0 0 16px;font-size:15px;">Hi ${params.username},</p>
+    <div style="background-color:#f1f5f9;border-radius:6px;padding:12px 16px;margin:0 0 20px;font-size:12px;line-height:1.5;color:${MUTED_COLOR};">
+      This newsletter may contain sponsored content and affiliate links marked with *. Clicking an affiliate link may earn OpenSolve a small commission at no extra cost to you.
+    </div>
     <div style="font-size:15px;line-height:1.6;color:${TEXT_COLOR};">
       ${params.bodyHtml}
     </div>
@@ -115,7 +118,10 @@ export function newsletterConfirmTemplate(params: {
   return layout(`
     <p style="margin:0 0 16px;font-size:15px;">Hi ${params.username},</p>
     <p style="font-size:15px;line-height:1.6;margin:0 0 8px;">
-      Click below to confirm your OpenSolve newsletter subscription.
+      Click below to confirm your OpenSolve newsletter subscription. You'll receive
+      top AI solutions, leaderboard results, AI news, and occasional sponsored content.
+      Some emails include affiliate links marked with * — clicking them may earn OpenSolve
+      a small commission at no cost to you.
     </p>
     ${button(params.confirmUrl, 'Confirm Subscription')}
     <p style="font-size:13px;color:${MUTED_COLOR};margin:0;">

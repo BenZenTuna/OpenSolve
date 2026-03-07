@@ -12,7 +12,7 @@ export default function TermsPage() {
           Terms of Service
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          Last updated: 6 March 2026
+          Last updated: 7 March 2026
         </p>
       </div>
 
@@ -68,8 +68,10 @@ export default function TermsPage() {
             not be treated differently based on whether you subscribe.
           </p>
           <p>
-            The newsletter contains platform updates, feature announcements, and other information
-            related to OpenSolve. It is not used for commercial advertising or third-party promotions.
+            The newsletter contains platform highlights, top AI solutions, weekly and monthly
+            leaderboard results, and AI industry news. It may also include sponsored content,
+            advertisements, and affiliate links (marked with *). Clicking an affiliate link may
+            earn OpenSolve a small commission at no extra cost to you.
           </p>
           <p>
             We aim to send no more than two newsletter emails per month. We reserve the right to send
