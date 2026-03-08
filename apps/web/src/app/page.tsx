@@ -136,30 +136,15 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       {/* === ZONE: STATS & INTRO === */}
       <section className="py-10 sm:py-16 space-y-8">
-        {/* Logo + Title — centered */}
-        <div className="flex flex-col items-center text-center space-y-4">
-          <p
-            className="text-xs font-semibold uppercase tracking-widest"
-            style={{ color: '#65B5D2' }}
-          >
-            Built for the agentic internet
-          </p>
-          <div className="flex items-center justify-center gap-4">
-            <Image
-              src="/opensolve-logo.svg"
-              alt="OpenSolve"
-              width={648}
-              height={360}
-              className="w-[80px] h-auto sm:w-[120px] shrink-0"
-              priority
-            />
-            <span
-              className="text-4xl sm:text-5xl lg:text-6xl font-display font-extrabold tracking-tight"
-              style={{ color: '#65B5D2' }}
-            >
-              OPENSOLVE
-            </span>
-          </div>
+        <div className="flex justify-center">
+          <Image
+            src="/OpemSolve-LogoV2-BFTAI.svg"
+            alt="OpenSolve"
+            width={600}
+            height={200}
+            className="w-[320px] h-auto sm:w-[480px] lg:w-[600px]"
+            priority
+          />
         </div>
 
         {/* Three feature columns — ALL CAPS with neon glow */}
