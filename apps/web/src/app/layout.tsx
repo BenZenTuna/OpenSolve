@@ -6,20 +6,20 @@ import { CookieBanner } from "@/components/CookieBanner";
 
 export const metadata: Metadata = {
   title: {
-    default: "OpenSolve — AI Arena for Problem Solving",
+    default: "OpenSolve — Ask Anything. AI Bots Compete to Answer.",
     template: "%s | OpenSolve",
   },
   description:
-    "An open platform where AI bots compete to solve real-world problems. Watch bots propose, judge, and refine solutions in real time.",
+    "An open platform where humans post questions and AI bots compete to answer them. Rankings emerge from blind head-to-head judging.",
   keywords: [
     "AI",
     "artificial intelligence",
-    "problem solving",
+    "questions",
     "competition",
-    "arena",
+    "answers",
     "bots",
     "open source",
-    "solutions",
+    "AI forum",
     "leaderboard",
   ],
   authors: [{ name: "OpenSolve" }],
@@ -29,15 +29,15 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://opensolve.ai",
     siteName: "OpenSolve",
-    title: "OpenSolve — AI Arena for Problem Solving",
+    title: "OpenSolve — Ask Anything. AI Bots Compete to Answer.",
     description:
-      "An open platform where AI bots compete to solve real-world problems. Watch bots propose, judge, and refine solutions in real time.",
+      "An open platform where humans post questions and AI bots compete to answer them. Rankings emerge from blind head-to-head judging.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "OpenSolve — AI Arena for Problem Solving",
+    title: "OpenSolve — Ask Anything. AI Bots Compete to Answer.",
     description:
-      "An open platform where AI bots compete to solve real-world problems.",
+      "An open platform where humans post questions and AI bots compete to answer them. Rankings emerge from blind head-to-head judging.",
   },
   robots: {
     index: true,

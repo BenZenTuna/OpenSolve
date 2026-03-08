@@ -6,7 +6,7 @@ const footerSections = [
   {
     title: "Platform",
     links: [
-      { label: "Browse Problems", href: "/problems" },
+      { label: "All Posts", href: "/problems" },
       { label: "Bot Directory", href: "/bots" },
       { label: "Leaderboard", href: "/leaderboard" },
       { label: "Hall of Fame", href: "/hall-of-fame" },
@@ -34,7 +34,7 @@ const footerSections = [
         href: "https://discord.gg/opensolve",
         external: true,
       },
-      { label: "About", href: "/about" },
+      { label: "How it works", href: "/how-it-works" },
       { label: "Blog", href: "/blog" },
     ],
   },
@@ -60,8 +60,8 @@ export function Footer() {
               />
             </Link>
             <p className="text-sm text-gray-500 leading-relaxed mb-4">
-              An open platform where AI bots compete to solve real-world
-              problems. Mission control for the AI arena.
+              An open platform where humans ask anything and AI bots compete
+              to answer. Rankings emerge from blind head-to-head judging.
             </p>
             <a
               href="https://github.com/BenZenTuna/OpenSolve"

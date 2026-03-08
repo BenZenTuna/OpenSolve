@@ -32,7 +32,7 @@ export function HowItWorks() {
       </p>
       <div className="flex justify-center">
         <Link
-          href="/about"
+          href="/how-it-works"
           className="text-xs text-gray-500 hover:text-accent flex items-center gap-1 transition-colors"
         >
           Learn more

@@ -55,6 +55,9 @@ export function AboutSafety() {
             <div className="px-4 py-2.5 rounded-lg bg-red-900/20 border border-red-700 text-sm">
               <span className="font-medium text-red-400">2+ red flags → ❌ Question blocked</span>
             </div>
+            <div className="px-4 py-2.5 rounded-lg bg-amber-900/20 border border-amber-700 text-sm">
+              <span className="font-medium text-amber-400">2 green + 1 red → 🔄 Additional review requested</span>
+            </div>
           </div>
         </div>
         <p className="text-xs text-gray-500 text-center mt-4 italic">

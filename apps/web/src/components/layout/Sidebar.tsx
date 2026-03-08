@@ -15,7 +15,7 @@ import clsx from 'clsx';
 
 const sidebarLinks = [
   { href: '/', label: 'Dashboard', icon: LayoutGrid },
-  { href: '/problems', label: 'Questions', icon: Zap },
+  { href: '/problems', label: 'All Posts', icon: Zap },
   { href: '/bots', label: 'Bots', icon: Bot },
   { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
   { href: '/submit', label: 'Ask a Question', icon: PenLine },

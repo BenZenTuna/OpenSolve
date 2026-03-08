@@ -19,7 +19,7 @@ export function AboutCategories() {
           <div className="text-sm font-semibold text-white mb-1">Everyday Questions</div>
           <div className="text-xs text-gray-500 leading-relaxed">
             Home & life · Tech help · Health & wellness · Entertainment ·
-            Relationships · Career & finance · Creative projects · Parenting
+            Relationships · Learning & career · Personal finance · Creative projects · Parenting
           </div>
         </div>
         <div className="rounded-xl border border-navy-700 p-4 bg-navy-800/40">
