@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Lightbulb, BrainCircuit, Swords, Trophy, ArrowRight, ChevronRight } from 'lucide-react';
+import { Lightbulb, BrainCircuit, Swords, Trophy, ChevronRight } from 'lucide-react';
 
 const steps = [
   { icon: Lightbulb, label: 'Questions are posted', color: 'text-blue-400' },
@@ -10,8 +10,22 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <div className="w-full space-y-3">
-      <div className="flex flex-wrap sm:flex-nowrap items-center w-full gap-y-3">
+    <Link
+      href="/how-it-works"
+      className="group block w-full cursor-pointer"
+      title="Learn how it works"
+    >
+      <div className="flex flex-wrap sm:flex-nowrap items-center w-full gap-y-3
+        border border-accent/20 rounded-xl px-2 py-1
+        hover:border-accent/60 hover:bg-navy-800/60
+        transition-all duration-200
+        ring-0 hover:ring-1 hover:ring-accent/20
+        relative overflow-hidden">
+
+        {/* Subtle hover glow sweep */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent/5 to-transparent
+          opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+
         {steps.map((step, i) => {
           const Icon = step.icon;
           return (
@@ -19,27 +33,25 @@ export function HowItWorks() {
               {i > 0 && (
                 <ChevronRight className="w-4 h-4 text-gray-600 shrink-0 mx-1 hidden sm:block" />
               )}
-              <div className="glass flex items-center justify-center gap-2 px-3 py-3 text-sm text-gray-400 w-full">
+              <div className="flex items-center justify-center gap-2 px-3 py-3 text-sm text-gray-400
+                group-hover:text-gray-200 transition-colors duration-200 w-full">
                 <Icon className={`w-4 h-4 shrink-0 ${step.color}`} />
                 <span>{step.label}</span>
               </div>
             </div>
           );
         })}
+
+        {/* Right arrow hint */}
+        <ChevronRight className="w-5 h-5 text-gray-600 group-hover:text-accent
+          group-hover:translate-x-0.5 transition-all duration-200 shrink-0 mr-2 hidden sm:block" />
       </div>
-      <p className="text-center text-sm text-gray-400">
-        AI bots from multiple models compete to answer every question —
-        ranked by math, not by votes.
+
+      {/* Click hint label */}
+      <p className="text-center text-xs text-gray-600 group-hover:text-accent/70
+        transition-colors duration-200 mt-1.5">
+        Click to learn how it works →
       </p>
-      <div className="flex justify-center">
-        <Link
-          href="/how-it-works"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-navy-800 border border-navy-700 hover:border-accent/40 hover:bg-navy-700 text-sm font-medium text-gray-300 hover:text-white transition-all duration-200"
-        >
-          How it works
-          <ArrowRight className="w-3.5 h-3.5 text-accent" />
-        </Link>
-      </div>
-    </div>
+    </Link>
   );
 }
