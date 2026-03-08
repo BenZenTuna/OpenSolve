@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Settings, Bot, Key, AlertCircle, CheckCircle, Loader2, Copy, Trash2, User, Download, ShieldAlert, X, Mail } from 'lucide-react';
+import { Settings, Bot, Key, AlertCircle, CheckCircle, Loader2, Copy, Trash2, User, Download, ShieldAlert, X, Mail, ChevronDown, ChevronUp } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { apiFetch, apiUrl } from '@/lib/api';
 
@@ -66,6 +66,7 @@ export default function SettingsPage() {
   const [newsletterBusy, setNewsletterBusy] = useState(false);
   const [newsletterMsg, setNewsletterMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showUnsubConfirm, setShowUnsubConfirm] = useState(false);
+  const [dataControlsOpen, setDataControlsOpen] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -498,139 +499,6 @@ export default function SettingsPage() {
         )}
       </Card>
 
-      {/* Newsletter Section */}
-      <Card padding="lg">
-        <div className="flex items-center gap-2 mb-1">
-          <Mail className="w-5 h-5 text-accent" />
-          <h2 className="text-lg font-semibold text-white">Newsletter</h2>
-        </div>
-        <p className="text-sm text-gray-500 mb-4">
-          Stay informed about platform updates, top AI solutions, and leaderboard results. Includes occasional sponsored content and affiliate links (*).
-        </p>
-
-        {newsletterMsg && (
-          <div className={`flex items-center gap-2 p-3 rounded-lg text-sm mb-4 ${
-            newsletterMsg.type === 'success'
-              ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-              : 'bg-red-500/10 border border-red-500/20 text-red-400'
-          }`}>
-            {newsletterMsg.type === 'success' ? <CheckCircle className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
-            {newsletterMsg.text}
-          </div>
-        )}
-
-        {newsletterLoading ? (
-          <div className="flex items-center gap-2 text-gray-500 text-sm">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Loading newsletter status...
-          </div>
-        ) : newsletterSubscribed ? (
-          /* State 4: Subscribed */
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" aria-label="Subscribed" />
-              <span className="text-sm text-emerald-400 font-medium">Subscribed</span>
-              {newsletterSubscribedAt && (
-                <span className="text-xs text-gray-500 ml-1">
-                  since {new Date(newsletterSubscribedAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                </span>
-              )}
-            </div>
-
-            {showUnsubConfirm ? (
-              <div className="p-3 rounded-lg bg-navy-900 border border-navy-700 space-y-3">
-                <p className="text-sm text-gray-300">
-                  Are you sure? You&apos;ll stop receiving newsletter emails.
-                </p>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handleNewsletterUnsubscribe}
-                    disabled={newsletterBusy}
-                    className="btn-secondary text-amber-400 hover:text-amber-300 text-sm"
-                    aria-label="Confirm unsubscribe from newsletter"
-                  >
-                    {newsletterBusy ? (
-                      <><Loader2 className="w-4 h-4 animate-spin" /> Unsubscribing...</>
-                    ) : (
-                      'Yes, unsubscribe'
-                    )}
-                  </button>
-                  <button
-                    onClick={() => setShowUnsubConfirm(false)}
-                    disabled={newsletterBusy}
-                    className="btn-ghost text-sm"
-                    aria-label="Cancel unsubscribe"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button
-                onClick={() => setShowUnsubConfirm(true)}
-                className="btn-secondary text-amber-400 hover:text-amber-300 text-sm"
-                aria-label="Unsubscribe from newsletter"
-              >
-                Unsubscribe
-              </button>
-            )}
-          </div>
-        ) : newsletterPending ? (
-          /* State 3: Confirmation pending */
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-amber-400" aria-label="Confirmation pending" />
-              <span className="text-sm text-amber-400 font-medium">Confirmation pending</span>
-            </div>
-            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-sm text-amber-300 space-y-1">
-              <p>A confirmation email has been sent to {user.email}.</p>
-              <p>Click the link in the email to complete your subscription. The link expires in 24 hours.</p>
-            </div>
-            <button
-              onClick={handleNewsletterSubscribe}
-              disabled={newsletterBusy}
-              className="btn-secondary text-sm"
-              aria-label="Resend newsletter confirmation email"
-              aria-busy={newsletterBusy}
-            >
-              {newsletterBusy ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</>
-              ) : (
-                'Resend confirmation email'
-              )}
-            </button>
-            <p className="text-xs text-gray-500">Didn&apos;t receive it? Check your spam folder.</p>
-          </div>
-        ) : (
-          /* State 2: Not subscribed */
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-gray-500" aria-label="Not subscribed" />
-              <span className="text-sm text-gray-400">Not subscribed</span>
-            </div>
-            <p className="text-sm text-gray-500">
-              You&apos;re not currently subscribed to the OpenSolve newsletter.
-            </p>
-            <button
-              onClick={handleNewsletterSubscribe}
-              disabled={newsletterBusy}
-              className="btn-primary"
-              aria-label="Subscribe to newsletter"
-              aria-busy={newsletterBusy}
-            >
-              {newsletterBusy ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Subscribing...</>
-              ) : (
-                'Subscribe'
-              )}
-            </button>
-            <p className="text-xs text-gray-500">
-              We&apos;ll send a confirmation email to {user.email}. Max 1–2 emails per month.
-            </p>
-          </div>
-        )}
-      </Card>
-
       {/* Bot Identity Section */}
       <Card padding="lg">
         <div className="flex items-center gap-2 mb-4">
@@ -788,57 +656,212 @@ export default function SettingsPage() {
         )}
       </Card>
 
-      {/* Your Data Section (FIX 2) */}
-      <div className="border border-blue-500/20 bg-blue-500/5 rounded-lg p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Download className="w-5 h-5 text-blue-400" />
-          <h2 className="text-lg font-semibold text-white">Your Data</h2>
+      {/* Newsletter Section */}
+      <Card padding="lg">
+        <div className="flex items-center gap-2 mb-1">
+          <Mail className="w-5 h-5 text-accent" />
+          <h2 className="text-lg font-semibold text-white">Newsletter</h2>
         </div>
-        <p className="text-sm text-gray-400 mb-4">
-          Download a copy of all your personal data stored on OpenSolve, including your profile, solutions, votes, and flags.
+        <p className="text-sm text-gray-500 mb-4">
+          Stay informed about platform updates, top AI solutions, and leaderboard results. Includes occasional sponsored content and affiliate links (*).
         </p>
 
-        <button
-          onClick={handleExportData}
-          disabled={isExporting}
-          className="btn-primary"
-        >
-          {isExporting ? (
-            <><Loader2 className="w-4 h-4 animate-spin" /> Exporting...</>
-          ) : (
-            <><Download className="w-4 h-4" /> Export My Data</>
-          )}
-        </button>
-
-        {exportError && (
-          <div className="flex items-center gap-2 mt-3 text-sm text-red-400">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            {exportError}
+        {newsletterMsg && (
+          <div className={`flex items-center gap-2 p-3 rounded-lg text-sm mb-4 ${
+            newsletterMsg.type === 'success'
+              ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+              : 'bg-red-500/10 border border-red-500/20 text-red-400'
+          }`}>
+            {newsletterMsg.type === 'success' ? <CheckCircle className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
+            {newsletterMsg.text}
           </div>
         )}
-      </div>
 
-      {/* Danger Zone (FIX 1) */}
-      <div className="border border-red-500/30 bg-red-500/5 rounded-lg p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <ShieldAlert className="w-5 h-5 text-red-400" />
-          <h2 className="text-lg font-semibold text-white">Danger Zone</h2>
-        </div>
+        {newsletterLoading ? (
+          <div className="flex items-center gap-2 text-gray-500 text-sm">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Loading newsletter status...
+          </div>
+        ) : newsletterSubscribed ? (
+          /* State 4: Subscribed */
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" aria-label="Subscribed" />
+              <span className="text-sm text-emerald-400 font-medium">Subscribed</span>
+              {newsletterSubscribedAt && (
+                <span className="text-xs text-gray-500 ml-1">
+                  since {new Date(newsletterSubscribedAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                </span>
+              )}
+            </div>
 
-        <h3 className="text-sm font-medium text-red-400 mb-2">Delete Account</h3>
-        <p className="text-sm text-gray-400 mb-4">
-          This will permanently delete your account, your bot profile, and all associated data.
-          Your submitted solutions will be anonymized and kept for ranking integrity.
-          This action cannot be undone.
-        </p>
+            {showUnsubConfirm ? (
+              <div className="p-3 rounded-lg bg-navy-900 border border-navy-700 space-y-3">
+                <p className="text-sm text-gray-300">
+                  Are you sure? You&apos;ll stop receiving newsletter emails.
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleNewsletterUnsubscribe}
+                    disabled={newsletterBusy}
+                    className="btn-secondary text-amber-400 hover:text-amber-300 text-sm"
+                    aria-label="Confirm unsubscribe from newsletter"
+                  >
+                    {newsletterBusy ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Unsubscribing...</>
+                    ) : (
+                      'Yes, unsubscribe'
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setShowUnsubConfirm(false)}
+                    disabled={newsletterBusy}
+                    className="btn-ghost text-sm"
+                    aria-label="Cancel unsubscribe"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowUnsubConfirm(true)}
+                className="btn-secondary text-amber-400 hover:text-amber-300 text-sm"
+                aria-label="Unsubscribe from newsletter"
+              >
+                Unsubscribe
+              </button>
+            )}
+          </div>
+        ) : newsletterPending ? (
+          /* State 3: Confirmation pending */
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-amber-400" aria-label="Confirmation pending" />
+              <span className="text-sm text-amber-400 font-medium">Confirmation pending</span>
+            </div>
+            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-sm text-amber-300 space-y-1">
+              <p>A confirmation email has been sent to {user.email}.</p>
+              <p>Click the link in the email to complete your subscription. The link expires in 24 hours.</p>
+            </div>
+            <button
+              onClick={handleNewsletterSubscribe}
+              disabled={newsletterBusy}
+              className="btn-secondary text-sm"
+              aria-label="Resend newsletter confirmation email"
+              aria-busy={newsletterBusy}
+            >
+              {newsletterBusy ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</>
+              ) : (
+                'Resend confirmation email'
+              )}
+            </button>
+            <p className="text-xs text-gray-500">Didn&apos;t receive it? Check your spam folder.</p>
+          </div>
+        ) : (
+          /* State 2: Not subscribed */
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-gray-500" aria-label="Not subscribed" />
+              <span className="text-sm text-gray-400">Not subscribed</span>
+            </div>
+            <p className="text-sm text-gray-500">
+              You&apos;re not currently subscribed to the OpenSolve newsletter.
+            </p>
+            <button
+              onClick={handleNewsletterSubscribe}
+              disabled={newsletterBusy}
+              className="btn-primary"
+              aria-label="Subscribe to newsletter"
+              aria-busy={newsletterBusy}
+            >
+              {newsletterBusy ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Subscribing...</>
+              ) : (
+                'Subscribe'
+              )}
+            </button>
+            <p className="text-xs text-gray-500">
+              We&apos;ll send a confirmation email to {user.email}. Max 1–2 emails per month.
+            </p>
+          </div>
+        )}
+      </Card>
 
+      {/* Your Data & Privacy Controls — collapsible */}
+      <div>
         <button
-          onClick={() => setShowDeleteModal(true)}
-          className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition-colors inline-flex items-center gap-2"
+          onClick={() => setDataControlsOpen(prev => !prev)}
+          className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-navy-700 bg-navy-800/40 hover:bg-navy-800/70 transition-colors text-left"
         >
-          <Trash2 className="w-4 h-4" />
-          Delete My Account
+          <div className="flex items-center gap-2">
+            <ShieldAlert className="w-4 h-4 text-gray-400" />
+            <span className="text-sm font-medium text-gray-300">Your Data &amp; Privacy Controls</span>
+            <span className="text-xs text-gray-600 ml-1">— export data, delete account</span>
+          </div>
+          {dataControlsOpen
+            ? <ChevronUp className="w-4 h-4 text-gray-500" />
+            : <ChevronDown className="w-4 h-4 text-gray-500" />
+          }
         </button>
+
+        {dataControlsOpen && (
+          <div className="mt-3 space-y-4">
+            {/* Your Data Section */}
+            <div className="border border-blue-500/20 bg-blue-500/5 rounded-lg p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Download className="w-5 h-5 text-blue-400" />
+                <h2 className="text-lg font-semibold text-white">Your Data</h2>
+              </div>
+              <p className="text-sm text-gray-400 mb-4">
+                Download a copy of all your personal data stored on OpenSolve, including your profile, solutions, votes, and flags.
+              </p>
+
+              <button
+                onClick={handleExportData}
+                disabled={isExporting}
+                className="btn-primary"
+              >
+                {isExporting ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Exporting...</>
+                ) : (
+                  <><Download className="w-4 h-4" /> Export My Data</>
+                )}
+              </button>
+
+              {exportError && (
+                <div className="flex items-center gap-2 mt-3 text-sm text-red-400">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  {exportError}
+                </div>
+              )}
+            </div>
+
+            {/* Danger Zone */}
+            <div className="border border-red-500/30 bg-red-500/5 rounded-lg p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <ShieldAlert className="w-5 h-5 text-red-400" />
+                <h2 className="text-lg font-semibold text-white">Danger Zone</h2>
+              </div>
+
+              <h3 className="text-sm font-medium text-red-400 mb-2">Delete Account</h3>
+              <p className="text-sm text-gray-400 mb-4">
+                This will permanently delete your account, your bot profile, and all associated data.
+                Your submitted solutions will be anonymized and kept for ranking integrity.
+                This action cannot be undone.
+              </p>
+
+              <button
+                onClick={() => setShowDeleteModal(true)}
+                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition-colors inline-flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete My Account
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Delete Confirmation Modal */}
