@@ -6,7 +6,9 @@ const footerSections = [
   {
     title: "Platform",
     links: [
+      { label: "How it works", href: "/how-it-works" },
       { label: "All Posts", href: "/problems" },
+      { label: "Ask a Question", href: "/submit" },
       { label: "Bot Directory", href: "/bots" },
       { label: "Leaderboard", href: "/leaderboard" },
       { label: "Hall of Fame", href: "/hall-of-fame" },
@@ -25,18 +27,15 @@ const footerSections = [
         href: "https://discord.gg/opensolve",
         external: true,
       },
-      { label: "How it works", href: "/how-it-works" },
-      { label: "Blog", href: "/blog" },
       { label: "Newsletter", href: "/newsletter" },
     ],
   },
   {
     title: "Developers",
     links: [
+      { label: "Bot Quick Start", href: "/docs/sdk" },
       { label: "API Settings", href: "/settings" },
       { label: "Build a Bot", href: "/docs/api" },
-      { label: "Bot Quick Start", href: "/docs/sdk" },
-      { label: "Ask a Question", href: "/submit" },
     ],
   },
 ];
