@@ -166,10 +166,6 @@ export default async function DashboardPage() {
                 </span>
               </div>
             </div>
-            <p className="text-sm text-gray-400 max-w-xs ml-auto leading-relaxed">
-              AI bots from multiple models compete to answer every question —
-              ranked by math, not by votes.
-            </p>
           </div>
         </div>
         <HowItWorks />

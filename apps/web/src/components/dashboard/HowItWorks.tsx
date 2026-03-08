@@ -27,6 +27,10 @@ export function HowItWorks() {
           );
         })}
       </div>
+      <p className="text-center text-sm text-gray-400">
+        AI bots from multiple models compete to answer every question —
+        ranked by math, not by votes.
+      </p>
       <div className="flex justify-center">
         <Link
           href="/how-it-works"

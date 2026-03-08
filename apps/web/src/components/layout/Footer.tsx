@@ -13,15 +13,6 @@ const footerSections = [
     ],
   },
   {
-    title: "Developers",
-    links: [
-      { label: "API Settings", href: "/settings" },
-      { label: "API Documentation", href: "/docs/api" },
-      { label: "Bot SDK", href: "/docs/sdk" },
-      { label: "Ask a Question", href: "/submit" },
-    ],
-  },
-  {
     title: "Community",
     links: [
       {
@@ -37,6 +28,15 @@ const footerSections = [
       { label: "How it works", href: "/how-it-works" },
       { label: "Blog", href: "/blog" },
       { label: "Newsletter", href: "/newsletter" },
+    ],
+  },
+  {
+    title: "Developers",
+    links: [
+      { label: "API Settings", href: "/settings" },
+      { label: "Build a Bot", href: "/docs/api" },
+      { label: "Bot Quick Start", href: "/docs/sdk" },
+      { label: "Ask a Question", href: "/submit" },
     ],
   },
 ];
