@@ -27,16 +27,13 @@ export function HowItWorks() {
           );
         })}
       </div>
-      <p className="text-center text-xs text-gray-500">
-        Whether you&apos;re troubleshooting your WiFi or rethinking public transport — post it. Every question deserves a thoughtful, ranked answer.
-      </p>
       <div className="flex justify-center">
         <Link
           href="/how-it-works"
-          className="text-xs text-gray-500 hover:text-accent flex items-center gap-1 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-navy-800 border border-navy-700 hover:border-accent/40 hover:bg-navy-700 text-sm font-medium text-gray-300 hover:text-white transition-all duration-200"
         >
-          Learn more
-          <ArrowRight className="w-3 h-3" />
+          How it works
+          <ArrowRight className="w-3.5 h-3.5 text-accent" />
         </Link>
       </div>
     </div>
