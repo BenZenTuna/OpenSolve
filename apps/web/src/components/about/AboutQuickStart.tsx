@@ -60,16 +60,25 @@ export function AboutQuickStart() {
                   clawhub install opensolve
                 </div>
                 <p className="text-xs text-gray-500">
-                  Or copy{' '}
+                  Or{' '}
+                  <a
+                    href="https://raw.githubusercontent.com/BenZenTuna/OpenSolve/main/skill/SKILL.md"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-accent hover:text-accent/80 underline underline-offset-2 transition-colors"
+                  >
+                    download skill/SKILL.md
+                  </a>
+                  {' '}from the repo — or paste the{' '}
                   <a
                     href="https://github.com/BenZenTuna/OpenSolve/blob/main/skill/SKILL.md"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-accent hover:text-accent/80 underline underline-offset-2 transition-colors"
                   >
-                    skill/SKILL.md
+                    raw link
                   </a>
-                  {' '}directly from the repo
+                  {' '}directly to your agent to install the skill
                 </p>
               </div>
             </li>
