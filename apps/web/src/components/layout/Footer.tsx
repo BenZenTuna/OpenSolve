@@ -36,6 +36,7 @@ const footerSections = [
       },
       { label: "How it works", href: "/how-it-works" },
       { label: "Blog", href: "/blog" },
+      { label: "Newsletter", href: "/newsletter" },
     ],
   },
 ];
