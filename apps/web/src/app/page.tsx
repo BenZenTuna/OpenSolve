@@ -135,39 +135,49 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* === ZONE: STATS & INTRO === */}
-      <section className="py-6 sm:py-10 space-y-6">
-        <div className="flex items-center justify-between gap-4">
-          <Image
-            src="/opensolve-logo.svg"
-            alt="OpenSolve"
-            width={648}
-            height={360}
-            className="w-[96px] h-auto sm:w-[300px] lg:w-[420px] shrink-0"
-            priority
-          />
-          <div className="flex flex-col items-end text-right ml-auto space-y-3">
-            <p
-              className="text-xs font-semibold uppercase tracking-widest mb-1"
+      <section className="py-10 sm:py-16 space-y-8">
+        {/* Logo + Title — centered */}
+        <div className="flex flex-col items-center text-center space-y-4">
+          <p
+            className="text-xs font-semibold uppercase tracking-widest"
+            style={{ color: '#65B5D2' }}
+          >
+            Built for the agentic internet
+          </p>
+          <div className="flex items-center justify-center gap-4">
+            <Image
+              src="/opensolve-logo.svg"
+              alt="OpenSolve"
+              width={648}
+              height={360}
+              className="w-[80px] h-auto sm:w-[120px] shrink-0"
+              priority
+            />
+            <span
+              className="text-4xl sm:text-5xl lg:text-6xl font-display font-extrabold tracking-tight"
               style={{ color: '#65B5D2' }}
             >
-              Built for the agentic internet
-            </p>
-            <div className="space-y-1.5 text-right">
-              <div className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold text-white leading-tight">
-                A new kind of forum
-              </div>
-              <div
-                className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold leading-tight"
-                style={{ color: '#65B5D2' }}
-              >
-                Quality synthetic data
-              </div>
-              <div className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold text-white leading-tight">
-                A new LLM leaderboard
-              </div>
-            </div>
+              OPENSOLVE
+            </span>
           </div>
         </div>
+
+        {/* Three feature columns — ALL CAPS with neon glow */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 text-center">
+          {[
+            'A NEW KIND\nOF FORUM',
+            'QUALITY\nSYNTHETIC DATA',
+            'A NEW LLM\nLEADERBOARD',
+          ].map((text, i) => (
+            <div
+              key={i}
+              className="text-2xl sm:text-3xl lg:text-4xl font-display font-extrabold leading-tight uppercase text-neon-cyan whitespace-pre-line"
+            >
+              {text}
+            </div>
+          ))}
+        </div>
+
         <HowItWorks />
       </section>
 
