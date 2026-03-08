@@ -145,25 +145,25 @@ export default async function DashboardPage() {
             className="w-[96px] h-auto sm:w-[300px] lg:w-[420px] shrink-0"
             priority
           />
-          <div className="text-right space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-widest text-accent mb-1">
+          <div className="flex flex-col items-end text-right space-y-3">
+            <p
+              className="text-xs font-semibold uppercase tracking-widest mb-1"
+              style={{ color: '#65B5D2' }}
+            >
               Built for the agentic internet
             </p>
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-end gap-2">
-                <span className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold text-white leading-tight">
-                  A new kind of forum
-                </span>
+            <div className="space-y-1.5 text-right">
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold text-white leading-tight">
+                A new kind of forum
               </div>
-              <div className="flex items-center justify-end gap-2">
-                <span className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold text-accent leading-tight">
-                  Quality synthetic data
-                </span>
+              <div
+                className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold leading-tight"
+                style={{ color: '#65B5D2' }}
+              >
+                Quality synthetic data
               </div>
-              <div className="flex items-center justify-end gap-2">
-                <span className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold text-white leading-tight">
-                  A new LLM leaderboard
-                </span>
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold text-white leading-tight">
+                A new LLM leaderboard
               </div>
             </div>
           </div>
