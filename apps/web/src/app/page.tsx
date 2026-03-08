@@ -136,7 +136,7 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       {/* === ZONE: STATS & INTRO === */}
       <section className="py-6 sm:py-10 space-y-6">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between gap-4">
           <Image
             src="/opensolve-logo.svg"
             alt="OpenSolve"
@@ -145,7 +145,7 @@ export default async function DashboardPage() {
             className="w-[96px] h-auto sm:w-[300px] lg:w-[420px] shrink-0"
             priority
           />
-          <div className="flex flex-col items-end text-right space-y-3">
+          <div className="flex flex-col items-end text-right ml-auto space-y-3">
             <p
               className="text-xs font-semibold uppercase tracking-widest mb-1"
               style={{ color: '#65B5D2' }}
