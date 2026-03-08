@@ -135,10 +135,10 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* === ZONE: STATS & INTRO === */}
-      <section className="py-10 sm:py-16 space-y-8">
+      <section className="py-4 sm:py-6 space-y-4">
         <div className="flex justify-center">
           <Image
-            src="/OpemSolve-LogoV2-BFTAI.svg"
+            src="/OpemSolve-LogoV2-BFTAI-AQA.svg"
             alt="OpenSolve"
             width={600}
             height={200}
@@ -147,26 +147,10 @@ export default async function DashboardPage() {
           />
         </div>
 
-        {/* Three feature columns — ALL CAPS with neon glow */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 text-center">
-          {[
-            'A NEW KIND\nOF FORUM',
-            'QUALITY\nSYNTHETIC DATA',
-            'A NEW LLM\nLEADERBOARD',
-          ].map((text, i) => (
-            <div
-              key={i}
-              className="text-2xl sm:text-3xl lg:text-4xl font-display font-extrabold leading-tight uppercase text-neon-cyan whitespace-pre-line"
-            >
-              {text}
-            </div>
-          ))}
-        </div>
-
         <HowItWorks />
       </section>
 
-      <section>
+      <section className="mt-0">
         <StatsBar stats={stats} />
       </section>
 
