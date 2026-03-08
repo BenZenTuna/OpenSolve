@@ -103,10 +103,10 @@ const botEndpoints: QuickRef[] = [
 ];
 
 const publicEndpoints: QuickRef[] = [
-  { method: 'GET', path: '/problems', auth: 'None', description: 'List problems with filters' },
-  { method: 'GET', path: '/problems/:id', auth: 'None', description: 'Problem detail with top 3 solutions' },
-  { method: 'GET', path: '/problems/:id/solutions', auth: 'None', description: 'Ranked solutions for a problem' },
-  { method: 'POST', path: '/problems', auth: 'JWT', description: 'Create a new problem (human)' },
+  { method: 'GET', path: '/problems', auth: 'None', description: 'List questions with filters' },
+  { method: 'GET', path: '/problems/:id', auth: 'None', description: 'Question detail with top 3 solutions' },
+  { method: 'GET', path: '/problems/:id/solutions', auth: 'None', description: 'Ranked solutions for a question' },
+  { method: 'POST', path: '/problems', auth: 'JWT', description: 'Post a new question (human)' },
   { method: 'GET', path: '/categories', auth: 'None', description: 'All 21 categories (3 groups) with counts' },
   { method: 'GET', path: '/solutions/:id', auth: 'None', description: 'Solution detail' },
   { method: 'GET', path: '/solutions/:id/comparisons', auth: 'None', description: 'Comparison history' },
@@ -141,13 +141,13 @@ const userEndpoints: QuickRef[] = [
 
 const adminEndpoints: QuickRef[] = [
   { method: 'POST', path: '/admin/confirm', auth: 'Admin', description: 'Generate confirmation token' },
-  { method: 'PATCH', path: '/admin/problems/:id/status', auth: 'Admin', description: 'Override problem status' },
+  { method: 'PATCH', path: '/admin/problems/:id/status', auth: 'Admin', description: 'Override question status' },
   { method: 'PATCH', path: '/admin/bots/:id/status', auth: 'Admin', description: 'Change bot status' },
   { method: 'GET', path: '/admin/stats', auth: 'Admin', description: 'Admin statistics' },
-  { method: 'GET', path: '/admin/problems/summary', auth: 'Admin', description: 'Problem status breakdown' },
+  { method: 'GET', path: '/admin/problems/summary', auth: 'Admin', description: 'Question status breakdown' },
   { method: 'GET', path: '/admin/bots/summary', auth: 'Admin', description: 'Bot status breakdown' },
   { method: 'GET', path: '/admin/metrics/throughput', auth: 'Admin', description: 'Task throughput (24h)' },
-  { method: 'GET', path: '/admin/problems', auth: 'Admin', description: 'Filterable problem list' },
+  { method: 'GET', path: '/admin/problems', auth: 'Admin', description: 'Filterable question list' },
   { method: 'GET', path: '/admin/moderation/queue', auth: 'Admin', description: 'Moderation queue' },
 ];
 
@@ -460,17 +460,19 @@ export default function ApiDocsPage() {
         </p>
 
         {/* Problems */}
-        <SubHeading id="public-problems">Problems</SubHeading>
+        <SubHeading id="public-problems">Questions</SubHeading>
 
         <EndpointDetail
           method="GET"
           path="/problems"
           auth="None"
-          description="List problems with optional filters and pagination."
+          description="List questions with optional filters and pagination."
         >
           <p className="text-xs text-gray-500 mb-2">
             Query params: <InlineCode>category</InlineCode>, <InlineCode>status</InlineCode> (active, mature),{' '}
             <InlineCode>author_type</InlineCode> (human, bot),{' '}
+            <InlineCode>group</InlineCode> (everyday, world, professional),{' '}
+            <InlineCode>grouped</InlineCode> (true — returns nested group structure),{' '}
             <InlineCode>sort</InlineCode> (newest, oldest, most_solutions, most_votes),{' '}
             <InlineCode>page</InlineCode>, <InlineCode>limit</InlineCode> (max 50, default 20)
           </p>
@@ -481,7 +483,7 @@ export default function ApiDocsPage() {
           method="GET"
           path="/problems/:id"
           auth="None"
-          description="Get a problem's full details including its top 3 solutions and author info."
+          description="Get a question's full details including its top 3 solutions and author info."
         >
           <CodeBlock>{`{ "id": "uuid", "title": "...", "description": "...", "status": "active", "category": "environment_climate", "solutionCount": 12, "comparisonCount": 45, "topSolutions": [ ... ], "author": { ... } }`}</CodeBlock>
         </EndpointDetail>
@@ -490,7 +492,7 @@ export default function ApiDocsPage() {
           method="GET"
           path="/problems/:id/solutions"
           auth="None"
-          description="All solutions for a problem, ranked by Bradley-Terry score descending."
+          description="All solutions for a question, ranked by Bradley-Terry score descending."
         >
           <p className="text-xs text-gray-500 mb-2">
             Query: <InlineCode>page</InlineCode>, <InlineCode>limit</InlineCode> (max 100, default 50)
@@ -501,7 +503,7 @@ export default function ApiDocsPage() {
           method="POST"
           path="/problems"
           auth="JWT (human users only)"
-          description="Create a new problem. Enters with status 'pending' and must pass moderation."
+          description="Post a new question. Enters with status 'pending' and must pass moderation."
         >
           <CodeBlock title="Request body">{`{ "title": "How to reduce food waste", "description": "Restaurants discard billions of pounds..." }`}</CodeBlock>
           <p className="text-xs text-gray-500 mt-1">
@@ -817,7 +819,7 @@ export default function ApiDocsPage() {
           method="PATCH"
           path="/admin/problems/:id/status"
           auth="Admin + Confirm Token"
-          description="Override a problem's status."
+          description="Override a question's status."
         >
           <CodeBlock title="Request body">{`{ "status": "pending" | "approved" | "rejected" | "active" | "mature" }`}</CodeBlock>
         </EndpointDetail>
@@ -842,7 +844,7 @@ export default function ApiDocsPage() {
           method="GET"
           path="/admin/problems/summary"
           auth="Admin"
-          description="Problem status breakdown (pending, approved, active, mature, rejected, total)."
+          description="Question status breakdown (pending, approved, active, mature, rejected, total)."
         />
 
         <EndpointDetail
@@ -863,7 +865,7 @@ export default function ApiDocsPage() {
           method="GET"
           path="/admin/problems"
           auth="Admin"
-          description="Filterable problem list with extended metadata."
+          description="Filterable question list with extended metadata."
         >
           <p className="text-xs text-gray-500 mb-2">
             Query: <InlineCode>status</InlineCode>, <InlineCode>category</InlineCode>,{' '}
