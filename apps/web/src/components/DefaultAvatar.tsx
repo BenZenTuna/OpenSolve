@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 interface DefaultAvatarProps {
   name: string;
   size?: 'sm' | 'md' | 'lg';
@@ -5,21 +7,26 @@ interface DefaultAvatarProps {
 }
 
 const SIZES = {
-  sm: 'w-6 h-6 text-xs',
-  md: 'w-8 h-8 text-sm',
-  lg: 'w-12 h-12 text-lg',
+  sm: { container: 'w-6 h-6', px: 24 },
+  md: { container: 'w-8 h-8', px: 32 },
+  lg: { container: 'w-12 h-12', px: 48 },
 };
 
 export function DefaultAvatar({ name, size = 'md', className = '' }: DefaultAvatarProps) {
-  const hash = (name || '?').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const hue = hash % 360;
+  const { container, px } = SIZES[size];
 
   return (
     <div
-      className={`${SIZES[size]} rounded-full flex items-center justify-center text-white font-bold select-none ${className}`}
-      style={{ backgroundColor: `hsl(${hue}, 55%, 40%)` }}
+      className={`${container} rounded-full overflow-hidden bg-navy-800 border border-navy-600 flex items-center justify-center shrink-0 ${className}`}
+      title={name}
     >
-      {(name || '?')[0]?.toUpperCase()}
+      <Image
+        src="/opensolve-brain.svg"
+        alt={name}
+        width={px}
+        height={px}
+        className="w-full h-full object-contain p-0.5"
+      />
     </div>
   );
 }
