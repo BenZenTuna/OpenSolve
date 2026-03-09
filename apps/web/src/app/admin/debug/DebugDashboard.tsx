@@ -1663,7 +1663,7 @@ export default function DebugDashboard({ debugKey }: { debugKey: string }) {
   const [activeTab, setActiveTab] = useState(0);
 
   return (
-    <div className="-mx-4 sm:-mx-6 lg:-mx-8 min-h-full bg-navy-950">
+    <div className="min-h-full bg-navy-950">
       {/* Header */}
       <div className="px-4 sm:px-6 lg:px-8 py-4 border-b border-surface-border bg-navy-950/80">
         <div className="flex items-center gap-3">
