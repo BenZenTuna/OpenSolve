@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Activity, Cpu, BarChart3, Shield, Bot, BookOpen,
   ChevronDown, ChevronRight, Info, AlertTriangle,
@@ -186,7 +185,7 @@ interface FamilyDistEntry {
 
 // ─── Hooks & Helpers ─────────────────────────────────────────────────────────
 
-function useDebugFetch<T>(endpoint: string, key: string, pollMs?: number) {
+function useDebugFetch<T>(endpoint: string, pollMs?: number) {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -195,7 +194,7 @@ function useDebugFetch<T>(endpoint: string, key: string, pollMs?: number) {
   const fetchData = useCallback(async () => {
     try {
       const res = await fetch(`/api/v1/internal/debug/${endpoint}`, {
-        headers: { 'X-Debug-Key': key },
+        credentials: 'include',
       });
       if (!res.ok) {
         if (res.status === 404) throw new Error('unauthorized');
@@ -211,7 +210,7 @@ function useDebugFetch<T>(endpoint: string, key: string, pollMs?: number) {
     } finally {
       if (mountedRef.current) setLoading(false);
     }
-  }, [endpoint, key]);
+  }, [endpoint]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -351,9 +350,9 @@ const STATUS_CONFIG: Record<string, { color: string; bg: string; label: string }
   red: { color: 'text-red-400', bg: 'bg-red-400', label: 'Critical' },
 };
 
-function BotTrafficTab({ debugKey }: { debugKey: string }) {
+function BotTrafficTab() {
   const { data, loading, error } = useDebugFetch<BotTrafficData>(
-    'bot-traffic', debugKey, 5000
+    'bot-traffic', 5000
   );
 
   if (loading && !data) return <LoadingState />;
@@ -533,9 +532,9 @@ function BotTrafficTab({ debugKey }: { debugKey: string }) {
 
 // ─── Tab 1: Live Feed ────────────────────────────────────────────────────────
 
-function LiveFeedTab({ debugKey }: { debugKey: string }) {
+function LiveFeedTab() {
   const { data, loading, error } = useDebugFetch<{ activities: DebugEvent[] }>(
-    'events', debugKey, 3000
+    'events', 3000
   );
 
   if (loading && !data) return <LoadingState />;
@@ -594,14 +593,14 @@ function extractFamilyFromModel(modelName: string): string {
 
 // ─── Tab 2: Dispatcher ──────────────────────────────────────────────────────
 
-function DispatcherTab({ debugKey }: { debugKey: string }) {
+function DispatcherTab() {
   const { data, loading, error } = useDebugFetch<{
     problems: DispatcherProblem[];
     activeTasks: ActiveTask[];
     trafficDistribution: { problemId: string; count: number; percent: string }[];
     totalHourlyTraffic: number;
     statusCounts: { status: string; count: number }[];
-  }>('dispatcher-state', debugKey, 10000);
+  }>('dispatcher-state', 10000);
 
   const [hoveredModels, setHoveredModels] = useState<string | null>(null);
 
@@ -772,7 +771,7 @@ function DispatcherTab({ debugKey }: { debugKey: string }) {
 
 // ─── Tab 3: Bradley-Terry ────────────────────────────────────────────────────
 
-function BradleyTerryTab({ debugKey }: { debugKey: string }) {
+function BradleyTerryTab() {
   const { data, loading, error } = useDebugFetch<{
     voteDistribution: VoteDistribution;
     convergenceData: ConvergenceItem[];
@@ -796,7 +795,7 @@ function BradleyTerryTab({ debugKey }: { debugKey: string }) {
       adoptionRate: number;
       familyDistribution: FamilyDistEntry[];
     };
-  }>('bt-stats', debugKey, 15000);
+  }>('bt-stats', 15000);
 
   if (loading && !data) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
@@ -1011,7 +1010,7 @@ function BradleyTerryTab({ debugKey }: { debugKey: string }) {
 
 // ─── Tab 4: Content Moderation ───────────────────────────────────────────────
 
-function ModerationTab({ debugKey }: { debugKey: string }) {
+function ModerationTab() {
   const { data, loading, error } = useDebugFetch<{
     pending: DispatcherProblem[];
     rejected: DispatcherProblem[];
@@ -1024,7 +1023,7 @@ function ModerationTab({ debugKey }: { debugKey: string }) {
       tiebreakerThreshold: number;
       flagCategories: string[];
     };
-  }>('moderation', debugKey, 10000);
+  }>('moderation', 10000);
 
   if (loading && !data) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
@@ -1178,12 +1177,12 @@ function ModerationTab({ debugKey }: { debugKey: string }) {
 
 // ─── Tab 5: Bot Monitor ──────────────────────────────────────────────────────
 
-function BotMonitorTab({ debugKey }: { debugKey: string }) {
+function BotMonitorTab() {
   const { data, loading, error } = useDebugFetch<{
     bots: BotEntry[];
     assignedTasks: Record<string, { taskType: string; problemId: string; assignedAt: string; expiresAt: string }[]>;
     rateLimits: { globalPerHour: number; perBotPerHour: number };
-  }>('bots', debugKey, 10000);
+  }>('bots', 10000);
 
   if (loading && !data) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
@@ -1295,9 +1294,9 @@ function BotMonitorTab({ debugKey }: { debugKey: string }) {
 
 // ─── Tab 6: Rules & Limits ───────────────────────────────────────────────────
 
-function RulesTab({ debugKey }: { debugKey: string }) {
+function RulesTab() {
   const { data, loading, error } = useDebugFetch<Record<string, Record<string, ConfigValue>>>(
-    'config', debugKey
+    'config'
   );
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
@@ -1389,12 +1388,12 @@ function RulesTab({ debugKey }: { debugKey: string }) {
 
 // ─── Tab 7: LLM Models ──────────────────────────────────────────────────────
 
-function LlmModelsTab({ debugKey }: { debugKey: string }) {
+function LlmModelsTab() {
   const { data, loading, error } = useDebugFetch<{
     summary: LlmSummary;
     models: LlmModelEntry[];
     recentModelActivity: RecentModelActivity[];
-  }>('llm-models', debugKey, 5000);
+  }>('llm-models', 5000);
 
   const [sortKey, setSortKey] = useState<string>('avgBtScore');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
@@ -1660,38 +1659,8 @@ const TABS = [
   { label: 'LLM Models', icon: Dna, desc: 'Model tracking' },
 ];
 
-function DebugDashboardContent() {
-  const searchParams = useSearchParams();
-  const key = searchParams.get('key');
+export default function DebugPage() {
   const [activeTab, setActiveTab] = useState(0);
-  const [authorized, setAuthorized] = useState<boolean | null>(null);
-
-  // Verify access by hitting the config endpoint
-  useEffect(() => {
-    if (!key) { setAuthorized(false); return; }
-    fetch(`/api/v1/internal/debug/config`, {
-      headers: { 'X-Debug-Key': key },
-    })
-      .then((res) => setAuthorized(res.ok))
-      .catch(() => setAuthorized(false));
-  }, [key]);
-
-  // Show 404 for unauthorized
-  if (authorized === null) {
-    return (
-      <div className="text-center py-20">
-        <RefreshCw className="w-6 h-6 animate-spin text-gray-600 mx-auto" />
-      </div>
-    );
-  }
-  if (!authorized || !key) {
-    return (
-      <div className="text-center py-20">
-        <h1 className="text-4xl font-bold text-gray-300">404</h1>
-        <p className="text-gray-600 mt-2">This page could not be found.</p>
-      </div>
-    );
-  }
 
   return (
     <div className="-mx-4 sm:-mx-6 lg:-mx-8">
@@ -1703,7 +1672,7 @@ function DebugDashboardContent() {
           </div>
           <div>
             <h1 className="text-lg font-bold text-white font-mono">OpenSolve Debug Console</h1>
-            <p className="text-xs text-gray-600 font-mono">Internal monitoring dashboard &middot; Not for public access</p>
+            <p className="text-xs text-gray-600 font-mono">Internal monitoring dashboard &middot; Admin only</p>
           </div>
         </div>
       </div>
@@ -1734,28 +1703,15 @@ function DebugDashboardContent() {
 
       {/* Tab Content */}
       <div className="px-4 sm:px-6 lg:px-8 py-6">
-        {activeTab === 0 && <BotTrafficTab debugKey={key} />}
-        {activeTab === 1 && <LiveFeedTab debugKey={key} />}
-        {activeTab === 2 && <DispatcherTab debugKey={key} />}
-        {activeTab === 3 && <BradleyTerryTab debugKey={key} />}
-        {activeTab === 4 && <ModerationTab debugKey={key} />}
-        {activeTab === 5 && <BotMonitorTab debugKey={key} />}
-        {activeTab === 6 && <RulesTab debugKey={key} />}
-        {activeTab === 7 && <LlmModelsTab debugKey={key} />}
+        {activeTab === 0 && <BotTrafficTab />}
+        {activeTab === 1 && <LiveFeedTab />}
+        {activeTab === 2 && <DispatcherTab />}
+        {activeTab === 3 && <BradleyTerryTab />}
+        {activeTab === 4 && <ModerationTab />}
+        {activeTab === 5 && <BotMonitorTab />}
+        {activeTab === 6 && <RulesTab />}
+        {activeTab === 7 && <LlmModelsTab />}
       </div>
     </div>
-  );
-}
-
-export default function DebugPage() {
-  return (
-    <Suspense fallback={
-      <div className="text-center py-20">
-        <RefreshCw className="w-6 h-6 animate-spin text-gray-600 mx-auto" />
-        <p className="text-xs text-gray-600 font-mono mt-2">Initializing debug console...</p>
-      </div>
-    }>
-      <DebugDashboardContent />
-    </Suspense>
   );
 }

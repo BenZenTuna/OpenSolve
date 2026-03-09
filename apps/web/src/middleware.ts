@@ -59,10 +59,9 @@ export function middleware(request: NextRequest) {
   // Paths exempt from access gate:
   // - /coming-soon: prevent infinite rewrite loop
   // - /privacy, /terms, /impressum: legal pages must always be accessible
-  // - /debug-x9k4m7: internal debug dashboard (has its own auth)
   // - /newsletter/confirm: double opt-in confirmation linked from emails
   // - /unsubscribe: one-click unsubscribe (must be ungated per UWG §7)
-  const exemptPaths = ['/coming-soon', '/privacy', '/terms', '/impressum', '/debug-x9k4m7', '/newsletter/confirm', '/unsubscribe'];
+  const exemptPaths = ['/coming-soon', '/privacy', '/terms', '/impressum', '/newsletter/confirm', '/unsubscribe'];
   if (exemptPaths.includes(pathname)) {
     return NextResponse.next();
   }

@@ -10,6 +10,7 @@ import {
   Users,
   Shield,
   Activity,
+  Bug,
   Mail,
   ArrowLeft,
   Loader2,
@@ -32,6 +33,7 @@ const navItems = [
   { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/moderation', label: 'Moderation', icon: Shield },
   { href: '/admin/activity', label: 'Activity', icon: Activity },
+  { href: '/admin/debug', label: 'Debug', icon: Bug },
   { href: '/admin/communications', label: 'Communications', icon: Mail },
 ];
 
