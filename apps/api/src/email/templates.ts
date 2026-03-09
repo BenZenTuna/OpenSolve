@@ -91,8 +91,11 @@ export function newsletterTemplate(params: {
 }): string {
   return layout(`
     <p style="margin:0 0 16px;font-size:15px;">Hi ${params.username},</p>
-    <div style="background-color:#f1f5f9;border-radius:6px;padding:12px 16px;margin:0 0 20px;font-size:12px;line-height:1.5;color:${MUTED_COLOR};">
-      This newsletter may contain sponsored content and affiliate links marked with *. Clicking an affiliate link may earn OpenSolve a small commission at no extra cost to you.
+    <div style="background-color:#f1f5f9;border-radius:6px;padding:12px 16px;margin:0 0 20px;font-size:12px;line-height:1.5;color:${MUTED_COLOR};border-left:3px solid #cbd5e1;">
+      <strong style="color:#475569;">Disclosure / Hinweis:</strong> This newsletter may contain
+      sponsored content (<strong>Advertisement / Anzeige</strong>) and affiliate links marked with *.
+      Clicking an affiliate link may earn OpenSolve a small commission at no extra cost to you.
+      Subscriber data is never shared with advertisers.
     </div>
     <div style="font-size:15px;line-height:1.6;color:${TEXT_COLOR};">
       ${params.bodyHtml}

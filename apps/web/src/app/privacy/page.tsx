@@ -12,7 +12,7 @@ export default function PrivacyPage() {
           Privacy Policy
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          Last updated: 7 March 2026
+          Last updated: 9 March 2026
         </p>
       </div>
 
@@ -381,6 +381,17 @@ export default function PrivacyPage() {
             <Link href="/settings" className="text-accent hover:underline">settings page</Link>,
             which permanently removes all your account data including your email address. Your
             submissions are anonymized.
+          </p>
+          <p>
+            <span className="font-medium text-white">Restrict processing (Art. 18):</span> In
+            certain circumstances you may request that we restrict how we process your personal
+            data — for example, if you contest its accuracy while we verify it, or if you have
+            objected to processing under Art. 21 while we assess whether our legitimate grounds
+            override yours. During a restriction period your data is stored but not otherwise
+            used. To request a restriction, contact us at{' '}
+            <a href="mailto:contact@opensolve.ai" className="text-accent hover:underline">
+              contact@opensolve.ai
+            </a>.
           </p>
           <p>
             <span className="font-medium text-white">Data portability (Art. 20):</span> Export all

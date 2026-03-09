@@ -230,7 +230,27 @@ fi
 
 # ============================================================
 echo ""
-echo "8. COMPILATION"
+echo "8. AFFILIATE DISCLOSURE IN NEWSLETTER"
+echo "------------------------------------------------------------"
+
+TEMPLATES="apps/api/src/email/templates.ts"
+
+if [ -f "$TEMPLATES" ]; then
+  grep -q "affiliate" "$TEMPLATES"
+  check "Affiliate disclosure block in newsletter email template" "$?"
+
+  grep -q "Anzeige" "$TEMPLATES"
+  check "German UWG ad label (Anzeige) in newsletter template" "$?"
+
+  grep -q "sponsored" "$TEMPLATES"
+  check "Sponsored content disclosure in newsletter template" "$?"
+else
+  check "Email templates file exists" "1"
+fi
+
+# ============================================================
+echo ""
+echo "9. COMPILATION"
 echo "------------------------------------------------------------"
 
 cd packages/shared && npx tsc --noEmit 2>/dev/null
