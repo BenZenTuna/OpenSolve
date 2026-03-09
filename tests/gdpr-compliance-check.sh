@@ -250,7 +250,32 @@ fi
 
 # ============================================================
 echo ""
-echo "9. COMPILATION"
+echo "9. RETENTION AUTOMATION"
+echo "------------------------------------------------------------"
+
+RETENTION_SVC="apps/api/src/services/retention.service.ts"
+SERVER="apps/api/src/server.ts"
+
+if [ -f "$RETENTION_SVC" ]; then
+  grep -q "setInterval\|startScheduler\|runCleanup\|runRetentionCleanup" "$RETENTION_SVC"
+  check "Retention service has schedulable cleanup method" "$?"
+
+  grep -q "logger\|log\." "$RETENTION_SVC"
+  check "Retention service emits log output" "$?"
+else
+  check "Retention service file exists" "1"
+fi
+
+if [ -f "$SERVER" ]; then
+  grep -q "retention\|Retention" "$SERVER"
+  check "Retention service referenced in server.ts" "$?"
+else
+  check "server.ts exists" "1"
+fi
+
+# ============================================================
+echo ""
+echo "10. COMPILATION"
 echo "------------------------------------------------------------"
 
 cd packages/shared && npx tsc --noEmit 2>/dev/null

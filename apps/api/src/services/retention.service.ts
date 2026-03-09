@@ -21,46 +21,53 @@ export interface RetentionResult {
 }
 
 export async function runRetentionCleanup(): Promise<RetentionResult> {
-  // Activity logs older than 90 days
-  const activityResult = await db.delete(activityLog)
-    .where(lt(activityLog.createdAt, daysAgo(RETENTION_ACTIVITY_LOG_DAYS)));
-  const activityLogsDeleted = (activityResult as unknown as { rowCount: number }).rowCount ?? 0;
+  logger.info('GDPR retention cleanup started');
 
-  // Completed tasks older than 30 days
-  const completedResult = await db.delete(tasks)
-    .where(and(
-      eq(tasks.status, 'completed'),
-      lt(tasks.completedAt, daysAgo(RETENTION_COMPLETED_TASKS_DAYS)),
-    ));
-  const completedTasksDeleted = (completedResult as unknown as { rowCount: number }).rowCount ?? 0;
+  try {
+    // Activity logs older than 90 days
+    const activityResult = await db.delete(activityLog)
+      .where(lt(activityLog.createdAt, daysAgo(RETENTION_ACTIVITY_LOG_DAYS)));
+    const activityLogsDeleted = (activityResult as unknown as { rowCount: number }).rowCount ?? 0;
 
-  // Expired tasks older than 7 days
-  const expiredResult = await db.delete(tasks)
-    .where(and(
-      eq(tasks.status, 'expired'),
-      lt(tasks.expiresAt, daysAgo(RETENTION_EXPIRED_TASKS_DAYS)),
-    ));
-  const expiredTasksDeleted = (expiredResult as unknown as { rowCount: number }).rowCount ?? 0;
+    // Completed tasks older than 30 days
+    const completedResult = await db.delete(tasks)
+      .where(and(
+        eq(tasks.status, 'completed'),
+        lt(tasks.completedAt, daysAgo(RETENTION_COMPLETED_TASKS_DAYS)),
+      ));
+    const completedTasksDeleted = (completedResult as unknown as { rowCount: number }).rowCount ?? 0;
 
-  // Rejected problems older than 30 days (cascade deletes related flags)
-  const rejectedResult = await db.delete(problems)
-    .where(and(
-      eq(problems.status, 'rejected'),
-      lt(problems.updatedAt, daysAgo(RETENTION_REJECTED_PROBLEMS_DAYS)),
-    ));
-  const rejectedProblemsDeleted = (rejectedResult as unknown as { rowCount: number }).rowCount ?? 0;
+    // Expired tasks older than 7 days
+    const expiredResult = await db.delete(tasks)
+      .where(and(
+        eq(tasks.status, 'expired'),
+        lt(tasks.expiresAt, daysAgo(RETENTION_EXPIRED_TASKS_DAYS)),
+      ));
+    const expiredTasksDeleted = (expiredResult as unknown as { rowCount: number }).rowCount ?? 0;
 
-  const result: RetentionResult = {
-    activityLogsDeleted,
-    completedTasksDeleted,
-    expiredTasksDeleted,
-    rejectedProblemsDeleted,
-  };
+    // Rejected problems older than 30 days (cascade deletes related flags)
+    const rejectedResult = await db.delete(problems)
+      .where(and(
+        eq(problems.status, 'rejected'),
+        lt(problems.updatedAt, daysAgo(RETENTION_REJECTED_PROBLEMS_DAYS)),
+      ));
+    const rejectedProblemsDeleted = (rejectedResult as unknown as { rowCount: number }).rowCount ?? 0;
 
-  const total = activityLogsDeleted + completedTasksDeleted + expiredTasksDeleted + rejectedProblemsDeleted;
-  if (total > 0) {
-    logger.info(result, 'Retention cleanup completed');
+    const result: RetentionResult = {
+      activityLogsDeleted,
+      completedTasksDeleted,
+      expiredTasksDeleted,
+      rejectedProblemsDeleted,
+    };
+
+    logger.info(
+      { activityLogsDeleted, completedTasksDeleted, expiredTasksDeleted, rejectedProblemsDeleted },
+      'GDPR retention cleanup complete',
+    );
+
+    return result;
+  } catch (err) {
+    logger.error({ err }, 'GDPR retention cleanup failed');
+    throw err;
   }
-
-  return result;
 }
