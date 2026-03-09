@@ -244,6 +244,9 @@ if [ -f "$TEMPLATES" ]; then
 
   grep -q "sponsored" "$TEMPLATES"
   check "Sponsored content disclosure in newsletter template" "$?"
+
+  grep -q "Kantelegatan\|postal\|Karlstad" "$TEMPLATES"
+  check "Postal address in newsletter email footer (UWG §7)" "$?"
 else
   check "Email templates file exists" "1"
 fi

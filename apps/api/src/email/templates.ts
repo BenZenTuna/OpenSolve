@@ -101,9 +101,14 @@ export function newsletterTemplate(params: {
       ${params.bodyHtml}
     </div>
     <hr style="border:none;border-top:1px solid #e2e8f0;margin:32px 0 16px;">
-    <p style="font-size:13px;color:${MUTED_COLOR};margin:0;">
+    <p style="font-size:13px;color:${MUTED_COLOR};margin:0 0 6px;">
       You are receiving this because you subscribed to the OpenSolve newsletter.
       <a href="${params.unsubscribeUrl}" style="color:${BRAND_COLOR};text-decoration:underline;">Unsubscribe</a>
+    </p>
+    <!-- UWG §7 / Marknadsföringslagen: postal address required in commercial emails -->
+    <p style="font-size:12px;color:${MUTED_COLOR};margin:0;">
+      OpenSolve &mdash; Taner Tuna, Kantelegatan 21F, 656 36 Karlstad, Sweden &mdash;
+      <a href="https://opensolve.ai" style="color:${MUTED_COLOR};text-decoration:none;">opensolve.ai</a>
     </p>
   `);
 }
