@@ -747,6 +747,34 @@ echo "=== GDPR export excludes security-only newsletter fields ==="
 grep -n "newsletterConsentIp\|newsletterUnsubscribeToken" \
   apps/api/src/routes/auth.routes.ts | grep -v "//"
 echo "↑ Must be empty — these fields must not appear uncommented in export"
+
+echo ""
+echo "=== Newsletter email template has permanent disclosure block ==="
+grep -n -i "affiliate\|sponsored\|Anzeige\|Hinweis\|Disclosure" apps/api/src/email/templates.ts
+echo "↑ Should show bilingual Disclosure/Hinweis label, Anzeige, affiliate, and sponsored in newsletterTemplate"
+
+echo ""
+echo "=== Retention service is automated and logged ==="
+grep -n "logger\|setInterval\|startScheduler\|runCleanup\|retention cleanup" \
+  apps/api/src/services/retention.service.ts | head -10
+echo "↑ Should show logger.info at start, completion with row counts, and error handler"
+echo ""
+echo "=== Retention scheduler wired in server.ts ==="
+grep -n "retention\|Retention" apps/api/src/server.ts
+echo "↑ Should show retention service imported and called with setTimeout/setInterval"
+
+echo ""
+echo "=== Privacy policy Art. 18 Right to Restriction ==="
+grep -n "Art. 18\|Restrict processing\|restriction" apps/web/src/app/privacy/page.tsx
+echo "↑ Should show Art. 18 paragraph between Art. 17 and Art. 20"
+echo ""
+echo "=== Privacy policy rights order (15, 16, 17, 18, 20, 21) ==="
+grep -n "Art. 15\|Art. 16\|Art. 17\|Art. 18\|Art. 20\|Art. 21" apps/web/src/app/privacy/page.tsx
+echo "↑ Line numbers must be in ascending order: 15 < 16 < 17 < 18 < 20 < 21"
+echo ""
+echo "=== Privacy policy last updated date ==="
+grep -n "Last updated" apps/web/src/app/privacy/page.tsx
+echo "↑ Should be 9 March 2026"
 ```
 
 **Compliance status:**
@@ -771,6 +799,11 @@ echo "↑ Must be empty — these fields must not appear uncommented in export"
 | Newsletter Consent Assessment | DONE | `docs/NEWSLETTER-CONSENT-ASSESSMENT.md` — documents double opt-in, UWG §7, 3-year retention |
 | Resend DPA / SCCs | DONE | Disclosed in privacy policy; Resend DPA signed at resend.com/legal |
 | Email open tracking | DONE | Disabled in Resend dashboard; disclosed in privacy policy |
+| Affiliate disclosure block in email template (UWG §7) | DONE | apps/api/src/email/templates.ts — newsletterTemplate |
+| German UWG ad label (Anzeige) in newsletter template | DONE | apps/api/src/email/templates.ts |
+| GDPR Art. 18 Right to Restriction in privacy policy | DONE | /privacy — Your Rights section |
+| Retention cleanup automated and logged | DONE | apps/api/src/services/retention.service.ts + server.ts |
+| Hetzner DPA signed (GDPR Art. 28) | DONE | Hetzner account portal (confirmed 9 March 2026) |
 
 **AI-Specific Regulation:**
 - Is AI-generated content labeled in the UI?
@@ -821,6 +854,9 @@ Document the known applied sessions that have modified the codebase:
 | Admin Email Panel (C) | 6 admin email API endpoints, Redis one-time confirmation tokens, /admin/communications page with 4 tabs |
 | Frontend Email UI (D) | Newsletter section in settings (4 states), /newsletter/confirm page, /unsubscribe page, NewsletterBanner component |
 | Compliance & Legal (E) | Privacy policy newsletter additions, Terms newsletter section, Newsletter Consent Assessment doc, LIA carve-out, login page disclosure, compliance tests |
+| COMP-1 | Affiliate disclosure hardened: bilingual Disclosure/Hinweis label, Anzeige for UWG §7, compliance script sections 8-10 added (41 total checks) |
+| COMP-2 | Art. 18 Right to Restriction added to Your Rights section; rights now in correct legal order 15→16→17→18→20→7(3)→21; date updated to 9 March 2026 |
+| COMP-3 | Retention logging hardened: logger.info at start, completion log fires always with 4 row counts, logger.error in catch block |
 
 ---
 
@@ -855,6 +891,13 @@ Rules:
   - New utility files: 1 (newsletter-tokens.ts)
   - New documentation files: 2 (RESEND-SETUP.md, NEWSLETTER-CONSENT-ASSESSMENT.md)
   - Newsletter compliance: Double opt-in ✅, One-click unsubscribe ✅, Consent record ✅, Privacy policy updated ✅, Consent assessment documented ✅, Open tracking disabled ✅
+  - Affiliate disclosure block in email template ✅ (Session 1, hardened March 2026)
+  - German UWG §7 Anzeige label in newsletter template ✅ (March 2026)
+  - Art. 18 Right to Restriction in privacy policy ✅ (March 2026)
+  - Retention cleanup automated (24h setInterval) ✅ confirmed March 2026
+  - Retention cleanup logging hardened (start/completion/error) ✅ (March 2026)
+  - Hetzner DPA signed via portal ✅ confirmed March 2026
+  - gdpr-compliance-check.sh: 41 checks, 0 failures ✅ (March 2026)
 
 Target length: This document should be thorough. 2000-5000 lines is expected and fine. Don't trim for brevity.
 
@@ -866,3 +909,12 @@ After creating the file, tell me:
 5. What the `/save` command does (or if no custom commands exist)
 6. Security summary: Are all services properly authenticated and isolated in docker-compose.prod.yml?
 7. Any NEW security concerns found during this scan
+8. Compliance sessions (2026-03-09) applied? Verify each:
+   - Does apps/api/src/email/templates.ts newsletterTemplate contain "Hinweis" and "Anzeige"? (PASS/FAIL)
+   - Does apps/web/src/app/privacy/page.tsx contain "Art. 18" with "Restrict processing"? (PASS/FAIL)
+   - Does the rights section have articles in order 15 → 16 → 17 → 18 → 20 → 21 by line number? (PASS/FAIL)
+   - Does apps/web/src/app/privacy/page.tsx show "Last updated: 9 March 2026"? (PASS/FAIL)
+   - Does apps/api/src/services/retention.service.ts contain logger.info for start, completion, and error? (PASS/FAIL)
+   - Does apps/api/src/server.ts import and wire retention cleanup with setInterval? (PASS/FAIL)
+   - Does tests/gdpr-compliance-check.sh have 41 total checks? (PASS/FAIL)
+   - Is Hetzner DPA confirmed signed? (CONFIRMED — signed via Hetzner account portal 9 March 2026)
