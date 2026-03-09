@@ -147,7 +147,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (!user) return null;
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="fixed inset-0 flex bg-gray-50 z-30">
       <AdminSidebar
         currentPath={pathname}
         collapsed={!sidebarOpen}
