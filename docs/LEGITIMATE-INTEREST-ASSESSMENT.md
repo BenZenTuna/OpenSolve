@@ -124,7 +124,7 @@ This assessment will be reviewed:
 | Purpose | Service-critical notifications (privacy changes, security breaches, terms changes) |
 | Legal basis | Art. 6(1)(f) — Legitimate Interest |
 | Recipients | No external recipients. Internal access limited to platform administrators. |
-| Transfers to third countries | None. All data stored in EU (Hetzner, Germany). |
+| Transfers to third countries | USA (Resend, Inc. — email delivery) — governed by SCCs. All storage remains in EU (Hetzner, Germany). |
 | Retention period | Lifetime of account. Deleted permanently on account deletion. |
 | Technical measures | PostgreSQL with SCRAM-SHA-256, Docker network isolation, no public port exposure, TLS in transit |
 | Organizational measures | Admin access requires JWT + CSRF token, rate-limited, activity logged |
