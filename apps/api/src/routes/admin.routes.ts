@@ -1,8 +1,8 @@
 import crypto from 'node:crypto';
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { db } from '../config/database.js';
-import { problems, bots, users, flags, tasks } from '../db/schema.js';
-import { eq, sql, and, ilike, desc, asc, gte } from 'drizzle-orm';
+import { problems, bots, users, flags, tasks, activityLog, solutions } from '../db/schema.js';
+import { eq, sql, and, or, ilike, desc, asc, gte, isNotNull, isNull } from 'drizzle-orm';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { env } from '../config/env.js';
 
@@ -207,6 +207,90 @@ export async function adminRoutes(fastify: FastifyInstance) {
     return reply.code(200).send(stats);
   });
 
+  // ===== GET /admin/users — Filterable user list =====
+  fastify.get('/admin/users', async (request, reply) => {
+    const query = request.query as Record<string, string | undefined>;
+    const role = query.role || 'all';
+    const hasBot = query.hasBot || 'all';
+    const newsletter = query.newsletter || 'all';
+    const search = query.search || '';
+    const sort = query.sort || 'newest';
+    const page = Math.max(1, parseInt(query.page || '1', 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(query.limit || '25', 10) || 25));
+    const offset = (page - 1) * limit;
+
+    const conditions = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (role !== 'all') conditions.push(eq(users.role, role as any));
+    if (hasBot === 'yes') conditions.push(isNotNull(users.botName));
+    if (hasBot === 'no') conditions.push(isNull(users.botName));
+    if (newsletter === 'subscribed') conditions.push(eq(users.newsletterSubscribed, true));
+    if (newsletter === 'unsubscribed') conditions.push(eq(users.newsletterSubscribed, false));
+    if (search) {
+      conditions.push(
+        or(
+          ilike(users.username, `%${search}%`),
+          ilike(users.email, `%${search}%`),
+        )!,
+      );
+    }
+
+    const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+    const orderBy = {
+      newest: desc(users.createdAt),
+      oldest: asc(users.createdAt),
+      username: asc(users.username),
+    }[sort] || desc(users.createdAt);
+
+    const [items, countResult] = await Promise.all([
+      db.select({
+        id: users.id,
+        username: users.username,
+        email: users.email,
+        role: users.role,
+        onboardingComplete: users.onboardingComplete,
+        botName: users.botName,
+        apiKeyPrefix: users.apiKeyPrefix,
+        newsletterSubscribed: users.newsletterSubscribed,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
+        .from(users)
+        .where(where)
+        .orderBy(orderBy)
+        .limit(limit)
+        .offset(offset),
+
+      db.select({ count: sql<number>`count(*)::int` })
+        .from(users)
+        .where(where),
+    ]);
+
+    const userList = items.map((item) => ({
+      id: item.id,
+      username: item.username,
+      email: item.email,
+      role: item.role,
+      onboardingComplete: item.onboardingComplete,
+      botName: item.botName,
+      hasApiKey: Boolean(item.apiKeyPrefix),
+      newsletterSubscribed: item.newsletterSubscribed,
+      createdAt: item.createdAt,
+      lastUpdated: item.updatedAt,
+    }));
+
+    return reply.code(200).send({
+      users: userList,
+      pagination: {
+        page,
+        limit,
+        total: countResult[0].count,
+        totalPages: Math.ceil(countResult[0].count / limit),
+      },
+    });
+  });
+
   // ===== NEW DASHBOARD ENDPOINTS (read-only) =====
 
   // GET /admin/problems/summary — Status breakdown for donut chart
@@ -271,6 +355,83 @@ export async function adminRoutes(fastify: FastifyInstance) {
       ...summary,
       total,
       activeLastDay: activeLastDayResult[0].count,
+    });
+  });
+
+  // GET /admin/bots — Extended filterable bot list
+  fastify.get('/admin/bots', async (request, reply) => {
+    const query = request.query as Record<string, string | undefined>;
+    const status = query.status || 'all';
+    const search = query.search || '';
+    const sort = query.sort || 'newest';
+    const page = Math.max(1, parseInt(query.page || '1', 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(query.limit || '25', 10) || 25));
+    const offset = (page - 1) * limit;
+
+    const conditions = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (status !== 'all') conditions.push(eq(bots.status, status as any));
+    if (search) {
+      conditions.push(
+        or(
+          ilike(bots.name, `%${search}%`),
+          ilike(users.username, `%${search}%`),
+        )!,
+      );
+    }
+
+    const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+    const orderBy = {
+      newest: desc(bots.createdAt),
+      oldest: asc(bots.createdAt),
+      most_points: desc(bots.totalPoints),
+      most_solutions: desc(bots.totalSolutions),
+      most_votes: desc(bots.totalVotes),
+      highest_elo: desc(bots.globalElo),
+      last_active: desc(bots.lastActiveAt),
+    }[sort] || desc(bots.createdAt);
+
+    const [items, countResult] = await Promise.all([
+      db.select({
+        id: bots.id,
+        name: bots.name,
+        description: bots.description,
+        status: bots.status,
+        ownerId: bots.ownerId,
+        ownerUsername: users.username,
+        totalPoints: bots.totalPoints,
+        totalSolutions: bots.totalSolutions,
+        totalVotes: bots.totalVotes,
+        totalFlags: bots.totalFlags,
+        totalProblemsCreated: bots.totalProblemsCreated,
+        totalTasksCompleted: bots.totalTasksCompleted,
+        voteAccuracy: bots.voteAccuracy,
+        globalElo: bots.globalElo,
+        lastActiveAt: bots.lastActiveAt,
+        createdAt: bots.createdAt,
+      })
+        .from(bots)
+        .leftJoin(users, eq(bots.ownerId, users.id))
+        .where(where)
+        .orderBy(orderBy)
+        .limit(limit)
+        .offset(offset),
+
+      db.select({ count: sql<number>`count(*)::int` })
+        .from(bots)
+        .leftJoin(users, eq(bots.ownerId, users.id))
+        .where(where),
+    ]);
+
+    return reply.code(200).send({
+      bots: items,
+      pagination: {
+        page,
+        limit,
+        total: countResult[0].count,
+        totalPages: Math.ceil(countResult[0].count / limit),
+      },
     });
   });
 
@@ -580,6 +741,119 @@ export async function adminRoutes(fastify: FastifyInstance) {
         mixed: mixedProblems.length,
         recentlyRejected: recentlyRejected.length,
       },
+    });
+  });
+
+  // ===== GET /admin/activity — Filterable activity log =====
+  fastify.get('/admin/activity', async (request, reply) => {
+    const query = request.query as Record<string, string | undefined>;
+    const action = query.action || 'all';
+    const actorType = query.actorType || 'all';
+    const search = query.search || '';
+    const sort = query.sort || 'newest';
+    const page = Math.max(1, parseInt(query.page || '1', 10) || 1);
+    const limit = Math.min(200, Math.max(1, parseInt(query.limit || '50', 10) || 50));
+    const offset = (page - 1) * limit;
+
+    const conditions = [];
+    if (action !== 'all') conditions.push(eq(activityLog.action, action));
+    if (actorType === 'bot') conditions.push(isNotNull(activityLog.botId));
+    if (actorType === 'human') {
+      conditions.push(
+        and(
+          isNotNull(activityLog.humanUserId),
+          sql`${activityLog.action} NOT LIKE 'admin_%'`,
+        )!,
+      );
+    }
+    if (actorType === 'admin') {
+      conditions.push(sql`${activityLog.action} LIKE 'admin_%'`);
+    }
+    if (search) {
+      conditions.push(
+        or(
+          ilike(bots.name, `%${search}%`),
+          ilike(users.username, `%${search}%`),
+          ilike(problems.title, `%${search}%`),
+        )!,
+      );
+    }
+
+    const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+    const orderBy = sort === 'oldest'
+      ? asc(activityLog.createdAt)
+      : desc(activityLog.createdAt);
+
+    const baseQuery = db
+      .select({
+        id: activityLog.id,
+        action: activityLog.action,
+        botId: activityLog.botId,
+        botName: bots.name,
+        humanUserId: activityLog.humanUserId,
+        humanUsername: users.username,
+        problemId: activityLog.problemId,
+        problemTitle: problems.title,
+        solutionId: activityLog.solutionId,
+        metadata: activityLog.metadata,
+        createdAt: activityLog.createdAt,
+      })
+      .from(activityLog)
+      .leftJoin(bots, eq(activityLog.botId, bots.id))
+      .leftJoin(users, eq(activityLog.humanUserId, users.id))
+      .leftJoin(problems, eq(activityLog.problemId, problems.id));
+
+    const countQuery = db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(activityLog)
+      .leftJoin(bots, eq(activityLog.botId, bots.id))
+      .leftJoin(users, eq(activityLog.humanUserId, users.id))
+      .leftJoin(problems, eq(activityLog.problemId, problems.id));
+
+    const [items, countResult, actionCountRows] = await Promise.all([
+      baseQuery
+        .where(where)
+        .orderBy(orderBy)
+        .limit(limit)
+        .offset(offset),
+
+      countQuery.where(where),
+
+      db.select({
+        action: activityLog.action,
+        count: sql<number>`count(*)::int`,
+      })
+        .from(activityLog)
+        .groupBy(activityLog.action),
+    ]);
+
+    const actionCounts: Record<string, number> = {};
+    for (const row of actionCountRows) {
+      actionCounts[row.action] = row.count;
+    }
+
+    return reply.code(200).send({
+      activities: items.map((item) => ({
+        id: item.id,
+        action: item.action,
+        botId: item.botId,
+        botName: item.botName || null,
+        humanUserId: item.humanUserId,
+        humanUsername: item.humanUsername || null,
+        problemId: item.problemId,
+        problemTitle: item.problemTitle || null,
+        solutionId: item.solutionId,
+        metadata: item.metadata,
+        createdAt: item.createdAt,
+      })),
+      pagination: {
+        page,
+        limit,
+        total: countResult[0].count,
+        totalPages: Math.ceil(countResult[0].count / limit),
+      },
+      actionCounts,
     });
   });
 }

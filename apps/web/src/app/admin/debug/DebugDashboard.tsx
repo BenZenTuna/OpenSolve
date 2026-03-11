@@ -1382,7 +1382,83 @@ function RulesTab({ debugKey }: { debugKey: string }) {
           </div>
         );
       })}
+      <RetentionCleanupSection debugKey={debugKey} />
     </div>
+  );
+}
+
+// ─── Retention Cleanup Section ───────────────────────────────────────────────
+
+function RetentionCleanupSection({ debugKey }: { debugKey: string }) {
+  const [confirming, setConfirming] = useState(false);
+  const [running, setRunning] = useState(false);
+  const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  const handleCleanup = async () => {
+    setRunning(true);
+    setResult(null);
+    try {
+      const res = await fetch('/api/v1/internal/debug/retention-cleanup', {
+        method: 'POST',
+        headers: { 'X-Debug-Key': debugKey },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setResult({ success: true, message: JSON.stringify(data, null, 2) });
+    } catch (e: unknown) {
+      setResult({ success: false, message: e instanceof Error ? e.message : 'Unknown error' });
+    } finally {
+      setRunning(false);
+      setConfirming(false);
+    }
+  };
+
+  return (
+    <section className="mt-6 p-4 rounded-lg border border-red-500/20 bg-red-500/5">
+      <h3 className="text-sm font-bold text-red-400 mb-2 flex items-center gap-2">
+        <AlertTriangle className="w-4 h-4" /> GDPR Retention Cleanup
+        <Tip text="Triggers manual retention cleanup to remove expired personal data per GDPR requirements. This is a destructive operation." />
+      </h3>
+      <p className="text-xs text-gray-500 font-mono mb-3">
+        Manually trigger the GDPR data retention cleanup process. This removes expired personal data from the database.
+      </p>
+      {!confirming ? (
+        <button
+          onClick={() => setConfirming(true)}
+          disabled={running}
+          className="px-4 py-2 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-xs font-mono font-bold hover:bg-red-500/25 transition-colors disabled:opacity-50"
+        >
+          Trigger Retention Cleanup
+        </button>
+      ) : (
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-red-400 font-mono font-bold">Are you sure?</span>
+          <button
+            onClick={handleCleanup}
+            disabled={running}
+            className="px-4 py-2 rounded-lg bg-red-500/25 border border-red-500/40 text-red-300 text-xs font-mono font-bold hover:bg-red-500/35 transition-colors disabled:opacity-50"
+          >
+            {running ? 'Running...' : 'Yes, run cleanup'}
+          </button>
+          <button
+            onClick={() => setConfirming(false)}
+            disabled={running}
+            className="px-3 py-2 rounded-lg bg-navy-800/50 border border-surface-border text-gray-400 text-xs font-mono hover:bg-navy-800/70 transition-colors disabled:opacity-50"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+      {result && (
+        <div className={`mt-3 p-3 rounded-lg font-mono text-xs ${result.success ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border border-red-500/20 text-red-400'}`}>
+          <div className="flex items-center gap-2 mb-1">
+            {result.success ? <CheckCircle className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
+            <span className="font-bold">{result.success ? 'Cleanup completed' : 'Cleanup failed'}</span>
+          </div>
+          <pre className="whitespace-pre-wrap text-gray-400 text-[10px] mt-1">{result.message}</pre>
+        </div>
+      )}
+    </section>
   );
 }
 

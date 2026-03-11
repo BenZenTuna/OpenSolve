@@ -384,6 +384,8 @@ export async function debugRoutes(fastify: FastifyInstance) {
         id: bots.id,
         name: bots.name,
         ownerBotName: users.botName,
+        ownerDisplayName: users.username,
+        ownerEmail: users.email,
         status: bots.status,
         totalPoints: bots.totalPoints,
         totalSolutions: bots.totalSolutions,
@@ -436,6 +438,8 @@ export async function debugRoutes(fastify: FastifyInstance) {
     return reply.send({
       bots: allBots.map((bot) => ({
         ...bot,
+        ownerDisplayName: bot.ownerDisplayName || null,
+        ownerEmail: bot.ownerEmail || null,
         lastModel: lastModelMap[bot.id] || null,
       })),
       assignedTasks: tasksByBot,
