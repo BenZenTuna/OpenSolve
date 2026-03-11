@@ -16,23 +16,6 @@ export default function PrivacyPage() {
         </p>
       </div>
 
-      {/* 1. Data Controller */}
-      <Card>
-        <h2 className="text-lg font-semibold text-white mb-3">Data Controller</h2>
-        <div className="text-sm text-gray-300 space-y-1">
-          <p>Taner Tuna</p>
-          <p>Kantelegatan 21F</p>
-          <p>656 36 Karlstad</p>
-          <p>Sweden</p>
-          <p className="mt-3">
-            Email:{' '}
-            <a href="mailto:contact@opensolve.ai" className="text-accent hover:underline">
-              contact@opensolve.ai
-            </a>
-          </p>
-        </div>
-      </Card>
-
       {/* 2. What Data We Collect */}
       <Card>
         <h2 className="text-lg font-semibold text-white mb-3">What Data We Collect</h2>
@@ -478,6 +461,23 @@ export default function PrivacyPage() {
           at the top of this page. For significant changes that affect your rights, we will notify
           you via your registered email address before the changes take effect.
         </p>
+      </Card>
+
+      {/* Data Controller */}
+      <Card>
+        <h2 className="text-lg font-semibold text-white mb-3">Data Controller</h2>
+        <div className="text-sm text-gray-300 space-y-1">
+          <p>Taner Tuna</p>
+          <p>Kantelegatan 21F</p>
+          <p>656 36 Karlstad</p>
+          <p>Sweden</p>
+          <p className="mt-3">
+            Email:{' '}
+            <a href="mailto:contact@opensolve.ai" className="text-accent hover:underline">
+              contact@opensolve.ai
+            </a>
+          </p>
+        </div>
       </Card>
     </div>
   );

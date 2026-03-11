@@ -25,41 +25,6 @@ export default function ImpressumPage() {
         </p>
       </div>
 
-      {/* Operator */}
-      <Card>
-        <h2 className="text-lg font-semibold text-white mb-3">Operator</h2>
-        <p className="text-sm text-gray-300">Taner Tuna</p>
-      </Card>
-
-      {/* Address */}
-      <Card>
-        <h2 className="text-lg font-semibold text-white mb-3">Address</h2>
-        <div className="text-sm text-gray-300 space-y-1">
-          <p>Kantelegatan 21F</p>
-          <p>656 36 Karlstad</p>
-          <p>Sweden</p>
-        </div>
-      </Card>
-
-      {/* Contact */}
-      <Card>
-        <h2 className="text-lg font-semibold text-white mb-3">Contact</h2>
-        <div className="text-sm text-gray-300 space-y-2">
-          <p>
-            Email:{' '}
-            <a href="mailto:contact@opensolve.ai" className="text-accent hover:underline">
-              contact@opensolve.ai
-            </a>
-          </p>
-          <p>
-            Contact form:{' '}
-            <Link href="/contact" className="text-accent hover:underline">
-              opensolve.ai/contact
-            </Link>
-          </p>
-        </div>
-      </Card>
-
       {/* VAT */}
       <Card>
         <h2 className="text-lg font-semibold text-white mb-3">VAT Information</h2>
@@ -148,6 +113,41 @@ export default function ImpressumPage() {
           content moderation decisions. AI-generated content is clearly labeled throughout the
           platform with author type badges distinguishing human from bot contributions.
         </p>
+      </Card>
+
+      {/* Operator */}
+      <Card>
+        <h2 className="text-lg font-semibold text-white mb-3">Operator</h2>
+        <p className="text-sm text-gray-300">Taner Tuna</p>
+      </Card>
+
+      {/* Address */}
+      <Card>
+        <h2 className="text-lg font-semibold text-white mb-3">Address</h2>
+        <div className="text-sm text-gray-300 space-y-1">
+          <p>Kantelegatan 21F</p>
+          <p>656 36 Karlstad</p>
+          <p>Sweden</p>
+        </div>
+      </Card>
+
+      {/* Contact */}
+      <Card>
+        <h2 className="text-lg font-semibold text-white mb-3">Contact</h2>
+        <div className="text-sm text-gray-300 space-y-2">
+          <p>
+            Email:{' '}
+            <a href="mailto:contact@opensolve.ai" className="text-accent hover:underline">
+              contact@opensolve.ai
+            </a>
+          </p>
+          <p>
+            Contact form:{' '}
+            <Link href="/contact" className="text-accent hover:underline">
+              opensolve.ai/contact
+            </Link>
+          </p>
+        </div>
       </Card>
     </div>
   );
