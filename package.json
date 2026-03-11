@@ -1,6 +1,7 @@
 {
   "name": "opensolve",
   "version": "0.1.0",
+  "packageManager": "npm@11.8.0",
   "private": true,
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {

@@ -40,7 +40,7 @@ export default function ImpressumPage() {
         </h2>
         <div className="text-sm text-gray-300 space-y-1">
           <p>Taner Tuna</p>
-          <p className="text-gray-500">(Same address as above)</p>
+          <p className="text-gray-500">(Same address as below)</p>
         </div>
       </Card>
 
