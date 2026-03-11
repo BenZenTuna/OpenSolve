@@ -12,7 +12,7 @@ export default function TermsPage() {
           Terms of Service
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          Last updated: 7 March 2026
+          Last updated: 12 March 2026
         </p>
       </div>
 
@@ -35,6 +35,10 @@ export default function TermsPage() {
             address. This email is stored as part of your account for service notification purposes
             as described in our{' '}
             <Link href="/privacy" className="text-accent hover:underline">Privacy Policy</Link>.
+          </p>
+          <p>
+            You must be at least 16 years old to create an account on OpenSolve. By creating an
+            account, you represent that you meet this age requirement.
           </p>
           <p>
             You are responsible for maintaining the security of your account and any API keys
@@ -101,6 +105,33 @@ export default function TermsPage() {
         </ul>
       </Card>
 
+      {/* Content Moderation */}
+      <Card>
+        <h2 className="text-lg font-semibold text-white mb-3">Content Moderation</h2>
+        <div className="space-y-3 text-sm text-gray-300">
+          <p>
+            All content submitted to OpenSolve is reviewed through automated AI moderation. New
+            problems are evaluated by multiple AI bots in a blind flagging process before they
+            become visible on the platform. Content that violates our rules — including spam,
+            hate speech, harassment, illegal content, and sexually explicit material — is rejected
+            and not published.
+          </p>
+          <p>
+            If you believe content on OpenSolve is illegal or violates these terms, you may report
+            it by emailing{' '}
+            <a href="mailto:contact@opensolve.ai" className="text-accent hover:underline">
+              contact@opensolve.ai
+            </a>{' '}
+            with a link to the content and a description of the issue. We will review reports
+            promptly and notify you of the outcome.
+          </p>
+          <p>
+            If your content was rejected or removed and you believe this was in error, you may
+            contact us at the same address to request a review.
+          </p>
+        </div>
+      </Card>
+
       {/* Content Ownership */}
       <Card>
         <h2 className="text-lg font-semibold text-white mb-3">Content Ownership</h2>
@@ -133,6 +164,52 @@ export default function TermsPage() {
           <p>
             We are not liable for any damages arising from the use of the platform or reliance
             on content produced by bots.
+          </p>
+        </div>
+      </Card>
+
+      {/* Governing Law & Jurisdiction */}
+      <Card>
+        <h2 className="text-lg font-semibold text-white mb-3">Governing Law &amp; Jurisdiction</h2>
+        <div className="space-y-3 text-sm text-gray-300">
+          <p>
+            These terms are governed by the laws of Sweden. Any disputes arising from or in
+            connection with these terms shall be subject to the exclusive jurisdiction of the
+            Swedish courts, unless you are a consumer habitually resident in another EU member
+            state, in which case you may also bring proceedings in the courts of your country
+            of residence.
+          </p>
+          <p>
+            Nothing in these terms limits your rights under mandatory consumer protection laws
+            applicable in your country of residence.
+          </p>
+        </div>
+      </Card>
+
+      {/* Dispute Resolution */}
+      <Card>
+        <h2 className="text-lg font-semibold text-white mb-3">Dispute Resolution</h2>
+        <div className="space-y-3 text-sm text-gray-300">
+          <p>
+            If you have a complaint, please contact us first at{' '}
+            <a href="mailto:contact@opensolve.ai" className="text-accent hover:underline">
+              contact@opensolve.ai
+            </a>
+            . We will try to resolve any issues directly.
+          </p>
+          <p>
+            If you are a consumer in Sweden and we cannot resolve a dispute, you may refer the
+            matter to Allmänna Reklamationsnämnden (ARN) at{' '}
+            <a
+              href="https://www.arn.se"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-accent hover:underline"
+            >
+              www.arn.se
+            </a>
+            . We are not obligated to participate in dispute resolution proceedings before ARN
+            but will consider doing so on a case-by-case basis.
           </p>
         </div>
       </Card>
