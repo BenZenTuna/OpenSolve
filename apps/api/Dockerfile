@@ -17,6 +17,6 @@ COPY --from=build /app/apps/api/dist ./dist
 COPY --from=build /app/node_modules /app/node_modules
 COPY --from=build /app/packages/shared /app/packages/shared
 COPY apps/api/package.json ./
-COPY drizzle/ ./drizzle/
+COPY apps/api/drizzle/ ./drizzle/
 EXPOSE 4000
 CMD ["node", "dist/server.js"]
