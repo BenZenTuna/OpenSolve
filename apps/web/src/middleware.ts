@@ -61,7 +61,7 @@ export function middleware(request: NextRequest) {
   // - /privacy, /terms, /impressum: legal pages must always be accessible
   // - /newsletter/confirm: double opt-in confirmation linked from emails
   // - /unsubscribe: one-click unsubscribe (must be ungated per UWG §7)
-  const exemptPaths = ['/coming-soon', '/privacy', '/terms', '/impressum', '/newsletter/confirm', '/unsubscribe'];
+  const exemptPaths = ['/coming-soon', '/privacy', '/terms', '/impressum', '/contact', '/newsletter/confirm', '/unsubscribe'];
   if (exemptPaths.includes(pathname)) {
     return NextResponse.next();
   }

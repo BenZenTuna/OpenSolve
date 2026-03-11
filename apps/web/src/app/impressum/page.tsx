@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { Scale } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 
@@ -43,11 +44,27 @@ export default function ImpressumPage() {
       {/* Contact */}
       <Card>
         <h2 className="text-lg font-semibold text-white mb-3">Contact</h2>
+        <div className="text-sm text-gray-300 space-y-2">
+          <p>
+            Email:{' '}
+            <a href="mailto:contact@opensolve.ai" className="text-accent hover:underline">
+              contact@opensolve.ai
+            </a>
+          </p>
+          <p>
+            Contact form:{' '}
+            <Link href="/contact" className="text-accent hover:underline">
+              opensolve.ai/contact
+            </Link>
+          </p>
+        </div>
+      </Card>
+
+      {/* VAT */}
+      <Card>
+        <h2 className="text-lg font-semibold text-white mb-3">VAT Information</h2>
         <p className="text-sm text-gray-300">
-          Email:{' '}
-          <a href="mailto:contact@opensolve.ai" className="text-accent hover:underline">
-            contact@opensolve.ai
-          </a>
+          VAT identification number: Not applicable (below VAT registration threshold).
         </p>
       </Card>
 
@@ -62,20 +79,39 @@ export default function ImpressumPage() {
         </div>
       </Card>
 
+      {/* DSA Contact Point */}
+      <Card>
+        <h2 className="text-lg font-semibold text-white mb-3">
+          DSA Single Point of Contact (Art.&nbsp;11&ndash;12 Regulation (EU) 2022/2065)
+        </h2>
+        <div className="text-sm text-gray-300 space-y-2">
+          <p>
+            For communications by authorities and users under the Digital Services Act:
+          </p>
+          <p>
+            Taner Tuna —{' '}
+            <a href="mailto:contact@opensolve.ai" className="text-accent hover:underline">
+              contact@opensolve.ai
+            </a>
+          </p>
+          <p className="text-gray-500">Language of communication: English, Swedish</p>
+        </div>
+      </Card>
+
       {/* EU Online Dispute Resolution */}
       <Card>
-        <h2 className="text-lg font-semibold text-white mb-3">EU Online Dispute Resolution</h2>
+        <h2 className="text-lg font-semibold text-white mb-3">Dispute Resolution</h2>
         <div className="space-y-3 text-sm text-gray-300">
           <p>
-            The European Commission provides a platform for online dispute resolution (ODR):{' '}
-            <a
-              href="https://ec.europa.eu/consumers/odr/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-accent hover:underline"
-            >
-              https://ec.europa.eu/consumers/odr/
-            </a>
+            The European Commission&apos;s Online Dispute Resolution (ODR) platform was discontinued
+            on 20 July 2025. For disputes, please contact us directly at{' '}
+            <a href="mailto:contact@opensolve.ai" className="text-accent hover:underline">
+              contact@opensolve.ai
+            </a>{' '}
+            or refer to the dispute resolution section in our{' '}
+            <Link href="/terms" className="text-accent hover:underline">
+              Terms of Service
+            </Link>.
           </p>
           <p>
             We are neither obligated nor willing to participate in dispute resolution proceedings

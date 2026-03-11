@@ -157,3 +157,32 @@ export function unsubscribeConfirmTemplate(params: {
     </p>
   `);
 }
+
+/**
+ * Contact form submission — sent to contact@opensolve.ai.
+ */
+export function contactFormTemplate(params: {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}): string {
+  return layout(`
+    <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:${TEXT_COLOR};">
+      New contact form submission:
+    </p>
+    <table style="width:100%;border-collapse:collapse;margin:0 0 20px;">
+      <tr>
+        <td style="padding:8px 12px;font-weight:600;color:${TEXT_COLOR};vertical-align:top;width:80px;">From:</td>
+        <td style="padding:8px 12px;color:${TEXT_COLOR};">${params.name || 'Not provided'} &lt;${params.email}&gt;</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 12px;font-weight:600;color:${TEXT_COLOR};vertical-align:top;">Subject:</td>
+        <td style="padding:8px 12px;color:${TEXT_COLOR};">${params.subject}</td>
+      </tr>
+    </table>
+    <div style="background-color:#f1f5f9;border-radius:6px;padding:16px;margin:0 0 20px;">
+      <p style="margin:0;font-size:14px;line-height:1.6;color:${TEXT_COLOR};white-space:pre-wrap;">${params.message}</p>
+    </div>
+  `);
+}

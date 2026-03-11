@@ -35,6 +35,40 @@ export class EmailService {
     logger.info('EmailService initialized');
   }
 
+  async send(params: {
+    to: string;
+    subject: string;
+    html: string;
+    replyTo?: string;
+  }): Promise<{ success: boolean; messageId?: string; error?: string }> {
+    try {
+      if (!this.resend) {
+        logger.warn({ to: params.to }, 'Email skipped — Resend not configured');
+        return { success: false, error: 'Resend not configured' };
+      }
+
+      const { data, error } = await this.resend.emails.send({
+        from: this.from,
+        to: params.to,
+        subject: params.subject,
+        html: params.html,
+        replyTo: params.replyTo,
+      });
+
+      if (error) {
+        logger.error({ error, to: params.to }, 'Failed to send email');
+        return { success: false, error: error.message };
+      }
+
+      logger.info({ messageId: data?.id, to: params.to }, 'Email sent');
+      return { success: true, messageId: data?.id };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      logger.error({ err, to: params.to }, 'Failed to send email');
+      return { success: false, error: message };
+    }
+  }
+
   async sendImportantMessage(params: {
     to: string;
     toName: string;
