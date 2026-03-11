@@ -12,7 +12,7 @@ export default function PrivacyPage() {
           Privacy Policy
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          Last updated: 9 March 2026
+          Last updated: 12 March 2026
         </p>
       </div>
 
@@ -183,17 +183,20 @@ export default function PrivacyPage() {
         </p>
         <div className="space-y-3 text-sm text-gray-300">
           <p>
-            <span className="font-medium text-white">Authentication cookie</span> (httpOnly,
-            secure): maintains your login session, expires after 1 hour.
+            <span className="font-medium text-white">Authentication cookie</span>{' '}
+            (<code className="text-xs text-gray-400">token</code>) — httpOnly,
+            secure: maintains your login session, expires after 1 hour.
           </p>
           <p>
-            <span className="font-medium text-white">Cookie notice preference:</span> records that
-            you&apos;ve seen our cookie notice, expires after 1 year.
+            <span className="font-medium text-white">Cookie notice preference</span>{' '}
+            (<code className="text-xs text-gray-400">opensolve_cookie_notice</code>) — records
+            that you&apos;ve seen our cookie notice, expires after 1 year.
           </p>
           <p>
-            <span className="font-medium text-white">OAuth state cookies:</span> temporary cookies
-            used during login for security (CSRF protection), deleted after the login callback
-            completes.
+            <span className="font-medium text-white">OAuth state cookie</span>{' '}
+            (<code className="text-xs text-gray-400">oauth_state</code>) — temporary signed
+            cookie used during login for security (CSRF protection), deleted after the login
+            callback completes. Expires after 10 minutes.
           </p>
         </div>
         <p className="text-sm text-gray-300 mt-3">
@@ -218,8 +221,9 @@ export default function PrivacyPage() {
       <Card>
         <h2 className="text-lg font-semibold text-white mb-3">Data Processing Location</h2>
         <p className="text-sm text-gray-300">
-          Your data is processed and stored on servers located in Germany (Hetzner Online GmbH),
-          within the European Union. No data is transferred outside the EU/EEA. A Data Processing
+          Your data is primarily processed and stored on servers located in Germany (Hetzner
+          Online GmbH), within the European Union. Certain processing involves transfer to the
+          United States as described in the Data Processors section below. A Data Processing
           Agreement pursuant to GDPR Article 28 is in place with our hosting provider.
         </p>
       </Card>
@@ -282,6 +286,22 @@ export default function PrivacyPage() {
             use Resend for analytics, tracking, or any purpose other than email delivery. Open tracking
             is disabled, click tracking is disabled, and no tracking pixels are embedded in any emails
             sent by OpenSolve. We do not monitor whether recipients open or click links in our emails.
+          </p>
+          <p>
+            <span className="font-medium text-white">Google (Authentication):</span> We use
+            Google OAuth 2.0 for sign-in. During authentication, Google processes your sign-in
+            request and provides us with your email address and an account identifier. We do not
+            store Google access tokens or call Google APIs beyond the initial authentication.
+            Google acts as an independent data controller for its sign-in service. Google&apos;s
+            privacy policy is available at{' '}
+            <a
+              href="https://policies.google.com/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-accent hover:underline"
+            >
+              policies.google.com/privacy
+            </a>.
           </p>
         </div>
       </Card>
