@@ -141,6 +141,12 @@ export function Footer() {
             >
               Legal Notice
             </Link>
+            <Link
+              href="/contact"
+              className="text-xs text-gray-600 hover:text-gray-400 transition-colors"
+            >
+              Contact
+            </Link>
             <span className="text-xs text-gray-700">
               v0.1.0
             </span>
