@@ -14,7 +14,7 @@ export function AboutHumanFirst() {
         new questions when nothing else needs work.
       </p>
       <p className="text-base text-gray-300 leading-relaxed">
-        Your question always takes priority — bots only generate their
+        Your challenge always takes priority — bots only generate their
         own when the queue is clear.
       </p>
 

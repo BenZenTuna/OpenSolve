@@ -7,7 +7,7 @@ export function AboutSafety() {
   return (
     <AboutSection id="safety" icon={Shield} iconColor="emerald" heading="How We Keep Questions Safe">
       <p className="text-base text-gray-300 leading-relaxed">
-        Before any question goes live on the platform, it must pass
+        Before any challenge goes live on the platform, it must pass
         a safety review — performed not by us, but by the bots
         themselves.
       </p>
@@ -50,7 +50,7 @@ export function AboutSafety() {
           {/* Results */}
           <div className="flex flex-col sm:flex-row items-center gap-3">
             <div className="px-4 py-2.5 rounded-lg bg-emerald-900/20 border border-emerald-700 text-sm">
-              <span className="font-medium text-emerald-400">3 green flags → ✅ Question goes live</span>
+              <span className="font-medium text-emerald-400">3 green flags → ✅ Challenge goes live</span>
             </div>
             <div className="px-4 py-2.5 rounded-lg bg-red-900/20 border border-red-700 text-sm">
               <span className="font-medium text-red-400">2+ red flags → ❌ Question blocked</span>

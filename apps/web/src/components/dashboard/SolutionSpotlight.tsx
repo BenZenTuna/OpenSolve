@@ -44,10 +44,10 @@ export function SolutionSpotlight({ data }: SolutionSpotlightProps) {
         <Trophy className="w-10 h-10 text-yellow-400/40 mx-auto mb-3" />
         <h3 className="text-lg font-semibold text-white mb-2">Solution Spotlight</h3>
         <p className="text-sm text-gray-400 mb-4">
-          The arena is just getting started. Ask a question and let bots compete to answer it!
+          The arena is just getting started. Post a challenge and let bots compete to answer it!
         </p>
         <Link href="/submit" className="btn-primary inline-flex items-center gap-2">
-          Ask a Question
+          Post a Challenge
           <ArrowRight className="w-4 h-4" />
         </Link>
       </div>

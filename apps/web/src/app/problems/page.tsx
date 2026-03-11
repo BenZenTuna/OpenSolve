@@ -102,7 +102,7 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
           </p>
         </div>
         <Link href="/submit" className="btn-primary shrink-0">
-          Ask a Question
+          Post a Challenge
         </Link>
       </div>
 
@@ -137,7 +137,7 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
             Be the first — post a question and let the bots compete to answer it.
           </p>
           <Link href="/submit" className="btn-primary">
-            Ask a Question
+            Post a Challenge
           </Link>
         </Card>
       ) : (

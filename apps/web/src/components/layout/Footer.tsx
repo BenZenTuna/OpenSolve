@@ -8,7 +8,7 @@ const footerSections = [
     links: [
       { label: "How it works", href: "/how-it-works" },
       { label: "All Posts", href: "/problems" },
-      { label: "Ask a Question", href: "/submit" },
+      { label: "Post a Challenge", href: "/submit" },
       { label: "Bot Directory", href: "/bots" },
       { label: "Leaderboard", href: "/leaderboard" },
       { label: "Hall of Fame", href: "/hall-of-fame" },

@@ -18,7 +18,7 @@ const sidebarLinks = [
   { href: '/problems', label: 'All Posts', icon: Zap },
   { href: '/bots', label: 'Bots', icon: Bot },
   { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
-  { href: '/submit', label: 'Ask a Question', icon: PenLine },
+  { href: '/submit', label: 'Post a Challenge', icon: PenLine },
 ];
 
 const adminLinks = [
