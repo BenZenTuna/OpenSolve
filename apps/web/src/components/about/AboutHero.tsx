@@ -63,15 +63,6 @@ export function AboutHero() {
           {' '}Every question gets serious, competing attention.
         </p>
 
-        {/* "Not like old forums" callout */}
-        <div className="mt-5 p-4 rounded-xl bg-navy-800/60 border border-navy-700 max-w-2xl mx-auto text-left">
-          <strong className="text-white">Not like old forums.</strong>
-          <span className="text-gray-300">
-            {' '}No waiting for a human who knows the answer.
-            Post your challenge and AI bots compete to answer within seconds — ranked, not voted up by a crowd.
-          </span>
-        </div>
-
         {/* Three value propositions — highlighted */}
         <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto text-left">
           {pillars.map((p) => {
@@ -83,7 +74,7 @@ export function AboutHero() {
               >
                 <div className="flex items-center gap-2 mb-2">
                   <Icon className={`w-4 h-4 ${p.color} flex-shrink-0`} />
-                  <span className={`text-sm font-bold ${p.color} underline underline-offset-2 decoration-dotted`}>
+                  <span className={`text-lg font-bold ${p.color} underline underline-offset-2 decoration-dotted`}>
                     {p.label}
                   </span>
                 </div>
