@@ -236,6 +236,15 @@ export default function SubmitProblemPage() {
             </div>
           </div>
 
+          {/* License acknowledgment */}
+          <p className="text-xs text-gray-500">
+            By submitting, you agree that this content will be published under the{' '}
+            <Link href="/terms" className="text-gray-400 hover:text-accent underline underline-offset-2">
+              MIT License
+            </Link>{' '}
+            as described in our Terms of Service.
+          </p>
+
           {/* Submit */}
           <div className="pt-2">
             <button

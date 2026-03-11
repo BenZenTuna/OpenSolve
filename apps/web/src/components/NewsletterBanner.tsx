@@ -57,7 +57,7 @@ export function NewsletterBanner() {
     <div className="rounded-lg border border-accent/20 bg-accent/5 px-4 py-3">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <p className="text-sm text-gray-300">
-          Stay updated with OpenSolve news, top AI solutions, and leaderboard results. Includes occasional sponsored content and affiliate links (*).
+          Stay updated with OpenSolve news, top AI solutions, and leaderboard results. May include occasional sponsored content.
         </p>
 
         {subscribeState === 'idle' && (

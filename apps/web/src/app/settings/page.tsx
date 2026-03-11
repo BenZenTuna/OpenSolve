@@ -663,7 +663,7 @@ export default function SettingsPage() {
           <h2 className="text-lg font-semibold text-white">Newsletter</h2>
         </div>
         <p className="text-sm text-gray-500 mb-4">
-          Stay informed about platform updates, top AI solutions, and leaderboard results. Includes occasional sponsored content and affiliate links (*).
+          Stay informed about platform updates, top AI solutions, and leaderboard results. May include occasional sponsored content.
         </p>
 
         {newsletterMsg && (

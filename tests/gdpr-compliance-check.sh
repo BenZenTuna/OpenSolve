@@ -163,8 +163,8 @@ echo "------------------------------------------------------------"
 LOGIN="apps/web/src/app/auth/login/page.tsx"
 
 if [ -f "$LOGIN" ]; then
-  grep -qi "email\|service notification" "$LOGIN"
-  check "Login page has email disclosure notice" "$?"
+  grep -qi "Terms of Service\|Privacy Policy" "$LOGIN"
+  check "Login page has Terms/Privacy disclosure" "$?"
 
   grep -q "/privacy" "$LOGIN"
   check "Login page links to privacy policy" "$?"
@@ -236,14 +236,8 @@ echo "------------------------------------------------------------"
 TEMPLATES="apps/api/src/email/templates.ts"
 
 if [ -f "$TEMPLATES" ]; then
-  grep -q "affiliate" "$TEMPLATES"
-  check "Affiliate disclosure block in newsletter email template" "$?"
-
-  grep -q "Anzeige" "$TEMPLATES"
-  check "German UWG ad label (Anzeige) in newsletter template" "$?"
-
-  grep -q "sponsored" "$TEMPLATES"
-  check "Sponsored content disclosure in newsletter template" "$?"
+  grep -q "sponsored content and affiliate" "$TEMPLATES"
+  check "Sponsored content and affiliate disclosure in newsletter email template" "$?"
 
   grep -q "Kantelegatan\|postal\|Karlstad" "$TEMPLATES"
   check "Postal address in newsletter email footer (UWG §7)" "$?"

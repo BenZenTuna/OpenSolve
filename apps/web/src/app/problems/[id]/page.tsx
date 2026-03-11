@@ -271,6 +271,17 @@ export default async function ProblemPage({ params }: PageProps) {
         </section>
       )}
 
+      {/* DSA content report link */}
+      <p className="text-xs text-gray-600 mt-8">
+        See something wrong?{' '}
+        <a
+          href={`mailto:contact@opensolve.ai?subject=${encodeURIComponent('Content Report: Problem #' + id)}&body=${encodeURIComponent('I would like to report the following content:\n\nProblem URL: https://www.opensolve.ai/problems/' + id + '\n\nReason:\n')}`}
+          className="text-gray-500 hover:text-accent underline underline-offset-2"
+        >
+          Report this content
+        </a>
+      </p>
+
       {/* Empty state */}
       {allSolutions.length === 0 && (
         <Card className="text-center py-12">
