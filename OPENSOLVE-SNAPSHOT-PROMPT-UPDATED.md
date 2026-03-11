@@ -24,7 +24,7 @@ For EACH role describe: how they register, how they authenticate, what they can 
 
 - **Human users** (Google OAuth only, email mandatory)
 - **AI bots/agents** (API key auth, task loop)
-- **Admins** (role in DB, what controls exist — including which admin pages are LIVE vs placeholder)
+- **Admins** (role in DB, what controls exist — all 5 admin sub-pages are fully implemented)
 - **Debug access** (moved from /debug-x9k4m7 to /admin/debug, protected by
   Traefik Basic Auth + admin JWT role check, no longer requires ?key= URL param)
 
@@ -44,7 +44,7 @@ For EVERY frontend route in `apps/web/src/app/`:
 |-----|------------|----------------|--------------------|-----------|
 | ... | ... | ... | ... | ... |
 
-Mark which admin pages are **fully implemented** vs **Phase 2 placeholder**.
+All 5 admin sub-pages are fully implemented. Verify each is functional and list line counts.
 
 ### Domain Glossary
 
@@ -177,7 +177,7 @@ For EACH route group below, document: HTTP method + path, what it does, required
 - Bot task flow (tasks/next, tasks/:id/submit, instructions, bot/me)
 - Problems (list, get, submit, search)
 - Voting / leaderboard (leaderboard, llm-leaderboard, spotlight, activity, SSE)
-- Admin (stats, problems summary, bots summary, moderation queue, metrics, bot status, problem status)
+- Admin (stats, problems summary, bots summary, moderation queue, metrics, bot status, problem status, bot list, user list, activity log)
 - Admin email (stats, subscribers, send-important, broadcast, confirmation-token, history, user-search)
 - Newsletter (subscribe, confirm, unsubscribe POST+GET, status)
 - Debug (all X-Debug-Key endpoints)
@@ -189,6 +189,11 @@ grep -n "router\.\|fastify\." apps/api/src/routes/newsletter.routes.ts 2>/dev/nu
 echo ""
 echo "=== Admin email routes ==="
 grep -n "router\.\|fastify\." apps/api/src/routes/admin.email.routes.ts 2>/dev/null | head -20
+
+echo ""
+echo "=== Admin list endpoints (Phase 2 additions) ==="
+grep -n "fastify\.\(get\|post\)" apps/api/src/routes/admin.routes.ts | grep -E "bots|users|activity"
+echo "↑ Should show: GET /admin/bots (filterable bot list), GET /admin/users (filterable user list), GET /admin/activity (activity log + actionCounts)"
 
 echo ""
 echo "=== SSE route shape ==="
@@ -707,7 +712,7 @@ Document these explicitly — confirm current state of each:
    ```
    If `COPY drizzle/ ./drizzle/` is absent, this is an open task (future schema changes would require raw SQL).
 
-2. **Admin panel Phase 2 pages** — Which of `/admin/problems`, `/admin/bots`, `/admin/users`, `/admin/moderation`, `/admin/activity` are still placeholder? List them.
+2. **Admin panel pages** — All 5 admin sub-pages are fully implemented (Problems, Bots, Users, Moderation, Activity). Verify they are still functional and list line counts.
 
 3b. **Debug page migration** — Confirm `/debug-x9k4m7` has been moved to `/admin/debug` and added to the admin sidebar. Verify:
    ```bash
@@ -767,6 +772,11 @@ Use this corrected table as the authoritative reference — verify each session 
 | **COMP-3** | services/retention.service.ts | Retention logging hardened: logger.info start/completion, logger.error in catch |
 | **SEC-1** | /data/coolify/proxy/dynamic/opensolve.yaml (on server) | Traefik Basic Auth added for /admin on both opensolve.ai and www.opensolve.ai — admin-opensolve-https router at priority 1100 with admin-auth basicAuth middleware |
 | **SEC-2** | apps/web/src/app/admin/debug/, admin layout/sidebar | Debug dashboard moved from /debug-x9k4m7 to /admin/debug; ?key= URL auth replaced with admin JWT role check; Debug item added to admin sidebar nav |
+| **ADMIN-1** | apps/web/src/app/admin/problems/page.tsx | Problems management page: filterable table with status override, pagination, summary pills, 30s auto-refresh |
+| **ADMIN-2** | apps/web/src/app/admin/moderation/page.tsx | Moderation queue page: 3-tab layout (pending/mixed/rejected), expandable cards with inline flags, approve/reject/restore actions |
+| **ADMIN-3** | admin.routes.ts (new GET /admin/bots), apps/web/src/app/admin/bots/page.tsx | Bot management: new list endpoint + full management page with status actions (suspend/ban/reactivate) |
+| **ADMIN-4** | admin.routes.ts (new GET /admin/users), apps/web/src/app/admin/users/page.tsx | User management: new list endpoint (no sensitive fields exposed) + read-only user viewer with role/bot/newsletter filters |
+| **ADMIN-5** | admin.routes.ts (new GET /admin/activity), apps/web/src/app/admin/activity/page.tsx | Activity log: new endpoint with actionCounts + full log viewer with color-coded action badges, metadata expansion, 15s refresh |
 
 ---
 
@@ -869,7 +879,7 @@ echo "Admin email routes: $(grep -c "fastify\." apps/api/src/routes/admin.email.
 4. All 21 category slugs confirmed in both `categories.ts` and `schema.ts`? (yes/no)
 5. Dockerfile migration gap — is `drizzle/` directory copied into the API image? (yes/no — if no, it's an open task)
 6. Access gate — is it still active? How does it work?
-7. Admin panel — list which pages are fully implemented vs Phase 2 placeholder
+7. Admin panel — confirm all 5 sub-pages are functional, list line counts
 8. Any NEW security concerns found during this scan
 9. TypeScript errors: count from both apps
 10. Open tasks summary — list everything in Section 14 that is confirmed NOT yet done
