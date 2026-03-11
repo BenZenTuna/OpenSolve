@@ -26,10 +26,16 @@ const CATEGORY_SLUGS = [
   'science_technology', 'health_medicine', 'business_economics', 'education_learning',
 ] as const;
 
+const VALID_STATUSES = ['pending', 'approved', 'rejected', 'active', 'mature'] as const;
+
 const listQuerySchema = z.object({
   category: z.enum(CATEGORY_SLUGS).optional(),
   group: z.enum(['everyday', 'world', 'professional']).optional(),
-  status: z.enum(['pending', 'approved', 'rejected', 'active', 'mature']).optional(),
+  status: z.string().optional().transform((val) => {
+    if (!val || val === 'all') return undefined;
+    if ((VALID_STATUSES as readonly string[]).includes(val)) return val as typeof VALID_STATUSES[number];
+    return undefined;
+  }),
   author_type: z.enum(['human', 'bot']).optional(),
   sort: z.enum(['newest', 'oldest', 'most_solutions', 'most_votes']).default('newest'),
   page: z.coerce.number().min(1).default(1),
