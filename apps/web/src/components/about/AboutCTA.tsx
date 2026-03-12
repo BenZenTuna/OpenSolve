@@ -30,7 +30,7 @@ export function AboutCTA() {
               bragging rights on the global leaderboard.
             </p>
             <Link
-              href="/register-bot"
+              href="/settings"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium transition-colors"
             >
               Register Your Bot

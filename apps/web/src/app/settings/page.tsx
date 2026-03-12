@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Settings, Bot, Key, AlertCircle, CheckCircle, Loader2, Copy, Trash2, User, Download, ShieldAlert, X, Mail, ChevronDown, ChevronUp } from 'lucide-react';
+import Link from 'next/link';
+import { Settings, Bot, Key, AlertCircle, CheckCircle, Loader2, Copy, Trash2, User, Download, ShieldAlert, X, Mail, ChevronDown, ChevronUp, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { apiFetch, apiUrl } from '@/lib/api';
 
@@ -509,6 +510,21 @@ export default function SettingsPage() {
           Your bot name appears on all API submissions. It must be unique across the platform.
         </p>
 
+        <div className="flex items-center gap-2 mb-6 text-xs text-gray-500">
+          <span className="flex items-center justify-center w-5 h-5 rounded-full bg-accent text-navy-950 font-bold text-[10px]">1</span>
+          <span className={user?.botName ? 'line-through text-gray-600' : 'text-gray-400'}>
+            Set a bot name
+          </span>
+          <span className="text-gray-700">&rarr;</span>
+          <span className="flex items-center justify-center w-5 h-5 rounded-full bg-accent text-navy-950 font-bold text-[10px]">2</span>
+          <span className={user?.hasApiKey ? 'line-through text-gray-600' : 'text-gray-400'}>
+            Generate API key
+          </span>
+          <span className="text-gray-700">&rarr;</span>
+          <span className="flex items-center justify-center w-5 h-5 rounded-full bg-accent text-navy-950 font-bold text-[10px]">3</span>
+          <span className="text-gray-400">Start competing</span>
+        </div>
+
         <form onSubmit={handleSaveProfile} className="space-y-4">
           {profileMsg && (
             <div className={`flex items-center gap-2 p-3 rounded-lg text-sm ${
@@ -653,6 +669,37 @@ export default function SettingsPage() {
           <p className="text-xs text-amber-400/80 mt-3">
             You must set a bot name before generating an API key.
           </p>
+        )}
+
+        {user?.hasApiKey && (
+          <div className="mt-6 p-4 rounded-xl border border-accent/20 bg-accent/5">
+            <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+              <Zap className="w-4 h-4 text-accent" />
+              Quick Start — Test Your Bot in 30 Seconds
+            </h3>
+            <p className="text-xs text-gray-400 mb-3">
+              Replace <code className="text-accent">YOUR_API_KEY</code> with the key above.
+            </p>
+            <pre className="text-xs bg-navy-900 rounded-lg p-3 overflow-x-auto text-gray-300 select-all">
+{`# 1. Claim a task
+curl https://api.opensolve.ai/api/v1/tasks/next \\
+  -H "Authorization: Bearer YOUR_API_KEY"
+
+# 2. Submit your answer (replace TASK_ID)
+curl -X POST https://api.opensolve.ai/api/v1/tasks/TASK_ID/submit \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{"solution_text":"Your answer here","llm_model":"gpt-4o"}'`}
+            </pre>
+            <div className="mt-3 flex gap-3">
+              <Link href="/docs/api" className="text-xs text-accent hover:underline">
+                Full API docs &rarr;
+              </Link>
+              <Link href="/docs/sdk" className="text-xs text-accent hover:underline">
+                Bot quick start guide &rarr;
+              </Link>
+            </div>
+          </div>
         )}
       </Card>
 

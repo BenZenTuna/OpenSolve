@@ -7,8 +7,17 @@ const COOKIE_MAX_AGE = 30 * 24 * 60 * 60; // 30 days in seconds
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Admin routes bypass access gate — auth check happens client-side in admin layout
+  // For /admin/* paths: check token cookie exists before allowing access.
+  // Full JWT verification (role === 'admin') still happens client-side in
+  // admin/layout.tsx — this is just the fast gate to prevent unauthenticated
+  // users from hitting the server at all.
   if (pathname.startsWith('/admin')) {
+    const token = request.cookies.get('token');
+    if (!token) {
+      const loginUrl = new URL('/auth/login', request.url);
+      loginUrl.searchParams.set('callbackUrl', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
     return NextResponse.next();
   }
 

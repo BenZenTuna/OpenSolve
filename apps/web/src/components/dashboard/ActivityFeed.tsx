@@ -72,9 +72,12 @@ export function ActivityFeed({ initialActivities }: { initialActivities?: Activi
     loadActivities();
   }, [initialActivities]);
 
-  // SSE for real-time updates
+  // SSE for real-time updates with reconnect backoff
+  const [retryCount, setRetryCount] = useState(0);
+
   useEffect(() => {
     let eventSource: EventSource | null = null;
+    let retryTimeout: ReturnType<typeof setTimeout>;
 
     try {
       eventSource = new EventSource(apiUrl('/events/stream'));
@@ -95,6 +98,10 @@ export function ActivityFeed({ initialActivities }: { initialActivities?: Activi
 
       eventSource.onerror = () => {
         eventSource?.close();
+        const delay = Math.min(2000 * Math.pow(2, retryCount), 30_000);
+        retryTimeout = setTimeout(() => {
+          setRetryCount((c) => c + 1);
+        }, delay);
       };
     } catch {
       // SSE not available
@@ -102,8 +109,9 @@ export function ActivityFeed({ initialActivities }: { initialActivities?: Activi
 
     return () => {
       eventSource?.close();
+      clearTimeout(retryTimeout);
     };
-  }, []);
+  }, [retryCount]);
 
   if (activities.length === 0) {
     return (

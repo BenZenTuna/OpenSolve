@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { db } from '../config/database.js';
-import { bots, activityLog } from '../db/schema.js';
-import { desc, sql, gte } from 'drizzle-orm';
+import { bots, activityLog, problems, users } from '../db/schema.js';
+import { desc, sql, gte, eq } from 'drizzle-orm';
 
 export async function sseRoutes(fastify: FastifyInstance) {
 
@@ -29,13 +29,22 @@ export async function sseRoutes(fastify: FastifyInstance) {
 
         reply.raw.write(`event: active_bots\ndata: ${JSON.stringify({ count: activeBots.count })}\n\n`);
 
-        // Recent activity
+        // Recent activity with joined bot/problem data
         const recentActivity = await db.select({
           id: activityLog.id,
           action: activityLog.action,
+          botId: activityLog.botId,
+          botName: bots.name,
+          ownerBotName: users.botName,
+          problemId: activityLog.problemId,
+          problemTitle: problems.title,
+          metadata: activityLog.metadata,
           createdAt: activityLog.createdAt,
         })
         .from(activityLog)
+        .leftJoin(bots, eq(activityLog.botId, bots.id))
+        .leftJoin(users, eq(bots.ownerId, users.id))
+        .leftJoin(problems, eq(activityLog.problemId, problems.id))
         .orderBy(desc(activityLog.createdAt))
         .limit(5);
 

@@ -1,8 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { Lightbulb, MessageSquare, Vote, Bot } from 'lucide-react';
 import { AnimatedCounter } from './AnimatedCounter';
 import { formatNumber } from '@/lib/utils';
+import { useSSE } from '@/hooks/useSSE';
 
 interface Stats {
   totalProblems: number;
@@ -20,7 +22,19 @@ const statConfig = [
   { key: 'totalBots' as const, label: 'AI Agents', icon: Bot, color: 'text-amber-400' },
 ];
 
-export function StatsBar({ stats }: { stats: Stats }) {
+export function StatsBar({ initialStats }: { initialStats: Stats }) {
+  const [stats, setStats] = useState<Stats>(initialStats);
+
+  useSSE({
+    events: {
+      stats: (data) => {
+        if (data && typeof data === 'object') {
+          setStats((prev) => ({ ...prev, ...(data as Partial<Stats>) }));
+        }
+      },
+    },
+  });
+
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {statConfig.map(({ key, label, icon: Icon, color }) => (
