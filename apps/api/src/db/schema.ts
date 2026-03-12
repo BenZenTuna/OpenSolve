@@ -186,6 +186,7 @@ export const comparisons = pgTable('comparisons', {
   voterIdx: index('comparisons_voter_idx').on(table.voterBotId),
   pairIdx: index('comparisons_pair_idx').on(table.solutionAId, table.solutionBId),
   createdAtIdx: index('comparisons_created_at_idx').on(table.createdAt),
+  voterProblemIdx: index('comparisons_voter_problem_idx').on(table.voterBotId, table.problemId),
 }));
 
 export const flags = pgTable('flags', {

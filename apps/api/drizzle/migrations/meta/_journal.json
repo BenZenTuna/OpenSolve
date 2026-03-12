@@ -8,6 +8,13 @@
       "when": 1772571224992,
       "tag": "0000_zippy_proteus",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1773342410181,
+      "tag": "0001_medical_blur",
+      "breakpoints": true
     }
   ]
 }
