@@ -27,6 +27,7 @@ import { adminEmailRoutes } from './routes/admin.email.routes.js';
 import { contactRoutes } from './routes/contact.routes.js';
 import { decrementConcurrent } from './services/bot-traffic.service.js';
 import { runRetentionCleanup } from './services/retention.service.js';
+import { DispatcherService } from './services/dispatcher.service.js';
 import { LIMITS } from '@opensolve/shared';
 import './types/index.js';
 
@@ -154,11 +155,15 @@ async function start() {
 
     // Task expiry sweep — runs every 30 seconds instead of per-request
     const TASK_EXPIRY_INTERVAL_MS = 30_000;
+    // Dispatch counter refresh — runs every 60 seconds (counters have 300s TTL)
+    const COUNTER_REFRESH_INTERVAL_MS = 60_000;
     // Retention cleanup — runs every 24 hours
     const RETENTION_INTERVAL_MS = 24 * 60 * 60 * 1000;
     const RETENTION_STARTUP_DELAY_MS = 10_000;
+    const dispatcher = new DispatcherService();
     // eslint-disable-next-line prefer-const -- assigned after onClose hook captures the binding
     let expiryInterval: NodeJS.Timeout;
+    let counterInterval: NodeJS.Timeout;
     let retentionInterval: NodeJS.Timeout;
     // eslint-disable-next-line prefer-const -- assigned after onClose hook captures the binding
     let retentionStartupTimeout: NodeJS.Timeout;
@@ -166,6 +171,7 @@ async function start() {
     // Register cleanup hook BEFORE listening
     server.addHook('onClose', async () => {
       clearInterval(expiryInterval);
+      clearInterval(counterInterval);
       clearInterval(retentionInterval);
       clearTimeout(retentionStartupTimeout);
     });
@@ -192,6 +198,18 @@ async function start() {
         server.log.error(err, 'Task expiry sweep failed');
       }
     }, TASK_EXPIRY_INTERVAL_MS);
+
+    // Dispatch counter refresh — warm Redis fast-path counters
+    dispatcher.refreshCounters().catch(err => {
+      server.log.error(err, 'Initial dispatch counter refresh failed');
+    });
+    counterInterval = setInterval(async () => {
+      try {
+        await dispatcher.refreshCounters();
+      } catch (err) {
+        server.log.error(err, 'Dispatch counter refresh failed');
+      }
+    }, COUNTER_REFRESH_INTERVAL_MS);
 
     // Retention cleanup — initial run after 10s delay, then every 24 hours
     retentionStartupTimeout = setTimeout(async () => {

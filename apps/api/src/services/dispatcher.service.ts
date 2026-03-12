@@ -1,4 +1,5 @@
 import { db } from '../config/database.js';
+import { redis } from '../config/redis.js';
 import { problems, solutions, flags, bots, tasks } from '../db/schema.js';
 import { eq, and, lt, sql, desc, asc, inArray } from 'drizzle-orm';
 import { PairSelectorService } from './pair-selector.service.js';
@@ -38,19 +39,28 @@ export class DispatcherService {
     const existingTask = await this.getActiveTask(bot.id);
     if (existingTask) return existingTask;
 
-    // Priority 1: Flagging
-    const flagTask = await this.tryAssignFlagTask(bot, brief);
-    if (flagTask) return flagTask;
+    // Fast-path: skip flag step if no pending problems exist
+    const pendingCount = await redis.get('dispatch:pending_problems');
+    if (pendingCount === null || parseInt(pendingCount) > 0) {
+      const flagTask = await this.tryAssignFlagTask(bot, brief);
+      if (flagTask) return flagTask;
+    }
 
-    // Priority 2: Solution
-    const solveTask = await this.tryAssignSolveTask(bot, brief);
-    if (solveTask) return solveTask;
+    // Fast-path: skip solve step if no active problems exist
+    const activeCount = await redis.get('dispatch:active_problems');
+    if (activeCount === null || parseInt(activeCount) > 0) {
+      const solveTask = await this.tryAssignSolveTask(bot, brief);
+      if (solveTask) return solveTask;
+    }
 
-    // Priority 3: Voting
-    const voteTask = await this.tryAssignVoteTask(bot, brief);
-    if (voteTask) return voteTask;
+    // Fast-path: skip vote step if no votable problems exist
+    const votableCount = await redis.get('dispatch:votable_problems');
+    if (votableCount === null || parseInt(votableCount) > 0) {
+      const voteTask = await this.tryAssignVoteTask(bot, brief);
+      if (voteTask) return voteTask;
+    }
 
-    // Priority 4: Problem creation
+    // Priority 4: Problem creation (always available)
     const createTask = await this.tryAssignCreateTask(bot, brief);
     if (createTask) return createTask;
 
@@ -267,6 +277,35 @@ export class DispatcherService {
       taskId: existing.id,
       payload: JSON.parse(existing.payload || '{}'),
     };
+  }
+
+  async refreshCounters(): Promise<void> {
+    const [pendingResult, activeResult, votableResult] = await Promise.all([
+      db.select({ count: sql<number>`count(*)` })
+        .from(problems)
+        .where(eq(problems.status, 'pending')),
+      db.select({ count: sql<number>`count(*)` })
+        .from(problems)
+        .where(eq(problems.status, 'active')),
+      db.select({ count: sql<number>`count(*)` })
+        .from(problems)
+        .where(
+          and(
+            sql`${problems.status} IN ('active', 'mature')`,
+            sql`${problems.solutionCount} >= 2`
+          )
+        ),
+    ]);
+
+    const pending = Number(pendingResult[0]?.count ?? 0);
+    const active = Number(activeResult[0]?.count ?? 0);
+    const votable = Number(votableResult[0]?.count ?? 0);
+
+    await Promise.all([
+      redis.set('dispatch:pending_problems', pending, 'EX', 300),
+      redis.set('dispatch:active_problems', active, 'EX', 300),
+      redis.set('dispatch:votable_problems', votable, 'EX', 300),
+    ]);
   }
 
   private async expireOldTasks(): Promise<void> {
