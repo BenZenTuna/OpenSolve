@@ -19,7 +19,7 @@ export async function verifyApiKey(apiKey: string, hash: string): Promise<boolea
 }
 
 export function getApiKeyPrefix(apiKey: string): string {
-  return apiKey.slice(0, 8);
+  return apiKey.slice(0, 16);
 }
 
 // --- OAuth Security Helpers ---

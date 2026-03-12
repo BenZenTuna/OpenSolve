@@ -15,13 +15,24 @@ export async function botAuthMiddleware(
   }
 
   const apiKey = authHeader.slice(7);
-  const prefix = apiKey.slice(0, 8);
+  const prefix16 = apiKey.slice(0, 16);
+  const prefix8 = apiKey.slice(0, 8);
 
-  const [user] = await db
+  // Try 16-char prefix first (new keys), fall back to 8-char (legacy keys)
+  let [user] = await db
     .select()
     .from(users)
-    .where(eq(users.apiKeyPrefix, prefix))
+    .where(eq(users.apiKeyPrefix, prefix16))
     .limit(1);
+
+  if (!user || !user.apiKeyHash) {
+    // Fallback: try legacy 8-char prefix
+    [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.apiKeyPrefix, prefix8))
+      .limit(1);
+  }
 
   if (!user || !user.apiKeyHash) {
     return reply.code(401).send({ error: 'Invalid API key' });

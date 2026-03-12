@@ -60,7 +60,7 @@ export const users = pgTable('users', {
   // Bot identity fields (for API submissions)
   botName: varchar('bot_name', { length: 50 }),
   apiKeyHash: varchar('api_key_hash', { length: 255 }),
-  apiKeyPrefix: varchar('api_key_prefix', { length: 8 }),
+  apiKeyPrefix: varchar('api_key_prefix', { length: 16 }),
   apiKeyCreatedAt: timestamp('api_key_created_at'),
 
   // Newsletter subscription (GDPR Art. 6(1)(a) — Consent)
