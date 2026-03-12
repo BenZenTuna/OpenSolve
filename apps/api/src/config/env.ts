@@ -18,6 +18,9 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(16),
   JWT_EXPIRES_IN: z.coerce.number().default(3600),
 
+  // Cookie signing (separate from JWT for defense-in-depth; falls back to JWT_SECRET if omitted)
+  COOKIE_SECRET: z.string().min(32).optional(),
+
   // OAuth - Google
   GOOGLE_CLIENT_ID: z.string().default(''),
   GOOGLE_CLIENT_SECRET: z.string().default(''),

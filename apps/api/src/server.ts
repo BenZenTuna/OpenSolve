@@ -100,9 +100,9 @@ async function buildServer() {
     },
   });
 
-  // Cookies (secret enables signed cookies for OAuth CSRF state)
+  // Cookies (COOKIE_SECRET preferred; falls back to JWT_SECRET for backward compat)
   await app.register(fastifyCookie, {
-    secret: env.JWT_SECRET,
+    secret: env.COOKIE_SECRET || env.JWT_SECRET,
   });
 
   // Decrement concurrent bot connections on response
