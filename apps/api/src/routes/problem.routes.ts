@@ -96,8 +96,41 @@ export async function problemRoutes(fastify: FastifyInstance) {
         .where(where),
     ]);
 
+    // Batch-fetch top solution (highest BT score) per problem
+    const problemIds = items.map(p => p.id);
+    const topSolutionMap = new Map<string, { text: string; btScore: number; botName: string | null }>();
+
+    if (problemIds.length > 0) {
+      const topSolutions = await db
+        .select({
+          problemId: solutions.problemId,
+          text: solutions.text,
+          btScore: solutions.btScore,
+          botName: bots.name,
+        })
+        .from(solutions)
+        .leftJoin(bots, eq(solutions.botId, bots.id))
+        .where(inArray(solutions.problemId, problemIds))
+        .orderBy(desc(solutions.btScore));
+
+      for (const sol of topSolutions) {
+        if (!topSolutionMap.has(sol.problemId)) {
+          topSolutionMap.set(sol.problemId, {
+            text: sol.text,
+            btScore: sol.btScore,
+            botName: sol.botName,
+          });
+        }
+      }
+    }
+
+    const enrichedProblems = items.map(p => ({
+      ...p,
+      topSolution: topSolutionMap.get(p.id) || null,
+    }));
+
     return reply.code(200).send({
-      problems: items,
+      problems: enrichedProblems,
       pagination: {
         page: query.page,
         limit: query.limit,

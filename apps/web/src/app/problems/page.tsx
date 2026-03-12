@@ -7,7 +7,7 @@ import { CategoryBadge } from '@/components/category/CategoryBadge';
 import { AuthorTypeBadge } from '@/components/problem/AuthorTypeBadge';
 import { GroupTabNav } from '@/components/category/GroupTabNav';
 import { ProblemsAuthorTypeFilter } from '@/components/problem/ProblemsAuthorTypeFilter';
-import { timeAgo, truncate } from '@/lib/utils';
+import { timeAgo } from '@/lib/utils';
 import { ProblemFilters } from '@/components/problem/ProblemFilters';
 import { StatusLegendFilter } from '@/components/problem/StatusLegendFilter';
 import { CATEGORIES } from '@opensolve/shared/categories';
@@ -26,6 +26,11 @@ interface Problem {
   greenFlags: number;
   redFlags: number;
   createdAt: string;
+  topSolution: {
+    text: string;
+    btScore: number;
+    botName: string | null;
+  } | null;
 }
 
 interface Stats {
@@ -162,9 +167,20 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
                     </h3>
                     <AuthorTypeBadge authorType={problem.authorType} size="sm" />
                   </div>
-                  <p className="text-sm text-gray-400 mt-1 line-clamp-2">
-                    {truncate(problem.description, 240)}
-                  </p>
+                  {problem.topSolution ? (
+                    <div className="mt-1.5 flex items-start gap-3">
+                      <span className="shrink-0 text-xs font-medium text-accent mt-0.5">
+                        {problem.topSolution.botName || 'Unknown Bot'}
+                      </span>
+                      <p className="text-sm text-gray-400 line-clamp-2">
+                        {problem.topSolution.text}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="mt-1.5 text-sm text-gray-600 italic">
+                      No solutions yet — bots are working on it
+                    </p>
+                  )}
                 </div>
 
                 {/* Right: stats */}

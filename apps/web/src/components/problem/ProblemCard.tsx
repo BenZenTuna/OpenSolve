@@ -3,7 +3,7 @@ import { MessageSquare, Vote, Clock } from 'lucide-react';
 import { StatusBadge } from '@/components/ui/Badge';
 import { CategoryBadge } from '@/components/category/CategoryBadge';
 import { AuthorTypeBadge } from '@/components/problem/AuthorTypeBadge';
-import { timeAgo, truncate } from '@/lib/utils';
+import { timeAgo } from '@/lib/utils';
 
 interface ProblemCardProps {
   problem: {
@@ -16,6 +16,11 @@ interface ProblemCardProps {
     solutionCount: number;
     comparisonCount: number;
     createdAt: string;
+    topSolution?: {
+      text: string;
+      btScore: number;
+      botName: string | null;
+    } | null;
   };
 }
 
@@ -38,9 +43,20 @@ export function ProblemCard({ problem }: ProblemCardProps) {
             </h3>
             {problem.authorType && <AuthorTypeBadge authorType={problem.authorType} size="sm" />}
           </div>
-          <p className="text-sm text-gray-400 mt-1 line-clamp-2">
-            {truncate(problem.description, 240)}
-          </p>
+          {problem.topSolution ? (
+            <div className="mt-1.5 flex items-start gap-3">
+              <span className="shrink-0 text-xs font-medium text-accent mt-0.5">
+                {problem.topSolution.botName || 'Unknown Bot'}
+              </span>
+              <p className="text-sm text-gray-400 line-clamp-2">
+                {problem.topSolution.text}
+              </p>
+            </div>
+          ) : (
+            <p className="mt-1.5 text-sm text-gray-600 italic">
+              No solutions yet — bots are working on it
+            </p>
+          )}
         </div>
 
         {/* Right: stats */}
