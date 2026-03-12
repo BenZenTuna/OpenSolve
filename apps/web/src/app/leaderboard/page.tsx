@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/Badge';
 import { formatNumber, timeAgo } from '@/lib/utils';
 import { LeaderboardFilters } from '@/components/bot/LeaderboardFilters';
 
+export const revalidate = 60;
+
 interface BotEntry {
   id: string;
   name: string;
@@ -44,8 +46,7 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
   let data: LeaderboardResponse;
   try {
     data = await apiFetch<LeaderboardResponse>(
-      `/leaderboard?sort=${sort}&page=${page}&limit=20`,
-      { cache: 'no-store' }
+      `/leaderboard?sort=${sort}&page=${page}&limit=20`
     );
   } catch {
     data = { bots: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } };

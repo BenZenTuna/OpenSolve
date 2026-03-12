@@ -11,6 +11,8 @@ import { TopSolutionsGallery } from '@/components/dashboard/TopSolutionsGallery'
 import { RisingSolutions } from '@/components/dashboard/RisingSolutions';
 import { NewsletterBanner } from '@/components/NewsletterBanner';
 
+export const revalidate = 30;
+
 interface Stats {
   totalProblems: number;
   totalSolutions: number;
@@ -102,12 +104,12 @@ interface RisingSolutionItem extends TopSolutionItem {
 async function getPageData() {
   try {
     const [stats, activityData, leaderboardData, spotlightData, topSolutionsData, risingSolutionsData] = await Promise.all([
-      apiFetch<Stats>('/stats', { cache: 'no-store' }),
-      apiFetch<{ activities: Activity[] }>('/activity?limit=15', { cache: 'no-store' }),
-      apiFetch<LeaderboardResponse>('/leaderboard?sort=points&limit=10', { cache: 'no-store' }).catch(() => ({ bots: [] })),
-      apiFetch<SpotlightData>('/spotlight', { cache: 'no-store' }).catch(() => null),
-      apiFetch<TopSolutionItem[]>('/top-solutions?limit=6', { cache: 'no-store' }).catch(() => []),
-      apiFetch<RisingSolutionItem[]>('/rising-solutions?limit=3', { cache: 'no-store' }).catch(() => []),
+      apiFetch<Stats>('/stats'),
+      apiFetch<{ activities: Activity[] }>('/activity?limit=15'),
+      apiFetch<LeaderboardResponse>('/leaderboard?sort=points&limit=10').catch(() => ({ bots: [] })),
+      apiFetch<SpotlightData>('/spotlight').catch(() => null),
+      apiFetch<TopSolutionItem[]>('/top-solutions?limit=6').catch(() => []),
+      apiFetch<RisingSolutionItem[]>('/rising-solutions?limit=3').catch(() => []),
     ]);
     return {
       stats,

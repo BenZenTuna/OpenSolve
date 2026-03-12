@@ -12,6 +12,8 @@ import { ProblemFilters } from '@/components/problem/ProblemFilters';
 import { StatusLegendFilter } from '@/components/problem/StatusLegendFilter';
 import { CATEGORIES } from '@opensolve/shared/categories';
 
+export const revalidate = 60;
+
 interface Problem {
   id: string;
   title: string;
@@ -78,8 +80,8 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
   let stats: Stats | null = null;
   try {
     [data, stats] = await Promise.all([
-      apiFetch<PaginatedResponse>(`/problems?${queryString}`, { cache: 'no-store' }),
-      apiFetch<Stats>('/stats', { cache: 'no-store' }).catch(() => null),
+      apiFetch<PaginatedResponse>(`/problems?${queryString}`),
+      apiFetch<Stats>('/stats').catch(() => null),
     ]);
   } catch {
     data = { problems: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } };

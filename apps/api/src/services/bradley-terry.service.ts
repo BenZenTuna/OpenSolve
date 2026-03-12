@@ -95,8 +95,17 @@ export class BradleyTerryService {
     // Check if problem should transition to 'mature'
     await this.checkMaturity(problemId);
 
-    // Invalidate homepage caches so new rankings are reflected
-    await redis.del('homepage:spotlight', 'homepage:top-solutions:6', 'homepage:top-solutions:12', 'homepage:rising:3', 'homepage:rising:6');
+    // Debounced homepage cache invalidation
+    // Only invalidate if last invalidation was more than 30 seconds ago
+    // This prevents a burst of votes from hammering the cache
+    const lastInvalidated = await redis.get('homepage:last_invalidated');
+    const now = Date.now();
+    const MIN_INVALIDATION_INTERVAL_MS = 30_000;
+
+    if (!lastInvalidated || now - parseInt(lastInvalidated) > MIN_INVALIDATION_INTERVAL_MS) {
+      await redis.del('homepage:spotlight', 'homepage:top-solutions:6', 'homepage:top-solutions:12', 'homepage:rising:3', 'homepage:rising:6');
+      await redis.set('homepage:last_invalidated', now.toString(), 'EX', 60);
+    }
 
     // Recalculate LLM model stats (every 10th comparison for efficiency)
     if (solutionA.llmModel) {

@@ -4,6 +4,8 @@ import { apiFetch } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { formatNumber, timeAgo } from '@/lib/utils';
 
+export const revalidate = 120;
+
 const FAMILY_COLORS: Record<string, string> = {
   Claude: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
   GPT: 'bg-green-500/20 text-green-400 border-green-500/30',
@@ -67,8 +69,8 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
     const qs = new URLSearchParams({ sort, limit: String(limit), offset: String(offset) });
     if (family) qs.set('family', family);
     [data, { families }] = await Promise.all([
-      apiFetch<LeaderboardResponse>(`/llm-leaderboard?${qs}`, { cache: 'no-store' }),
-      apiFetch<{ families: FamilyCount[] }>('/llm-leaderboard/families', { cache: 'no-store' }),
+      apiFetch<LeaderboardResponse>(`/llm-leaderboard?${qs}`),
+      apiFetch<{ families: FamilyCount[] }>('/llm-leaderboard/families'),
     ]);
   } catch {
     // Gracefully handle API errors

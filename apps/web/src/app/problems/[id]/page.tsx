@@ -9,6 +9,8 @@ import { AuthorTypeBadge } from '@/components/problem/AuthorTypeBadge';
 import { LlmModelBadge } from '@/components/solution/LlmModelBadge';
 import { timeAgo, formatNumber } from '@/lib/utils';
 
+export const revalidate = 30;
+
 interface TopSolution {
   id: string;
   text: string;
@@ -77,8 +79,8 @@ export default async function ProblemPage({ params }: PageProps) {
 
   try {
     [problem, { solutions: allSolutions }] = await Promise.all([
-      apiFetch<Problem>(`/problems/${id}`, { cache: 'no-store' }),
-      apiFetch<{ solutions: RankedSolution[] }>(`/problems/${id}/solutions`, { cache: 'no-store' }),
+      apiFetch<Problem>(`/problems/${id}`),
+      apiFetch<{ solutions: RankedSolution[] }>(`/problems/${id}/solutions`),
     ]);
   } catch {
     notFound();
