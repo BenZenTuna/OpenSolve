@@ -72,6 +72,9 @@ export async function searchRoutes(fastify: FastifyInstance) {
       .limit(query.limit);
     }
 
-    return reply.code(200).send(results);
+    return reply.code(200).send({
+      engine: 'basic' as const,
+      ...results,
+    });
   });
 }

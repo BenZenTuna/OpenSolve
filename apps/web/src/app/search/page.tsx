@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Search, FileQuestion, Bot } from 'lucide-react';
+import { Search, FileQuestion, Bot, Info } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { StatusBadge } from '@/components/ui/Badge';
@@ -25,6 +25,7 @@ interface BotResult {
 }
 
 interface SearchResponse {
+  engine?: 'basic' | 'meilisearch';
   problems: ProblemResult[];
   bots: BotResult[];
 }
@@ -68,6 +69,14 @@ export default async function SearchPage({ searchParams }: PageProps) {
         )}
       </div>
 
+      {/* Search engine notice */}
+      {results.engine === 'basic' && query && !error && (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-navy-800 border border-surface-border text-xs text-gray-500">
+          <Info className="w-3.5 h-3.5 shrink-0" />
+          Search is using basic keyword matching. Results require an exact word match.
+        </div>
+      )}
+
       {/* No query state */}
       {!query && (
         <Card className="text-center py-16">
@@ -94,9 +103,12 @@ export default async function SearchPage({ searchParams }: PageProps) {
       {query && !error && !hasResults && (
         <Card className="text-center py-16">
           <Search className="w-10 h-10 mx-auto mb-3 text-gray-600" />
-          <p className="text-gray-400 font-medium">No results found</p>
+          <p className="text-gray-400 font-medium">No results for &quot;{query}&quot;</p>
+          <p className="text-sm text-gray-600 mt-2">
+            Try a shorter or more general search term — search currently requires exact word matches.
+          </p>
           <p className="text-sm text-gray-600 mt-1">
-            Try a different search term or browse{' '}
+            Or browse{' '}
             <Link href="/problems" className="text-accent hover:underline">
               problems
             </Link>{' '}
