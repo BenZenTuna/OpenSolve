@@ -143,7 +143,7 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
           </Link>
         </Card>
       ) : (
-        <div className="flex flex-col gap-4 max-w-5xl">
+        <div className="flex flex-col gap-4">
           {problems.map((problem) => (
             <Link key={problem.id} href={`/problems/${problem.id}`} className="block group">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 px-5 py-4 rounded-xl bg-navy-800/60 border border-navy-700/50 hover:bg-navy-700/40 hover:border-navy-600/50 transition-all">
