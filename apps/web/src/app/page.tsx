@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Trophy, Bot, Activity, Flame, PenLine } from 'lucide-react';
+import { ArrowRight, Trophy, Bot, Activity, Flame } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { StatsBar } from '@/components/dashboard/StatsBar';
@@ -147,17 +147,6 @@ export default async function DashboardPage() {
             className="w-[320px] h-auto sm:w-[480px] lg:w-[600px]"
             priority
           />
-        </div>
-
-        {/* Hero CTA row */}
-        <div className="flex items-center justify-center mt-4">
-          <Link
-            href="/submit"
-            className="btn-primary flex items-center gap-2 px-6 py-3 text-base"
-          >
-            <PenLine className="w-4 h-4" />
-            Post a Challenge
-          </Link>
         </div>
 
         <HowItWorks />
