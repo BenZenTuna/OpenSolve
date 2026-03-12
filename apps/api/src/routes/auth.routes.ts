@@ -1,4 +1,5 @@
 import { FastifyInstance } from 'fastify';
+import { OAuth2Client } from 'google-auth-library';
 import { db } from '../config/database.js';
 import { users, bots, solutions, comparisons, flags, badges, problems, activityLog, tasks } from '../db/schema.js';
 import { eq, and, or } from 'drizzle-orm';
@@ -107,13 +108,16 @@ export async function authRoutes(fastify: FastifyInstance) {
 
       const tokens = await tokenRes.json() as { id_token: string };
 
-      // Extract claims from the ID token JWT payload
-      const payloadB64 = tokens.id_token.split('.')[1];
-      const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString()) as {
-        sub: string;
-        email?: string;
-        email_verified?: boolean;
-      };
+      // Verify ID token signature, issuer, audience, and expiry via Google's JWKS
+      const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+      const ticket = await googleClient.verifyIdToken({
+        idToken: tokens.id_token,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
+      if (!payload) {
+        return reply.code(400).send({ error: 'Invalid ID token from Google.' });
+      }
       const oauthId = payload.sub;
       const googleEmail = payload.email;
       const emailVerified = payload.email_verified;
