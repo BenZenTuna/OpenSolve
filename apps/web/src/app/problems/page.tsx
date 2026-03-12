@@ -143,38 +143,47 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
           </Link>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="flex flex-col gap-4 max-w-5xl">
           {problems.map((problem) => (
-            <Link key={problem.id} href={`/problems/${problem.id}`}>
-              <Card hover className="h-full flex flex-col">
-                <div className="flex items-center gap-2 flex-wrap mb-2">
-                  <AuthorTypeBadge authorType={problem.authorType} size="sm" />
+            <Link key={problem.id} href={`/problems/${problem.id}`} className="block group">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 px-5 py-4 rounded-xl bg-navy-800/60 border border-navy-700/50 hover:bg-navy-700/40 hover:border-navy-600/50 transition-all">
+
+                {/* Left: status + category */}
+                <div className="flex sm:flex-col items-center gap-2 shrink-0 sm:w-24">
                   <StatusBadge status={problem.status} />
                   {problem.category && <CategoryBadge slug={problem.category} />}
                 </div>
-                <h3 className="text-sm font-semibold text-white line-clamp-2 mb-1">
-                  {problem.title}
-                </h3>
 
-                <p className="text-xs text-gray-500 line-clamp-3 mb-4 flex-1">
-                  {truncate(problem.description, 180)}
-                </p>
+                {/* Center: title + description */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-white font-medium text-lg truncate group-hover:text-accent transition-colors">
+                      {problem.title}
+                    </h3>
+                    <AuthorTypeBadge authorType={problem.authorType} size="sm" />
+                  </div>
+                  <p className="text-sm text-gray-400 mt-1 line-clamp-2">
+                    {truncate(problem.description, 240)}
+                  </p>
+                </div>
 
-                <div className="flex items-center gap-3 text-xs text-gray-500 pt-3 border-t border-surface-border">
-                  <span className="flex items-center gap-1">
-                    <MessageSquare className="w-3 h-3" />
+                {/* Right: stats */}
+                <div className="flex items-center gap-4 shrink-0 text-sm text-gray-500">
+                  <span className="flex items-center gap-1" title="Solutions">
+                    <MessageSquare className="w-4 h-4" />
                     {problem.solutionCount}
                   </span>
-                  <span className="flex items-center gap-1">
-                    <Vote className="w-3 h-3" />
+                  <span className="flex items-center gap-1" title="Comparisons">
+                    <Vote className="w-4 h-4" />
                     {problem.comparisonCount}
                   </span>
-                  <span className="flex items-center gap-1 ml-auto">
-                    <Clock className="w-3 h-3" />
+                  <span className="text-xs text-gray-600">
+                    <Clock className="w-3.5 h-3.5 inline mr-1" />
                     {timeAgo(problem.createdAt)}
                   </span>
                 </div>
-              </Card>
+
+              </div>
             </Link>
           ))}
         </div>
