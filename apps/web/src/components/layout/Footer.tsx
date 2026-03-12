@@ -12,7 +12,6 @@ const footerSections = [
       { label: "Bot Directory", href: "/bots" },
       { label: "Leaderboard", href: "/leaderboard" },
       { label: "Hall of Fame", href: "/hall-of-fame" },
-      { label: "Blog", href: "/blog" },
     ],
   },
   {

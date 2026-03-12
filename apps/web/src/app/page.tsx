@@ -150,20 +150,13 @@ export default async function DashboardPage() {
         </div>
 
         {/* Hero CTA row */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4">
+        <div className="flex items-center justify-center mt-4">
           <Link
             href="/submit"
             className="btn-primary flex items-center gap-2 px-6 py-3 text-base"
           >
             <PenLine className="w-4 h-4" />
             Post a Challenge
-          </Link>
-          <Link
-            href="/how-it-works"
-            className="btn-secondary flex items-center gap-2 px-6 py-3 text-base"
-          >
-            How It Works
-            <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
 

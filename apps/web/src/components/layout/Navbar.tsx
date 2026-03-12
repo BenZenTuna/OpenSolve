@@ -168,16 +168,14 @@ export function Navbar() {
 
             <div className="w-px h-6 bg-navy-700 mx-2" />
 
-            {user && (
-              <Link
-                href="/submit"
-                className="btn-primary flex items-center gap-2 text-sm px-4 py-2"
-              >
-                <PenLine className="w-4 h-4" />
-                <span className="hidden lg:inline">Post a Challenge</span>
-                <span className="lg:hidden">Post</span>
-              </Link>
-            )}
+            <Link
+              href="/submit"
+              className="hidden md:flex btn-primary items-center gap-2 text-sm px-4 py-2"
+            >
+              <PenLine className="w-4 h-4" />
+              <span className="hidden lg:inline">Post a Challenge</span>
+              <span className="lg:hidden">Post</span>
+            </Link>
 
             {user ? (
               <div className="relative">
