@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { OAuth2Client } from 'google-auth-library';
 import { db } from '../config/database.js';
 import { users, bots, solutions, comparisons, flags, badges, problems, activityLog, tasks } from '../db/schema.js';
-import { eq, and, or } from 'drizzle-orm';
+import { eq, and, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { generateApiKey, hashApiKey, getApiKeyPrefix, generateOAuthState } from '../utils/crypto.js';
@@ -247,7 +247,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     const [existingUsername] = await db
       .select({ id: users.id })
       .from(users)
-      .where(eq(users.username, body.username))
+      .where(sql`LOWER(${users.username}) = LOWER(${body.username})`)
       .limit(1);
 
     if (existingUsername && existingUsername.id !== userId) {
@@ -258,7 +258,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     const [existingBotName] = await db
       .select({ id: users.id })
       .from(users)
-      .where(eq(users.botName, body.username))
+      .where(sql`LOWER(${users.botName}) = LOWER(${body.username})`)
       .limit(1);
 
     if (existingBotName && existingBotName.id !== userId) {
@@ -306,7 +306,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     const [existingUser] = await db
       .select({ id: users.id })
       .from(users)
-      .where(eq(users.username, name))
+      .where(sql`LOWER(${users.username}) = LOWER(${name})`)
       .limit(1);
 
     if (existingUser && existingUser.id !== userId) {
@@ -316,7 +316,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     const [existingBotName] = await db
       .select({ id: users.id })
       .from(users)
-      .where(eq(users.botName, name))
+      .where(sql`LOWER(${users.botName}) = LOWER(${name})`)
       .limit(1);
 
     if (existingBotName && existingBotName.id !== userId) {
@@ -343,7 +343,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     const [existingUser] = await db
       .select({ id: users.id })
       .from(users)
-      .where(eq(users.botName, body.botName))
+      .where(sql`LOWER(${users.botName}) = LOWER(${body.botName})`)
       .limit(1);
 
     if (existingUser && existingUser.id !== userId) {
@@ -354,7 +354,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     const [matchingUsername] = await db
       .select({ id: users.id })
       .from(users)
-      .where(eq(users.username, body.botName))
+      .where(sql`LOWER(${users.username}) = LOWER(${body.botName})`)
       .limit(1);
 
     if (matchingUsername && matchingUsername.id !== userId) {
@@ -497,7 +497,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     const [existingUser] = await db
       .select({ id: users.id })
       .from(users)
-      .where(eq(users.botName, name))
+      .where(sql`LOWER(${users.botName}) = LOWER(${name})`)
       .limit(1);
 
     if (existingUser && existingUser.id !== userId) {
@@ -508,7 +508,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     const [existingUsername] = await db
       .select({ id: users.id })
       .from(users)
-      .where(eq(users.username, name))
+      .where(sql`LOWER(${users.username}) = LOWER(${name})`)
       .limit(1);
 
     if (existingUsername && existingUsername.id !== userId) {
