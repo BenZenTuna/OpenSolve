@@ -9,19 +9,15 @@ export class ModerationService {
     verdict: 'green' | 'red',
     _category: string
   ): Promise<{ newStatus: string }> {
-    // Update counters
-    if (verdict === 'green') {
-      await db.update(problems)
-        .set({ greenFlags: sql`${problems.greenFlags} + 1` })
-        .where(eq(problems.id, problemId));
-    } else {
-      await db.update(problems)
-        .set({ redFlags: sql`${problems.redFlags} + 1` })
-        .where(eq(problems.id, problemId));
-    }
-
-    // Get updated problem
-    const [problem] = await db.select().from(problems).where(eq(problems.id, problemId));
+    // Atomic increment + read — prevents race condition when two flags arrive simultaneously
+    const [problem] = await db.update(problems)
+      .set(
+        verdict === 'green'
+          ? { greenFlags: sql`${problems.greenFlags} + 1` }
+          : { redFlags: sql`${problems.redFlags} + 1` }
+      )
+      .where(eq(problems.id, problemId))
+      .returning();
     const totalFlags = problem.greenFlags + problem.redFlags;
 
     // Determine new status
