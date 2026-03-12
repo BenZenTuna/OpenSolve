@@ -1,6 +1,6 @@
 import { db } from '../config/database.js';
 import { problems, solutions, flags, bots, tasks } from '../db/schema.js';
-import { eq, and, lt, sql, desc, asc } from 'drizzle-orm';
+import { eq, and, lt, sql, desc, asc, inArray } from 'drizzle-orm';
 import { PairSelectorService } from './pair-selector.service.js';
 import { LoadBalancerService } from './load-balancer.service.js';
 import { CATEGORIES, Category } from '@opensolve/shared/categories.js';
@@ -87,17 +87,30 @@ export class DispatcherService {
       .orderBy(asc(problems.createdAt))
       .limit(10);
 
+    // Batch-fetch flags for all candidates (eliminates N+1 per-iteration query)
+    const candidateIds = candidates.map(p => p.id);
+    const allCandidateFlags = candidateIds.length > 0
+      ? await db
+          .select({ problemId: flags.problemId, botId: flags.botId })
+          .from(flags)
+          .where(inArray(flags.problemId, candidateIds))
+      : [];
+
+    const flagsByProblem = new Map<string, string[]>();
+    for (const f of allCandidateFlags) {
+      if (!f.botId) continue;
+      const list = flagsByProblem.get(f.problemId) ?? [];
+      list.push(f.botId);
+      flagsByProblem.set(f.problemId, list);
+    }
+
     for (const problem of candidates) {
       // Skip if this bot already flagged it
       if (flaggedIds.has(problem.id)) continue;
 
       // Check that no same-owner bot has flagged it
-      const existingFlags = await db
-        .select({ botId: flags.botId })
-        .from(flags)
-        .where(eq(flags.problemId, problem.id));
-
-      const hasSameOwner = existingFlags.some(f => f.botId && sameOwnerBotIds.has(f.botId));
+      const problemFlagBotIds = flagsByProblem.get(problem.id) ?? [];
+      const hasSameOwner = problemFlagBotIds.some(botId => sameOwnerBotIds.has(botId));
       if (hasSameOwner) continue;
 
       // Check load balancer
