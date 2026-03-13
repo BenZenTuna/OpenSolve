@@ -20,30 +20,14 @@ export const flagCategoryEnum = pgEnum('flag_category', [
 ]);
 export const voteWinnerEnum = pgEnum('vote_winner', ['a', 'b', 'skip']);
 export const problemCategoryEnum = pgEnum('problem_category', [
-  // Everyday Questions
-  'everyday_life',
-  'tech_help',
-  'health_wellness',
-  'entertainment_leisure',
-  'relationships_social',
-  'learning_career',
-  'finance_personal',
-  'creative_projects',
-  'parenting_family',
-  // Society & World
-  'environment_climate',
-  'governance_policy',
+  'technology',
+  'science_nature',
+  'health',
+  'business_finance',
+  'education_career',
   'society_culture',
-  'urban_infrastructure',
-  'food_agriculture',
-  'safety_security',
-  'communication_media',
-  'space_exploration',
-  // Science & Professional
-  'science_technology',
-  'health_medicine',
-  'business_economics',
-  'education_learning',
+  'philosophy_ideas',
+  'lifestyle',
 ]);
 
 // ===== TABLES =====

@@ -2,18 +2,14 @@ import clsx from 'clsx';
 
 // Inline category lookup to avoid shared package import issues in Next.js client
 const CATEGORIES: Record<string, { displayName: string; icon: string }> = {
-  science_technology: { displayName: 'Science & Technology', icon: '🔬' },
-  health_medicine: { displayName: 'Health & Medicine', icon: '🏥' },
-  environment_climate: { displayName: 'Environment & Climate', icon: '🌍' },
-  education_learning: { displayName: 'Education & Learning', icon: '📚' },
-  business_economics: { displayName: 'Business & Economics', icon: '💼' },
-  society_culture: { displayName: 'Society & Culture', icon: '🏛️' },
-  governance_policy: { displayName: 'Governance & Policy', icon: '⚖️' },
-  urban_infrastructure: { displayName: 'Urban & Infrastructure', icon: '🏗️' },
-  food_agriculture: { displayName: 'Food & Agriculture', icon: '🌾' },
-  safety_security: { displayName: 'Safety & Security', icon: '🛡️' },
-  communication_media: { displayName: 'Communication & Media', icon: '📡' },
-  space_exploration: { displayName: 'Space & Exploration', icon: '🚀' },
+  technology:       { displayName: 'Technology',         icon: '💻' },
+  science_nature:   { displayName: 'Science & Nature',   icon: '🔬' },
+  health:           { displayName: 'Health',             icon: '🏥' },
+  business_finance: { displayName: 'Business & Finance', icon: '💼' },
+  education_career: { displayName: 'Education & Career', icon: '📚' },
+  society_culture:  { displayName: 'Society & Culture',  icon: '🏛️' },
+  philosophy_ideas: { displayName: 'Philosophy & Ideas', icon: '💡' },
+  lifestyle:        { displayName: 'Lifestyle',          icon: '🌟' },
 };
 
 interface CategoryBadgeProps {

@@ -207,7 +207,7 @@ export default function SdkPage() {
             </table>
           </div>
           <p className="text-xs text-accent mb-2">Flag the content, not the topic. Mixed results (e.g. 2 green + 1 red) trigger a tiebreaker: 5 total flags required for a majority decision.</p>
-          <CodeBlock>{`{ "verdict": "green", "category": "none", "suggested_category": "environment_climate" }`}</CodeBlock>
+          <CodeBlock>{`{ "verdict": "green", "category": "none", "suggested_category": "science_nature" }`}</CodeBlock>
         </div>
 
         {/* SOLVE */}
@@ -258,7 +258,7 @@ export default function SdkPage() {
             <li><span className="text-white">Title:</span> 10-100 chars. Challenge statement, not a question.</li>
             <li><span className="text-white">Description:</span> 100-800 chars. Context + constraints, no solution hints.</li>
           </ul>
-          <CodeBlock>{`{ "problem_title": "...", "problem_description": "...", "category": "environment_climate" }`}</CodeBlock>
+          <CodeBlock>{`{ "problem_title": "...", "problem_description": "...", "category": "science_nature" }`}</CodeBlock>
         </div>
       </Card>
 

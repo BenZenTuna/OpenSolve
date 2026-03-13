@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/Card';
 import { StatusBadge } from '@/components/ui/Badge';
 import { CategoryBadge } from '@/components/category/CategoryBadge';
 import { AuthorTypeBadge } from '@/components/problem/AuthorTypeBadge';
-import { GroupTabNav } from '@/components/category/GroupTabNav';
+import { CategoryChipRow } from '@/components/category/CategoryChipRow';
 import { ProblemsAuthorTypeFilter } from '@/components/problem/ProblemsAuthorTypeFilter';
 import { timeAgo } from '@/lib/utils';
 import { ProblemFilters } from '@/components/problem/ProblemFilters';
@@ -60,7 +60,6 @@ interface PageProps {
     sort?: string;
     page?: string;
     category?: string;
-    group?: string;
     author_type?: string;
   }>;
 }
@@ -71,13 +70,11 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
   const sort = params.sort || 'newest';
   const page = parseInt(params.page || '1', 10);
   const category = params.category || '';
-  const group = params.group || '';
   const authorType = (params.author_type as 'human' | 'bot' | undefined) || '';
 
   const queryParts = [`sort=${sort}`, `page=${page}`, 'limit=20'];
   if (status) queryParts.push(`status=${status}`);
   if (category) queryParts.push(`category=${category}`);
-  else if (group) queryParts.push(`group=${group}`);
   if (authorType) queryParts.push(`author_type=${authorType}`);
   const queryString = queryParts.join('&');
 
@@ -113,8 +110,8 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
         </Link>
       </div>
 
-      {/* Group Tabs — primary navigation */}
-      <GroupTabNav activeGroup={group || null} activeCategory={category || null} />
+      {/* Category Filter */}
+      <CategoryChipRow activeCategory={category || null} />
 
       {/* Filters Row: Author Type + Status/Sort */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -135,7 +132,7 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
           <div className="text-4xl mb-4">
             {category
               ? CATEGORIES.find(c => c.slug === category)?.icon ?? '🔍'
-              : group === 'everyday' ? '🏠' : group === 'world' ? '🌍' : group === 'professional' ? '🔬' : '✨'}
+              : '✨'}
           </div>
           <p className="text-gray-400 font-medium text-lg mb-2">
             No questions here yet
@@ -210,7 +207,7 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
         <nav className="flex items-center justify-center gap-2">
           {page > 1 && (
             <Link
-              href={`/problems?${new URLSearchParams({ ...(status ? { status } : {}), ...(category ? { category } : {}), ...(group ? { group } : {}), ...(authorType ? { author_type: authorType } : {}), sort, page: String(page - 1) }).toString()}`}
+              href={`/problems?${new URLSearchParams({ ...(status ? { status } : {}), ...(category ? { category } : {}), ...(authorType ? { author_type: authorType } : {}), sort, page: String(page - 1) }).toString()}`}
               className="btn-secondary text-sm"
             >
               Previous
@@ -223,7 +220,7 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
 
           {page < pagination.totalPages && (
             <Link
-              href={`/problems?${new URLSearchParams({ ...(status ? { status } : {}), ...(category ? { category } : {}), ...(group ? { group } : {}), ...(authorType ? { author_type: authorType } : {}), sort, page: String(page + 1) }).toString()}`}
+              href={`/problems?${new URLSearchParams({ ...(status ? { status } : {}), ...(category ? { category } : {}), ...(authorType ? { author_type: authorType } : {}), sort, page: String(page + 1) }).toString()}`}
               className="btn-secondary text-sm"
             >
               Next

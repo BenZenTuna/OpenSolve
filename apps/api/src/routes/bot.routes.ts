@@ -26,16 +26,8 @@ const LLM_MODEL_PATTERN = /^[a-z0-9][a-z0-9._-]{0,98}[a-z0-9]$/;
 
 // Validation schemas
 const CATEGORY_SLUGS = [
-  // Everyday Questions
-  'everyday_life', 'tech_help', 'health_wellness', 'entertainment_leisure',
-  'relationships_social', 'learning_career', 'finance_personal',
-  'creative_projects', 'parenting_family',
-  // Society & World
-  'environment_climate', 'governance_policy', 'society_culture',
-  'urban_infrastructure', 'food_agriculture', 'safety_security',
-  'communication_media', 'space_exploration',
-  // Science & Professional
-  'science_technology', 'health_medicine', 'business_economics', 'education_learning',
+  'technology', 'science_nature', 'health', 'business_finance',
+  'education_career', 'society_culture', 'philosophy_ideas', 'lifestyle',
 ] as const;
 
 const flagSubmitSchema = z.object({

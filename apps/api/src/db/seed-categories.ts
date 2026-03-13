@@ -39,7 +39,7 @@ async function main() {
     {
       title: 'How can we make quantum computing accessible to small businesses?',
       description: 'Quantum computing promises exponential speedups for optimization, simulation, and cryptography. However, access is limited to large corporations and research institutions. Small businesses could benefit from quantum-enhanced logistics, financial modeling, and supply chain optimization, but the barrier to entry remains extremely high in terms of cost, expertise, and infrastructure. How can we democratize access to quantum computing resources?',
-      category: 'science_technology',
+      category: 'technology',
       solutions: [
         'Create a cloud-based Quantum-as-a-Service (QaaS) platform with a freemium tier specifically designed for SMBs, offering pre-built quantum algorithms for common business problems like route optimization and inventory management, with a visual drag-and-drop interface that requires no quantum physics knowledge.',
         'Develop quantum computing co-ops where small businesses in a region pool resources to share access to a quantum processor, managed by a local tech hub that provides training and consulting to help businesses identify problems suited for quantum speedup.',
@@ -57,7 +57,7 @@ async function main() {
     {
       title: 'How can we reduce diagnostic delays for rare diseases?',
       description: 'Patients with rare diseases wait an average of 5-7 years for a correct diagnosis, often seeing 8+ specialists before getting answers. This diagnostic odyssey causes immense suffering, delayed treatment, and unnecessary medical costs. With over 7,000 known rare diseases affecting 300+ million people worldwide, the challenge of rapid and accurate diagnosis is both urgent and complex. How can we significantly shorten this diagnostic journey?',
-      category: 'health_medicine',
+      category: 'health',
       solutions: [
         'Build an AI-powered differential diagnosis tool trained on rare disease case reports and genetic databases that primary care physicians can use during initial consultations, flagging potential rare conditions based on symptom patterns that would normally be missed.',
         'Create a global rare disease patient registry with standardized symptom encoding, enabling pattern matching across populations — when a patient presents with an unusual combination of symptoms, the system surfaces similar cases and their eventual diagnoses.',
@@ -76,7 +76,7 @@ async function main() {
     {
       title: 'How can cities effectively manage urban heat islands?',
       description: 'Urban areas can be 5-10 degrees Fahrenheit warmer than surrounding rural areas due to the urban heat island effect. Dark pavement, concrete buildings, reduced vegetation, waste heat from vehicles and AC, and limited airflow create dangerous heat conditions that disproportionately affect vulnerable populations. With climate change intensifying heat waves, this is an increasingly urgent public health and environmental challenge.',
-      category: 'environment_climate',
+      category: 'science_nature',
       solutions: [
         'Mandate cool roof policies requiring all new and replacement roofs to use high-albedo materials that reflect sunlight, combined with retrofit incentive programs for existing buildings, targeting a citywide albedo increase of 0.1 within a decade.',
         'Create an interconnected network of urban micro-forests using the Miyawaki method — dense, native plantings in small spaces like parking medians, vacant lots, and building perimeters — that can cool surrounding areas by 2-4 degrees.',
@@ -94,7 +94,7 @@ async function main() {
     {
       title: 'How can we bridge the digital literacy gap for adults over 60?',
       description: 'As essential services increasingly move online — banking, healthcare portals, government services, social connections — millions of older adults are being left behind. Many lack basic digital skills like using email, navigating websites, or identifying online scams. This digital divide contributes to social isolation, reduced access to services, and vulnerability to fraud. Current training programs often fail because they do not account for the specific learning needs of older adults.',
-      category: 'education_learning',
+      category: 'education_career',
       solutions: [
         'Create a peer-mentoring program pairing tech-savvy seniors with those who need help, since older adults learn better from age peers who understand their challenges and can teach at a comfortable pace without condescension.',
         'Develop simplified tablet devices pre-loaded with essential apps (banking, healthcare, video calling) that use extra-large icons, simplified navigation, and built-in voice assistance — designed specifically for seniors rather than adapted from general-purpose devices.',
@@ -112,7 +112,7 @@ async function main() {
     {
       title: 'How can gig economy workers access affordable benefits?',
       description: 'Over 60 million Americans participate in the gig economy, working as rideshare drivers, delivery couriers, freelancers, and independent contractors. Most lack access to employer-provided health insurance, retirement plans, paid leave, and workers compensation. The traditional employment benefits model does not fit the gig economy structure, yet these workers have the same needs for financial security and healthcare. How can we create a viable benefits system for this growing workforce?',
-      category: 'business_economics',
+      category: 'business_finance',
       solutions: [
         'Create portable benefits accounts that follow workers across gig platforms — each platform contributes a percentage per job into a worker\'s personal benefits fund, which can be used for health insurance, retirement, or paid leave regardless of which platform they work for.',
         'Establish gig worker cooperatives that pool buying power to negotiate group rates on health insurance, dental, vision, and retirement plans, functioning like a virtual employer for benefits purposes while maintaining worker independence.',
@@ -148,7 +148,7 @@ async function main() {
     {
       title: 'How can governments effectively regulate AI without stifling innovation?',
       description: 'Artificial intelligence is advancing rapidly, with applications in healthcare, finance, criminal justice, education, and virtually every sector. While AI offers enormous benefits, it also poses risks: algorithmic bias, job displacement, privacy violations, deepfakes, and autonomous weapons. Governments worldwide are struggling to create regulatory frameworks that protect citizens without driving AI development to less regulated jurisdictions or preventing beneficial applications.',
-      category: 'governance_policy',
+      category: 'society_culture',
       solutions: [
         'Implement a tiered risk-based regulatory framework where AI applications are classified by potential harm level — minimal risk (spam filters) needs only transparency, high risk (medical diagnosis) requires certification and auditing, and unacceptable risk (social scoring) is banned.',
         'Create regulatory sandboxes where companies can test AI applications under supervised conditions with relaxed rules, allowing innovation while maintaining safety oversight — successful sandbox graduates receive streamlined approval for full deployment.',
@@ -166,7 +166,7 @@ async function main() {
     {
       title: 'How can we solve the last-mile delivery problem in dense urban areas?',
       description: 'The explosion of e-commerce has created massive last-mile delivery challenges in cities. Delivery trucks cause congestion, double-parking, emissions, and safety hazards. Failed deliveries due to residents being away waste resources. Package theft from doorsteps costs billions annually. The current model of individual trucks making individual stops at individual addresses is fundamentally inefficient for dense urban environments.',
-      category: 'urban_infrastructure',
+      category: 'society_culture',
       solutions: [
         'Build a network of automated parcel lockers at every transit station, grocery store, and community center — residents choose their nearest locker as the delivery address, consolidating deliveries and eliminating failed attempts and porch theft.',
         'Create underground autonomous delivery tunnel networks in new developments, using small robotic carts that travel through dedicated micro-tunnels to deliver packages directly to building basements, removing delivery vehicles from streets entirely.',
@@ -184,7 +184,7 @@ async function main() {
     {
       title: 'How can we reduce food waste in restaurant and food service industries?',
       description: 'Restaurants and food service operations waste an estimated 22-33 billion pounds of food annually in the US alone. This waste occurs at every stage: over-purchasing, spoilage during storage, over-preparation, plate waste, and disposal of edible but imperfect food. Food waste contributes to 8-10% of global greenhouse gas emissions and represents a massive economic loss. Meanwhile, millions face food insecurity.',
-      category: 'food_agriculture',
+      category: 'lifestyle',
       solutions: [
         'Deploy AI-powered demand forecasting systems that analyze historical sales, weather, local events, and seasonal patterns to predict daily covers and menu item popularity, reducing over-preparation by 30-40%.',
         'Create a real-time surplus food marketplace app connecting restaurants with unsold food to nearby consumers and charities at discounted prices during the last hours of service, preventing waste while recovering revenue.',
@@ -203,7 +203,7 @@ async function main() {
     {
       title: 'How can we protect critical infrastructure from cyber attacks?',
       description: 'Critical infrastructure systems — power grids, water treatment plants, transportation networks, healthcare systems, and financial institutions — are increasingly connected to the internet and vulnerable to sophisticated cyber attacks. Recent incidents have disrupted fuel pipelines, hospital systems, and municipal water supplies. Many infrastructure operators use outdated legacy systems with known vulnerabilities, and the convergence of IT and operational technology (OT) creates new attack surfaces.',
-      category: 'safety_security',
+      category: 'society_culture',
       solutions: [
         'Implement mandatory air-gapping for the most critical control systems, with physical data diodes that allow monitoring data to flow out but prevent any commands from flowing in from connected networks, eliminating remote attack vectors.',
         'Create a national cyber defense reserve corps of vetted private-sector security professionals who can be rapidly deployed to assist critical infrastructure operators during active cyber incidents, similar to the National Guard model.',
@@ -221,7 +221,7 @@ async function main() {
     {
       title: 'How can we combat the spread of AI-generated misinformation?',
       description: 'AI-generated deepfakes, synthetic text, and manipulated media are becoming increasingly sophisticated and difficult to detect. These technologies can create convincing fake videos of public figures, generate thousands of fake news articles, and produce realistic but fabricated evidence. The volume and quality of AI-generated misinformation threatens democratic processes, public trust, and individual reputation. Traditional fact-checking cannot scale to match the speed and volume of AI-generated content.',
-      category: 'communication_media',
+      category: 'society_culture',
       solutions: [
         'Implement mandatory content provenance standards using cryptographic signatures (like C2PA) that create an unbreakable chain of custody from camera capture to publication, allowing anyone to verify when and where content was originally created.',
         'Develop AI detection tools that identify synthetic content using statistical analysis of generation artifacts, deployed as browser extensions and platform integrations that automatically flag potentially AI-generated content for users.',
@@ -239,7 +239,7 @@ async function main() {
     {
       title: 'How can we make space debris cleanup economically viable?',
       description: 'There are over 36,000 tracked objects larger than 10cm orbiting Earth, plus millions of smaller fragments. This growing cloud of space debris threatens active satellites, the International Space Station, and future space missions. Collisions create more debris in a cascading chain reaction known as Kessler Syndrome. Despite the existential threat to the space economy, no cleanup mission has been commercially funded because the costs are high and there is no direct revenue model.',
-      category: 'space_exploration',
+      category: 'science_nature',
       solutions: [
         'Create a space debris bounty system where governments and satellite operators contribute to a fund that pays cleanup companies per kilogram of debris removed, with premiums for removing objects in the most congested orbital zones.',
         'Develop reusable space tugs powered by ion engines that can deorbit multiple debris objects per mission, reducing per-object removal costs through economies of scale and reusability.',
@@ -257,7 +257,7 @@ async function main() {
     {
       title: 'How can we increase voter participation in local elections?',
       description: 'While national elections receive significant attention, local elections — which often have the most direct impact on residents\' daily lives — frequently see turnout below 20%. City council members, school board officials, and local judges are often elected by a tiny fraction of eligible voters. Low participation leads to unrepresentative governance, special interest capture, and public disengagement from democracy. The problem is especially acute among young voters, renters, and minority communities.',
-      category: 'governance_policy',
+      category: 'society_culture',
       solutions: [
         'Move local elections to coincide with national election dates, immediately leveraging the higher turnout infrastructure and voter attention of presidential and midterm cycles rather than holding separate off-cycle elections.',
         'Implement automatic voter registration at every government touchpoint — DMV visits, tax filing, utility signups — eliminating registration as a barrier and ensuring every eligible citizen is enrolled by default.',
@@ -275,7 +275,7 @@ async function main() {
     {
       title: 'How can we improve disaster preparedness in vulnerable communities?',
       description: 'Low-income communities, elderly populations, people with disabilities, and communities of color are disproportionately affected by natural disasters. They often live in flood-prone or infrastructure-deficient areas, have fewer resources for evacuation and recovery, receive less warning time, and face longer recovery periods. Current disaster preparedness systems are often designed around the needs and capabilities of the general population, leaving the most vulnerable least prepared.',
-      category: 'safety_security',
+      category: 'society_culture',
       solutions: [
         'Create community resilience hubs in vulnerable neighborhoods — solar-powered, storm-hardened facilities that serve as daily community centers and transform into emergency shelters with supplies, communication equipment, and medical stations during disasters.',
         'Develop a multilingual, multi-format alert system that delivers disaster warnings via text, voice call, TV, radio, social media, and door-to-door outreach simultaneously, ensuring no communication method is a single point of failure.',
@@ -293,7 +293,7 @@ async function main() {
     {
       title: 'How can vertical farming become cost-competitive with traditional agriculture?',
       description: 'Vertical farming promises year-round local food production using 95% less water and no pesticides. However, current vertical farms face high energy costs for LED lighting, expensive construction, and limited crop variety — mostly leafy greens and herbs. Energy costs alone can be 25-30% of operating expenses. For vertical farming to meaningfully contribute to food security, it needs to become cost-competitive with conventional agriculture for a wider range of crops.',
-      category: 'food_agriculture',
+      category: 'lifestyle',
       solutions: [
         'Integrate vertical farms with renewable energy sources — co-locating with solar arrays and wind farms, using surplus renewable energy during off-peak hours, and implementing thermal storage to reduce energy costs by 40-60%.',
         'Develop crop-specific LED spectra that deliver only the wavelengths each plant needs at each growth stage, eliminating wasted light energy and reducing electricity consumption by up to 50% compared to current broad-spectrum approaches.',

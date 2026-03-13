@@ -15,6 +15,13 @@
       "when": 1773342410181,
       "tag": "0001_medical_blur",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1741868400000,
+      "tag": "0002_category_simplification",
+      "breakpoints": true
     }
   ]
 }

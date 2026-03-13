@@ -3,26 +3,18 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { CATEGORIES, getCategoriesByGroup } from '@opensolve/shared/categories';
-import type { CategoryGroup } from '@opensolve/shared/categories';
+import { CATEGORIES } from '@opensolve/shared/categories';
 
 interface CategoryChipRowProps {
-  activeGroup: CategoryGroup | null;
   activeCategory: string | null;
 }
 
-export function CategoryChipRow({ activeGroup, activeCategory }: CategoryChipRowProps) {
+export function CategoryChipRow({ activeCategory }: CategoryChipRowProps) {
   const searchParams = useSearchParams();
-  const categories = activeGroup
-    ? getCategoriesByGroup(activeGroup)
-    : CATEGORIES;
-
-  if (categories.length === 0) return null;
 
   function buildCategoryHref(slug: string): string {
     const params = new URLSearchParams(searchParams.toString());
     params.set('category', slug);
-    params.delete('group');
     params.delete('page');
     const qs = params.toString();
     return `/problems?${qs}`;
@@ -32,11 +24,6 @@ export function CategoryChipRow({ activeGroup, activeCategory }: CategoryChipRow
     const params = new URLSearchParams(searchParams.toString());
     params.delete('category');
     params.delete('page');
-    if (activeGroup) {
-      params.set('group', activeGroup);
-    } else {
-      params.delete('group');
-    }
     const qs = params.toString();
     return `/problems${qs ? `?${qs}` : ''}`;
   }
@@ -54,7 +41,7 @@ export function CategoryChipRow({ activeGroup, activeCategory }: CategoryChipRow
       >
         All
       </Link>
-      {categories.map(cat => (
+      {CATEGORIES.map(cat => (
         <Link
           key={cat.slug}
           href={buildCategoryHref(cat.slug)}

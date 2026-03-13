@@ -73,7 +73,7 @@ async function main() {
       userId: createdUsers[0].id, // Sarah Chen
       title: 'How can we make mental health support accessible to college students who can\'t afford therapy?',
       description: 'College students face unprecedented levels of anxiety, depression, and burnout. Campus counseling centers have months-long waitlists, private therapy costs $100-200 per session, and insurance coverage is often inadequate. Many students suffer in silence because they simply can\'t afford professional help. Free apps and hotlines exist but lack the depth of real therapeutic relationships. We need creative solutions that provide meaningful, ongoing mental health support at a price point college students can actually afford.',
-      category: 'health_medicine' as const,
+      category: 'health' as const,
       solutions: [
         'Create a tiered peer counseling program where graduate psychology students provide supervised therapy sessions to undergrads at $10-15 per session, giving both groups valuable experience while making support affordable.',
         'Build a university-funded group therapy network where licensed therapists lead themed support groups of 8-12 students, reducing per-person costs to $15-20 while building community and reducing isolation.',
@@ -111,7 +111,7 @@ async function main() {
       userId: createdUsers[1].id, // Marcus Johnson
       title: 'What are the most effective ways to reduce gun violence in American cities without restricting legal gun ownership?',
       description: 'Gun violence kills over 45,000 Americans annually, with urban communities bearing a disproportionate burden. While the gun control debate remains politically deadlocked, there are potential interventions that focus on reducing violence rather than restricting access. Violence interruption programs, community investment, mental health services, and targeted enforcement have shown promise. What comprehensive strategies can significantly reduce gun violence while respecting Second Amendment rights?',
-      category: 'safety_security' as const,
+      category: 'society_culture' as const,
       solutions: [
         'Scale up violence interruption programs like Cure Violence that employ credible messengers — former gang members and community leaders who mediate conflicts before they turn lethal, proven to reduce shootings by 40-70% in target areas.',
         'Create a nationwide voluntary gun buyback program paired with community investment — for every dollar spent on buybacks, invest two dollars in the community for job training, youth programs, and mental health services.',
@@ -149,7 +149,7 @@ async function main() {
       userId: createdUsers[2].id, // Aiko Tanaka
       title: 'How can public transit systems attract riders back after the remote work revolution?',
       description: 'Public transit ridership in major cities has declined 20-40% compared to pre-pandemic levels as remote and hybrid work became permanent for millions of knowledge workers. This creates a fiscal death spiral: fewer riders means less revenue, which means service cuts, which drives away more riders. Transit agencies face a fundamental question — how do you design a transit system for a world where the traditional 9-to-5 commute is no longer the dominant travel pattern? The old model of peak-hour service to downtown office districts no longer matches how people actually move.',
-      category: 'urban_infrastructure' as const,
+      category: 'society_culture' as const,
       solutions: [
         'Redesign transit networks around an all-day, all-directions model rather than peak-hour commuter patterns — increase frequency on cross-town and neighborhood-to-neighborhood routes that serve shopping, healthcare, and social trips.',
         'Implement dynamic pricing that makes off-peak rides significantly cheaper (50-75% discount), spreading demand throughout the day and incentivizing the discretionary trips that need to replace lost commuter revenue.',
@@ -187,7 +187,7 @@ async function main() {
       userId: createdUsers[3].id, // David Okafor
       title: 'How can African countries build semiconductor manufacturing capacity to reduce tech dependency?',
       description: 'Africa imports virtually 100% of its semiconductors, creating massive dependency on foreign supply chains. The COVID-era chip shortage exposed how this dependency can paralyze economies — automotive, telecommunications, agriculture technology, and banking all suffered. Meanwhile, the global chip industry is concentrated in just a few countries. With a young, growing population and increasing tech adoption, Africa needs its own semiconductor ecosystem. But building chip fabs requires billions in investment, rare technical expertise, and reliable infrastructure that many African nations currently lack.',
-      category: 'science_technology' as const,
+      category: 'technology' as const,
       solutions: [
         'Start with chip packaging and testing facilities rather than fabrication — these require 10x less capital investment and can be operational in 2-3 years, building workforce skills and supply chain relationships before moving to manufacturing.',
         'Create a pan-African semiconductor consortium pooling investment from 10-15 nations to fund a shared foundry, with production allocated proportional to investment and technical contribution, achieving scale no single country could.',
@@ -225,7 +225,7 @@ async function main() {
       userId: createdUsers[4].id, // Elena Rodriguez
       title: 'How can cities make housing affordable without killing development incentives?',
       description: 'Housing costs in major cities have become unaffordable for median-income families, with many spending over 50% of income on rent. Traditional approaches create a dilemma: strict rent controls discourage new construction, while purely market-driven development produces luxury units that don\'t serve most residents. Zoning reform, inclusionary housing, public housing, and various subsidies each have advocates and critics. The challenge is finding a comprehensive approach that expands housing supply, keeps prices accessible, and still makes development economically viable for builders.',
-      category: 'governance_policy' as const,
+      category: 'society_culture' as const,
       solutions: [
         'Implement by-right zoning that allows 4-6 story mixed-use buildings in all residential zones without discretionary review, dramatically increasing supply while maintaining neighborhood character through design standards rather than density limits.',
         'Create a social housing developer — a public entity that builds and manages mixed-income housing at cost, without the profit margins that add 15-25% to private development, while operating with private-sector efficiency standards.',

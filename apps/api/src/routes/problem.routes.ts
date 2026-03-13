@@ -3,8 +3,7 @@ import { z } from 'zod';
 import { db } from '../config/database.js';
 import { problems, solutions, bots, users } from '../db/schema.js';
 import { eq, desc, asc, sql, and, isNotNull, inArray } from 'drizzle-orm';
-import { CATEGORIES, CATEGORY_GROUP_DEFINITIONS, getCategoriesByGroup } from '@opensolve/shared/categories.js';
-import type { CategoryGroup } from '@opensolve/shared/categories.js';
+import { CATEGORIES } from '@opensolve/shared/categories.js';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { sanitizeMiddleware } from '../middleware/sanitize.middleware.js';
 
@@ -14,23 +13,14 @@ const createProblemSchema = z.object({
 });
 
 const CATEGORY_SLUGS = [
-  // Everyday Questions
-  'everyday_life', 'tech_help', 'health_wellness', 'entertainment_leisure',
-  'relationships_social', 'learning_career', 'finance_personal',
-  'creative_projects', 'parenting_family',
-  // Society & World
-  'environment_climate', 'governance_policy', 'society_culture',
-  'urban_infrastructure', 'food_agriculture', 'safety_security',
-  'communication_media', 'space_exploration',
-  // Science & Professional
-  'science_technology', 'health_medicine', 'business_economics', 'education_learning',
+  'technology', 'science_nature', 'health', 'business_finance',
+  'education_career', 'society_culture', 'philosophy_ideas', 'lifestyle',
 ] as const;
 
 const VALID_STATUSES = ['pending', 'approved', 'rejected', 'active', 'mature'] as const;
 
 const listQuerySchema = z.object({
   category: z.enum(CATEGORY_SLUGS).optional(),
-  group: z.enum(['everyday', 'world', 'professional']).optional(),
   status: z.string().optional().transform((val) => {
     if (!val || val === 'all') return undefined;
     if ((VALID_STATUSES as readonly string[]).includes(val)) return val as typeof VALID_STATUSES[number];
@@ -53,11 +43,6 @@ export async function problemRoutes(fastify: FastifyInstance) {
     const conditions = [];
     if (query.category) {
       conditions.push(eq(problems.category, query.category));
-    } else if (query.group) {
-      const groupSlugs = getCategoriesByGroup(query.group as CategoryGroup).map(c => c.slug) as typeof CATEGORY_SLUGS[number][];
-      if (groupSlugs.length > 0) {
-        conditions.push(inArray(problems.category, groupSlugs));
-      }
     }
     if (query.status) conditions.push(eq(problems.status, query.status));
     if (query.author_type) conditions.push(eq(problems.authorType, query.author_type));
@@ -241,46 +226,26 @@ export async function problemRoutes(fastify: FastifyInstance) {
 
   // ===== LIST CATEGORIES WITH COUNTS =====
   fastify.get('/categories', async (request, reply) => {
-    const { grouped, group } = request.query as { grouped?: string; group?: string };
-
     const categoryCounts = await db
       .select({
         category: problems.category,
         count: sql<number>`count(*)::int`,
-        activeCount: sql<number>`count(*) FILTER (WHERE ${problems.status} = 'active')::int`,
       })
       .from(problems)
       .where(isNotNull(problems.category))
       .groupBy(problems.category);
 
-    const categoriesWithCounts = CATEGORIES
-      .filter(cat => !group || cat.group === group)
-      .map(cat => {
-        const counts = categoryCounts.find((c: { category: string | null }) => c.category === cat.slug);
-        return {
-          slug: cat.slug,
-          displayName: cat.displayName,
-          icon: cat.icon,
-          description: cat.description,
-          group: cat.group,
-          totalProblems: counts?.count ?? 0,
-          activeProblems: counts?.activeCount ?? 0,
-        };
-      });
+    const countMap = new Map(categoryCounts.map(r => [r.category as string, r.count]));
 
-    if (grouped === 'true') {
-      return reply.code(200).send({
-        groups: CATEGORY_GROUP_DEFINITIONS.map(g => ({
-          id: g.id,
-          label: g.label,
-          tagline: g.tagline,
-          description: g.description,
-          categories: categoriesWithCounts.filter(c => c.group === g.id),
-        })),
-      });
-    }
-
-    return reply.code(200).send(categoriesWithCounts);
+    return reply.code(200).send(
+      CATEGORIES.map(c => ({
+        slug: c.slug,
+        displayName: c.displayName,
+        icon: c.icon,
+        description: c.description,
+        activeProblems: countMap.get(c.slug) || 0,
+      }))
+    );
   });
 
   // ===== CREATE PROBLEM (human only) =====
