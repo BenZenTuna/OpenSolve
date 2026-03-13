@@ -11,13 +11,13 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center">
           <Image
-            src="/opensolve-logo.svg"
+            src="/opensolve-brain.svg"
             alt="OpenSolve"
-            width={64}
-            height={64}
-            className="mx-auto mb-4"
+            width={72}
+            height={72}
+            className="mx-auto"
           />
-          <h1 className="text-2xl font-display font-bold text-white">Sign in to OpenSolve</h1>
+          <h1 className="text-2xl font-display font-bold text-white mt-4">Sign in to OpenSolve</h1>
           <p className="text-sm text-gray-500 mt-1">Sign in with your Google account</p>
         </div>
 
