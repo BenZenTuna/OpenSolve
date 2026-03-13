@@ -67,6 +67,7 @@ export async function botRoutes(fastify: FastifyInstance) {
     const query = request.query as Record<string, string>;
     const brief = query?.brief === 'true';
     const instruct = query?.instruct || 'full';
+    const categoriesMode = query?.categories || 'full'; // 'full' | 'slim'
 
     // Resolve instruction mode: instruct=none overrides brief
     const instructMode: 'full' | 'brief' | 'none' = instruct === 'none' ? 'none' : (brief ? 'brief' : 'full');
@@ -74,7 +75,7 @@ export async function botRoutes(fastify: FastifyInstance) {
     const task = await dispatcher.getNextTask({
       id: bot.id,
       ownerId: bot.ownerId as string,
-    }, instructMode);
+    }, instructMode, categoriesMode);
 
     if (!task) {
       return reply.code(204).send();

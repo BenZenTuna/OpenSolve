@@ -32,7 +32,7 @@ export class DispatcherService {
     this.loadBalancer = new LoadBalancerService();
   }
 
-  async getNextTask(bot: Bot, instructMode: 'full' | 'brief' | 'none' = 'full'): Promise<TaskResult | null> {
+  async getNextTask(bot: Bot, instructMode: 'full' | 'brief' | 'none' = 'full', categoriesMode: string = 'full'): Promise<TaskResult | null> {
     // Task expiry now handled by a 30s interval sweep in server.ts
 
     // Check if bot already has an active task
@@ -42,7 +42,7 @@ export class DispatcherService {
     // Fast-path: skip flag step if no pending problems exist
     const pendingCount = await redis.get('dispatch:pending_problems');
     if (pendingCount === null || parseInt(pendingCount) > 0) {
-      const flagTask = await this.tryAssignFlagTask(bot, instructMode);
+      const flagTask = await this.tryAssignFlagTask(bot, instructMode, categoriesMode);
       if (flagTask) return flagTask;
     }
 
@@ -61,13 +61,13 @@ export class DispatcherService {
     }
 
     // Priority 4: Problem creation (always available)
-    const createTask = await this.tryAssignCreateTask(bot, instructMode);
+    const createTask = await this.tryAssignCreateTask(bot, instructMode, categoriesMode);
     if (createTask) return createTask;
 
     return null;
   }
 
-  private async tryAssignFlagTask(bot: Bot, instructMode: 'full' | 'brief' | 'none'): Promise<TaskResult | null> {
+  private async tryAssignFlagTask(bot: Bot, instructMode: 'full' | 'brief' | 'none', categoriesMode: string): Promise<TaskResult | null> {
     // Get problem IDs this bot has already flagged
     const botFlaggedProblems = await db
       .select({ problemId: flags.problemId })
@@ -135,11 +135,13 @@ export class DispatcherService {
         problem_id: problem.id,
         problem_title: problem.title,
         problem_description: this.wrapContent(problem.description),
-        categories: CATEGORIES.map((c: Category) => ({
-          slug: c.slug,
-          name: c.displayName,
-          description: c.description,
-        })),
+        categories: categoriesMode === 'slim'
+          ? CATEGORIES.map((c: Category) => c.slug)
+          : CATEGORIES.map((c: Category) => ({
+              slug: c.slug,
+              name: c.displayName,
+              description: c.description,
+            })),
         ...(instruction !== undefined && { instruction }),
         ...(instructMode !== 'none' && { response_format: '{ "verdict": "green" or "red", "category": "none" or violation type, "suggested_category": "category_slug" }' }),
       });
@@ -229,17 +231,19 @@ export class DispatcherService {
     return null;
   }
 
-  private async tryAssignCreateTask(bot: Bot, instructMode: 'full' | 'brief' | 'none'): Promise<TaskResult | null> {
+  private async tryAssignCreateTask(bot: Bot, instructMode: 'full' | 'brief' | 'none', categoriesMode: string): Promise<TaskResult | null> {
     const instruction = instructMode === 'none' ? undefined
       : instructMode === 'brief' ? CREATE_INSTRUCTION_BRIEF
       : CREATE_INSTRUCTION;
 
     return this.createTask(bot.id, 'create', null, {
-      categories: CATEGORIES.map((c: Category) => ({
-        slug: c.slug,
-        name: c.displayName,
-        description: c.description,
-      })),
+      categories: categoriesMode === 'slim'
+        ? CATEGORIES.map((c: Category) => c.slug)
+        : CATEGORIES.map((c: Category) => ({
+            slug: c.slug,
+            name: c.displayName,
+            description: c.description,
+          })),
       ...(instruction !== undefined && { instruction }),
       ...(instructMode !== 'none' && { response_format: '{ "problem_title": "...", "problem_description": "...", "category": "category_slug" }' }),
     });
