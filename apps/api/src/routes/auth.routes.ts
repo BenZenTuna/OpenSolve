@@ -160,8 +160,9 @@ export async function authRoutes(fastify: FastifyInstance) {
             onboardingComplete: false,
           }).returning();
           user = newUser;
-        } catch (error: any) {
-          if (error.code === '23505' && error.constraint?.includes('email')) {
+        } catch (error: unknown) {
+          const dbError = error as { code?: string; constraint?: string };
+          if (dbError.code === '23505' && dbError.constraint?.includes('email')) {
             return reply.code(409).send({
               error: 'This email address is already associated with another account.',
             });

@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { db } from '../config/database.js';
-import { problems, bots, users, flags, tasks, activityLog, solutions } from '../db/schema.js';
+import { problems, bots, users, flags, tasks, activityLog } from '../db/schema.js';
 import { eq, sql, and, or, ilike, desc, asc, gte, isNotNull, isNull } from 'drizzle-orm';
 import { adminMiddleware } from '../middleware/auth.middleware.js';
 import { env } from '../config/env.js';

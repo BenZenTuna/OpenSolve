@@ -163,6 +163,7 @@ async function start() {
     const dispatcher = new DispatcherService();
     // eslint-disable-next-line prefer-const -- assigned after onClose hook captures the binding
     let expiryInterval: NodeJS.Timeout;
+    // eslint-disable-next-line prefer-const -- assigned after onClose hook captures the binding
     let counterInterval: NodeJS.Timeout;
     let retentionInterval: NodeJS.Timeout;
     // eslint-disable-next-line prefer-const -- assigned after onClose hook captures the binding
