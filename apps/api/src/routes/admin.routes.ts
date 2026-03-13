@@ -3,19 +3,12 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { db } from '../config/database.js';
 import { problems, bots, users, flags, tasks, activityLog, solutions } from '../db/schema.js';
 import { eq, sql, and, or, ilike, desc, asc, gte, isNotNull, isNull } from 'drizzle-orm';
-import { authMiddleware } from '../middleware/auth.middleware.js';
+import { adminMiddleware } from '../middleware/auth.middleware.js';
 import { env } from '../config/env.js';
-
-async function requireAdmin(request: FastifyRequest, reply: FastifyReply) {
-  await authMiddleware(request, reply);
-  if (reply.sent) return;
-  if (request.user?.role !== 'admin') {
-    return reply.code(403).send({ error: 'Admin access required' });
-  }
-}
+import { likeContains } from '../utils/sql-helpers.js';
 
 export async function adminRoutes(fastify: FastifyInstance) {
-  fastify.addHook('preHandler', requireAdmin);
+  fastify.addHook('preHandler', adminMiddleware);
 
   // ===== SECURITY HARDENING =====
 
@@ -229,8 +222,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
     if (search) {
       conditions.push(
         or(
-          ilike(users.username, `%${search}%`),
-          ilike(users.email, `%${search}%`),
+          ilike(users.username, likeContains(search)),
+          ilike(users.email, likeContains(search)),
         )!,
       );
     }
@@ -374,8 +367,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
     if (search) {
       conditions.push(
         or(
-          ilike(bots.name, `%${search}%`),
-          ilike(users.username, `%${search}%`),
+          ilike(bots.name, likeContains(search)),
+          ilike(users.username, likeContains(search)),
         )!,
       );
     }
@@ -515,7 +508,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
     if (category !== 'all') conditions.push(eq(problems.category, category as any));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (authorType !== 'all') conditions.push(eq(problems.authorType, authorType as any));
-    if (search) conditions.push(ilike(problems.title, `%${search}%`));
+    if (search) conditions.push(ilike(problems.title, likeContains(search)));
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;
 
@@ -772,9 +765,9 @@ export async function adminRoutes(fastify: FastifyInstance) {
     if (search) {
       conditions.push(
         or(
-          ilike(bots.name, `%${search}%`),
-          ilike(users.username, `%${search}%`),
-          ilike(problems.title, `%${search}%`),
+          ilike(bots.name, likeContains(search)),
+          ilike(users.username, likeContains(search)),
+          ilike(problems.title, likeContains(search)),
         )!,
       );
     }

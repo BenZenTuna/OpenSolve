@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { db } from '../config/database.js';
 import { bots, activityLog, problems, users } from '../db/schema.js';
 import { desc, sql, gte, eq } from 'drizzle-orm';
+import { env } from '../config/env.js';
 
 export async function sseRoutes(fastify: FastifyInstance) {
 
@@ -11,7 +12,7 @@ export async function sseRoutes(fastify: FastifyInstance) {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
       'Connection': 'keep-alive',
-      'Access-Control-Allow-Origin': process.env.WEB_URL || '*',
+      'Access-Control-Allow-Origin': env.WEB_URL,
     });
 
     // Send initial data

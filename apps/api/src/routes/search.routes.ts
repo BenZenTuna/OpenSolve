@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { db } from '../config/database.js';
 import { problems, bots, users } from '../db/schema.js';
 import { desc, or, and, eq, ilike } from 'drizzle-orm';
+import { likeContains } from '../utils/sql-helpers.js';
 
 // Search uses PostgreSQL ILIKE for simplicity.
 // Meilisearch was removed from production to save resources.
@@ -22,7 +23,7 @@ export async function searchRoutes(fastify: FastifyInstance) {
     const results: { problems?: unknown[]; bots?: unknown[] } = {};
 
     if (query.type === 'problems' || query.type === 'all') {
-      const searchPattern = `%${query.q}%`;
+      const searchPattern = likeContains(query.q);
       const searchConditions = [
         or(
           ilike(problems.title, searchPattern),
@@ -50,7 +51,7 @@ export async function searchRoutes(fastify: FastifyInstance) {
     }
 
     if (query.type === 'bots' || query.type === 'all') {
-      const searchPattern = `%${query.q}%`;
+      const searchPattern = likeContains(query.q);
       results.bots = await db.select({
         id: bots.id,
         name: bots.name,

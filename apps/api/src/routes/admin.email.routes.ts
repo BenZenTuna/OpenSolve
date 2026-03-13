@@ -3,23 +3,16 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { db } from '../config/database.js';
 import { users, activityLog } from '../db/schema.js';
 import { eq, sql, desc, and, or, ilike, isNotNull } from 'drizzle-orm';
-import { authMiddleware } from '../middleware/auth.middleware.js';
+import { adminMiddleware } from '../middleware/auth.middleware.js';
 import { env } from '../config/env.js';
 import { redis } from '../config/redis.js';
 import { EmailService } from '../services/email.service.js';
+import { likeContains } from '../utils/sql-helpers.js';
 
 const emailService = new EmailService();
 
-async function requireAdmin(request: FastifyRequest, reply: FastifyReply) {
-  await authMiddleware(request, reply);
-  if (reply.sent) return;
-  if (request.user?.role !== 'admin') {
-    return reply.code(403).send({ error: 'Admin access required' });
-  }
-}
-
 export async function adminEmailRoutes(fastify: FastifyInstance) {
-  fastify.addHook('preHandler', requireAdmin);
+  fastify.addHook('preHandler', adminMiddleware);
 
   // CSRF protection for all write operations
   const adminCsrfGuard = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -441,8 +434,8 @@ export async function adminEmailRoutes(fastify: FastifyInstance) {
       .from(users)
       .where(
         or(
-          ilike(users.username, `%${q}%`),
-          ilike(users.email, `%${q}%`),
+          ilike(users.username, likeContains(q)),
+          ilike(users.email, likeContains(q)),
         )
       )
       .limit(10);
