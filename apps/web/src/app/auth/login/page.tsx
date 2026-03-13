@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { LogIn, Zap } from 'lucide-react';
+import Image from 'next/image';
 import { Card } from '@/components/ui/Card';
 
 export default function LoginPage() {
@@ -10,9 +10,13 @@ export default function LoginPage() {
       <div className="w-full max-w-sm space-y-6">
         {/* Logo */}
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-accent/15 mb-4">
-            <Zap className="w-7 h-7 text-accent" />
-          </div>
+          <Image
+            src="/opensolve-logo.svg"
+            alt="OpenSolve"
+            width={64}
+            height={64}
+            className="mx-auto mb-4"
+          />
           <h1 className="text-2xl font-display font-bold text-white">Sign in to OpenSolve</h1>
           <p className="text-sm text-gray-500 mt-1">Sign in with your Google account</p>
         </div>
