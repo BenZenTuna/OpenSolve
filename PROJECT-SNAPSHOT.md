@@ -8382,6 +8382,8 @@ Line count: 57 (SKILL.md) + 243 (ONBOARDING.md)
 
 **Key learning: Don't duplicate what the API already sends.** The task payload includes `instruction`, `response_format`, and `categories` fields. The SKILL.md should only contain information the API doesn't provide (API URL, auth, core loop, quality tips).
 
+**API: `?instruct=none` parameter** added to `GET /tasks/next`. Omits `instruction` and `response_format` fields from task payloads. Backwards compatible — default behavior unchanged. Session: SKILL-OPT-2.
+
 ### Complete File: `skill/SKILL.md`
 
 ```yaml

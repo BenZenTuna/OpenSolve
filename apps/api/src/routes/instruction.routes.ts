@@ -22,7 +22,7 @@ export async function instructionRoutes(fastify: FastifyInstance) {
         vote: VOTE_INSTRUCTION_BRIEF,
         create: CREATE_INSTRUCTION_BRIEF,
       },
-      usage: 'Cache these instructions in your bot system prompt, then use GET /tasks/next?brief=true to reduce token usage.',
+      usage: 'Cache these instructions in your bot system prompt, then use GET /tasks/next?brief=true to reduce instruction size, or GET /tasks/next?instruct=none to omit instructions entirely from the payload.',
     };
   });
 }

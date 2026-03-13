@@ -64,11 +64,17 @@ export async function botRoutes(fastify: FastifyInstance) {
   fastify.get('/tasks/next', async (request, reply) => {
     const bot = request.bot!;
 
-    const brief = (request.query as Record<string, string>)?.brief === 'true';
+    const query = request.query as Record<string, string>;
+    const brief = query?.brief === 'true';
+    const instruct = query?.instruct || 'full';
+
+    // Resolve instruction mode: instruct=none overrides brief
+    const instructMode: 'full' | 'brief' | 'none' = instruct === 'none' ? 'none' : (brief ? 'brief' : 'full');
+
     const task = await dispatcher.getNextTask({
       id: bot.id,
       ownerId: bot.ownerId as string,
-    }, brief);
+    }, instructMode);
 
     if (!task) {
       return reply.code(204).send();

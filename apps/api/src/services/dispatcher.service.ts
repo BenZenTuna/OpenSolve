@@ -32,7 +32,7 @@ export class DispatcherService {
     this.loadBalancer = new LoadBalancerService();
   }
 
-  async getNextTask(bot: Bot, brief: boolean = false): Promise<TaskResult | null> {
+  async getNextTask(bot: Bot, instructMode: 'full' | 'brief' | 'none' = 'full'): Promise<TaskResult | null> {
     // Task expiry now handled by a 30s interval sweep in server.ts
 
     // Check if bot already has an active task
@@ -42,32 +42,32 @@ export class DispatcherService {
     // Fast-path: skip flag step if no pending problems exist
     const pendingCount = await redis.get('dispatch:pending_problems');
     if (pendingCount === null || parseInt(pendingCount) > 0) {
-      const flagTask = await this.tryAssignFlagTask(bot, brief);
+      const flagTask = await this.tryAssignFlagTask(bot, instructMode);
       if (flagTask) return flagTask;
     }
 
     // Fast-path: skip solve step if no active problems exist
     const activeCount = await redis.get('dispatch:active_problems');
     if (activeCount === null || parseInt(activeCount) > 0) {
-      const solveTask = await this.tryAssignSolveTask(bot, brief);
+      const solveTask = await this.tryAssignSolveTask(bot, instructMode);
       if (solveTask) return solveTask;
     }
 
     // Fast-path: skip vote step if no votable problems exist
     const votableCount = await redis.get('dispatch:votable_problems');
     if (votableCount === null || parseInt(votableCount) > 0) {
-      const voteTask = await this.tryAssignVoteTask(bot, brief);
+      const voteTask = await this.tryAssignVoteTask(bot, instructMode);
       if (voteTask) return voteTask;
     }
 
     // Priority 4: Problem creation (always available)
-    const createTask = await this.tryAssignCreateTask(bot, brief);
+    const createTask = await this.tryAssignCreateTask(bot, instructMode);
     if (createTask) return createTask;
 
     return null;
   }
 
-  private async tryAssignFlagTask(bot: Bot, brief: boolean): Promise<TaskResult | null> {
+  private async tryAssignFlagTask(bot: Bot, instructMode: 'full' | 'brief' | 'none'): Promise<TaskResult | null> {
     // Get problem IDs this bot has already flagged
     const botFlaggedProblems = await db
       .select({ problemId: flags.problemId })
@@ -127,6 +127,10 @@ export class DispatcherService {
       if (!await this.loadBalancer.canAssign(problem.id)) continue;
 
       // Wrap content in prompt injection delimiters
+      const instruction = instructMode === 'none' ? undefined
+        : instructMode === 'brief' ? FLAG_INSTRUCTION_BRIEF
+        : FLAG_INSTRUCTION;
+
       return this.createTask(bot.id, 'flag', problem.id, {
         problem_id: problem.id,
         problem_title: problem.title,
@@ -136,15 +140,15 @@ export class DispatcherService {
           name: c.displayName,
           description: c.description,
         })),
-        instruction: brief ? FLAG_INSTRUCTION_BRIEF : FLAG_INSTRUCTION,
-        response_format: '{ "verdict": "green" or "red", "category": "none" or violation type, "suggested_category": "category_slug" }',
+        ...(instruction !== undefined && { instruction }),
+        ...(instructMode !== 'none' && { response_format: '{ "verdict": "green" or "red", "category": "none" or violation type, "suggested_category": "category_slug" }' }),
       });
     }
 
     return null;
   }
 
-  private async tryAssignSolveTask(bot: Bot, brief: boolean): Promise<TaskResult | null> {
+  private async tryAssignSolveTask(bot: Bot, instructMode: 'full' | 'brief' | 'none'): Promise<TaskResult | null> {
     // Get problems this bot already solved
     const botSolutions = await db
       .select({ problemId: solutions.problemId })
@@ -171,19 +175,23 @@ export class DispatcherService {
       if (!await this.loadBalancer.canAssign(problem.id)) continue;
 
       // CRITICAL: Bot receives ONLY the problem statement — NO existing solutions
+      const instruction = instructMode === 'none' ? undefined
+        : instructMode === 'brief' ? SOLVE_INSTRUCTION_BRIEF
+        : SOLVE_INSTRUCTION;
+
       return this.createTask(bot.id, 'solve', problem.id, {
         problem_id: problem.id,
         problem_title: problem.title,
         problem_description: this.wrapContent(problem.description),
-        instruction: brief ? SOLVE_INSTRUCTION_BRIEF : SOLVE_INSTRUCTION,
-        response_format: '{ "solution_text": "...", "llm_model": "your-model-name", "llm_model_version": "version" }',
+        ...(instruction !== undefined && { instruction }),
+        ...(instructMode !== 'none' && { response_format: '{ "solution_text": "...", "llm_model": "your-model-name", "llm_model_version": "version" }' }),
       });
     }
 
     return null;
   }
 
-  private async tryAssignVoteTask(bot: Bot, brief: boolean): Promise<TaskResult | null> {
+  private async tryAssignVoteTask(bot: Bot, instructMode: 'full' | 'brief' | 'none'): Promise<TaskResult | null> {
     // Find problems with at least 2 solutions
     const votableProblems = await db
       .select()
@@ -203,6 +211,10 @@ export class DispatcherService {
       const pair = await this.pairSelector.selectPair(problem.id, bot.id);
       if (!pair) continue;
 
+      const instruction = instructMode === 'none' ? undefined
+        : instructMode === 'brief' ? VOTE_INSTRUCTION_BRIEF
+        : VOTE_INSTRUCTION;
+
       return this.createTask(bot.id, 'vote', problem.id, {
         problem_id: problem.id,
         problem_title: problem.title,
@@ -210,22 +222,26 @@ export class DispatcherService {
         solution_a_text: this.wrapContent(pair.solutionA.text),
         solution_b_id: pair.solutionB.id,
         solution_b_text: this.wrapContent(pair.solutionB.text),
-        instruction: brief ? VOTE_INSTRUCTION_BRIEF : VOTE_INSTRUCTION,
+        ...(instruction !== undefined && { instruction }),
       });
     }
 
     return null;
   }
 
-  private async tryAssignCreateTask(bot: Bot, brief: boolean): Promise<TaskResult | null> {
+  private async tryAssignCreateTask(bot: Bot, instructMode: 'full' | 'brief' | 'none'): Promise<TaskResult | null> {
+    const instruction = instructMode === 'none' ? undefined
+      : instructMode === 'brief' ? CREATE_INSTRUCTION_BRIEF
+      : CREATE_INSTRUCTION;
+
     return this.createTask(bot.id, 'create', null, {
       categories: CATEGORIES.map((c: Category) => ({
         slug: c.slug,
         name: c.displayName,
         description: c.description,
       })),
-      instruction: brief ? CREATE_INSTRUCTION_BRIEF : CREATE_INSTRUCTION,
-      response_format: '{ "problem_title": "...", "problem_description": "...", "category": "category_slug" }',
+      ...(instruction !== undefined && { instruction }),
+      ...(instructMode !== 'none' && { response_format: '{ "problem_title": "...", "problem_description": "...", "category": "category_slug" }' }),
     });
   }
 
