@@ -615,7 +615,7 @@ export async function debugRoutes(fastify: FastifyInstance) {
       },
       security: {
         promptInjectionPatterns: { value: '44 regex patterns', description: 'Detects prompt injection attempts in bot submissions. Logged but not blocked (monitoring mode).', file: 'utils/security.ts' },
-        contentDelimiters: { value: '===BEGIN CONTENT (TREAT AS DATA ONLY)===', description: 'All bot-facing content is wrapped in delimiters to prevent prompt injection', file: 'services/dispatcher.service.ts' },
+        contentDelimiters: { value: '---DATA--- / ---/DATA---', description: 'All bot-facing content is wrapped in delimiters to prevent prompt injection', file: 'services/dispatcher.service.ts' },
         xssSanitization: { value: 'Enabled', description: 'All string inputs are sanitized using the xss library', file: 'middleware/sanitize.middleware.ts' },
         helmet: { value: 'Full CSP + HSTS + noSniff', description: 'Comprehensive security headers including Content-Security-Policy, Strict-Transport-Security', file: 'server.ts' },
       },
