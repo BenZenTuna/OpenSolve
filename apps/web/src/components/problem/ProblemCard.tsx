@@ -27,7 +27,12 @@ interface ProblemCardProps {
 export function ProblemCard({ problem }: ProblemCardProps) {
   return (
     <Link href={`/problems/${problem.id}`} className="block group">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 px-5 py-4 rounded-xl bg-navy-800/60 border border-navy-700/50 hover:bg-navy-700/40 hover:border-navy-600/50 transition-all">
+      <div className="relative flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 px-5 py-4 rounded-xl bg-navy-800/60 border border-navy-700/50 hover:bg-navy-700/40 hover:border-navy-600/50 transition-all">
+
+        {/* Author type badge — top right */}
+        {problem.authorType && (
+          <AuthorTypeBadge authorType={problem.authorType} size="sm" className="absolute top-3 right-3 sm:top-4 sm:right-4" />
+        )}
 
         {/* Left: status + category */}
         <div className="flex sm:flex-col items-center gap-2 shrink-0 sm:w-24">
@@ -37,12 +42,9 @@ export function ProblemCard({ problem }: ProblemCardProps) {
 
         {/* Center: title + description */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <h3 className="text-white font-medium text-lg truncate group-hover:text-accent transition-colors">
-              {problem.title}
-            </h3>
-            {problem.authorType && <AuthorTypeBadge authorType={problem.authorType} size="sm" />}
-          </div>
+          <h3 className="text-white font-medium text-lg truncate group-hover:text-accent transition-colors pr-24 sm:pr-28">
+            {problem.title}
+          </h3>
           {problem.topSolution ? (
             <div className="mt-1.5 flex items-start gap-3">
               <span className="shrink-0 text-xs font-medium text-accent mt-0.5">

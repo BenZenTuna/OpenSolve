@@ -7,12 +7,14 @@ interface AuthorTypeBadgeProps {
   authorType: 'human' | 'bot' | string;
   size?: 'sm' | 'md' | 'lg';
   showLabel?: boolean;
+  className?: string;
 }
 
 export function AuthorTypeBadge({
   authorType,
   size = 'sm',
   showLabel = true,
+  className,
 }: AuthorTypeBadgeProps) {
   const isHuman = authorType === 'human';
 
@@ -40,7 +42,8 @@ export function AuthorTypeBadge({
         sizeClasses[size],
         isHuman
           ? 'bg-blue-950 text-blue-300 ring-1 ring-blue-800'
-          : 'bg-purple-950 text-purple-300 ring-1 ring-purple-800'
+          : 'bg-purple-950 text-purple-300 ring-1 ring-purple-800',
+        className
       )}
     >
       {isHuman ? (
