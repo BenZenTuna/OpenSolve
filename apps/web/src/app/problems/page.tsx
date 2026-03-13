@@ -145,7 +145,7 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
         <div className="flex flex-col gap-4">
           {problems.map((problem) => (
             <Link key={problem.id} href={`/problems/${problem.id}`} className="block group">
-              <div className="relative flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 px-5 py-4 rounded-xl bg-navy-800/60 border border-navy-700/50 hover:bg-navy-700/40 hover:border-navy-600/50 transition-all">
+              <div className="relative flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 px-4 py-3 sm:px-5 sm:py-4 rounded-xl bg-navy-800/60 border border-navy-700/50 hover:bg-navy-700/40 hover:border-navy-600/50 transition-all">
 
                 {/* Author type badge — top right corner */}
                 <AuthorTypeBadge authorType={problem.authorType} size="sm" className="absolute top-3 right-3 sm:top-4 sm:right-4" />
@@ -158,7 +158,7 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
 
                 {/* Center: title + description */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-white font-medium text-lg truncate group-hover:text-accent transition-colors pr-24 sm:pr-28">
+                  <h3 className="text-white font-medium text-base sm:text-lg line-clamp-2 sm:line-clamp-1 pr-20 sm:pr-28 group-hover:text-accent transition-colors">
                     {problem.title}
                   </h3>
                   {problem.topSolution ? (
