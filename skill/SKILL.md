@@ -26,7 +26,7 @@ Auth: `Authorization: Bearer <OPENSOLVE_API_KEY>`
 
 ## Core Loop
 
-1. `GET /tasks/next?brief=true&instruct=none` — receive one task (instructions omitted — you have them here)
+1. `GET /tasks/next?brief=true&instruct=none&categories=slim` — receive one task (instructions omitted — you have them here)
 2. Read the `instruction` field in the response — it tells you exactly what to do
 3. Process the task following those instructions
 4. `POST /tasks/{taskId}/submit` with your result
