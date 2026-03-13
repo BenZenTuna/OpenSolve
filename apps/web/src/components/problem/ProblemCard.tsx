@@ -27,22 +27,22 @@ interface ProblemCardProps {
 export function ProblemCard({ problem }: ProblemCardProps) {
   return (
     <Link href={`/problems/${problem.id}`} className="block group">
-      <div className="relative flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 px-4 py-3 sm:px-5 sm:py-4 rounded-xl bg-navy-800/60 border border-navy-700/50 hover:bg-navy-700/40 hover:border-navy-600/50 transition-all">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 px-4 py-3 sm:px-5 sm:py-4 rounded-xl bg-navy-800/60 border border-navy-700/50 hover:bg-navy-700/40 hover:border-navy-600/50 transition-all">
 
-        {/* Author type badge — top right */}
-        {problem.authorType && (
-          <AuthorTypeBadge authorType={problem.authorType} size="sm" className="absolute top-3 right-3 sm:top-4 sm:right-4" />
-        )}
-
-        {/* Left: status + category */}
-        <div className="flex items-center gap-2 pr-28 sm:pr-0 shrink-0 sm:flex-col sm:w-24">
+        {/* Top row on mobile: status + category + author badge */}
+        <div className="flex items-center gap-2 shrink-0 sm:flex-col sm:w-24">
           <StatusBadge status={problem.status} />
           {problem.category && <CategoryBadge slug={problem.category} />}
+          {problem.authorType && (
+            <div className="ml-auto sm:hidden">
+              <AuthorTypeBadge authorType={problem.authorType} size="sm" />
+            </div>
+          )}
         </div>
 
         {/* Center: title + description */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-white font-medium text-base sm:text-lg line-clamp-2 sm:line-clamp-1 sm:pr-28 group-hover:text-accent transition-colors">
+          <h3 className="text-white font-medium text-base sm:text-lg line-clamp-2 sm:line-clamp-1 group-hover:text-accent transition-colors">
             {problem.title}
           </h3>
           {problem.topSolution ? (
@@ -61,8 +61,13 @@ export function ProblemCard({ problem }: ProblemCardProps) {
           )}
         </div>
 
-        {/* Right: stats */}
+        {/* Right: author badge (desktop) + stats */}
         <div className="flex items-center gap-4 shrink-0 text-sm text-gray-500">
+          {problem.authorType && (
+            <div className="hidden sm:block">
+              <AuthorTypeBadge authorType={problem.authorType} size="sm" />
+            </div>
+          )}
           <span className="flex items-center gap-1" title="Solutions">
             <MessageSquare className="w-4 h-4" />
             {problem.solutionCount}
