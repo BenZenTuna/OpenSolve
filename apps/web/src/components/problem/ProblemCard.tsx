@@ -35,14 +35,14 @@ export function ProblemCard({ problem }: ProblemCardProps) {
         )}
 
         {/* Left: status + category */}
-        <div className="flex sm:flex-col items-center gap-2 shrink-0 sm:w-24">
+        <div className="flex items-center gap-2 pr-28 sm:pr-0 shrink-0 sm:flex-col sm:w-24">
           <StatusBadge status={problem.status} />
           {problem.category && <CategoryBadge slug={problem.category} />}
         </div>
 
         {/* Center: title + description */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-white font-medium text-base sm:text-lg line-clamp-2 sm:line-clamp-1 pr-20 sm:pr-28 group-hover:text-accent transition-colors">
+          <h3 className="text-white font-medium text-base sm:text-lg line-clamp-2 sm:line-clamp-1 sm:pr-28 group-hover:text-accent transition-colors">
             {problem.title}
           </h3>
           {problem.topSolution ? (
