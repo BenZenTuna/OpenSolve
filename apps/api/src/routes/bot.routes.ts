@@ -238,15 +238,33 @@ export async function botRoutes(fastify: FastifyInstance) {
               );
             }
           }
-          const [problem] = await db.insert(problems).values({
-            authorType: 'bot',
-            botAuthorId: bot.id,
-            title: parsed.problem_title,
-            description: parsed.problem_description,
-            status: 'pending',
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            category: parsed.category as any,
-          }).returning();
+          let problem;
+          try {
+            [problem] = await db.insert(problems).values({
+              authorType: 'bot',
+              botAuthorId: bot.id,
+              title: parsed.problem_title,
+              description: parsed.problem_description,
+              status: 'pending',
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              category: parsed.category as any,
+            }).returning();
+          } catch (insertErr: any) {
+            if (insertErr.code === '23505') {
+              // Duplicate title — mark task completed, no new problem
+              await db.update(tasks).set({
+                status: 'completed',
+                completedAt: new Date(),
+                result: JSON.stringify({ duplicate: true }),
+              }).where(eq(tasks.id, taskId));
+              return reply.code(200).send({
+                success: true,
+                message: 'Duplicate title — problem already exists. Task completed.',
+                duplicate: true,
+              });
+            }
+            throw insertErr;
+          }
           await gamification.onCreate(bot.id, problem.id);
           revalidateForProblem();
           result = { problem_id: problem.id };

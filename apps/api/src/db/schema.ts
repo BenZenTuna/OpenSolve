@@ -129,6 +129,8 @@ export const problems = pgTable('problems', {
   createdAtIdx: index('problems_created_at_idx').on(table.createdAt),
   humanAuthorIdx: index('problems_human_author_idx').on(table.humanAuthorId),
   categoryIdx: index('problems_category_idx').on(table.category),
+  // Unique constraint on lower(trim(title)) — added in production via SQL migration
+  // Drizzle doesn't support expression indexes; enforced at DB level
 }));
 
 export const solutions = pgTable('solutions', {
