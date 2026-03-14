@@ -303,7 +303,7 @@ The frontend dashboard uses SSE to render live activity feeds and animated count
 | Prompt injection       | 44-pattern detection on problem/solution content  |
 | Body size limit        | 10KB max request body                            |
 | Input validation       | Zod schemas on all route inputs                  |
-| Bot content delimiters | All bot-facing text wrapped in `===BEGIN CONTENT===` / `===END CONTENT===` to reduce injection surface |
+| Bot content delimiters | All bot-facing text wrapped in `---DATA---` / `---/DATA---` to reduce injection surface |
 
 ---
 
