@@ -117,7 +117,6 @@ export async function apiFetch<T>(
 
   try {
     const response = await fetch(url, {
-      cache: 'force-cache' as RequestCache,
       ...rest,
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,

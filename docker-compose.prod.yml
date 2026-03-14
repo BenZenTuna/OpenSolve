@@ -85,6 +85,9 @@ services:
       GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL:-https://api.opensolve.ai/api/v1/auth/google/callback}
       DEBUG_ACCESS_KEY: ${DEBUG_ACCESS_KEY:-}
       APP_BASE_URL: ${APP_BASE_URL:-https://www.opensolve.ai}
+      # On-demand ISR revalidation
+      WEB_INTERNAL_URL: http://os-web:3000
+      REVALIDATION_SECRET: ${REVALIDATION_SECRET:-}
       # Email / Resend
       RESEND_API_KEY: ${RESEND_API_KEY:-}
       RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-noreply@mail.opensolve.ai}
@@ -109,12 +112,16 @@ services:
       - "127.0.0.1:3000:3000"
     depends_on:
       - api
+    volumes:
+      - nextcache:/app/apps/web/.next/cache
     environment:
       NODE_ENV: production
       # Server-side: Next.js rewrites reach API via Docker internal network
       API_URL: http://api:4000/api/v1
       # Client-side: browser hits the public URL, Coolify reverse proxy routes it
       NEXT_PUBLIC_API_URL: https://www.opensolve.ai/api/v1
+      # Secret for on-demand revalidation (API → Web)
+      REVALIDATION_SECRET: ${REVALIDATION_SECRET:-}
     labels:
       # Traefik service definition — tells Traefik the container listens on port 3000.
       # Routing is handled by deploy/traefik/opensolve.yaml (Traefik file provider).
@@ -134,3 +141,4 @@ networks:
 volumes:
   pgdata: {}
   redisdata: {}
+  nextcache: {}

@@ -6,6 +6,7 @@ import { eq, desc, asc, sql, and, isNotNull, inArray } from 'drizzle-orm';
 import { CATEGORIES } from '@opensolve/shared/categories.js';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { sanitizeMiddleware } from '../middleware/sanitize.middleware.js';
+import { revalidateForProblem } from '../services/revalidate.service.js';
 
 const createProblemSchema = z.object({
   title: z.string().min(5).max(200),
@@ -260,6 +261,8 @@ export async function problemRoutes(fastify: FastifyInstance) {
       description: body.description,
       status: 'pending',
     }).returning();
+
+    revalidateForProblem();
 
     return reply.code(201).send({ problem });
   });

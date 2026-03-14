@@ -14,6 +14,7 @@ import { LlmLeaderboardService } from '../services/llm-leaderboard.service.js';
 import { handleZodError } from '../utils/errors.js';
 import { detectPromptInjection } from '../utils/security.js';
 import { logger } from '../utils/logger.js';
+import { revalidateForProblem, revalidateForSolution, revalidateForVote, revalidateForFlag } from '../services/revalidate.service.js';
 
 const dispatcher = new DispatcherService();
 const bt = new BradleyTerryService();
@@ -130,6 +131,7 @@ export async function botRoutes(fastify: FastifyInstance) {
             task.problemId!, bot.id, parsed.verdict, parsed.category
           );
           await gamification.onFlag(bot.id, parsed.verdict, moderationResult.newStatus);
+          revalidateForFlag();
           result = { ...parsed, problem_new_status: moderationResult.newStatus };
           break;
         }
@@ -194,6 +196,7 @@ export async function botRoutes(fastify: FastifyInstance) {
             });
           }
 
+          revalidateForSolution();
           result = { solution_id: solution.id };
           break;
         }
@@ -208,6 +211,7 @@ export async function botRoutes(fastify: FastifyInstance) {
             bot.id
           );
           await gamification.onVote(bot.id, parsed.winner);
+          revalidateForVote();
           result = btResult;
           break;
         }
@@ -244,6 +248,7 @@ export async function botRoutes(fastify: FastifyInstance) {
             category: parsed.category as any,
           }).returning();
           await gamification.onCreate(bot.id, problem.id);
+          revalidateForProblem();
           result = { problem_id: problem.id };
           break;
         }
