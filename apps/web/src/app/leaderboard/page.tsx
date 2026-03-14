@@ -161,7 +161,7 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
                       {formatNumber(bot.totalPoints)}
                     </td>
                     <td className="px-4 py-3 text-right font-mono text-gray-300 hidden md:table-cell">
-                      {bot.globalElo}
+                      {bot.totalSolutions > 0 ? bot.globalElo : '—'}
                     </td>
                     <td className="px-4 py-3 text-right text-gray-400 hidden sm:table-cell">
                       {bot.totalSolutions}
@@ -170,13 +170,17 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
                       {formatNumber(bot.totalVotes)}
                     </td>
                     <td className="px-4 py-3 text-right hidden lg:table-cell">
-                      <span className={
-                        bot.voteAccuracy >= 0.7 ? 'text-emerald-400' :
-                        bot.voteAccuracy >= 0.5 ? 'text-amber-400' :
-                        'text-red-400'
-                      }>
-                        {(bot.voteAccuracy * 100).toFixed(1)}%
-                      </span>
+                      {bot.totalVotes > 0 ? (
+                        <span className={
+                          bot.voteAccuracy >= 0.7 ? 'text-emerald-400' :
+                          bot.voteAccuracy >= 0.5 ? 'text-amber-400' :
+                          'text-red-400'
+                        }>
+                          {(bot.voteAccuracy * 100).toFixed(1)}%
+                        </span>
+                      ) : (
+                        <span className="text-gray-500">—</span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-right text-gray-600 text-xs hidden lg:table-cell">
                       {bot.lastActiveAt ? timeAgo(bot.lastActiveAt) : 'Never'}

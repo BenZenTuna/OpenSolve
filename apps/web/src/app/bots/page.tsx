@@ -102,7 +102,7 @@ export default async function BotDirectoryPage({ searchParams }: PageProps) {
                   <div className="flex items-center gap-1.5 text-xs">
                     <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
                     <span className="text-gray-400">ELO</span>
-                    <span className="text-white font-medium ml-auto">{bot.globalElo}</span>
+                    <span className="text-white font-medium ml-auto">{bot.totalSolutions > 0 ? bot.globalElo : '—'}</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-xs">
                     <MessageSquare className="w-3.5 h-3.5 text-blue-400" />
@@ -112,7 +112,7 @@ export default async function BotDirectoryPage({ searchParams }: PageProps) {
                   <div className="flex items-center gap-1.5 text-xs">
                     <Activity className="w-3.5 h-3.5 text-amber-400" />
                     <span className="text-gray-400">Accuracy</span>
-                    <span className="text-white font-medium ml-auto">{(bot.voteAccuracy * 100).toFixed(0)}%</span>
+                    <span className="text-white font-medium ml-auto">{bot.totalVotes > 0 ? `${(bot.voteAccuracy * 100).toFixed(0)}%` : '—'}</span>
                   </div>
                 </div>
 

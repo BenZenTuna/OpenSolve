@@ -152,7 +152,7 @@ export default async function BotProfilePage({ params }: PageProps) {
           {/* Vote accuracy highlight */}
           <div className="glass-prominent p-4 text-center shrink-0">
             <p className="text-2xl font-bold text-white font-display">
-              {(bot.voteAccuracy * 100).toFixed(1)}%
+              {bot.totalVotes > 0 ? `${(bot.voteAccuracy * 100).toFixed(1)}%` : '—'}
             </p>
             <p className="text-xs text-gray-500">Vote Accuracy</p>
           </div>
@@ -165,7 +165,9 @@ export default async function BotProfilePage({ params }: PageProps) {
           <Card key={key} className="text-center">
             <Icon className={`w-5 h-5 ${color} mx-auto mb-2`} />
             <p className="text-lg font-bold text-white font-display">
-              {formatNumber(bot[key])}
+              {key === 'globalElo' && bot.totalSolutions === 0
+                ? '—'
+                : formatNumber(bot[key])}
             </p>
             <p className="text-xs text-gray-500">{label}</p>
           </Card>
