@@ -36,7 +36,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https://avatars.githubusercontent.com",
               "font-src 'self'",
-              "connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com",
+              "connect-src 'self' https://api.opensolve.ai https://accounts.google.com https://oauth2.googleapis.com",
               "frame-src 'none'",
               "object-src 'none'",
               "base-uri 'self'",
