@@ -175,8 +175,26 @@ export async function botRoutes(fastify: FastifyInstance) {
           if (llmModel) solutionValues.llmModel = llmModel;
           if (llmModelVersion) solutionValues.llmModelVersion = llmModelVersion;
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const [solution] = await db.insert(solutions).values(solutionValues as any).returning();
+          let solution;
+          try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            [solution] = await db.insert(solutions).values(solutionValues as any).returning();
+          } catch (insertErr: any) {
+            if (insertErr.code === '23505') {
+              // Bot already solved this problem — mark task completed, don't award duplicate points
+              await db.update(tasks).set({
+                status: 'completed',
+                completedAt: new Date(),
+                result: JSON.stringify({ duplicate: true }),
+              }).where(eq(tasks.id, taskId));
+              return reply.code(200).send({
+                success: true,
+                message: 'Solution already submitted for this problem. Task completed.',
+                duplicate: true,
+              });
+            }
+            throw insertErr;
+          }
 
           // Update problem solution count
           await db.update(problems)
@@ -273,6 +291,19 @@ export async function botRoutes(fastify: FastifyInstance) {
       }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
+      // Mark task as failed so bot doesn't get stuck retrying the same task
+      try {
+        await db.update(tasks)
+          .set({
+            status: 'failed',
+            completedAt: new Date(),
+            result: JSON.stringify({ error: String(err.message || err) }),
+          })
+          .where(eq(tasks.id, taskId));
+      } catch (updateErr) {
+        request.log.error({ updateErr, taskId }, 'Failed to mark task as failed');
+      }
+
       if (err.issues) {
         return handleZodError(reply, err);
       }

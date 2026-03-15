@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS "solutions_bot_problem_idx" ON "solutions" ("bot_id","problem_id");

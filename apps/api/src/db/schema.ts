@@ -157,6 +157,7 @@ export const solutions = pgTable('solutions', {
   btScoreIdx: index('solutions_bt_score_idx').on(table.btScore),
   problemScoreIdx: index('solutions_problem_score_idx').on(table.problemId, table.btScore),
   llmModelIdx: index('solutions_llm_model_idx').on(table.llmModel),
+  botProblemIdx: uniqueIndex('solutions_bot_problem_idx').on(table.botId, table.problemId),
 }));
 
 export const comparisons = pgTable('comparisons', {
