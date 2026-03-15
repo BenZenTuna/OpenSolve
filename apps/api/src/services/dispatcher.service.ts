@@ -84,14 +84,15 @@ export class DispatcherService {
 
     const sameOwnerBotIds = new Set(sameOwnerBots.map(b => b.id));
 
-    // Find pending problems with fewer than 3 flags
+    // Find pending problems with fewer than 3 flags, skip poison problems
     const candidates = await db
       .select()
       .from(problems)
       .where(
         and(
           eq(problems.status, 'pending'),
-          sql`${problems.greenFlags} + ${problems.redFlags} < 3`
+          sql`${problems.greenFlags} + ${problems.redFlags} < 3`,
+          lt(problems.failedFlagAttempts, 5)
         )
       )
       .orderBy(asc(problems.createdAt))
@@ -143,7 +144,7 @@ export class DispatcherService {
               description: c.description,
             })),
         ...(instruction !== undefined && { instruction }),
-        ...(instructMode !== 'none' && { response_format: '{ "verdict": "green" or "red", "category": "none" or violation type, "suggested_category": "category_slug" }' }),
+        ...(instructMode !== 'none' && { response_format: '{ "verdict": "green"|"red", "category": "none"|"sexual"|"drugs"|"weapons"|"criminal"|"ethical"|"hate_speech"|"harassment"|"spam", "suggested_category": "<category_slug>"|null }' }),
       });
     }
 

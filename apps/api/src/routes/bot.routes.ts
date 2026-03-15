@@ -34,7 +34,7 @@ const CATEGORY_SLUGS = [
 const flagSubmitSchema = z.object({
   verdict: z.enum(['green', 'red']),
   category: z.enum(['sexual', 'drugs', 'weapons', 'criminal', 'ethical', 'hate_speech', 'harassment', 'spam', 'none']),
-  suggested_category: z.enum(CATEGORY_SLUGS).nullable(),
+  suggested_category: z.enum(CATEGORY_SLUGS).nullable().optional(),
 });
 
 const solveSubmitSchema = z.object({
@@ -46,6 +46,91 @@ const solveSubmitSchema = z.object({
 const voteSubmitSchema = z.object({
   winner: z.enum(['a', 'b', 'skip']),
 });
+
+const VALID_FLAG_CATEGORIES = ['sexual', 'drugs', 'weapons', 'criminal', 'ethical', 'hate_speech', 'harassment', 'spam', 'none'];
+
+const FLAG_CATEGORY_MAP: Record<string, string> = {
+  spam_gibberish: 'spam', gibberish: 'spam', spam_content: 'spam', junk: 'spam',
+  nonsense: 'spam', keyboard_mash: 'spam', prompt_injection: 'spam', advertisement: 'spam',
+  ads: 'spam', lorem_ipsum: 'spam', garbage: 'spam', unintelligible: 'spam', incoherent: 'spam',
+  sexually_explicit: 'sexual', sexual_content: 'sexual', pornography: 'sexual', nsfw: 'sexual', explicit: 'sexual',
+  drug: 'drugs', drug_manufacturing: 'drugs', drug_use: 'drugs', illegal_drugs: 'drugs',
+  narcotics: 'drugs', substance_abuse: 'drugs',
+  weapon: 'weapons', weapon_creation: 'weapons', violence: 'weapons', attack: 'weapons',
+  crime: 'criminal', illegal: 'criminal', illegal_activity: 'criminal', criminal_activity: 'criminal', solicitation: 'criminal',
+  manipulation: 'ethical', exploitation: 'ethical', deception: 'ethical', unethical: 'ethical',
+  hate: 'hate_speech', hateful: 'hate_speech', racist: 'hate_speech', discrimination: 'hate_speech', bigotry: 'hate_speech',
+  harassing: 'harassment', bullying: 'harassment', cyberbullying: 'harassment', targeting: 'harassment', abuse: 'harassment',
+};
+
+function normalizeFlagCategory(raw: string | null | undefined): string {
+  if (!raw) return 'none';
+  const n = raw.toLowerCase().trim().replace(/[\s/\-_]+/g, '_');
+  if (VALID_FLAG_CATEGORIES.includes(n)) return n;
+  if (FLAG_CATEGORY_MAP[n]) return FLAG_CATEGORY_MAP[n];
+  for (const valid of VALID_FLAG_CATEGORIES) {
+    if (n.includes(valid)) return valid;
+  }
+  return 'none';
+}
+
+const SUGGESTED_CATEGORY_MAP: Record<string, string> = {
+  tech: 'technology', science: 'science_nature', nature: 'science_nature',
+  medical: 'health', healthcare: 'health', medicine: 'health', wellness: 'health',
+  business: 'business_finance', finance: 'business_finance', economics: 'business_finance', economy: 'business_finance',
+  education: 'education_career', career: 'education_career', careers: 'education_career', learning: 'education_career',
+  society: 'society_culture', culture: 'society_culture', politics: 'society_culture', social: 'society_culture',
+  philosophy: 'philosophy_ideas', ideas: 'philosophy_ideas', ethics: 'philosophy_ideas',
+  life: 'lifestyle', personal: 'lifestyle', daily_life: 'lifestyle', everyday: 'lifestyle',
+  home: 'lifestyle', cooking: 'lifestyle', fitness: 'lifestyle', travel: 'lifestyle', relationships: 'lifestyle',
+};
+
+function normalizeSuggestedCategory(raw: string | null | undefined): string | null {
+  if (!raw || raw === 'null' || raw === 'undefined' || raw === 'none' || raw === 'N/A') return null;
+  const n = raw.toLowerCase().trim().replace(/[\s\-]+/g, '_');
+  const validCategories = CATEGORY_SLUGS as readonly string[];
+  if (validCategories.includes(n)) return n;
+  if (SUGGESTED_CATEGORY_MAP[n]) return SUGGESTED_CATEGORY_MAP[n];
+  for (const valid of validCategories) {
+    if (n.includes(valid) || valid.includes(n)) return valid;
+  }
+  return null;
+}
+
+const MAX_FAILED_FLAG_ATTEMPTS = 5;
+
+async function trackFailedFlagAttempt(problemId: string): Promise<void> {
+  try {
+    const [problem] = await db.update(problems)
+      .set({
+        failedFlagAttempts: sql`${problems.failedFlagAttempts} + 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(problems.id, problemId))
+      .returning({
+        id: problems.id,
+        failedFlagAttempts: problems.failedFlagAttempts,
+        status: problems.status,
+      });
+
+    if (problem && problem.failedFlagAttempts >= MAX_FAILED_FLAG_ATTEMPTS && problem.status === 'pending') {
+      await db.update(problems)
+        .set({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          status: 'rejected' as any,
+          updatedAt: new Date(),
+        })
+        .where(and(
+          eq(problems.id, problemId),
+          eq(problems.status, 'pending'),
+        ));
+      logger.warn({ problemId, attempts: problem.failedFlagAttempts },
+        'Auto-rejected problem after repeated flag failures');
+    }
+  } catch (err) {
+    logger.error({ err, problemId }, 'Failed to track flag attempt');
+  }
+}
 
 const createSubmitSchema = z.object({
   problem_title: z.string().min(5).max(200),
@@ -116,7 +201,15 @@ export async function botRoutes(fastify: FastifyInstance) {
     try {
       switch (task.taskType) {
         case 'flag': {
-          const parsed = flagSubmitSchema.parse(body);
+          const normalizedBody: Record<string, unknown> = {
+            ...body,
+            category: normalizeFlagCategory(body.category as string | null | undefined),
+            suggested_category: normalizeSuggestedCategory(body.suggested_category as string | null | undefined),
+          };
+          if (normalizedBody.verdict === 'red' && normalizedBody.category === 'none') {
+            normalizedBody.category = 'spam';
+          }
+          const parsed = flagSubmitSchema.parse(normalizedBody);
           // Store the flag with suggested_category
           await db.insert(flags).values({
             problemId: task.problemId!,
@@ -302,6 +395,11 @@ export async function botRoutes(fastify: FastifyInstance) {
           .where(eq(tasks.id, taskId));
       } catch (updateErr) {
         request.log.error({ updateErr, taskId }, 'Failed to mark task as failed');
+      }
+
+      // Track failed flag attempts — auto-reject poison problems
+      if (task.taskType === 'flag' && task.problemId) {
+        await trackFailedFlagAttempt(task.problemId);
       }
 
       if (err.issues) {

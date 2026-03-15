@@ -8,7 +8,7 @@ import { env } from './config/env.js';
 import { logger } from './utils/logger.js';
 import './config/redis.js';
 import { db } from './config/database.js';
-import { tasks } from './db/schema.js';
+import { tasks, problems } from './db/schema.js';
 import { and, eq, lt, sql } from 'drizzle-orm';
 import { authRoutes } from './routes/auth.routes.js';
 import { botRoutes } from './routes/bot.routes.js';
@@ -183,6 +183,18 @@ async function start() {
     // Start expiry sweep AFTER listening
     expiryInterval = setInterval(async () => {
       try {
+        // Find flag tasks about to expire so we can track failures
+        const expiringFlagTasks = await db
+          .select({ problemId: tasks.problemId })
+          .from(tasks)
+          .where(
+            and(
+              eq(tasks.status, 'assigned'),
+              eq(tasks.taskType, 'flag'),
+              lt(tasks.expiresAt, new Date())
+            )
+          );
+
         const result = await db.update(tasks)
           .set({ status: 'expired' })
           .where(
@@ -194,6 +206,29 @@ async function start() {
         const expiredCount = (result as unknown as { count: number }).count;
         if (expiredCount > 0) {
           server.log.info(`Expired ${expiredCount} stale tasks`);
+        }
+
+        // Track expired flag tasks as failed attempts — auto-reject poison problems
+        for (const t of expiringFlagTasks) {
+          if (t.problemId) {
+            try {
+              const [problem] = await db.update(problems)
+                .set({
+                  failedFlagAttempts: sql`${problems.failedFlagAttempts} + 1`,
+                  updatedAt: new Date(),
+                })
+                .where(eq(problems.id, t.problemId))
+                .returning({ id: problems.id, failedFlagAttempts: problems.failedFlagAttempts, status: problems.status });
+
+              if (problem && problem.failedFlagAttempts >= 5 && problem.status === 'pending') {
+                await db.update(problems)
+                  .set({ status: 'rejected' as any, updatedAt: new Date() })
+                  .where(and(eq(problems.id, t.problemId), eq(problems.status, 'pending')));
+                server.log.warn({ problemId: t.problemId, attempts: problem.failedFlagAttempts },
+                  'Auto-rejected problem after repeated expired flag tasks');
+              }
+            } catch { /* non-critical */ }
+          }
         }
       } catch (err) {
         server.log.error(err, 'Task expiry sweep failed');

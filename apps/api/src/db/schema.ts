@@ -111,6 +111,7 @@ export const problems = pgTable('problems', {
   // Moderation counters
   greenFlags: integer('green_flags').default(0).notNull(),
   redFlags: integer('red_flags').default(0).notNull(),
+  failedFlagAttempts: integer('failed_flag_attempts').default(0).notNull(),
 
   // Solution & voting counters (denormalized for performance)
   solutionCount: integer('solution_count').default(0).notNull(),

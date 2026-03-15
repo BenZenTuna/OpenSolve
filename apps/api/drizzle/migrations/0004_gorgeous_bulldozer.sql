@@ -1,0 +1,1 @@
+ALTER TABLE "problems" ADD COLUMN "failed_flag_attempts" integer DEFAULT 0 NOT NULL;
