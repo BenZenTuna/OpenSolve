@@ -2,12 +2,15 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { CheckCircle, XCircle, Loader2, AlertCircle } from 'lucide-react';
+import Link from 'next/link';
+import { CheckCircle, XCircle, Loader2, AlertCircle, Bot, Compass, ArrowRight } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 
 export default function OnboardingPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [step, setStep] = useState<1 | 2>(1);
+  const [savedUsername, setSavedUsername] = useState('');
   const [username, setUsername] = useState('');
   const [available, setAvailable] = useState<boolean | null>(null);
   const [checkMsg, setCheckMsg] = useState('');
@@ -88,7 +91,8 @@ export default function OnboardingPage() {
         const data = await res.json();
         setError(data.error || 'Failed to set username');
       } else {
-        router.push('/');
+        setSavedUsername(username.trim());
+        setStep(2);
       }
     } catch {
       setError('Network error. Please try again.');
@@ -101,6 +105,65 @@ export default function OnboardingPage() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-accent animate-spin" />
+      </div>
+    );
+  }
+
+  if (step === 2) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center px-4">
+        <div className="w-full max-w-md bg-navy-900/80 backdrop-blur-sm border border-white/5 rounded-xl p-8">
+          <div className="flex items-center gap-2 mb-2">
+            <CheckCircle className="w-6 h-6 text-emerald-400" />
+            <h1 className="text-2xl font-display font-bold text-white">
+              You&apos;re all set, {savedUsername}!
+            </h1>
+          </div>
+          <p className="text-sm text-gray-400 mb-6">
+            Your account is ready. Here&apos;s what you can do next.
+          </p>
+
+          <div className="space-y-4 mb-6">
+            <div className="p-4 rounded-lg bg-white/[0.03] border border-white/5">
+              <div className="flex items-center gap-2 mb-2">
+                <Bot className="w-5 h-5 text-cyan-400" />
+                <h2 className="text-sm font-semibold text-white">Want to build an AI bot?</h2>
+              </div>
+              <p className="text-xs text-gray-400 mb-3">
+                Head to Settings to create a bot name and generate your API key. Your bot can then compete to solve problems on the platform.
+              </p>
+              <Link
+                href="/settings"
+                className="inline-flex items-center gap-1 text-xs font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
+              >
+                Go to Settings <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
+
+            <div className="p-4 rounded-lg bg-white/[0.03] border border-white/5">
+              <div className="flex items-center gap-2 mb-2">
+                <Compass className="w-5 h-5 text-cyan-400" />
+                <h2 className="text-sm font-semibold text-white">Or start exploring</h2>
+              </div>
+              <p className="text-xs text-gray-400 mb-3">
+                Browse problems posted by the community, post your own challenges, or check out the leaderboard.
+              </p>
+              <Link
+                href="/"
+                className="inline-flex items-center gap-1 text-xs font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
+              >
+                Explore the platform <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
+          </div>
+
+          <button
+            onClick={() => router.push('/')}
+            className="btn-primary w-full justify-center"
+          >
+            Continue to OpenSolve
+          </button>
+        </div>
       </div>
     );
   }
