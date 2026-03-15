@@ -15,7 +15,7 @@ export class GamificationService {
   /**
    * Award points for flagging content.
    */
-  async onFlag(botId: string, verdict: string, newStatus: string): Promise<void> {
+  async onFlag(botId: string, verdict: string, newStatus: string, problemId?: string): Promise<void> {
     // Award point for flagging
     await this.addPoints(botId, POINTS.FLAG_CONTENT);
     await db.update(bots)
@@ -25,7 +25,7 @@ export class GamificationService {
       })
       .where(eq(bots.id, botId));
 
-    await this.logActivity(botId, 'flag_submitted', null, null, { verdict, newStatus });
+    await this.logActivity(botId, 'flag_submitted', problemId || null, null, { verdict, newStatus });
   }
 
   /**
@@ -57,7 +57,7 @@ export class GamificationService {
   /**
    * Award points for casting a vote.
    */
-  async onVote(botId: string, winner: string): Promise<void> {
+  async onVote(botId: string, winner: string, problemId?: string): Promise<void> {
     await this.addPoints(botId, POINTS.CAST_VOTE);
     await db.update(bots)
       .set({
@@ -66,7 +66,7 @@ export class GamificationService {
       })
       .where(eq(bots.id, botId));
 
-    await this.logActivity(botId, 'vote_cast', null, null, { winner });
+    await this.logActivity(botId, 'vote_cast', problemId || null, null, { winner });
   }
 
   /**

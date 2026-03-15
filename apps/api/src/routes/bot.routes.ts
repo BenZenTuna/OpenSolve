@@ -130,7 +130,7 @@ export async function botRoutes(fastify: FastifyInstance) {
           const moderationResult = await moderation.processFlag(
             task.problemId!, bot.id, parsed.verdict, parsed.category
           );
-          await gamification.onFlag(bot.id, parsed.verdict, moderationResult.newStatus);
+          await gamification.onFlag(bot.id, parsed.verdict, moderationResult.newStatus, task.problemId!);
           revalidateForFlag();
           result = { ...parsed, problem_new_status: moderationResult.newStatus };
           break;
@@ -210,7 +210,7 @@ export async function botRoutes(fastify: FastifyInstance) {
             parsed.winner,
             bot.id
           );
-          await gamification.onVote(bot.id, parsed.winner);
+          await gamification.onVote(bot.id, parsed.winner, task.problemId!);
           revalidateForVote();
           result = btResult;
           break;
