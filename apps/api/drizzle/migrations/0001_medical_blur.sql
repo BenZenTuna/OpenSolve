@@ -1,22 +1,22 @@
-ALTER TYPE "problem_category" ADD VALUE 'everyday_life';--> statement-breakpoint
-ALTER TYPE "problem_category" ADD VALUE 'tech_help';--> statement-breakpoint
-ALTER TYPE "problem_category" ADD VALUE 'health_wellness';--> statement-breakpoint
-ALTER TYPE "problem_category" ADD VALUE 'entertainment_leisure';--> statement-breakpoint
-ALTER TYPE "problem_category" ADD VALUE 'relationships_social';--> statement-breakpoint
-ALTER TYPE "problem_category" ADD VALUE 'learning_career';--> statement-breakpoint
-ALTER TYPE "problem_category" ADD VALUE 'finance_personal';--> statement-breakpoint
-ALTER TYPE "problem_category" ADD VALUE 'creative_projects';--> statement-breakpoint
-ALTER TYPE "problem_category" ADD VALUE 'parenting_family';--> statement-breakpoint
-ALTER TYPE "problem_category" ADD VALUE 'governance_policy';--> statement-breakpoint
-ALTER TYPE "problem_category" ADD VALUE 'science_technology';--> statement-breakpoint
-ALTER TYPE "problem_category" ADD VALUE 'health_medicine';--> statement-breakpoint
-ALTER TYPE "problem_category" ADD VALUE 'business_economics';--> statement-breakpoint
-ALTER TYPE "problem_category" ADD VALUE 'education_learning';--> statement-breakpoint
-ALTER TABLE "users" ADD COLUMN "newsletter_subscribed" boolean DEFAULT false NOT NULL;--> statement-breakpoint
-ALTER TABLE "users" ADD COLUMN "newsletter_subscribed_at" timestamp with time zone;--> statement-breakpoint
-ALTER TABLE "users" ADD COLUMN "newsletter_consent_ip" varchar(45);--> statement-breakpoint
-ALTER TABLE "users" ADD COLUMN "newsletter_consent_method" varchar(50);--> statement-breakpoint
-ALTER TABLE "users" ADD COLUMN "newsletter_unsubscribe_token" varchar(128);--> statement-breakpoint
+ALTER TYPE "problem_category" ADD VALUE IF NOT EXISTS 'everyday_life';--> statement-breakpoint
+ALTER TYPE "problem_category" ADD VALUE IF NOT EXISTS 'tech_help';--> statement-breakpoint
+ALTER TYPE "problem_category" ADD VALUE IF NOT EXISTS 'health_wellness';--> statement-breakpoint
+ALTER TYPE "problem_category" ADD VALUE IF NOT EXISTS 'entertainment_leisure';--> statement-breakpoint
+ALTER TYPE "problem_category" ADD VALUE IF NOT EXISTS 'relationships_social';--> statement-breakpoint
+ALTER TYPE "problem_category" ADD VALUE IF NOT EXISTS 'learning_career';--> statement-breakpoint
+ALTER TYPE "problem_category" ADD VALUE IF NOT EXISTS 'finance_personal';--> statement-breakpoint
+ALTER TYPE "problem_category" ADD VALUE IF NOT EXISTS 'creative_projects';--> statement-breakpoint
+ALTER TYPE "problem_category" ADD VALUE IF NOT EXISTS 'parenting_family';--> statement-breakpoint
+ALTER TYPE "problem_category" ADD VALUE IF NOT EXISTS 'governance_policy';--> statement-breakpoint
+ALTER TYPE "problem_category" ADD VALUE IF NOT EXISTS 'science_technology';--> statement-breakpoint
+ALTER TYPE "problem_category" ADD VALUE IF NOT EXISTS 'health_medicine';--> statement-breakpoint
+ALTER TYPE "problem_category" ADD VALUE IF NOT EXISTS 'business_economics';--> statement-breakpoint
+ALTER TYPE "problem_category" ADD VALUE IF NOT EXISTS 'education_learning';--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "newsletter_subscribed" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "newsletter_subscribed_at" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "newsletter_consent_ip" varchar(45);--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "newsletter_consent_method" varchar(50);--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "newsletter_unsubscribe_token" varchar(128);--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "comparisons_voter_problem_idx" ON "comparisons" ("voter_bot_id","problem_id");--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "users_newsletter_unsubscribe_token_idx" ON "users" ("newsletter_unsubscribe_token");
 
