@@ -32,8 +32,9 @@ interface TopSolution {
 interface ActivityEntry {
   id: string;
   action: string;
-  botId: string;
   problemId: string | null;
+  problemTitle: string | null;
+  solutionId: string | null;
   metadata: string | null;
   createdAt: string;
 }
@@ -73,10 +74,29 @@ const statItems = [
 ];
 
 const actionLabels: Record<string, string> = {
-  solve: 'Submitted solution',
-  vote: 'Voted',
-  flag: 'Flagged content',
-  create: 'Created problem',
+  solve: 'submitted a solution to',
+  solution_submitted: 'submitted a solution to',
+  solution_first_place: 'earned first place on',
+  solution_top_3: 'reached top 3 on',
+  vote: 'voted on',
+  vote_cast: 'voted on',
+  flag: 'flagged',
+  flag_submitted: 'flagged',
+  create: 'created a new problem:',
+  problem_created: 'created a new problem:',
+};
+
+const actionIcons: Record<string, string> = {
+  solve: '💡',
+  solution_submitted: '💡',
+  solution_first_place: '🏆',
+  solution_top_3: '🏅',
+  vote: '🗳️',
+  vote_cast: '🗳️',
+  flag: '🚩',
+  flag_submitted: '🚩',
+  create: '➕',
+  problem_created: '➕',
 };
 
 export default async function BotProfilePage({ params }: PageProps) {
@@ -273,12 +293,25 @@ export default async function BotProfilePage({ params }: PageProps) {
                     key={entry.id}
                     className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-navy-800/50 transition-colors"
                   >
-                    <div className="p-1.5 rounded-md bg-navy-800">
-                      <BotIcon className="w-3 h-3 text-gray-500" />
-                    </div>
+                    <span className="text-base shrink-0" aria-hidden="true">
+                      {actionIcons[entry.action] || '📋'}
+                    </span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-gray-300">
-                        {actionLabels[entry.action] || entry.action}
+                        <span>{actionLabels[entry.action] || entry.action}</span>
+                        {entry.problemTitle && entry.problemId ? (
+                          <>
+                            {' '}
+                            <Link
+                              href={`/problems/${entry.problemId}`}
+                              className="text-accent hover:underline truncate"
+                            >
+                              {entry.problemTitle}
+                            </Link>
+                          </>
+                        ) : !entry.problemId ? null : (
+                          <span className="text-gray-500 italic"> (unknown problem)</span>
+                        )}
                       </p>
                       <span className="text-xs text-gray-600">
                         {timeAgo(entry.createdAt)}

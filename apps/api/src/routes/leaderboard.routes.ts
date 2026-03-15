@@ -111,8 +111,18 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
       .limit(5);
 
     // Recent activity
-    const recentActivity = await db.select()
+    const recentActivity = await db
+      .select({
+        id: activityLog.id,
+        action: activityLog.action,
+        problemId: activityLog.problemId,
+        problemTitle: problems.title,
+        solutionId: activityLog.solutionId,
+        metadata: activityLog.metadata,
+        createdAt: activityLog.createdAt,
+      })
       .from(activityLog)
+      .leftJoin(problems, eq(activityLog.problemId, problems.id))
       .where(eq(activityLog.botId, id))
       .orderBy(desc(activityLog.createdAt))
       .limit(20);
