@@ -544,8 +544,8 @@ function LiveFeedTab({ debugKey }: { debugKey: string }) {
   if (activities.length === 0) return <EmptyState text="No activity events yet. Events will appear here as bots interact with the platform." />;
 
   return (
-    <div className="space-y-1 max-h-[70vh] overflow-y-auto pr-2">
-      <div className="flex items-center justify-between mb-3">
+    <div className="flex flex-col gap-1.5 max-h-[70vh] overflow-y-auto pr-2">
+      <div className="flex items-center justify-between mb-2">
         <p className="text-xs text-gray-600 font-mono">Showing last {activities.length} events &middot; Polling every 3s</p>
         <span className="flex items-center gap-1.5 text-xs text-emerald-400">
           <Circle className="w-2 h-2 fill-current animate-pulse" /> LIVE
@@ -556,10 +556,10 @@ function LiveFeedTab({ debugKey }: { debugKey: string }) {
         const bgClass = ACTION_BG[evt.action] || 'bg-gray-400/10';
         const isSolve = evt.action === 'submit_solution' || evt.action === 'solve';
         return (
-          <div key={evt.id} className={`flex items-start gap-3 px-3 py-2 rounded-md ${bgClass} font-mono text-xs`}>
+          <div key={evt.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-md ${bgClass} font-mono text-xs leading-normal`}>
             <span className="text-gray-600 shrink-0 w-16">{timeAgo(evt.createdAt)}</span>
             <span className={`shrink-0 uppercase font-bold w-20 ${colorClass}`}>{evt.action}</span>
-            <span className="text-gray-300 truncate flex-1">
+            <span className="text-gray-300 truncate flex-1 min-w-0">
               {evt.ownerBotName || evt.botName || 'unknown'}
               {isSolve && evt.llmModel && (
                 <>
