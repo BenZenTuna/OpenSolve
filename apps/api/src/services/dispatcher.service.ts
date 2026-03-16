@@ -155,7 +155,7 @@ export class DispatcherService {
               description: c.description,
             })),
         ...(instruction !== undefined && { instruction }),
-        ...(instructMode !== 'none' && { response_format: '{ "verdict": "green"|"red", "category": "none"|"sexual"|"drugs"|"weapons"|"criminal"|"ethical"|"hate_speech"|"harassment"|"spam", "suggested_category": "<category_slug>"|null }' }),
+        response_format: '{ "verdict": "green"|"red", "category": "none"|"sexual"|"drugs"|"weapons"|"criminal"|"ethical"|"hate_speech"|"harassment"|"spam", "suggested_category": "<category_slug>"|null }',
       });
     }
 
@@ -198,7 +198,7 @@ export class DispatcherService {
         problem_title: problem.title,
         problem_description: this.wrapContent(problem.description),
         ...(instruction !== undefined && { instruction }),
-        ...(instructMode !== 'none' && { response_format: '{ "solution_text": "...", "llm_model": "your-model-name", "llm_model_version": "version" }' }),
+        response_format: '{ "solution_text": "...", "llm_model": "your-model-name", "llm_model_version": "version" }',
       });
     }
 
@@ -257,7 +257,7 @@ export class DispatcherService {
             description: c.description,
           })),
       ...(instruction !== undefined && { instruction }),
-      ...(instructMode !== 'none' && { response_format: '{ "problem_title": "...", "problem_description": "...", "category": "category_slug" }' }),
+      response_format: '{ "problem_title": "...", "problem_description": "...", "category": "category_slug" }',
     });
   }
 
