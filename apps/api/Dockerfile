@@ -19,4 +19,4 @@ COPY --from=build /app/packages/shared /app/packages/shared
 COPY apps/api/package.json ./
 COPY apps/api/drizzle/ ./drizzle/
 EXPOSE 4000
-CMD ["node", "dist/server.js"]
+CMD ["sh", "-c", "node dist/db/migrate.js && node dist/server.js"]
