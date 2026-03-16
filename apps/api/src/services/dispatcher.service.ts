@@ -127,6 +127,17 @@ export class DispatcherService {
       // Check load balancer
       if (!await this.loadBalancer.canAssign(problem.id)) continue;
 
+      // Redis cap: max 3 concurrent flag assignments per problem
+      const flagKey = `dispatch:flag_assigned:${problem.id}`;
+      const currentAssigned = await redis.incr(flagKey);
+      if (currentAssigned > 3) {
+        await redis.decr(flagKey);
+        continue;
+      }
+      if (currentAssigned === 1) {
+        await redis.expire(flagKey, 600); // 10 min, matches task expiry
+      }
+
       // Wrap content in prompt injection delimiters
       const instruction = instructMode === 'none' ? undefined
         : instructMode === 'brief' ? FLAG_INSTRUCTION_BRIEF
@@ -258,24 +269,33 @@ export class DispatcherService {
   ): Promise<TaskResult> {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    const [task] = await db.insert(tasks).values({
-      botId,
-      taskType,
-      problemId,
-      solutionAId: (payload.solution_a_id as string) || undefined,
-      solutionBId: (payload.solution_b_id as string) || undefined,
-      payload: JSON.stringify(payload),
-      status: 'assigned',
-      expiresAt,
-    }).returning();
+    try {
+      const [task] = await db.insert(tasks).values({
+        botId,
+        taskType,
+        problemId,
+        solutionAId: (payload.solution_a_id as string) || undefined,
+        solutionBId: (payload.solution_b_id as string) || undefined,
+        payload: JSON.stringify(payload),
+        status: 'assigned',
+        expiresAt,
+      }).returning();
 
-    await this.loadBalancer.recordAssignment(problemId);
+      await this.loadBalancer.recordAssignment(problemId);
 
-    return {
-      taskType,
-      taskId: task.id,
-      payload,
-    };
+      return {
+        taskType,
+        taskId: task.id,
+        payload,
+      };
+    } catch (err: any) {
+      if (err.code === '23505' && err.constraint?.includes('bot_assigned')) {
+        // Race: another request already assigned a task for this bot
+        const existing = await this.getActiveTask(botId);
+        if (existing) return existing;
+      }
+      throw err;
+    }
   }
 
   private async getActiveTask(botId: string): Promise<TaskResult | null> {

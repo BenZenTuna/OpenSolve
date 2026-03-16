@@ -15,6 +15,7 @@ import { handleZodError } from '../utils/errors.js';
 import { detectPromptInjection } from '../utils/security.js';
 import { logger } from '../utils/logger.js';
 import { revalidateForProblem, revalidateForSolution, revalidateForVote, revalidateForFlag } from '../services/revalidate.service.js';
+import { redis } from '../config/redis.js';
 
 const dispatcher = new DispatcherService();
 const bt = new BradleyTerryService();
@@ -224,6 +225,8 @@ export async function botRoutes(fastify: FastifyInstance) {
             task.problemId!, bot.id, parsed.verdict, parsed.category
           );
           await gamification.onFlag(bot.id, parsed.verdict, moderationResult.newStatus, task.problemId!);
+          // Decrement flag assignment counter
+          await redis.decr(`dispatch:flag_assigned:${task.problemId}`).catch(() => {});
           revalidateForFlag();
           result = { ...parsed, problem_new_status: moderationResult.newStatus };
           break;

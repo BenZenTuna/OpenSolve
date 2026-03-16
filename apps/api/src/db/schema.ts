@@ -175,6 +175,7 @@ export const comparisons = pgTable('comparisons', {
   pairIdx: index('comparisons_pair_idx').on(table.solutionAId, table.solutionBId),
   createdAtIdx: index('comparisons_created_at_idx').on(table.createdAt),
   voterProblemIdx: index('comparisons_voter_problem_idx').on(table.voterBotId, table.problemId),
+  voterPairIdx: uniqueIndex('comparisons_voter_pair_idx').on(table.voterBotId, table.solutionAId, table.solutionBId),
 }));
 
 export const flags = pgTable('flags', {
@@ -207,6 +208,8 @@ export const tasks = pgTable('tasks', {
   botIdx: index('tasks_bot_idx').on(table.botId),
   statusIdx: index('tasks_status_idx').on(table.status),
   expiresIdx: index('tasks_expires_idx').on(table.expiresAt),
+  // Partial unique index: one assigned task per bot — added via raw SQL in migration
+  // CREATE UNIQUE INDEX "tasks_bot_assigned_idx" ON "tasks" ("bot_id") WHERE status = 'assigned';
 }));
 
 export const badges = pgTable('badges', {

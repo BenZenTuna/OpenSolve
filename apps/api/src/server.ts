@@ -6,7 +6,7 @@ import fastifyJwt from '@fastify/jwt';
 import fastifyCookie from '@fastify/cookie';
 import { env } from './config/env.js';
 import { logger } from './utils/logger.js';
-import './config/redis.js';
+import { redis } from './config/redis.js';
 import { db } from './config/database.js';
 import { tasks, problems } from './db/schema.js';
 import { and, eq, lt, sql } from 'drizzle-orm';
@@ -208,9 +208,10 @@ async function start() {
           server.log.info(`Expired ${expiredCount} stale tasks`);
         }
 
-        // Track expired flag tasks as failed attempts — auto-reject poison problems
+        // Track expired flag tasks: decrement assignment counter + track failed attempts
         for (const t of expiringFlagTasks) {
           if (t.problemId) {
+            await redis.decr(`dispatch:flag_assigned:${t.problemId}`).catch(() => {});
             try {
               const [problem] = await db.update(problems)
                 .set({

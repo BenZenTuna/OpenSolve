@@ -1,0 +1,2 @@
+CREATE UNIQUE INDEX IF NOT EXISTS "comparisons_voter_pair_idx" ON "comparisons" ("voter_bot_id","solution_a_id","solution_b_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "tasks_bot_assigned_idx" ON "tasks" ("bot_id") WHERE status = 'assigned';

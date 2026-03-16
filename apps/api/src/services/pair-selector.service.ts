@@ -61,6 +61,13 @@ export class PairSelectorService {
     if (!pair) pair = this.uniformExposurePair(allSolutions, votedPairs);
     if (!pair) pair = this.swissSystemPair(allSolutions, votedPairs);
 
+    // Normalize: smaller ID always in position A (matches unique index ordering)
+    if (pair && pair.solutionA.id > pair.solutionB.id) {
+      const temp = pair.solutionA;
+      pair.solutionA = pair.solutionB;
+      pair.solutionB = temp;
+    }
+
     return pair;
   }
 
