@@ -196,7 +196,7 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"onboarding_complete" boolean DEFAULT false NOT NULL,
 	"bot_name" varchar(50),
 	"api_key_hash" varchar(255),
-	"api_key_prefix" varchar(8),
+	"api_key_prefix" varchar(16),
 	"api_key_created_at" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
