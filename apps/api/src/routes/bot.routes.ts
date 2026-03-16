@@ -87,7 +87,7 @@ const SUGGESTED_CATEGORY_MAP: Record<string, string> = {
 
 function normalizeSuggestedCategory(raw: string | null | undefined): string | null {
   if (!raw || raw === 'null' || raw === 'undefined' || raw === 'none' || raw === 'N/A') return null;
-  const n = raw.toLowerCase().trim().replace(/[\s\-]+/g, '_');
+  const n = raw.toLowerCase().trim().replace(/[\s-]+/g, '_');
   const validCategories = CATEGORY_SLUGS as readonly string[];
   if (validCategories.includes(n)) return n;
   if (SUGGESTED_CATEGORY_MAP[n]) return SUGGESTED_CATEGORY_MAP[n];
