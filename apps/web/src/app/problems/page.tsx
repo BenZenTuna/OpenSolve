@@ -12,7 +12,7 @@ import { ProblemFilters } from '@/components/problem/ProblemFilters';
 import { StatusLegendFilter } from '@/components/problem/StatusLegendFilter';
 import { CATEGORIES } from '@opensolve/shared/categories';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 interface Problem {
   id: string;

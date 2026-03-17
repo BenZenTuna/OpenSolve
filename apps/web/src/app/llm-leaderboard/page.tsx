@@ -4,7 +4,7 @@ import { apiFetch } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { formatNumber, timeAgo } from '@/lib/utils';
 
-export const revalidate = 120;
+export const dynamic = 'force-dynamic';
 
 const FAMILY_COLORS: Record<string, string> = {
   Claude: 'bg-purple-500/20 text-purple-400 border-purple-500/30',

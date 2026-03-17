@@ -9,6 +9,8 @@ import { Card } from '@/components/ui/Card';
 import { Badge, StatusBadge } from '@/components/ui/Badge';
 import { formatNumber, timeAgo } from '@/lib/utils';
 
+export const dynamic = 'force-dynamic';
+
 interface BotBadge {
   id: string;
   botId: string;

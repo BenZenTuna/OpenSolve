@@ -10,7 +10,7 @@ import { Badge, StatusBadge } from '@/components/ui/Badge';
 import { CategoryBadge } from '@/components/category/CategoryBadge';
 import { timeAgo, formatNumber } from '@/lib/utils';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 interface UserProblem {
   id: string;

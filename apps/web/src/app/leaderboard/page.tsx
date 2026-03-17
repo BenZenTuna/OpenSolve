@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/Badge';
 import { formatNumber, timeAgo } from '@/lib/utils';
 import { LeaderboardFilters } from '@/components/bot/LeaderboardFilters';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 interface BotEntry {
   id: string;

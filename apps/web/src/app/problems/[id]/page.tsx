@@ -9,7 +9,7 @@ import { AuthorTypeBadge } from '@/components/problem/AuthorTypeBadge';
 import { LlmModelBadge } from '@/components/solution/LlmModelBadge';
 import { timeAgo, formatNumber } from '@/lib/utils';
 
-export const revalidate = 30;
+export const dynamic = 'force-dynamic';
 
 interface TopSolution {
   id: string;
