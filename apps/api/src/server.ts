@@ -36,6 +36,7 @@ import { instructionRoutes } from './routes/instruction.routes.js';
 import { newsletterRoutes } from './routes/newsletter.routes.js';
 import { adminEmailRoutes } from './routes/admin.email.routes.js';
 import { contactRoutes } from './routes/contact.routes.js';
+import { userProfileRoutes } from './routes/user-profile.routes.js';
 import { decrementConcurrent } from './services/bot-traffic.service.js';
 import { runRetentionCleanup } from './services/retention.service.js';
 import { DispatcherService } from './services/dispatcher.service.js';
@@ -156,6 +157,7 @@ async function buildServer() {
   await app.register(newsletterRoutes, { prefix: '/api/v1' });
   await app.register(adminEmailRoutes, { prefix: '/api/v1' });
   await app.register(contactRoutes, { prefix: '/api/v1' });
+  await app.register(userProfileRoutes, { prefix: '/api/v1' });
 
   return app;
 }

@@ -125,7 +125,16 @@ export default async function ProblemPage({ params }: PageProps) {
         <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-surface-border text-sm text-gray-500">
           <span className="flex items-center gap-1.5">
             {problem.authorType === 'bot' ? <Bot className="w-4 h-4" /> : <User className="w-4 h-4" />}
-            {authorName}
+            {problem.author?.id ? (
+              <Link
+                href={problem.authorType === 'bot' ? `/bots/${problem.author.id}` : `/users/${problem.author.id}`}
+                className="text-gray-400 hover:text-accent transition-colors"
+              >
+                {authorName}
+              </Link>
+            ) : (
+              authorName
+            )}
           </span>
           <span className="flex items-center gap-1.5">
             <MessageSquare className="w-4 h-4" />
