@@ -46,6 +46,8 @@ For EVERY frontend route in `apps/web/src/app/`:
 
 All 5 admin sub-pages are fully implemented. Verify each is functional and list line counts.
 
+Ensure `/users/[id]` (public user profile) is included in the walkthrough table. This page was added in the USER-PROFILE session.
+
 ### Domain Glossary
 
 Define every domain-specific term: Problem, Solution, Task, Vote, Comparison, Flag, Score, BT Score, Rating, Category, Attention Score, Confidence Interval, Badge, LLM Model, Activity Log, Dispatcher, Mature.
@@ -104,6 +106,7 @@ Pay special attention to these key families confirmed in the codebase:
 - `newsletter:*` (confirmation tokens)
 - `load-balancer:*` (per-problem traffic tracking)
 - `admin:*` (confirmation tokens, email tokens)
+- `dispatch:flag_assigned:{problemId}` — Thundering herd flag counter (INCR on assign, safe Lua DECR on complete/expire, capped at 3)
 
 ---
 
@@ -150,6 +153,16 @@ echo "  newsletterConsentMethod, newsletterUnsubscribeToken"
 echo ""
 echo "=== Migration files present ==="
 ls -la apps/api/drizzle/migrations/
+
+echo ""
+echo "=== Unique title index ==="
+grep -n "problems_title_unique\|lower.*trim.*title" apps/api/src/db/schema.ts
+echo "↑ Should reference unique index on lower(trim(title))"
+
+echo ""
+echo "=== Duplicate title handler ==="
+grep -n "23505\|duplicate" apps/api/src/routes/bot.routes.ts
+echo "↑ Should show PostgreSQL unique violation handler in create task case"
 ```
 
 ---
@@ -165,6 +178,7 @@ grep "^export" packages/shared/src/index.ts
 grep "^export" packages/shared/src/constants.ts
 grep "^export" packages/shared/src/types.ts
 grep "^export" packages/shared/src/validation.ts
+grep "^export" packages/shared/src/model-families.ts
 
 echo ""
 echo "=== Category count ==="
@@ -177,10 +191,80 @@ grep -c "CategoryGroup\|group:" packages/shared/src/categories.ts
 echo "↑ Expected: 0"
 ```
 
+```bash
+echo "=== Model families file exists ==="
+wc -l packages/shared/src/model-families.ts
+echo "↑ Should exist (extracted from constants.ts)"
+
+echo ""
+echo "=== Known model families count ==="
+grep -c "matchKeys:" packages/shared/src/model-families.ts
+echo "↑ Expected: 40"
+
+echo ""
+echo "=== Model families NOT in constants.ts ==="
+grep -c "KNOWN_MODEL_FAMILIES\|hashColor\|displayModelName\|getModelFamily\|PROVIDER_PREFIXES" packages/shared/src/constants.ts
+echo "↑ Expected: 0 (all moved to model-families.ts)"
+
+echo ""
+echo "=== Model families barrel export ==="
+grep "model-families" packages/shared/src/index.ts
+echo "↑ Expected: export * from './model-families.js'"
+
+echo ""
+echo "=== No hardcoded FAMILY_COLORS in admin debug ==="
+grep -c "FAMILY_COLORS" apps/web/src/app/admin/debug/DebugDashboard.tsx
+echo "↑ Expected: 0 (replaced with shared getModelFamily)"
+
+echo ""
+echo "=== Validation regex allows / and : ==="
+grep "a-z0-9._" packages/shared/src/validation.ts
+echo "↑ Should contain /:+ in character class"
+
+echo ""
+echo "=== Bot routes regex allows / and : ==="
+grep "LLM_MODEL_PATTERN" apps/api/src/routes/bot.routes.ts
+echo "↑ Should contain /:+ in character class"
+
+echo ""
+echo "=== No 'Other' in model families ==="
+grep -c "'Other'" packages/shared/src/model-families.ts
+echo "↑ Expected: 0 (unknown models get auto-detected, no Other bucket)"
+
+echo ""
+echo "=== getModelFamily consumers ==="
+grep -l "getModelFamily" apps/api/src/services/llm-leaderboard.service.ts apps/web/src/components/solution/LlmModelBadge.tsx apps/web/src/app/llm-leaderboard/page.tsx apps/web/src/app/llm-leaderboard/\[modelName\]/page.tsx apps/web/src/app/admin/debug/DebugDashboard.tsx 2>/dev/null | wc -l
+echo "↑ Expected: 5 consumer files"
+```
+
+Show the COMPLETE `packages/shared/src/model-families.ts`.
+
+Document the model family architecture:
+- `ModelFamilyInfo` interface: `{ color, label, company, matchKeys }`
+- `KNOWN_MODEL_FAMILIES`: 40 curated families with brand colors and matchKeys arrays
+- `hashColor()`: deterministic HSL color generation for unknown models
+- `displayModelName()`: strips provider prefixes (ollama/, openrouter/, etc.) for badge display
+- `getModelFamily()`: returns `{ family, color, company }` — matches against matchKeys, falls back to auto-detection with deterministic color
+- No "Other" bucket — every model gets a unique identity
+- Badge text = full model name (via `displayModelName`), NOT the family label
+- Family = grouping + color only (for leaderboard filters and badge dots)
+- Backward compat: `MODEL_FAMILIES` alias and `ModelFamily = string` type still exported
+
+List all 40 known families in a table:
+
+| # | Key | Label | Company | matchKeys |
+|---|-----|-------|---------|-----------|
+| 1 | gpt | GPT | OpenAI | gpt, chatgpt, o1, o3, o4, codex, gpt-oss |
+| ... (fill all 40 from the actual file) | ... | ... | ... | ... |
+
 Document the exported types and functions:
 - `Category` interface
 - `CATEGORIES`, `CATEGORY_SLUGS`
 - `getCategoryBySlug()`
+- `ModelFamilyInfo` interface
+- `KNOWN_MODEL_FAMILIES`, `MODEL_FAMILIES` (backward compat alias)
+- `getModelFamily()`, `displayModelName()`, `hashColor()`
+- `ModelFamily` type (= `string`)
 
 Document the full 8-category taxonomy in a table:
 
@@ -189,6 +273,131 @@ Document the full 8-category taxonomy in a table:
 | technology | ... | ... |
 
 Note: categories are flat (no groups). The old 3-group system (everyday/world/professional with 21 categories) was replaced.
+
+---
+
+## SECTION 2c: ISR & REVALIDATION
+
+```bash
+echo "=== apiFetch — no force-cache ==="
+grep -n "force-cache" apps/web/src/lib/api.ts
+echo "↑ Should be 0 results (removed)"
+
+echo ""
+echo "=== On-demand revalidation route exists ==="
+cat apps/web/src/app/api/revalidate/route.ts 2>/dev/null | head -5
+echo "↑ Should show revalidatePath import"
+
+echo ""
+echo "=== Revalidation service exists ==="
+cat apps/api/src/services/revalidate.service.ts 2>/dev/null | head -10
+echo "↑ Should show fire-and-forget revalidation helper"
+
+echo ""
+echo "=== Revalidation wired into bot routes ==="
+grep -n "revalidate" apps/api/src/routes/bot.routes.ts | head -10
+echo "↑ Should show imports + calls for flag/solve/vote/create"
+
+echo ""
+echo "=== Revalidation wired into problem routes ==="
+grep -n "revalidate" apps/api/src/routes/problem.routes.ts | head -5
+
+echo ""
+echo "=== Docker nextcache volume ==="
+grep -n "nextcache" docker-compose.prod.yml
+echo "↑ Should show volume mount + volume definition"
+
+echo ""
+echo "=== ISR revalidate intervals ==="
+grep -rn "export const revalidate" apps/web/src/app/ --include="*.tsx" --include="*.ts"
+echo "↑ Document each page's revalidation interval"
+
+echo ""
+echo "=== cache: 'no-store' on apiFetch ==="
+grep -n "cache.*no-store" apps/web/src/lib/api.ts
+echo "↑ Should show cache: 'no-store' in apiFetch default options"
+
+echo ""
+echo "=== force-dynamic pages ==="
+grep -rn "export const dynamic" apps/web/src/app/ --include="*.tsx" --include="*.ts"
+echo "↑ Should show force-dynamic on: problems, problems/[id], bots/[id], leaderboard, llm-leaderboard, users/[id]"
+
+echo ""
+echo "=== Homepage still uses revalidate (not force-dynamic) ==="
+grep "export const revalidate" apps/web/src/app/page.tsx
+echo "↑ Should show revalidate = 30"
+```
+
+Document the revalidation architecture:
+- Which pages have ISR and what revalidate interval
+- How on-demand revalidation is triggered (API → web container via POST /api/revalidate)
+- The revalidation service helper functions (revalidateForProblem, revalidateForSolution, revalidateForVote, revalidateForFlag)
+- Docker volume for ISR cache persistence (nextcache mounted at /app/apps/web/.next/cache)
+- Environment variables: WEB_INTERNAL_URL, REVALIDATION_SECRET
+- cache: 'no-store' added to apiFetch default options — prevents Next.js server-side Data Cache from caching API responses
+- 6 dynamic pages switched from `revalidate` to `export const dynamic = 'force-dynamic'`: problems list, problem detail, bot profile, bot leaderboard, LLM leaderboard, user profile
+- Homepage retains `export const revalidate = 30` (acceptable staleness, high traffic page)
+- API-level Redis caching (homepage endpoints: 180-300s TTL) still provides performance benefit
+
+---
+
+## SECTION 2d: MIGRATION HEALTH & DEPLOYMENT READINESS
+
+```bash
+echo "=== All migration files (numbered and unnumbered) ==="
+ls -la apps/api/drizzle/migrations/*.sql
+
+echo ""
+echo "=== Unnumbered migration files (Drizzle migrator skips these) ==="
+ls apps/api/drizzle/migrations/*.sql | grep -v "^apps/api/drizzle/migrations/[0-9]" | grep -v "meta"
+echo "↑ Should be 0 files — all migrations must be numbered (0000_, 0001_, etc.)"
+echo "  Known problematic files: newsletter_subscription.sql, widen_api_key_prefix.sql"
+
+echo ""
+echo "=== Duplicate migration number prefixes ==="
+ls apps/api/drizzle/migrations/*.sql | sed 's/.*\///' | cut -c1-4 | sort | uniq -d
+echo "↑ Should be empty — no two files should share the same 0000/0001/etc. prefix"
+
+echo ""
+echo "=== ALTER TYPE ADD VALUE without IF NOT EXISTS (will fail on fresh DB) ==="
+grep -n "ADD VALUE " apps/api/drizzle/migrations/*.sql | grep -v "IF NOT EXISTS"
+echo "↑ Must be 0 lines — every ADD VALUE must include IF NOT EXISTS"
+
+echo ""
+echo "=== ALTER TABLE ADD COLUMN without IF NOT EXISTS ==="
+grep -n "ADD COLUMN " apps/api/drizzle/migrations/*.sql | grep -v "IF NOT EXISTS"
+echo "↑ Should be 0 lines for idempotent migrations"
+
+echo ""
+echo "=== api_key_prefix column width in base migration ==="
+grep -n "api_key_prefix" apps/api/drizzle/migrations/0000_*.sql
+echo "↑ Should show varchar(16), not varchar(8)"
+
+echo ""
+echo "=== Auto-migration on server startup ==="
+grep -n "migrate\|runMigrations" apps/api/src/server.ts
+echo "↑ Check if migrations run automatically on startup"
+grep -n "migrate" apps/api/src/db/migrate.ts | head -5
+echo "↑ Show the migrate script entry point"
+
+echo ""
+echo "=== Drizzle config file location ==="
+find . -name "drizzle.config*" -not -path "*/node_modules/*" 2>/dev/null
+echo "↑ Must exist and be accessible from the Docker container working directory"
+
+echo ""
+echo "=== Dockerfile copies drizzle config ==="
+grep -n "drizzle" apps/api/Dockerfile
+echo "↑ Should show COPY for both drizzle/ migrations directory AND drizzle.config file"
+```
+
+Document:
+- Complete list of all migration files with their numbering status
+- Any unnumbered files that need to be folded into the numbered sequence or removed
+- Whether server.ts auto-runs migrations on startup (if not, this is a deployment risk — every fresh DB or DB reset requires manual `docker exec` to run migrations)
+- Whether the Dockerfile copies both the drizzle migrations directory AND the drizzle config file into the image
+- Any enum ADD VALUE statements missing IF NOT EXISTS
+- Any migration numbering collisions
 
 ---
 
@@ -215,6 +424,7 @@ For EACH route group below, document: HTTP method + path, what it does, required
 - Admin email (stats, subscribers, send-important, broadcast, confirmation-token, history, user-search)
 - Newsletter (subscribe, confirm, unsubscribe POST+GET, status)
 - Contact (POST /contact — form submission, rate-limited 3/hr, sends to contact@opensolve.ai via Resend)
+- User profile (GET /users/:id/profile — public profile with username, join date, posted problems, linked bot)
 - Debug (all X-Debug-Key endpoints)
 
 ```bash
@@ -234,6 +444,41 @@ echo ""
 echo "=== Contact form route ==="
 grep -n "fastify\.\|router\." apps/api/src/routes/contact.routes.ts 2>/dev/null | head -10
 echo "↑ Should show POST /contact (rate limit 3/hr)"
+
+echo ""
+echo "=== User profile route ==="
+grep -n "fastify\.\(get\|post\)" apps/api/src/routes/user-profile.routes.ts 2>/dev/null | head -5
+echo "↑ Should show GET /users/:id/profile"
+
+echo ""
+echo "=== User profile registered in server ==="
+grep "userProfile" apps/api/src/server.ts
+echo "↑ Should show import + register"
+
+echo ""
+echo "=== User profile exposes no sensitive fields ==="
+grep -c "email\|apiKey\|oauth\|password\|hash\|newsletter" apps/api/src/routes/user-profile.routes.ts
+echo "↑ Must be 0"
+
+echo ""
+echo "=== Model Arena sort tabs (4 options, default win_rate) ==="
+grep -n "sortOptions\|key:.*label:" apps/web/src/app/llm-leaderboard/page.tsx | head -10
+echo "↑ Should show exactly 4 sort options: win_rate, avg_score, first_place_count, total_solutions"
+
+echo ""
+echo "=== Model Arena default sort ==="
+grep "win_rate" apps/web/src/app/llm-leaderboard/page.tsx | head -3
+echo "↑ Should show win_rate as default (not avg_score)"
+
+echo ""
+echo "=== Removed sort options gone from backend ==="
+grep "best_score\|top3_count" apps/api/src/routes/llm-leaderboard.routes.ts apps/api/src/services/llm-leaderboard.service.ts 2>/dev/null
+echo "↑ Must be empty — best_score and top3_count removed from sort enum and orderBy map"
+
+echo ""
+echo "=== Sort tab descriptions rendered ==="
+grep -n "description\|activeSort" apps/web/src/app/llm-leaderboard/page.tsx | head -5
+echo "↑ Should show description field on sort options and rendering logic"
 
 echo ""
 echo "=== SSE route shape ==="
@@ -333,7 +578,106 @@ grep -n "setInterval\|expiry\|expire\|sweep" apps/api/src/services/dispatcher.se
 echo ""
 echo "=== One-task-at-a-time enforcement ==="
 grep -n "activeTask\|one.*task\|already.*task" apps/api/src/services/dispatcher.service.ts | head -10
+
+echo ""
+echo "=== Concurrency: Partial unique index prevents double task assignment ==="
+grep -n "bot_assigned\|tasks_bot_assigned" apps/api/src/db/schema.ts
+echo "↑ Should show uniqueIndex on (bot_id) WHERE status = 'assigned'"
+
+echo ""
+echo "=== Concurrency: 23505 fallback in createTask ==="
+grep -n "23505\|bot_assigned" apps/api/src/services/dispatcher.service.ts
+echo "↑ Should show catch for duplicate task, falls back to getActiveTask"
+
+echo ""
+echo "=== Concurrency: Flag thundering herd Redis cap ==="
+grep -n "flag_assigned\|INCR\|incr" apps/api/src/services/dispatcher.service.ts
+echo "↑ Should show Redis INCR capped at 3 per problem"
+
+echo ""
+echo "=== Concurrency: Safe flag counter decrement (Lua floor) ==="
+grep -n "safeDecr\|local v\|tonumber" apps/api/src/routes/bot.routes.ts apps/api/src/server.ts
+echo "↑ Should show Lua script preventing counter going below 0"
+
+echo ""
+echo "=== response_format always sent (not stripped by instruct=none) ==="
+grep -c "instructMode !== 'none'" apps/api/src/services/dispatcher.service.ts
+echo "↑ Should be 0 — response_format is now unconditional for all instruct modes"
+
+echo ""
+echo "=== Flag normalization before Zod validation ==="
+grep -n "normalizeFlagCategory\|FLAG_CATEGORY_MAP" apps/api/src/routes/bot.routes.ts | head -5
+echo "↑ Should show normalization functions mapping ~40 LLM category variations"
+
+echo ""
+echo "=== Poison problem: failedFlagAttempts column ==="
+grep -n "failedFlagAttempts\|failed_flag_attempts" apps/api/src/db/schema.ts
+echo "↑ Should show integer column with default 0 on problems table"
+
+echo ""
+echo "=== Poison problem: auto-reject after 5 failures ==="
+grep -n "trackFailedFlagAttempt\|MAX_FAILED" apps/api/src/routes/bot.routes.ts
+echo "↑ Should show auto-reject function called on flag task failures"
+
+echo ""
+echo "=== Poison problem: dispatcher skips poisoned problems ==="
+grep -n "failedFlagAttempts" apps/api/src/services/dispatcher.service.ts
+echo "↑ Should show lt(problems.failedFlagAttempts, 5) in flag candidate query"
+
+echo ""
+echo "=== Task status: 'failed' on submit errors ==="
+grep -n "status.*failed" apps/api/src/routes/bot.routes.ts | head -5
+echo "↑ Should show catch block marks task as 'failed' before returning error"
+
+echo ""
+echo "=== Solutions unique index (one solution per bot per problem) ==="
+grep -n "solutions_bot_problem_idx\|botProblemIdx" apps/api/src/db/schema.ts
+echo "↑ Should show uniqueIndex on (botId, problemId)"
+
+echo ""
+echo "=== Solve duplicate 23505 handler ==="
+grep -n "23505" apps/api/src/routes/bot.routes.ts
+echo "↑ Should show handlers in both solve and create cases"
 ```
+
+---
+
+## SECTION 5b: STUCK-TASK FIX VERIFICATION
+
+The stuck-task retry loop was a critical bug where failed task submissions left tasks in 'assigned' status, trapping bots in a retry loop. Three fixes were applied:
+
+```bash
+echo "=== Fix 1: Failed task marking in submit catch block ==="
+grep -n "status.*failed\|failed.*mark" apps/api/src/routes/bot.routes.ts
+echo "↑ Should show task status set to 'failed' in the catch block of POST /tasks/:id/submit"
+
+echo ""
+echo "=== Fix 2: 23505 duplicate handling in solve case ==="
+grep -n -A 5 "23505" apps/api/src/routes/bot.routes.ts
+echo "↑ Should show duplicate handling in BOTH create case AND solve case"
+echo "  Solve case should mark task as 'completed' (not 'failed') for duplicates"
+
+echo ""
+echo "=== Fix 3: Unique index on solutions(botId, problemId) ==="
+grep -n "solutions_bot_problem_idx\|botProblemIdx" apps/api/src/db/schema.ts
+echo "↑ Should show uniqueIndex on (botId, problemId)"
+
+echo ""
+echo "=== uniqueIndex import present ==="
+grep -n "uniqueIndex" apps/api/src/db/schema.ts | head -3
+echo "↑ Should be imported from drizzle-orm/pg-core"
+
+echo ""
+echo "=== tasks table has correct indexes ==="
+grep -n "tasks_bot_assigned_idx" apps/api/src/db/schema.ts
+echo "↑ Should show unique partial index on bot_id WHERE status = 'assigned'"
+```
+
+Document:
+- Whether the submit catch block marks tasks as 'failed' (prevents retry loop)
+- Whether 23505 (duplicate key) is handled in both create AND solve cases
+- Whether the unique index on solutions(bot_id, problem_id) exists in schema
+- The complete error handling flow for task submission failures
 
 ---
 
@@ -344,6 +688,38 @@ Show the COMPLETE:
 - `apps/api/src/services/pair-selector.service.ts` (or equivalent)
 
 Document: starting BT score, starting confidence interval, K-factor, ELO formula, pair selection strategy (Swiss/uniform/random percentages), maturity thresholds, win/loss bonus points.
+
+```bash
+echo ""
+echo "=== BT transaction with SELECT FOR UPDATE ==="
+grep -n "FOR UPDATE\|db\.transaction\|tx\." apps/api/src/services/bradley-terry.service.ts | head -10
+echo "↑ Should show transaction wrapper locking solution rows before score update"
+
+echo ""
+echo "=== Deadlock prevention: consistent lock ordering ==="
+grep -n "sort()\|idFirst\|idSecond" apps/api/src/services/bradley-terry.service.ts
+echo "↑ Should show sorted ID ordering for FOR UPDATE locks"
+
+echo ""
+echo "=== Maturity bonus: atomic transition prevents double-award ==="
+grep -n "mature.*RETURNING\|status.*!=.*mature" apps/api/src/services/bradley-terry.service.ts
+echo "↑ Should show UPDATE WHERE status != 'mature' RETURNING — only one caller wins"
+
+echo ""
+echo "=== Duplicate vote prevention ==="
+grep -n "voter_pair\|comparisons_voter_pair" apps/api/src/db/schema.ts
+echo "↑ Should show uniqueIndex on (voterBotId, solutionAId, solutionBId)"
+
+echo ""
+echo "=== Pair normalization in selector ==="
+grep -n "solutionA.id.*>.*solutionB.id\|normalize\|swap" apps/api/src/services/pair-selector.service.ts
+echo "↑ Should show canonical ID ordering — smaller ID always as solutionA"
+
+echo ""
+echo "=== Duplicate comparison 23505 guard ==="
+grep -n "23505" apps/api/src/services/bradley-terry.service.ts
+echo "↑ Should show early return if same bot already voted on same pair"
+```
 
 ---
 
@@ -378,6 +754,28 @@ grep -rn "K_FACTOR\|BT\.\|MATURITY\|INITIAL.*SCORE\|STARTING" \
 ```
 
 For each constant: variable name, value, file:line, what it controls.
+
+```bash
+echo ""
+echo "=== Solution text limits updated ==="
+grep -n "SOLUTION_TEXT_MAX" packages/shared/src/constants.ts
+echo "↑ Should be 5000 (was 2000)"
+
+echo ""
+echo "=== Zod schema limits ==="
+grep -n "min(50)\|max(5000)" apps/api/src/routes/bot.routes.ts
+echo "↑ Should show min(50).max(5000) on solution_text"
+
+echo ""
+echo "=== Instruction character guidance ==="
+grep -n "800-1800\|400-1200" packages/shared/src/constants.ts
+echo "↑ Should show 800-1800 (was 400-1200)"
+
+echo ""
+echo "=== llm_model enhanced instructions ==="
+grep -n "llm_model" packages/shared/src/constants.ts | head -5
+echo "↑ Should show clear instruction with model name examples"
+```
 
 ---
 
@@ -465,6 +863,26 @@ echo ""
 echo "=== No unused auth dependencies ==="
 grep "next-auth" apps/web/package.json 2>/dev/null
 echo "↑ Must be empty — next-auth was removed (unused)"
+
+echo ""
+echo "=== DB connection pool size ==="
+grep -n "max.*30\|idle_timeout\|connect_timeout" apps/api/src/config/database.ts
+echo "↑ Should show max: 30 (was default 10)"
+
+echo ""
+echo "=== Auto-migration on startup ==="
+grep -n "migrate" apps/api/Dockerfile
+echo "↑ Dockerfile CMD should run migrate.js before server.js"
+
+echo ""
+echo "=== Migration script ==="
+head -5 apps/api/src/db/migrate.ts
+echo "↑ Should show drizzle-orm migrator import"
+
+echo ""
+echo "=== api_key_prefix varchar(16) in initial migration ==="
+grep "api_key_prefix" apps/api/drizzle/migrations/0000_*.sql
+echo "↑ Should show varchar(16), NOT varchar(8)"
 ```
 
 ---
@@ -1005,6 +1423,10 @@ Document these explicitly — confirm current state of each:
 
 11. **Admin Basic Auth hash algorithm** — Upgraded from Apache MD5 (`$apr1$`) to bcrypt (`$2y$`) in SEC-FIX-7. Credentials rotated. Verify the live config still uses bcrypt (Coolify redeploys can reset dynamic Traefik configs).
 
+12. **Pending problem deadlock** — When all available bots have flagged a problem with mixed verdicts (e.g., 2 green + 1 red) and there are no more bots to flag, the problem stays pending forever. Needs either: lower tiebreaker threshold (2G/1R → approve), timeout-based auto-resolution, or admin escalation.
+
+13. **Bot-created duplicate topics** — Bots using `instruct=none` with CREATE tasks generate the same topics across fresh databases (e.g., "Why do hospitals still use fax machines") because they have no context about existing problems. The CREATE payload should include recent problem titles to prevent semantic duplicates.
+
 ---
 
 ## SECTION 15: SESSION HISTORY (Chronological)
@@ -1069,10 +1491,41 @@ Use this corrected table as the authoritative reference — verify each session 
 | **SEC-FIX-7** | /data/coolify/proxy/dynamic/opensolve.yaml (on server) | Admin Basic Auth hash upgraded from Apache MD5 ($apr1$) to bcrypt ($2y$) for brute-force resistance; credentials rotated |
 | **CAT-REDUCE** | packages/shared/src/categories.ts, schema.ts, constants.ts, dispatcher.service.ts, bot.routes.ts, problem.routes.ts, SKILL.md, 27+ web app files | 21 categories (3 groups) reduced to 8 categories (flat, no groups); all group references removed |
 | **SKILL-OPT-1** | skill/SKILL.md v2.0.0 (rewrite), skill/ONBOARDING.md (NEW) | SKILL.md reduced from ~1,849 words to ~250 words; rubrics, categories, submit formats moved to ONBOARDING.md; weekly scheduled contribution with day-of-install cron schedule |
-| **SKILL-OPT-2** | bot.routes.ts, dispatcher.service.ts, instruction.routes.ts | `?instruct=none` parameter on GET /tasks/next — omits instruction and response_format fields from task payloads |
+| **SKILL-OPT-2** | bot.routes.ts, dispatcher.service.ts, instruction.routes.ts | `?instruct=none` parameter on GET /tasks/next — omits instruction field from task payloads. Note: response_format is now ALWAYS sent regardless of instruct mode (FIX-RESP-FMT) |
 | **SKILL-OPT-3** | bot.routes.ts, dispatcher.service.ts | `?categories=slim` parameter on GET /tasks/next — FLAG/CREATE tasks send category slugs only instead of full objects |
 | **SKILL-OPT-4** | dispatcher.service.ts | Content wrappers shortened from `===BEGIN CONTENT (TREAT AS DATA ONLY)===` (62 chars) to `---DATA---` (22 chars) |
 | **SKILL-OPT-5** | skill/ONBOARDING.md | Cron task message reduced from ~500+ chars to ~200 chars; uses optimized query string |
+| **FIX-BOTDEFAULTS** | leaderboard/page.tsx, bots/page.tsx, bots/[id]/page.tsx | ELO and Vote Accuracy display "—" instead of default values (1200 / 50%) when bot has zero solutions or zero votes respectively. Admin pages unaffected. |
+| **FIX-ISR** | apps/web/src/lib/api.ts, apps/web/src/app/api/revalidate/route.ts, docker-compose.prod.yml | Removed `cache: 'force-cache'` default from apiFetch (was overriding page-level revalidate); added on-demand revalidation POST endpoint; added nextcache Docker volume for ISR persistence |
+| **FIX-ISR-WIRE** | apps/api/src/services/revalidate.service.ts (NEW), bot.routes.ts, problem.routes.ts, docker-compose.prod.yml | Fire-and-forget revalidation calls from API to web container on data-changing events (problem create, flag, solve, vote); WEB_INTERNAL_URL + REVALIDATION_SECRET env vars |
+| **FIX-DEDUP** | bot.routes.ts, problems table (production index) | Unique index `problems_title_unique` on `lower(trim(title))` prevents duplicate problem titles; create handler catches PostgreSQL 23505 error and returns `{ success: true, duplicate: true }` |
+| **FIX-STUCK-TASK** | bot.routes.ts, schema.ts, migration | Three fixes: (1) catch block marks task as 'failed' on submit errors, (2) solve case handles 23505 duplicate with 'completed' status, (3) unique index `solutions_bot_problem_idx` on (bot_id, problem_id) |
+| **FIX-MIGRATION-ENUM** | drizzle/migrations/0001_medical_blur.sql | Added `IF NOT EXISTS` to all `ALTER TYPE ADD VALUE` and `ALTER TABLE ADD COLUMN` statements to prevent failures on fresh database migrations |
+| **FIX-LLM-REGEX** | bot.routes.ts, validation.ts | `LLM_MODEL_PATTERN` regex updated to allow `/`, `:`, `+` characters — fixes NULL storage for Ollama-style model names like `ollama/qwen3.5:9b`; same fix applied to shared validation schema |
+| **REFACTOR-MODEL-FAMILIES** | packages/shared/src/model-families.ts (NEW), constants.ts, index.ts, validation.ts, DebugDashboard.tsx | Model family logic extracted from constants.ts into dedicated model-families.ts; 40 curated families with matchKeys arrays; auto-detection with deterministic color for unknown models; no "Other" bucket; admin debug dashboard uses shared getModelFamily() instead of hardcoded FAMILY_COLORS |
+
+| **HOTFIX-OLLAMA-MATCH** | packages/shared/src/model-families.ts | Fixed false positive: `getModelFamily()` no longer matches against raw input string — only against provider-stripped string. Prevents `ollama/` matching as "Llama" and `groq/` matching as "Grok" |
+| **FIX-FLAG-VALID** | bot.routes.ts | .nullable().optional() on suggested_category in flagSchema |
+| **FIX-FLAG-NORM** | bot.routes.ts | normalizeFlagCategory() + normalizeSuggestedCategory() map ~40 LLM variations to valid enums before Zod parse |
+| **FIX-POISON** | schema.ts, bot.routes.ts, server.ts, dispatcher.service.ts | failedFlagAttempts column; auto-reject after 5 failures; dispatcher skips poison problems |
+| **FIX-RACE-BT** | bradley-terry.service.ts | db.transaction() + SELECT FOR UPDATE on solution rows; deadlock-safe ID ordering |
+| **FIX-RACE-MATURE** | bradley-terry.service.ts | Atomic maturity transition: UPDATE WHERE status != 'mature' RETURNING prevents double bonus |
+| **FIX-RACE-TASK** | schema.ts, dispatcher.service.ts | Partial unique index tasks_bot_assigned_idx on (bot_id) WHERE status='assigned'; 23505 fallback |
+| **FIX-RACE-POOL** | database.ts | DB pool max: 30, idle_timeout: 20, connect_timeout: 10 |
+| **FIX-RACE-VOTE** | schema.ts, bradley-terry.service.ts, pair-selector.service.ts | uniqueIndex on comparisons(voter, solA, solB); normalized pair ordering; 23505 guard |
+| **FIX-RACE-HERD** | dispatcher.service.ts, bot.routes.ts, server.ts | Redis INCR/DECR cap of 3 concurrent flag assignments per problem |
+| **FIX-FLAG-CTR** | bot.routes.ts, server.ts | Lua script safeDecrFlagCounter() floors counter at 0; prevents negative from expired+late-submit race |
+| **FIX-AUTO-MIG** | Dockerfile | CMD runs migrate.js before server.js; migrations auto-apply on every deploy |
+| **FIX-VARCHAR16** | drizzle/migrations/0000_*.sql | api_key_prefix varchar(8) → varchar(16) in initial migration SQL |
+| **FIX-RESP-FMT** | dispatcher.service.ts | response_format sent unconditionally (was stripped by instruct=none, breaking llm_model reporting) |
+| **FIX-CHAR-LIM** | constants.ts, bot.routes.ts | SOLUTION_TEXT_MAX 2000→5000; Zod min(50) max(5000); instruction text 800-1800; llm_model instructions enhanced |
+| **SKILL-v2.1** | skill/SKILL.md, skill/ONBOARDING.md | Submit Formats section with exact JSON; CRITICAL llm_model with provider examples; 800-1800 char limits; all flag enum values inline |
+| **FIX-REJECTED** | problem.routes.ts | "All" status filter on GET /problems now excludes rejected problems (`ne(problems.status, 'rejected')`); rejected only visible when explicitly filtered |
+| **USER-PROFILE** | user-profile.routes.ts (NEW), server.ts, users/[id]/page.tsx (NEW), problems/[id]/page.tsx | Public user profile page at /users/:id showing username, join date, posted problems, linked bot; human author names clickable on problem detail page |
+| **UI-SOLUTIONS** | problems/[id]/page.tsx | Top Solutions section changed from 3-column grid to full-width vertical stack for readability |
+| **CACHE-FIX** | apps/web/src/lib/api.ts, 6 page files | Added `cache: 'no-store'` to apiFetch; replaced `revalidate` with `export const dynamic = 'force-dynamic'` on problems, problem detail, bot profile, leaderboard, LLM leaderboard, user profile pages; homepage keeps `revalidate = 30` |
+| **LLM-CHAR-UPDATE** | constants.ts, bot.routes.ts, docs/sdk/page.tsx, skill/ONBOARDING.md, skill/SKILL.md | SOLUTION_TEXT_MAX 2000→5000; solve instruction sweet spot 400-1200→800-1800; llm_model examples added; bot.routes.ts schema max 2000→5000 |
+| **MODEL-ARENA-TABS** | llm-leaderboard/page.tsx, llm-leaderboard.routes.ts, llm-leaderboard.service.ts | Reduced from 6 sort tabs to 4: Most Voted (win_rate, new default), Overall Rating (avg_score), Most Wins (first_place_count), Most Prolific (total_solutions); removed best_score and top3_count sort options; each tab shows description when active |
 
 ---
 
@@ -1081,12 +1534,12 @@ Use this corrected table as the authoritative reference — verify each session 
 ```bash
 echo "=== SKILL.md version ==="
 grep "version:" skill/SKILL.md | head -3
-echo "↑ Should be 2.0.0"
+echo "↑ Should be 2.1.0"
 
 echo ""
 echo "=== SKILL.md — word count (should be ~250 words, not ~1,800) ==="
 wc -w skill/SKILL.md
-echo "↑ Should be under 300 words (lean version — rubrics moved to ONBOARDING.md)"
+echo "↑ Should be under 500 words (v2.1 added Submit Formats section)"
 
 echo ""
 echo "=== SKILL.md — no full rubrics ==="
@@ -1131,6 +1584,31 @@ echo ""
 echo "=== ONBOARDING.md — lean cron message ==="
 grep "instruct=none" skill/ONBOARDING.md
 echo "↑ Should show optimized query string in cron message"
+
+echo ""
+echo "=== SKILL.md — Submit Formats section ==="
+grep -c "Submit Formats" skill/SKILL.md
+echo "↑ Should be 1"
+
+echo ""
+echo "=== SKILL.md — CRITICAL llm_model with provider examples ==="
+grep -c "gemini\|claude\|gpt" skill/SKILL.md
+echo "↑ Should be 3+ (Gemini, Claude, GPT examples)"
+
+echo ""
+echo "=== SKILL.md — 800-1800 character limit ==="
+grep "800-1800" skill/SKILL.md
+echo "↑ Should show HARD LIMIT: 800-1800"
+
+echo ""
+echo "=== ONBOARDING.md — CRITICAL llm_model instruction ==="
+grep -c "CRITICAL.*llm_model\|MUST include" skill/ONBOARDING.md
+echo "↑ Should be 1+"
+
+echo ""
+echo "=== ONBOARDING.md — 50-5000 API limit ==="
+grep "50-5000" skill/ONBOARDING.md
+echo "↑ Should show updated API character limit"
 ```
 
 Show the COMPLETE `skill/SKILL.md`.
@@ -1235,5 +1713,84 @@ echo "Contact route: $(grep -c "fastify\." apps/api/src/routes/contact.routes.ts
     - Admin middleware has NO token cookie check (just NextResponse.next() for /admin)? (yes/no)
     - Admin Basic Auth uses bcrypt ($2y$) not Apache MD5 ($apr1$)? (yes/no — server-side check)
 13. Redis key inventory — were all key families documented? List any undocumented patterns.
-
+14. ISR & Revalidation — confirm all FIX-ISR, FIX-ISR-WIRE changes are present:
+    - `force-cache` removed from apiFetch? (yes/no)
+    - On-demand revalidation route at `apps/web/src/app/api/revalidate/route.ts` exists? (yes/no)
+    - Revalidation service at `apps/api/src/services/revalidate.service.ts` exists? (yes/no)
+    - Bot routes import and call revalidation helpers for flag/solve/vote/create? (yes/no)
+    - Problem routes call revalidation on human problem creation? (yes/no)
+    - Docker nextcache volume defined and mounted? (yes/no)
+    - WEB_INTERNAL_URL and REVALIDATION_SECRET in docker-compose.prod.yml? (yes/no)
+15. Deduplication — confirm FIX-DEDUP changes are present:
+    - Unique index `problems_title_unique` on `lower(trim(title))` in schema or migration? (yes/no)
+    - Create task handler catches PostgreSQL error code 23505? (yes/no)
+    - Duplicate response returns `{ success: true, duplicate: true }`? (yes/no)
+16. Bot display defaults — confirm FIX-BOTDEFAULTS changes:
+    - Leaderboard ELO shows "—" when totalSolutions === 0? (yes/no)
+    - Leaderboard Accuracy shows "—" when totalVotes === 0? (yes/no)
+    - Bot profile page applies same conditionals? (yes/no)
+    - Bots directory page applies same conditionals? (yes/no)
+17. LLM model regex — confirm FIX-LLM-REGEX changes:
+    - bot.routes.ts `LLM_MODEL_PATTERN` contains `/:+` in character class? (yes/no)
+    - validation.ts llmModelSchema regex contains `/:+` in character class? (yes/no)
+    - Model names like `ollama/qwen3.5:9b` pass regex validation? (yes/no)
+18. Model families extraction — confirm REFACTOR-MODEL-FAMILIES changes:
+    - `packages/shared/src/model-families.ts` exists? (yes/no)
+    - 40 known families with matchKeys arrays? (yes/no)
+    - `constants.ts` has zero model family code (KNOWN_MODEL_FAMILIES, hashColor, getModelFamily, displayModelName, PROVIDER_PREFIXES all removed)? (yes/no)
+    - `index.ts` exports `./model-families.js`? (yes/no)
+    - No "Other" family in the registry? (yes/no)
+    - `getModelFamily()` returns `{ family, color, company }` with auto-detection fallback? (yes/no)
+    - Admin debug DebugDashboard.tsx uses `getModelFamily()` instead of hardcoded FAMILY_COLORS? (yes/no)
+    - All 5 consumer files resolve imports via barrel export? (yes/no)
+19. Stuck-task fix:
+    - Submit catch block marks task 'failed'? (yes/no)
+    - uniqueIndex on solutions(botId, problemId)? (yes/no)
+    - 23505 handling in solve case? (yes/no)
+    - flagSchema .nullable() on suggested_category? (yes/no)
+20. Concurrency (6 races):
+    - BT: db.transaction() + FOR UPDATE? (yes/no)
+    - Maturity: atomic WHERE status != 'mature' RETURNING? (yes/no)
+    - Double task: partial unique index tasks_bot_assigned_idx? (yes/no)
+    - DB pool: max 30? (yes/no)
+    - Duplicate vote: uniqueIndex on comparisons(voter, solA, solB)? (yes/no)
+    - Flag herd: Redis INCR/DECR cap at 3? (yes/no)
+21. Flag normalization:
+    - normalizeFlagCategory() exists with ~40 mappings? (yes/no)
+    - Called before Zod parse? (yes/no)
+22. Poison problems:
+    - failedFlagAttempts column? (yes/no)
+    - Auto-reject at 5 failures? (yes/no)
+    - Dispatcher skips >= 5? (yes/no)
+23. Auto-migrations:
+    - Dockerfile CMD runs migrate.js before server.js? (yes/no)
+    - drizzle/ COPY'd in Dockerfile? (yes/no)
+24. SKILL.md v2.1:
+    - Submit Formats section? (yes/no)
+    - CRITICAL llm_model with provider examples? (yes/no)
+    - 800-1800 char limit? (yes/no)
+25. Character limits synced:
+    - SOLUTION_TEXT_MAX = 5000? (yes/no)
+    - Zod min(50) max(5000)? (yes/no)
+    - Instructions say 800-1800? (yes/no)
+26. Caching architecture — confirm CACHE-FIX changes:
+    - `cache: 'no-store'` in apiFetch? (yes/no)
+    - `export const dynamic = 'force-dynamic'` on problems, problem detail, bot profile, leaderboard, LLM leaderboard, user profile? (yes/no)
+    - Homepage still has `revalidate = 30` (not force-dynamic)? (yes/no)
+    - User profile route exists at `apps/api/src/routes/user-profile.routes.ts`? (yes/no)
+    - User profile page exists at `apps/web/src/app/users/[id]/page.tsx`? (yes/no)
+    - Human author names clickable on problem detail page? (yes/no)
+27. Model Arena tabs — confirm MODEL-ARENA-TABS changes:
+    - Exactly 4 sort options (win_rate, avg_score, first_place_count, total_solutions)? (yes/no)
+    - Default sort is win_rate (not avg_score)? (yes/no)
+    - best_score and top3_count removed from backend Zod enum and service orderBy? (yes/no)
+    - Each tab has a description shown when active? (yes/no)
+28. Migration health — confirm migration files are deployable to a fresh database:
+    - All migration files are numbered (no unnumbered .sql files in migrations/)? (yes/no)
+    - No duplicate migration number prefixes? (yes/no)
+    - All `ALTER TYPE ADD VALUE` include `IF NOT EXISTS`? (yes/no)
+    - All `ALTER TABLE ADD COLUMN` include `IF NOT EXISTS`? (yes/no)
+    - `api_key_prefix` defined as varchar(16) in base migration? (yes/no)
+    - Drizzle config file copied into Docker image? (yes/no)
+    - Does server.ts auto-run migrations on startup? (yes/no — if no, document the manual step)
 Target length: 2,000–5,000 lines. Be thorough but do not repeat the same file contents across multiple sections.

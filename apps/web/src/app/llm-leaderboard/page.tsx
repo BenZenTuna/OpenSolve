@@ -89,65 +89,67 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
 
       {/* Filters */}
       <Card padding="sm">
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Sort */}
-          <div className="flex items-center gap-2">
-            <label className="text-xs text-gray-500 uppercase tracking-wider">Sort</label>
-            <div className="flex flex-wrap gap-1">
-              {sortOptions.map((opt) => (
+        <div className="space-y-2">
+          {/* Top row: Sort tabs left, Family filter right */}
+          <div className="flex items-center justify-between flex-wrap gap-y-3">
+            {/* Left: Sort tabs */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <label className="text-xs text-gray-500 uppercase tracking-wider">Sort</label>
+              <div className="flex flex-wrap gap-1">
+                {sortOptions.map((opt) => (
+                  <Link
+                    key={opt.key}
+                    href={`/llm-leaderboard?sort=${opt.key}${family ? `&family=${family}` : ''}`}
+                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                      sort === opt.key
+                        ? 'bg-accent/20 text-accent border border-accent/30'
+                        : 'bg-navy-800 text-gray-400 border border-navy-700 hover:text-gray-200 hover:border-navy-600'
+                    }`}
+                  >
+                    {opt.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+            {/* Right: Family filter */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <label className="text-xs text-gray-500 uppercase tracking-wider">Family</label>
+              <div className="flex flex-wrap gap-1">
                 <Link
-                  key={opt.key}
-                  href={`/llm-leaderboard?sort=${opt.key}${family ? `&family=${family}` : ''}`}
+                  href={`/llm-leaderboard?sort=${sort}`}
                   className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                    sort === opt.key
+                    !family
                       ? 'bg-accent/20 text-accent border border-accent/30'
                       : 'bg-navy-800 text-gray-400 border border-navy-700 hover:text-gray-200 hover:border-navy-600'
                   }`}
                 >
-                  {opt.label}
+                  All
                 </Link>
-              ))}
+                {families.map((f) => (
+                  <Link
+                    key={f.family || 'null'}
+                    href={`/llm-leaderboard?sort=${sort}&family=${f.family || ''}`}
+                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                      family === f.family
+                        ? 'bg-accent/20 text-accent border border-accent/30'
+                        : 'bg-navy-800 text-gray-400 border border-navy-700 hover:text-gray-200 hover:border-navy-600'
+                    }`}
+                  >
+                    {f.family || 'Other'} ({f.count})
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
-          {/* Active sort description */}
+          {/* Description below the entire row */}
           {(() => {
             const activeSort = sortOptions.find(o => o.key === sort);
             return activeSort ? (
-              <p className="text-xs text-gray-500 mt-1.5 ml-1">
+              <p className="text-xs text-gray-500 ml-1">
                 {activeSort.description}
               </p>
             ) : null;
           })()}
-
-          {/* Family filter */}
-          <div className="flex items-center gap-2">
-            <label className="text-xs text-gray-500 uppercase tracking-wider">Family</label>
-            <div className="flex flex-wrap gap-1">
-              <Link
-                href={`/llm-leaderboard?sort=${sort}`}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                  !family
-                    ? 'bg-accent/20 text-accent border border-accent/30'
-                    : 'bg-navy-800 text-gray-400 border border-navy-700 hover:text-gray-200 hover:border-navy-600'
-                }`}
-              >
-                All
-              </Link>
-              {families.map((f) => (
-                <Link
-                  key={f.family || 'null'}
-                  href={`/llm-leaderboard?sort=${sort}&family=${f.family || ''}`}
-                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                    family === f.family
-                      ? 'bg-accent/20 text-accent border border-accent/30'
-                      : 'bg-navy-800 text-gray-400 border border-navy-700 hover:text-gray-200 hover:border-navy-600'
-                  }`}
-                >
-                  {f.family || 'Other'} ({f.count})
-                </Link>
-              ))}
-            </div>
-          </div>
         </div>
       </Card>
 
