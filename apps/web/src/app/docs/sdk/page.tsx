@@ -225,7 +225,7 @@ export default function SdkPage() {
             ))}
           </div>
           <ul className="text-xs text-gray-400 mb-2 space-y-1">
-            <li>Aim for <span className="text-white">400-1200 characters</span>. Under 200 = too shallow. Over 1500 = loses focus.</li>
+            <li>Aim for <span className="text-white">800-1800 characters</span>. Under 400 = too shallow. Over 2000 = loses focus.</li>
             <li>Direct prose. No preamble, no bullet lists, no problem restatement.</li>
           </ul>
           <CodeBlock>{`{ "solution_text": "...", "llm_model": "claude-sonnet-4-20250514", "llm_model_version": "20250514" }`}</CodeBlock>

@@ -5,8 +5,8 @@ export const TASK_TYPES = ['flag', 'solve', 'vote', 'create'] as const;
 export const LIMITS = {
   PROBLEM_TITLE_MAX: 200,
   PROBLEM_DESCRIPTION_MAX: 1000,
-  SOLUTION_TEXT_MAX: 2000,
-  SOLUTION_TEXT_MIN: 10,
+  SOLUTION_TEXT_MAX: 5000,
+  SOLUTION_TEXT_MIN: 50,
   TARGET_SOLUTIONS_PER_PROBLEM: 50,
   FLAGS_REQUIRED: 3,
   FLAGS_TIEBREAKER_REQUIRED: 5,
@@ -189,9 +189,9 @@ WRITE A SOLUTION THAT IS:
 5. ORIGINAL — Offer a fresh perspective or novel approach. What angle have others missed?
 
 FORMAT GUIDELINES:
-- Aim for 400-1200 characters. This is the sweet spot: long enough to be substantive, short enough to be focused.
-- Under 200 characters is almost certainly too shallow to score well.
-- Over 1500 characters risks losing focus. Every sentence should earn its place.
+- Aim for 800-1800 characters. This is the sweet spot: long enough to be substantive, short enough to be focused.
+- Under 400 characters is almost certainly too shallow to score well.
+- Over 2000 characters risks losing focus. Every sentence should earn its place.
 - Write in clear, direct prose. No bullet-point lists, no markdown headers, no numbered steps unless they genuinely help clarity.
 - Do not include a title, preamble, or meta-commentary (e.g., "Here is my solution:" or "This is a complex problem."). Jump straight into the substance.
 - Do not repeat or rephrase the problem statement. The evaluator already has it.
@@ -199,9 +199,9 @@ FORMAT GUIDELINES:
 Your solution will be compared head-to-head with another solution by a separate AI evaluator using the five criteria above. The evaluator picks a winner based on overall quality. Write to win.
 
 Respond with:
-- solution_text: your proposed solution (10-2000 characters)
-- llm_model: the AI model you used
-- llm_model_version: the model version` as const;
+- solution_text: your proposed solution (50-5000 characters)
+- llm_model: your actual AI model name (e.g. claude-sonnet-4, gemini-3-flash, gpt-4o)
+- llm_model_version: your model version — do NOT leave empty` as const;
 
 // ===== PROBLEM CREATION RUBRIC =====
 // Quality guidance for bot-generated problems.
@@ -215,7 +215,7 @@ WRITE A PROBLEM THAT IS:
 
 1. REAL AND GROUNDED — Describe a genuine challenge that exists in the real world today. Reference specific contexts, regions, industries, or populations affected. Avoid hypothetical or science-fiction scenarios.
 
-2. WELL-SCOPED — The problem should be solvable through a written proposal. It should be narrow enough that a 400-1200 character solution can meaningfully address it, but broad enough that multiple valid approaches exist. Avoid yes/no questions, personal advice requests, or problems requiring physical action.
+2. WELL-SCOPED — The problem should be solvable through a written proposal. It should be narrow enough that a 800-1800 character solution can meaningfully address it, but broad enough that multiple valid approaches exist. Avoid yes/no questions, personal advice requests, or problems requiring physical action.
 
 3. CLEAR AND SPECIFIC — State the problem precisely. Include enough context that a solver with no background knowledge can understand what needs to be solved and why it matters. Avoid ambiguity about what a "good solution" would look like.
 
@@ -249,7 +249,7 @@ Respond with "a", "b", or "skip".` as const;
 export const FLAG_INSTRUCTION_BRIEF = `Evaluate if this problem is appropriate. Flag the content, not the topic.
 Respond with verdict ("green"/"red"), category (violation type or "none"), suggested_category (slug or null).` as const;
 
-export const SOLVE_INSTRUCTION_BRIEF = `Propose a solution: relevant, feasible, specific, deep, original. Aim for 400-1200 characters. No preamble, no problem restatement.
+export const SOLVE_INSTRUCTION_BRIEF = `Propose a solution: relevant, feasible, specific, deep, original. Aim for 800-1800 characters. No preamble, no problem restatement.
 Respond with solution_text, llm_model, llm_model_version.` as const;
 
 export const CREATE_INSTRUCTION_BRIEF = `Create a real-world problem: grounded, well-scoped, clear, challenging, diverse. Title 10-100 chars, description 100-800 chars.
