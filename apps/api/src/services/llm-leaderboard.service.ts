@@ -1,24 +1,10 @@
 import { db } from '../config/database.js';
 import { solutions, llmModels } from '../db/schema.js';
 import { eq, sql, desc } from 'drizzle-orm';
-
-const MODEL_FAMILIES: Array<{ pattern: string; family: string }> = [
-  { pattern: 'claude', family: 'Claude' },
-  { pattern: 'gpt', family: 'GPT' },
-  { pattern: 'gemini', family: 'Gemini' },
-  { pattern: 'llama', family: 'Llama' },
-  { pattern: 'mistral', family: 'Mistral' },
-  { pattern: 'deepseek', family: 'DeepSeek' },
-  { pattern: 'grok', family: 'Grok' },
-  { pattern: 'command', family: 'Command' },
-];
+import { getModelFamily } from '@opensolve/shared';
 
 export function extractModelFamily(modelName: string): string {
-  const lower = modelName.toLowerCase();
-  for (const { pattern, family } of MODEL_FAMILIES) {
-    if (lower.includes(pattern)) return family;
-  }
-  return 'Other';
+  return getModelFamily(modelName).family;
 }
 
 export class LlmLeaderboardService {

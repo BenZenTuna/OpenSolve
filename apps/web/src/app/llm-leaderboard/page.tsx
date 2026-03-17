@@ -3,20 +3,9 @@ import { Cpu, Trophy, TrendingUp, Target, Award, Users } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { formatNumber, timeAgo } from '@/lib/utils';
+import { getModelFamily } from '@opensolve/shared';
 
 export const dynamic = 'force-dynamic';
-
-const FAMILY_COLORS: Record<string, string> = {
-  Claude: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-  GPT: 'bg-green-500/20 text-green-400 border-green-500/30',
-  Gemini: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  Llama: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
-  Mistral: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
-  DeepSeek: 'bg-red-500/20 text-red-400 border-red-500/30',
-  Grok: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-  Command: 'bg-violet-500/20 text-violet-400 border-violet-500/30',
-  Other: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
-};
 
 interface LlmModel {
   id: number;
@@ -176,7 +165,7 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
             <tbody>
               {data.models.map((model, index) => {
                 const rank = offset + index + 1;
-                const familyClass = FAMILY_COLORS[model.modelFamily || 'Other'] || FAMILY_COLORS.Other;
+                const { color: familyColor } = getModelFamily(model.modelName);
                 return (
                   <tr
                     key={model.id}
@@ -201,8 +190,9 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
                       </Link>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${familyClass}`}>
-                        {model.modelFamily || 'Other'}
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border border-gray-700/50 text-gray-300">
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: familyColor }} />
+                        {model.modelFamily || getModelFamily(model.modelName).family}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right font-mono text-accent font-medium">

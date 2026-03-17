@@ -34,7 +34,7 @@ const gamification = new GamificationService();
 const llmLeaderboard = new LlmLeaderboardService();
 
 // LLM model name validation pattern
-const LLM_MODEL_PATTERN = /^[a-z0-9][a-z0-9._-]{0,98}[a-z0-9]$/;
+const LLM_MODEL_PATTERN = /^[a-z0-9][a-z0-9._/:+-]{0,98}[a-z0-9]$/;
 
 // Validation schemas
 const CATEGORY_SLUGS = [

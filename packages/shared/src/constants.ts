@@ -52,20 +52,83 @@ export const BADGE_TYPES = {
   ARENA_LEGEND: 'arena_legend',
 } as const;
 
-// LLM Model families
-export const MODEL_FAMILIES = {
-  Claude: { color: '#A855F7', label: 'Claude' },
-  GPT: { color: '#22C55E', label: 'GPT' },
-  Gemini: { color: '#3B82F6', label: 'Gemini' },
-  Llama: { color: '#F97316', label: 'Llama' },
-  Mistral: { color: '#06B6D4', label: 'Mistral' },
-  DeepSeek: { color: '#EF4444', label: 'DeepSeek' },
-  Grok: { color: '#EAB308', label: 'Grok' },
-  Command: { color: '#8B5CF6', label: 'Command' },
-  Other: { color: '#6B7280', label: 'Other' },
-} as const;
+// Well-known LLM families — used ONLY for color assignment and leaderboard grouping.
+// The badge always shows the full model name, not the family label.
+// Any model not matching these gets a deterministic auto-generated color.
+export const KNOWN_MODEL_FAMILIES: Record<string, { color: string; label: string }> = {
+  claude: { color: '#A855F7', label: 'Claude' },
+  gpt: { color: '#22C55E', label: 'GPT' },
+  gemini: { color: '#3B82F6', label: 'Gemini' },
+  llama: { color: '#F97316', label: 'Llama' },
+  mistral: { color: '#06B6D4', label: 'Mistral' },
+  deepseek: { color: '#EF4444', label: 'DeepSeek' },
+  grok: { color: '#EAB308', label: 'Grok' },
+  command: { color: '#8B5CF6', label: 'Command' },
+  qwen: { color: '#10B981', label: 'Qwen' },
+  phi: { color: '#F59E0B', label: 'Phi' },
+  gemma: { color: '#EC4899', label: 'Gemma' },
+  yi: { color: '#14B8A6', label: 'Yi' },
+  cohere: { color: '#6366F1', label: 'Cohere' },
+};
 
-export type ModelFamily = keyof typeof MODEL_FAMILIES;
+/**
+ * Generate a deterministic HSL color from any string.
+ * Same input always produces the same color.
+ */
+export function hashColor(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = ((hash << 5) - hash + name.charCodeAt(i)) | 0;
+  }
+  const hue = Math.abs(hash) % 360;
+  return `hsl(${hue}, 65%, 55%)`;
+}
+
+/** Common provider prefixes to strip for display (NOT for family detection). */
+const PROVIDER_PREFIXES = /^(ollama|openrouter|together|anyscale|fireworks|groq|perplexity|replicate)\//i;
+
+/**
+ * Strip the provider prefix from a model name for display.
+ * "ollama/qwen3.5:9b" → "qwen3.5:9b"
+ * "gpt-4o" → "gpt-4o" (no prefix, unchanged)
+ * "openrouter/meta-llama/llama-3.1-70b" → "meta-llama/llama-3.1-70b"
+ */
+export function displayModelName(modelName: string): string {
+  return modelName.replace(PROVIDER_PREFIXES, '');
+}
+
+/**
+ * Detect the model family from a model name string.
+ * Returns { family, color } where:
+ *   - family: grouping label for leaderboard filters (e.g., "Qwen", "Gemini")
+ *   - color: hex or hsl color string for the badge
+ *
+ * NOTE: The badge text is always the full model name (via displayModelName),
+ * NOT the family label. Family is only for grouping and color.
+ */
+export function getModelFamily(modelName: string): { family: string; color: string } {
+  const lower = modelName.toLowerCase();
+  // Strip provider prefix for matching
+  const stripped = lower.replace(PROVIDER_PREFIXES, '');
+
+  // Check against known families
+  for (const [key, info] of Object.entries(KNOWN_MODEL_FAMILIES)) {
+    if (stripped.includes(key) || lower.includes(key)) {
+      return { family: info.label, color: info.color };
+    }
+  }
+
+  // Unknown model: extract a family name from the first segment
+  // "nemotron-70b" → "nemotron" → family "Nemotron"
+  // "solar-10.7b-instruct" → "solar" → family "Solar"
+  const baseName = stripped.split(/[-_.:]/)[0] || stripped;
+  const family = baseName.charAt(0).toUpperCase() + baseName.slice(1);
+  return { family, color: hashColor(baseName) };
+}
+
+// Backward compat — old code importing MODEL_FAMILIES still compiles
+export const MODEL_FAMILIES = KNOWN_MODEL_FAMILIES;
+export type ModelFamily = string;
 
 // API key format
 export const API_KEY_PREFIX = 'os_key_';
