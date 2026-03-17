@@ -4,6 +4,7 @@ import { apiFetch } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { formatNumber, timeAgo } from '@/lib/utils';
 import { getModelFamily } from '@opensolve/shared';
+import { FamilyFilter } from '@/components/llm/FamilyFilter';
 
 export const dynamic = 'force-dynamic';
 
@@ -111,35 +112,12 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
                 ))}
               </div>
             </div>
-            {/* Right: Family filter */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <label className="text-xs text-gray-500 uppercase tracking-wider">Family</label>
-              <div className="flex flex-wrap gap-1">
-                <Link
-                  href={`/llm-leaderboard?sort=${sort}`}
-                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                    !family
-                      ? 'bg-accent/20 text-accent border border-accent/30'
-                      : 'bg-navy-800 text-gray-400 border border-navy-700 hover:text-gray-200 hover:border-navy-600'
-                  }`}
-                >
-                  All
-                </Link>
-                {families.map((f) => (
-                  <Link
-                    key={f.family || 'null'}
-                    href={`/llm-leaderboard?sort=${sort}&family=${f.family || ''}`}
-                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                      family === f.family
-                        ? 'bg-accent/20 text-accent border border-accent/30'
-                        : 'bg-navy-800 text-gray-400 border border-navy-700 hover:text-gray-200 hover:border-navy-600'
-                    }`}
-                  >
-                    {f.family || 'Other'} ({f.count})
-                  </Link>
-                ))}
-              </div>
-            </div>
+            {/* Right: Family filter (collapsible dropdown) */}
+            <FamilyFilter
+              families={families}
+              currentFamily={family}
+              currentSort={sort}
+            />
           </div>
           {/* Description below the entire row */}
           {(() => {
