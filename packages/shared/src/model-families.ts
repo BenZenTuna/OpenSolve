@@ -333,7 +333,7 @@ export function getModelFamily(modelName: string): { family: string; color: stri
   // Check against known families using matchKeys
   for (const [, info] of Object.entries(KNOWN_MODEL_FAMILIES)) {
     for (const key of info.matchKeys) {
-      if (stripped.includes(key) || lower.includes(key)) {
+      if (stripped.includes(key)) {
         return { family: info.label, color: info.color, company: info.company };
       }
     }
