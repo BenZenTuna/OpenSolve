@@ -39,7 +39,7 @@ const flagSubmitSchema = z.object({
 });
 
 const solveSubmitSchema = z.object({
-  solution_text: z.string().min(10).max(2000),
+  solution_text: z.string().min(50).max(2000),
   llm_model: z.string().max(100).optional(),
   llm_model_version: z.string().max(50).optional(),
 });
