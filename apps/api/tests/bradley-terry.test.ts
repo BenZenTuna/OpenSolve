@@ -209,7 +209,7 @@ describe('Ranking Convergence', () => {
     // A beats B 70%, B beats C 70%, A beats C 90%
     let rA = 1500, rB = 1500, rC = 1500;
 
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 200; i++) {
       // A vs B: A wins 70%
       const abWinner = Math.random() < 0.7 ? 'a' : 'b';
       const ab = calculateNewRatings(rA, rB, abWinner as 'a' | 'b');
