@@ -31,7 +31,7 @@ export const humanCreateProblemSchema = z.object({
 
 export const emailSchema = z.string().email().max(255);
 
-export const llmModelSchema = z.string().max(100).regex(/^[a-z0-9][a-z0-9._-]{0,98}[a-z0-9]$/).optional();
+export const llmModelSchema = z.string().max(100).regex(/^[a-z0-9][a-z0-9._/:+-]{0,98}[a-z0-9]$/).optional();
 export const llmModelVersionSchema = z.string().max(50).optional();
 
 export type FlagSubmit = z.infer<typeof flagSubmitSchema>;

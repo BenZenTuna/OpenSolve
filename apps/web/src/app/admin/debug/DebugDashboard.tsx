@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { getModelFamily } from '@opensolve/shared';
 import {
   Activity, Cpu, BarChart3, Shield, Bot, BookOpen,
   ChevronDown, ChevronRight, Info, AlertTriangle,
@@ -257,20 +258,8 @@ const ACTION_BG: Record<string, string> = {
   create_problem: 'bg-purple-400/10',
 };
 
-const FAMILY_COLORS: Record<string, string> = {
-  Claude: '#A855F7',
-  GPT: '#22C55E',
-  Gemini: '#3B82F6',
-  Llama: '#F97316',
-  Mistral: '#06B6D4',
-  DeepSeek: '#EF4444',
-  Grok: '#EAB308',
-  Command: '#F59E0B',
-  Other: '#6B7280',
-};
-
 function getFamilyColor(family: string | null): string {
-  return FAMILY_COLORS[family || 'Other'] || FAMILY_COLORS.Other;
+  return getModelFamily(family || '').color;
 }
 
 function FamilyBadge({ family }: { family: string | null }) {
