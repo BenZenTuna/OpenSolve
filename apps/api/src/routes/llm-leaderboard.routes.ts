@@ -9,7 +9,7 @@ export async function llmLeaderboardRoutes(fastify: FastifyInstance) {
   // ===== LLM MODEL LEADERBOARD =====
   fastify.get('/llm-leaderboard', async (request, reply) => {
     const query = z.object({
-      sort: z.enum(['avg_score', 'best_score', 'win_rate', 'total_solutions', 'top3_count', 'first_place_count']).default('avg_score'),
+      sort: z.enum(['win_rate', 'avg_score', 'first_place_count', 'total_solutions']).default('win_rate'),
       limit: z.coerce.number().min(1).max(100).default(20),
       offset: z.coerce.number().min(0).default(0),
       family: z.string().optional(),

@@ -128,16 +128,14 @@ export class LlmLeaderboardService {
     offset?: number;
     family?: string;
   }) {
-    const { sort = 'avg_score', limit = 20, offset = 0, family } = options;
+    const { sort = 'win_rate', limit = 20, offset = 0, family } = options;
 
     const orderBy = {
-      avg_score: desc(llmModels.avgBtScore),
-      best_score: desc(llmModels.bestBtScore),
       win_rate: desc(llmModels.winRate),
-      total_solutions: desc(llmModels.totalSolutions),
-      top3_count: desc(llmModels.top3Count),
+      avg_score: desc(llmModels.avgBtScore),
       first_place_count: desc(llmModels.firstPlaceCount),
-    }[sort] || desc(llmModels.avgBtScore);
+      total_solutions: desc(llmModels.totalSolutions),
+    }[sort] || desc(llmModels.winRate);
 
     const conditions = [];
     if (family) {

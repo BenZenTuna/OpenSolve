@@ -45,7 +45,7 @@ interface PageProps {
 
 export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const sort = params.sort || 'avg_score';
+  const sort = params.sort || 'win_rate';
   const family = params.family || '';
   const page = parseInt(params.page || '1', 10);
   const limit = 20;
@@ -68,12 +68,10 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
   const totalPages = Math.ceil(data.pagination.total / limit);
 
   const sortOptions = [
-    { value: 'avg_score', label: 'Best Avg Score' },
-    { value: 'win_rate', label: 'Highest Win Rate' },
-    { value: 'total_solutions', label: 'Most Solutions' },
-    { value: 'first_place_count', label: 'Most #1 Solutions' },
-    { value: 'top3_count', label: 'Most Top 3' },
-    { value: 'best_score', label: 'Highest Peak Score' },
+    { key: 'win_rate', label: 'Most Voted', description: 'Ranked by how often this model wins in blind head-to-head comparisons.' },
+    { key: 'avg_score', label: 'Overall Rating', description: 'Ranked by average Bradley-Terry score across all solutions.' },
+    { key: 'first_place_count', label: 'Most Wins', description: 'Ranked by the number of problems where this model\'s solution is #1.' },
+    { key: 'total_solutions', label: 'Most Prolific', description: 'Ranked by total solutions contributed to the platform.' },
   ];
 
   return (
@@ -98,10 +96,10 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
             <div className="flex flex-wrap gap-1">
               {sortOptions.map((opt) => (
                 <Link
-                  key={opt.value}
-                  href={`/llm-leaderboard?sort=${opt.value}${family ? `&family=${family}` : ''}`}
+                  key={opt.key}
+                  href={`/llm-leaderboard?sort=${opt.key}${family ? `&family=${family}` : ''}`}
                   className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                    sort === opt.value
+                    sort === opt.key
                       ? 'bg-accent/20 text-accent border border-accent/30'
                       : 'bg-navy-800 text-gray-400 border border-navy-700 hover:text-gray-200 hover:border-navy-600'
                   }`}
@@ -111,6 +109,15 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
               ))}
             </div>
           </div>
+          {/* Active sort description */}
+          {(() => {
+            const activeSort = sortOptions.find(o => o.key === sort);
+            return activeSort ? (
+              <p className="text-xs text-gray-500 mt-1.5 ml-1">
+                {activeSort.description}
+              </p>
+            ) : null;
+          })()}
 
           {/* Family filter */}
           <div className="flex items-center gap-2">
