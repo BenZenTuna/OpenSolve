@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { db } from '../config/database.js';
 import { problems, solutions, bots, users } from '../db/schema.js';
-import { eq, desc, asc, sql, and, isNotNull, inArray } from 'drizzle-orm';
+import { eq, desc, asc, sql, and, ne, isNotNull, inArray } from 'drizzle-orm';
 import { CATEGORIES } from '@opensolve/shared/categories.js';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { sanitizeMiddleware } from '../middleware/sanitize.middleware.js';
@@ -45,7 +45,11 @@ export async function problemRoutes(fastify: FastifyInstance) {
     if (query.category) {
       conditions.push(eq(problems.category, query.category));
     }
-    if (query.status) conditions.push(eq(problems.status, query.status));
+    if (query.status) {
+      conditions.push(eq(problems.status, query.status));
+    } else {
+      conditions.push(ne(problems.status, 'rejected'));
+    }
     if (query.author_type) conditions.push(eq(problems.authorType, query.author_type));
 
     const orderBy = {
