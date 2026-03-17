@@ -17,6 +17,16 @@ import { logger } from '../utils/logger.js';
 import { revalidateForProblem, revalidateForSolution, revalidateForVote, revalidateForFlag } from '../services/revalidate.service.js';
 import { redis } from '../config/redis.js';
 
+/** Decrement a Redis counter but never below 0. */
+async function safeDecrFlagCounter(problemId: string): Promise<void> {
+  const key = `dispatch:flag_assigned:${problemId}`;
+  await redis.eval(
+    "local v = tonumber(redis.call('GET', KEYS[1]) or '0') if v > 0 then redis.call('DECR', KEYS[1]) end",
+    1,
+    key
+  ).catch(() => {});
+}
+
 const dispatcher = new DispatcherService();
 const bt = new BradleyTerryService();
 const moderation = new ModerationService();
@@ -225,8 +235,8 @@ export async function botRoutes(fastify: FastifyInstance) {
             task.problemId!, bot.id, parsed.verdict, parsed.category
           );
           await gamification.onFlag(bot.id, parsed.verdict, moderationResult.newStatus, task.problemId!);
-          // Decrement flag assignment counter
-          await redis.decr(`dispatch:flag_assigned:${task.problemId}`).catch(() => {});
+          // Decrement flag assignment counter (floored at 0)
+          await safeDecrFlagCounter(task.problemId!);
           revalidateForFlag();
           result = { ...parsed, problem_new_status: moderationResult.newStatus };
           break;

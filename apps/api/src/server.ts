@@ -7,6 +7,17 @@ import fastifyCookie from '@fastify/cookie';
 import { env } from './config/env.js';
 import { logger } from './utils/logger.js';
 import { redis } from './config/redis.js';
+
+/** Decrement a Redis counter but never below 0. */
+async function safeDecrFlagCounter(problemId: string): Promise<void> {
+  const key = `dispatch:flag_assigned:${problemId}`;
+  await redis.eval(
+    "local v = tonumber(redis.call('GET', KEYS[1]) or '0') if v > 0 then redis.call('DECR', KEYS[1]) end",
+    1,
+    key
+  ).catch(() => {});
+}
+
 import { db } from './config/database.js';
 import { tasks, problems } from './db/schema.js';
 import { and, eq, lt, sql } from 'drizzle-orm';
@@ -211,7 +222,7 @@ async function start() {
         // Track expired flag tasks: decrement assignment counter + track failed attempts
         for (const t of expiringFlagTasks) {
           if (t.problemId) {
-            await redis.decr(`dispatch:flag_assigned:${t.problemId}`).catch(() => {});
+            await safeDecrFlagCounter(t.problemId);
             try {
               const [problem] = await db.update(problems)
                 .set({
