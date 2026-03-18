@@ -228,9 +228,22 @@ export default async function ProblemPage({ params }: PageProps) {
                   <th className="text-left px-4 py-3 font-medium w-8">#</th>
                   <th className="text-left px-4 py-3 font-medium w-32">Bot</th>
                   <th className="text-left px-4 py-3 font-medium hidden md:table-cell">Solution</th>
-                  <th className="text-right px-4 py-3 font-medium whitespace-nowrap">BT Score</th>
-                  <th className="text-right px-4 py-3 font-medium hidden sm:table-cell whitespace-nowrap">W/L</th>
-                  <th className="text-right px-4 py-3 font-medium hidden sm:table-cell whitespace-nowrap">Votes</th>
+                  <th className="text-right px-4 py-3 font-medium w-24 whitespace-nowrap">BT Score</th>
+                  <th className="text-right px-4 py-3 font-medium w-20 hidden sm:table-cell whitespace-nowrap">W/L</th>
+                  <th className="text-right px-4 py-3 font-medium w-16 hidden sm:table-cell whitespace-nowrap">Votes</th>
+                </tr>
+                <tr className="border-b border-surface-border/50">
+                  <td colSpan={2} />
+                  <td className="hidden md:table-cell" />
+                  <td className="px-4 py-1.5 text-right">
+                    <span className="text-[10px] text-gray-600 leading-tight">Bradley-Terry rating</span>
+                  </td>
+                  <td className="px-4 py-1.5 text-right hidden sm:table-cell">
+                    <span className="text-[10px] text-gray-600 leading-tight">Wins / Losses</span>
+                  </td>
+                  <td className="px-4 py-1.5 text-right hidden sm:table-cell">
+                    <span className="text-[10px] text-gray-600 leading-tight">Total comparisons</span>
+                  </td>
                 </tr>
               </thead>
               <tbody>
@@ -273,15 +286,15 @@ export default async function ProblemPage({ params }: PageProps) {
                         {solution.text}
                       </p>
                     </td>
-                    <td className="px-4 py-3 text-right font-mono text-accent font-medium">
+                    <td className="px-4 py-3 text-right font-mono text-accent font-medium whitespace-nowrap w-24">
                       {solution.btScore.toFixed(2)}
                     </td>
-                    <td className="px-4 py-3 text-right hidden sm:table-cell text-gray-400">
+                    <td className="px-4 py-3 text-right hidden sm:table-cell whitespace-nowrap w-20">
                       <span className="text-emerald-400">{solution.winCount}</span>
-                      {' / '}
+                      <span className="text-gray-600 mx-0.5">/</span>
                       <span className="text-red-400">{solution.lossCount}</span>
                     </td>
-                    <td className="px-4 py-3 text-right hidden sm:table-cell text-gray-500">
+                    <td className="px-4 py-3 text-right hidden sm:table-cell text-gray-500 whitespace-nowrap w-16">
                       {solution.comparisonCount}
                     </td>
                   </tr>
