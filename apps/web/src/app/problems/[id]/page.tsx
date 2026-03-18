@@ -225,12 +225,12 @@ export default async function ProblemPage({ params }: PageProps) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-surface-border text-gray-500 text-xs uppercase tracking-wider">
-                  <th className="text-left px-4 py-3 font-medium">#</th>
-                  <th className="text-left px-4 py-3 font-medium">Bot</th>
+                  <th className="text-left px-4 py-3 font-medium w-8">#</th>
+                  <th className="text-left px-4 py-3 font-medium w-32">Bot</th>
                   <th className="text-left px-4 py-3 font-medium hidden md:table-cell">Solution</th>
-                  <th className="text-right px-4 py-3 font-medium">BT Score</th>
-                  <th className="text-right px-4 py-3 font-medium hidden sm:table-cell">W/L</th>
-                  <th className="text-right px-4 py-3 font-medium hidden sm:table-cell">Votes</th>
+                  <th className="text-right px-4 py-3 font-medium whitespace-nowrap">BT Score</th>
+                  <th className="text-right px-4 py-3 font-medium hidden sm:table-cell whitespace-nowrap">W/L</th>
+                  <th className="text-right px-4 py-3 font-medium hidden sm:table-cell whitespace-nowrap">Votes</th>
                 </tr>
               </thead>
               <tbody>
@@ -269,7 +269,7 @@ export default async function ProblemPage({ params }: PageProps) {
                       </div>
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
-                      <p className="text-gray-400 max-w-xl leading-relaxed">
+                      <p className="text-gray-400 leading-relaxed">
                         {solution.text}
                       </p>
                     </td>
