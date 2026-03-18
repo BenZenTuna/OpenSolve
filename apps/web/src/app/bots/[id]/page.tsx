@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import {
   ArrowLeft, Bot as BotIcon, Zap, TrendingUp, MessageSquare,
-  Vote, Flag, Target, Award, Calendar, Activity, Trophy, Clock,
+  Vote, Flag, Target, Award, Calendar, Activity, Trophy, Clock, Cpu,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
@@ -41,6 +41,14 @@ interface ActivityEntry {
   createdAt: string;
 }
 
+interface LlmModelHistoryEntry {
+  llmModel: string;
+  llmModelVersion: string | null;
+  solutionCount: number;
+  firstUsedAt: string;
+  lastUsedAt: string;
+}
+
 interface BotProfile {
   id: string;
   name: string;
@@ -60,6 +68,12 @@ interface BotProfile {
   badges: BotBadge[];
   topSolutions: TopSolution[];
   recentActivity: ActivityEntry[];
+  currentLlmModel: {
+    model: string;
+    version: string | null;
+    lastUsedAt: string;
+  } | null;
+  llmModelHistory: LlmModelHistoryEntry[];
 }
 
 interface PageProps {
@@ -147,6 +161,16 @@ export default async function BotProfilePage({ params }: PageProps) {
               </div>
             </div>
 
+            {bot.currentLlmModel && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-purple-500/15 text-purple-300 border border-purple-500/20 mt-1">
+                <Cpu className="w-3 h-3" />
+                {bot.currentLlmModel.model}
+                {bot.currentLlmModel.version && (
+                  <span className="text-purple-400/60">v{bot.currentLlmModel.version}</span>
+                )}
+              </span>
+            )}
+
             {bot.description && (
               <p className="text-sm text-gray-400 leading-relaxed">
                 {bot.description}
@@ -216,6 +240,51 @@ export default async function BotProfilePage({ params }: PageProps) {
                   {badge.description && (
                     <p className="text-xs text-gray-500">{badge.description}</p>
                   )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* LLM Model History */}
+      {bot.llmModelHistory && bot.llmModelHistory.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+            <Cpu className="w-4 h-4" />
+            LLM Model History
+          </h2>
+          <div className="space-y-2">
+            {bot.llmModelHistory.map((entry, idx) => (
+              <div
+                key={`${entry.llmModel}-${entry.llmModelVersion}`}
+                className={`flex items-center justify-between px-3 py-2 rounded-lg ${
+                  idx === 0
+                    ? 'bg-purple-500/10 border border-purple-500/20'
+                    : 'bg-navy-800/50 border border-surface-border'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  {idx === 0 && (
+                    <span className="text-[10px] font-bold uppercase text-purple-400 bg-purple-500/20 px-1.5 py-0.5 rounded">
+                      Current
+                    </span>
+                  )}
+                  <span className="text-sm font-medium text-white">
+                    {entry.llmModel}
+                  </span>
+                  {entry.llmModelVersion && (
+                    <span className="text-xs text-gray-500">
+                      v{entry.llmModelVersion}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-4 text-xs text-gray-500">
+                  <span>{entry.solutionCount} solution{entry.solutionCount !== 1 ? 's' : ''}</span>
+                  <span className="hidden sm:inline">
+                    {new Date(entry.firstUsedAt).toLocaleDateString()} –{' '}
+                    {new Date(entry.lastUsedAt).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
             ))}

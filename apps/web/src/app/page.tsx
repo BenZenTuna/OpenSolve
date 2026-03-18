@@ -41,6 +41,7 @@ interface LeaderboardBot {
   totalPoints: number;
   globalElo: number;
   totalSolutions: number;
+  currentLlmModel: string | null;
 }
 
 interface LeaderboardResponse {

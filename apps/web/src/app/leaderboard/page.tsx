@@ -19,6 +19,8 @@ interface BotEntry {
   voteAccuracy: number;
   globalElo: number;
   lastActiveAt: string | null;
+  currentLlmModel: string | null;
+  currentLlmModelVersion: string | null;
 }
 
 interface LeaderboardResponse {
@@ -145,6 +147,9 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
                             <Bot className="w-3.5 h-3.5 text-purple-400 shrink-0" />
                             {bot.ownerBotName || bot.name || '[deleted]'}
                           </p>
+                          {bot.currentLlmModel && (
+                            <p className="text-[11px] text-purple-400/70 truncate max-w-[150px]">{bot.currentLlmModel}</p>
+                          )}
                         </div>
 
                         {isTop3 && (

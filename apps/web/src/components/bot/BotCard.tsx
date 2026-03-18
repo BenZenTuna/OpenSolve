@@ -13,6 +13,7 @@ interface BotCardProps {
     globalElo: number;
     totalSolutions: number;
     lastActiveAt: string | null;
+    currentLlmModel?: string | null;
   };
   rank?: number;
 }
@@ -48,6 +49,11 @@ export function BotCard({ bot, rank }: BotCardProps) {
               </p>
               {isOnline && <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />}
             </div>
+            {bot.currentLlmModel && (
+              <span className="text-[11px] text-purple-400/70 truncate max-w-[150px]">
+                {bot.currentLlmModel}
+              </span>
+            )}
           </div>
         </div>
 

@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { db } from '../config/database.js';
 import { bots, badges, problems, solutions, users, activityLog } from '../db/schema.js';
-import { eq, desc, sql, isNotNull, and } from 'drizzle-orm';
+import { eq, desc, sql, isNotNull, and, inArray } from 'drizzle-orm';
 
 export async function leaderboardRoutes(fastify: FastifyInstance) {
 
@@ -48,8 +48,40 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
         .where(eq(bots.status, 'active')),
     ]);
 
+    // Get current LLM model for each bot in the leaderboard
+    const botIds = items.map(b => b.id);
+    const latestModels = botIds.length > 0 ? await db.select({
+      botId: solutions.botId,
+      llmModel: solutions.llmModel,
+      llmModelVersion: solutions.llmModelVersion,
+    })
+    .from(solutions)
+    .where(and(
+      inArray(solutions.botId, botIds),
+      isNotNull(solutions.llmModel)
+    ))
+    .orderBy(desc(solutions.createdAt))
+    .then(rows => {
+      const seen = new Set<string>();
+      return rows.filter(r => {
+        if (r.botId && !seen.has(r.botId)) {
+          seen.add(r.botId);
+          return true;
+        }
+        return false;
+      });
+    }) : [];
+
+    const modelMap = new Map(latestModels.map(m => [m.botId, { model: m.llmModel, version: m.llmModelVersion }]));
+
+    const botsWithModel = items.map(bot => ({
+      ...bot,
+      currentLlmModel: modelMap.get(bot.id)?.model || null,
+      currentLlmModelVersion: modelMap.get(bot.id)?.version || null,
+    }));
+
     return reply.code(200).send({
-      bots: items,
+      bots: botsWithModel,
       pagination: {
         page: query.page,
         limit: query.limit,
@@ -127,11 +159,35 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
       .orderBy(desc(activityLog.createdAt))
       .limit(20);
 
+    // LLM model history
+    const llmModelHistory = await db.select({
+      llmModel: solutions.llmModel,
+      llmModelVersion: solutions.llmModelVersion,
+      solutionCount: sql<number>`count(*)::int`,
+      firstUsedAt: sql<string>`min(${solutions.createdAt})`,
+      lastUsedAt: sql<string>`max(${solutions.createdAt})`,
+    })
+    .from(solutions)
+    .where(and(
+      eq(solutions.botId, id),
+      isNotNull(solutions.llmModel)
+    ))
+    .groupBy(solutions.llmModel, solutions.llmModelVersion)
+    .orderBy(sql`max(${solutions.createdAt}) desc`);
+
+    const currentLlmModel = llmModelHistory.length > 0 ? {
+      model: llmModelHistory[0].llmModel,
+      version: llmModelHistory[0].llmModelVersion,
+      lastUsedAt: llmModelHistory[0].lastUsedAt,
+    } : null;
+
     return reply.code(200).send({
       ...bot,
       badges: botBadges,
       topSolutions,
       recentActivity,
+      currentLlmModel,
+      llmModelHistory,
     });
   });
 

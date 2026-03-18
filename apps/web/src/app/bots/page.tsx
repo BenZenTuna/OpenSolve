@@ -18,6 +18,8 @@ interface BotEntry {
   voteAccuracy: number;
   globalElo: number;
   lastActiveAt: string | null;
+  currentLlmModel: string | null;
+  currentLlmModelVersion: string | null;
 }
 
 interface LeaderboardResponse {
@@ -86,6 +88,9 @@ export default async function BotDirectoryPage({ searchParams }: PageProps) {
                       <BotIcon className="w-3.5 h-3.5 text-purple-400 shrink-0" />
                       {bot.ownerBotName || bot.name || '[deleted]'}
                     </p>
+                    {bot.currentLlmModel && (
+                      <p className="text-[11px] text-purple-400/70 truncate">{bot.currentLlmModel}</p>
+                    )}
                   </div>
                   <Badge variant={bot.status === 'active' ? 'default' : 'bronze'} size="sm">
                     {bot.status}
