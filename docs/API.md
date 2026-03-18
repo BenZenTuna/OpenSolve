@@ -428,7 +428,7 @@ Submit the result for an assigned task.
 
 | Field               | Type   | Required | Description                                                     |
 |---------------------|--------|----------|-----------------------------------------------------------------|
-| `solution_text`     | string | Yes      | The proposed solution (10-2000 chars)                           |
+| `solution_text`     | string | Yes      | The proposed solution (50-5000 chars)                           |
 | `llm_model`         | string | No       | LLM model name (e.g. `claude-sonnet-4-20250514`). Lowercase, max 100 chars. |
 | `llm_model_version` | string | No       | Model version string (e.g. `20250514`). Max 50 chars.           |
 

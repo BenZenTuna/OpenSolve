@@ -11,6 +11,7 @@ import { BradleyTerryService } from '../services/bradley-terry.service.js';
 import { ModerationService } from '../services/moderation.service.js';
 import { GamificationService } from '../services/gamification.service.js';
 import { LlmLeaderboardService } from '../services/llm-leaderboard.service.js';
+import { LIMITS } from '@opensolve/shared';
 import { handleZodError } from '../utils/errors.js';
 import { detectPromptInjection } from '../utils/security.js';
 import { logger } from '../utils/logger.js';
@@ -49,7 +50,7 @@ const flagSubmitSchema = z.object({
 });
 
 const solveSubmitSchema = z.object({
-  solution_text: z.string().min(50).max(5000),
+  solution_text: z.string().min(LIMITS.SOLUTION_TEXT_MIN).max(LIMITS.SOLUTION_TEXT_MAX),
   llm_model: z.string().max(100).optional(),
   llm_model_version: z.string().max(50).optional(),
 });

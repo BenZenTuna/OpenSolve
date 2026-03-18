@@ -883,6 +883,26 @@ echo ""
 echo "=== api_key_prefix varchar(16) in initial migration ==="
 grep "api_key_prefix" apps/api/drizzle/migrations/0000_*.sql
 echo "↑ Should show varchar(16), NOT varchar(8)"
+
+echo ""
+echo "=== COOKIE_SECRET in prod compose ==="
+grep -n "COOKIE_SECRET" docker-compose.prod.yml
+echo "↑ Must be present in the api service environment block"
+echo "  If missing: cookie signing falls back to JWT_SECRET (same key for two purposes)"
+
+echo ""
+echo "=== Bot rate limit constant vs route registration ==="
+grep -n "BOT_RATE_LIMIT_PER_HOUR" packages/shared/src/constants.ts
+grep -n "BOT_RATE_LIMIT_PER_HOUR\|registerBotRateLimit\|max:.*LIMITS" apps/api/src/routes/bot.routes.ts apps/api/src/middleware/rate-limit.middleware.ts
+echo "↑ The constant value and what is passed to registerBotRateLimit must match"
+echo "  Known discrepancy: route docs previously said 60 req/hr but constant is 360"
+
+echo ""
+echo "=== DPA and TOM PDFs gitignored ==="
+git -C . check-ignore -v docs/DPA_en.pdf docs/TOM_en.pdf 2>/dev/null || \
+  grep -n "DPA\|TOM\|\.pdf" .gitignore
+echo "↑ Both PDFs must be gitignored — they contain confidential legal/personal details"
+echo "  If NOT gitignored, this is a security/compliance issue"
 ```
 
 ---
@@ -1609,6 +1629,13 @@ echo ""
 echo "=== ONBOARDING.md — 50-5000 API limit ==="
 grep "50-5000" skill/ONBOARDING.md
 echo "↑ Should show updated API character limit"
+
+echo ""
+echo "=== Bot routes solution_text uses LIMITS constants (not hardcoded numbers) ==="
+grep -n "LIMITS.SOLUTION_TEXT_MIN\|LIMITS.SOLUTION_TEXT_MAX" apps/api/src/routes/bot.routes.ts
+echo "↑ Should reference shared constants, not hardcoded 50/5000"
+grep -n "\.min(50)\|\.max(5000)" apps/api/src/routes/bot.routes.ts
+echo "↑ If the above shows hardcoded numbers instead of constants, report it as a drift issue"
 ```
 
 Show the COMPLETE `skill/SKILL.md`.
@@ -1770,9 +1797,11 @@ echo "Contact route: $(grep -c "fastify\." apps/api/src/routes/contact.routes.ts
     - CRITICAL llm_model with provider examples? (yes/no)
     - 800-1800 char limit? (yes/no)
 25. Character limits synced:
-    - SOLUTION_TEXT_MAX = 5000? (yes/no)
-    - Zod min(50) max(5000)? (yes/no)
-    - Instructions say 800-1800? (yes/no)
+    - SOLUTION_TEXT_MAX = 5000 in constants.ts? (yes/no)
+    - SOLUTION_TEXT_MIN = 50 in constants.ts? (yes/no)
+    - Zod schema in bot.routes.ts uses LIMITS.SOLUTION_TEXT_MIN and LIMITS.SOLUTION_TEXT_MAX (not hardcoded)? (yes/no)
+    - SKILL.md reflects min=50 max=5000 limits? (yes/no)
+    - Instructions say 800-1800 chars? (yes/no)
 26. Caching architecture — confirm CACHE-FIX changes:
     - `cache: 'no-store'` in apiFetch? (yes/no)
     - `export const dynamic = 'force-dynamic'` on problems, problem detail, bot profile, leaderboard, LLM leaderboard, user profile? (yes/no)
@@ -1793,4 +1822,10 @@ echo "Contact route: $(grep -c "fastify\." apps/api/src/routes/contact.routes.ts
     - `api_key_prefix` defined as varchar(16) in base migration? (yes/no)
     - Drizzle config file copied into Docker image? (yes/no)
     - Does server.ts auto-run migrations on startup? (yes/no — if no, document the manual step)
+29. Security hardening — new items from SEC-AUDIT-2026-03:
+    - COOKIE_SECRET present in docker-compose.prod.yml api environment? (yes/no)
+    - If missing: note that cookie signing falls back to JWT_SECRET (both signing contexts sharing one key)
+    - Bot rate limit constant (360/hr) matches what is actually registered in rate-limit.middleware.ts? (yes/no)
+    - DPA_en.pdf and TOM_en.pdf gitignored? (yes/no)
+    - Bot rate limit documented correctly in route group docs as 360/hr (not 60/hr)? (yes/no)
 Target length: 2,000–5,000 lines. Be thorough but do not repeat the same file contents across multiple sections.

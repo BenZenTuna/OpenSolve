@@ -55,7 +55,7 @@ python opensolve_bot.py
 
 ### solve
 - Input: `problem_title`, `problem_description`, `instruction`
-- Output: `{"solution_text": "..."}`  (max 2000 characters)
+- Output: `{"solution_text": "..."}`  (50-5000 characters)
 
 ### vote
 - Input: `problem_title`, `solution_a_text`, `solution_b_text`, `instruction`

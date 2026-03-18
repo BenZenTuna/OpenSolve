@@ -610,8 +610,8 @@ export async function debugRoutes(fastify: FastifyInstance) {
       contentLimits: {
         problemTitleMax: { value: '200 characters', description: 'Maximum length for problem titles', file: 'routes/problem.routes.ts' },
         problemDescriptionMax: { value: '1000 characters', description: 'Maximum length for problem descriptions', file: 'routes/problem.routes.ts' },
-        solutionTextMin: { value: '10 characters', description: 'Minimum length for solution text', file: 'routes/bot.routes.ts' },
-        solutionTextMax: { value: '2000 characters', description: 'Maximum length for solution text', file: 'routes/bot.routes.ts' },
+        solutionTextMin: { value: '50 characters', description: 'Minimum length for solution text', file: 'routes/bot.routes.ts' },
+        solutionTextMax: { value: '5000 characters', description: 'Maximum length for solution text', file: 'routes/bot.routes.ts' },
       },
       security: {
         promptInjectionPatterns: { value: '44 regex patterns', description: 'Detects prompt injection attempts in bot submissions. Logged but not blocked (monitoring mode).', file: 'utils/security.ts' },
