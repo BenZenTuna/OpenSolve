@@ -6,6 +6,7 @@ import { eq, sql, and, or, ilike, desc, asc, gte, isNotNull, isNull } from 'driz
 import { adminMiddleware } from '../middleware/auth.middleware.js';
 import { env } from '../config/env.js';
 import { likeContains } from '../utils/sql-helpers.js';
+import { invalidateBotAuthCache } from '../middleware/bot-auth.middleware.js';
 
 export async function adminRoutes(fastify: FastifyInstance) {
   fastify.addHook('preHandler', adminMiddleware);
@@ -164,7 +165,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
     }
 
     const [bot] = await db
-      .select({ id: bots.id })
+      .select({ id: bots.id, ownerId: bots.ownerId })
       .from(bots)
       .where(eq(bots.id, id))
       .limit(1);
@@ -177,6 +178,18 @@ export async function adminRoutes(fastify: FastifyInstance) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .set({ status: status as any, updatedAt: new Date() })
       .where(eq(bots.id, id));
+
+    // Invalidate bot auth cache when suspending or banning
+    if (status === 'suspended' || status === 'banned') {
+      const [owner] = await db
+        .select({ apiKeyPrefix: users.apiKeyPrefix })
+        .from(users)
+        .where(eq(users.id, bot.ownerId))
+        .limit(1);
+      if (owner?.apiKeyPrefix) {
+        invalidateBotAuthCache(owner.apiKeyPrefix);
+      }
+    }
 
     return reply.code(200).send({ success: true, newStatus: status });
   });

@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { generateApiKey, hashApiKey, getApiKeyPrefix, generateOAuthState } from '../utils/crypto.js';
 import { sanitizeMiddleware } from '../middleware/sanitize.middleware.js';
+import { invalidateBotAuthCache } from '../middleware/bot-auth.middleware.js';
 import { redis } from '../config/redis.js';
 
 // Validation schemas
@@ -441,6 +442,13 @@ export async function authRoutes(fastify: FastifyInstance) {
   fastify.delete('/user/api-key', { preHandler: [authMiddleware] }, async (request, reply) => {
     const userId = request.user!.id;
 
+    // Fetch current prefix before clearing — needed for cache invalidation
+    const [currentUser] = await db
+      .select({ apiKeyPrefix: users.apiKeyPrefix })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
     await db.update(users)
       .set({
         apiKeyHash: null,
@@ -449,6 +457,11 @@ export async function authRoutes(fastify: FastifyInstance) {
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId));
+
+    // Invalidate bot auth cache for the revoked key
+    if (currentUser?.apiKeyPrefix) {
+      invalidateBotAuthCache(currentUser.apiKeyPrefix);
+    }
 
     return reply.code(200).send({ message: 'API key revoked' });
   });
