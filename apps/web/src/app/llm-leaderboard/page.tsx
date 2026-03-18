@@ -90,7 +90,7 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
 
       {/* Filters */}
       <Card padding="sm">
-        <div className="space-y-2">
+        <div className="space-y-2 relative z-20">
           {/* Top row: Sort tabs left, Family filter right */}
           <div className="flex items-center justify-between flex-wrap gap-y-3">
             {/* Left: Sort tabs */}
