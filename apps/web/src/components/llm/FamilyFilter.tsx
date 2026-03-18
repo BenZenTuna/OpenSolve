@@ -49,7 +49,7 @@ export function FamilyFilter({ families, currentFamily, currentSort }: FamilyFil
           onClick={() => setOpen(!open)}
           className={cn(
             'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border cursor-pointer',
-            'bg-navy-800 text-gray-300 border-navy-700 hover:text-white hover:border-navy-500'
+            'bg-white/5 text-gray-300 border-white/10 hover:text-white hover:border-white/20'
           )}
         >
           {activeLabel}
@@ -68,7 +68,7 @@ export function FamilyFilter({ families, currentFamily, currentSort }: FamilyFil
       </div>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1.5 z-50 min-w-[180px] py-1.5 rounded-lg border border-navy-700 bg-navy-900 shadow-xl shadow-black/30">
+        <div className="absolute right-0 top-full mt-1.5 z-50 min-w-[200px] py-1.5 rounded-lg border border-white/10 bg-[#0f1729] shadow-2xl">
           <Link
             href={buildHref(null)}
             onClick={() => setOpen(false)}
@@ -76,13 +76,13 @@ export function FamilyFilter({ families, currentFamily, currentSort }: FamilyFil
               'block px-3 py-1.5 text-xs font-medium transition-colors',
               !currentFamily
                 ? 'text-accent bg-accent/10'
-                : 'text-gray-400 hover:text-white hover:bg-navy-800'
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
             )}
           >
             All Families
           </Link>
 
-          <div className="border-t border-navy-700 my-1" />
+          <div className="border-t border-white/10 my-1" />
 
           {families.map((f) => (
             <Link
@@ -93,7 +93,7 @@ export function FamilyFilter({ families, currentFamily, currentSort }: FamilyFil
                 'flex items-center justify-between px-3 py-1.5 text-xs font-medium transition-colors',
                 currentFamily === f.family
                   ? 'text-accent bg-accent/10'
-                  : 'text-gray-400 hover:text-white hover:bg-navy-800'
+                  : 'text-gray-400 hover:text-white hover:bg-white/5'
               )}
             >
               <span>{f.family || 'Other'}</span>

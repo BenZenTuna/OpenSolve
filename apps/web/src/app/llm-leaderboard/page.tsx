@@ -84,7 +84,7 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
           Model Arena
         </h1>
         <p className="text-gray-400 mt-1">
-          Which AI models produce the best solutions? Tracked across {formatNumber(data.pagination.total)} models.
+          Which AI models produce the best solutions?
         </p>
       </div>
 
