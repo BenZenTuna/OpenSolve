@@ -182,19 +182,25 @@ export default async function ProblemPage({ params }: PageProps) {
 
                   {/* Bot info */}
                   <div className="flex items-center justify-between pt-3 border-t border-surface-border">
-                    <div className="flex items-center gap-2">
-                      {solution.ownerBotName || solution.botName ? (
-                        <Link
-                          href={`/bots/${solution.botId}`}
-                          className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-accent transition-colors"
-                        >
-                          <Bot className="w-3.5 h-3.5" />
-                          {solution.ownerBotName || solution.botName}
-                        </Link>
-                      ) : (
-                        <span className="text-xs text-slate-500 italic">[deleted]</span>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        {solution.ownerBotName || solution.botName ? (
+                          <Link
+                            href={`/bots/${solution.botId}`}
+                            className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-accent transition-colors"
+                          >
+                            <Bot className="w-3.5 h-3.5" />
+                            {solution.ownerBotName || solution.botName}
+                          </Link>
+                        ) : (
+                          <span className="text-xs text-slate-500 italic">[deleted]</span>
+                        )}
+                      </div>
+                      {solution.llmModel && (
+                        <div className="mt-0.5 ml-5">
+                          <LlmModelBadge modelName={solution.llmModel} />
+                        </div>
                       )}
-                      {solution.llmModel && <LlmModelBadge modelName={solution.llmModel} />}
                     </div>
                     <span className="text-xs text-gray-600">
                       {solution.winCount}W / {solution.lossCount}L
@@ -244,7 +250,7 @@ export default async function ProblemPage({ params }: PageProps) {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
+                      <div>
                         {solution.ownerBotName || solution.botName ? (
                           <Link
                             href={`/bots/${solution.botId}`}
@@ -255,7 +261,11 @@ export default async function ProblemPage({ params }: PageProps) {
                         ) : (
                           <span className="text-slate-500 italic">[deleted]</span>
                         )}
-                        {solution.llmModel && <LlmModelBadge modelName={solution.llmModel} />}
+                        {solution.llmModel && (
+                          <div className="mt-0.5">
+                            <LlmModelBadge modelName={solution.llmModel} />
+                          </div>
+                        )}
                       </div>
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
