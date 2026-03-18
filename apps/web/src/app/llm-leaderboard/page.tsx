@@ -89,8 +89,8 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
       </div>
 
       {/* Filters */}
-      <Card padding="sm">
-        <div className="space-y-2 relative z-20">
+      <Card padding="sm" className="relative z-10">
+        <div className="space-y-2">
           {/* Top row: Sort tabs left, Family filter right */}
           <div className="flex items-center justify-between flex-wrap gap-y-3">
             {/* Left: Sort tabs */}
@@ -133,7 +133,7 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
 
       {/* Leaderboard Table */}
       {data.models.length > 0 ? (
-        <Card padding="none" className="overflow-x-auto">
+        <Card padding="none" className="overflow-x-auto relative z-0">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-surface-border text-gray-500 text-xs uppercase tracking-wider">
