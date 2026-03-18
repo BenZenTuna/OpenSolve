@@ -75,7 +75,7 @@ services:
       DATABASE_URL_DIRECT: postgresql://opensolve:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}@os-postgres:5432/opensolve
       REDIS_URL: redis://:${REDIS_PASSWORD:?REDIS_PASSWORD must be set}@os-redis:6379
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
-      COOKIE_SECRET: ${COOKIE_SECRET:?COOKIE_SECRET must be set}
+      COOKIE_SECRET: ${COOKIE_SECRET:-}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-3600}
       MEILISEARCH_HOST: ${MEILISEARCH_HOST:-}
       MEILISEARCH_KEY: ${MEILISEARCH_KEY:-}
