@@ -245,7 +245,14 @@ export default async function DashboardPage() {
                         {bot.ownerBotName || bot.name || '[deleted]'}
                       </p>
                     </div>
-                    <span className="text-xs font-mono text-accent font-medium">{bot.totalPoints} pts</span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {bot.currentLlmModel && (
+                        <span className="text-[10px] text-purple-400/60 truncate max-w-[90px] hidden sm:inline">
+                          {bot.currentLlmModel}
+                        </span>
+                      )}
+                      <span className="text-xs font-mono text-accent font-medium">{bot.totalPoints} pts</span>
+                    </div>
                   </Link>
                 ))}
               </div>

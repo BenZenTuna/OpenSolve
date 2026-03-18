@@ -1,5 +1,6 @@
 # CLAUDE CODE PROMPT — OpenSolve Full Project Snapshot
 # Paste this entire prompt into Claude Code while in your OpenSolve project directory
+# Session log: PERF-1: Bot auth cache, PostgreSQL connection pool, dispatcher/pair-selector/load-balancer parallelization, sameOwnerBots Redis cache, 3 composite indexes on problems table
 
 ---
 
@@ -47,6 +48,8 @@ For EVERY frontend route in `apps/web/src/app/`:
 All 5 admin sub-pages are fully implemented. Verify each is functional and list line counts.
 
 Ensure `/users/[id]` (public user profile) is included in the walkthrough table. This page was added in the USER-PROFILE session.
+
+Ensure `/bots/[id]` walkthrough entry mentions: current LLM model badge near bot name + LLM model history section (showing all models the bot has used, with solution counts and date ranges). This was added in the LLM-HIST-1 session.
 
 ### Domain Glossary
 
@@ -107,6 +110,7 @@ Pay special attention to these key families confirmed in the codebase:
 - `load-balancer:*` (per-problem traffic tracking)
 - `admin:*` (confirmation tokens, email tokens)
 - `dispatch:flag_assigned:{problemId}` — Thundering herd flag counter (INCR on assign, safe Lua DECR on complete/expire, capped at 3)
+- `bot:owner_bots:{ownerId}` — Cached set of bot IDs owned by a user (JSON array, 5min TTL, used by dispatcher to enforce same-owner anti-gaming without repeated DB queries)
 
 ---
 
@@ -341,6 +345,66 @@ Document the revalidation architecture:
 
 ---
 
+## SECTION 2e: PERFORMANCE OPTIMIZATION VERIFICATION
+```bash
+echo "=== Bot auth cache exists ==="
+grep -n "AUTH_CACHE" apps/api/src/middleware/bot-auth.middleware.ts
+echo "↑ Should show Map declaration, set, get/TTL check, and export of invalidateBotAuthCache"
+
+echo ""
+echo "=== Auth cache invalidation call sites ==="
+grep -rn "invalidateBotAuthCache" apps/api/src/routes/
+echo "↑ Should show exactly 2 call sites: auth.routes.ts and admin.routes.ts"
+
+echo ""
+echo "=== Owner bots cache in dispatcher ==="
+grep -n "bot:owner_bots" apps/api/src/services/dispatcher.service.ts
+echo "↑ Should show Redis get + set with EX 300 in getSameOwnerBotIds helper"
+
+echo ""
+echo "=== invalidateOwnerBotsCache call site ==="
+grep -n "invalidateOwnerBotsCache" apps/api/src/routes/auth.routes.ts
+echo "↑ Should show exactly 1 call in the new bot insert branch of PUT /user/bot-profile"
+
+echo ""
+echo "=== Promise.all in dispatcher ==="
+grep -n "Promise.all" apps/api/src/services/dispatcher.service.ts
+echo "↑ Should show 2 occurrences: one in tryAssignFlagTask, one in tryAssignSolveTask"
+
+echo ""
+echo "=== Promise.all in pair-selector ==="
+grep -n "Promise.all" apps/api/src/services/pair-selector.service.ts
+echo "↑ Should show 1 occurrence in selectPair"
+
+echo ""
+echo "=== Promise.all in load-balancer ==="
+grep -n "Promise.all" apps/api/src/services/load-balancer.service.ts
+echo "↑ Should show 2 occurrences: one in canAssign, one in recordAssignment"
+
+echo ""
+echo "=== getTotalHourlyCount removed from load-balancer ==="
+grep -n "getTotalHourlyCount" apps/api/src/services/load-balancer.service.ts
+echo "↑ Should be 0 results (method was removed)"
+
+echo ""
+echo "=== Composite indexes on problems table ==="
+grep -n "solve_dispatch\|vote_dispatch\|flag_dispatch" apps/api/src/db/schema.ts
+echo "↑ Should show 3 composite indexes"
+
+echo ""
+echo "=== PostgreSQL max_connections ==="
+grep "max_connections" docker-compose.prod.yml
+grep "max_connections" docker-compose.yml
+echo "↑ prod should be 200, dev should be 100"
+
+echo ""
+echo "=== DB pool size ==="
+grep -n "max:" apps/api/src/config/database.ts
+echo "↑ Should show max: 30"
+```
+
+---
+
 ## SECTION 2d: MIGRATION HEALTH & DEPLOYMENT READINESS
 
 ```bash
@@ -479,6 +543,27 @@ echo ""
 echo "=== Sort tab descriptions rendered ==="
 grep -n "description\|activeSort" apps/web/src/app/llm-leaderboard/page.tsx | head -5
 echo "↑ Should show description field on sort options and rendering logic"
+
+echo ""
+echo ""
+echo "=== Bot profile includes LLM model history (LLM-HIST-1) ==="
+grep -n "llmModelHistory\|llmModel\|currentLlmModel" apps/api/src/routes/leaderboard.routes.ts | head -15
+echo "↑ Should show: llmModelHistory query (GROUP BY llm_model) in /bots/:id, currentLlmModel in response"
+
+echo ""
+echo "=== Leaderboard includes currentLlmModel per bot ==="
+grep -n "currentLlmModel\|modelMap\|latestModels\|inArray" apps/api/src/routes/leaderboard.routes.ts | head -10
+echo "↑ Should show batch subquery for latest llm_model per bot in /leaderboard endpoint"
+
+echo ""
+echo "=== BotCard shows current LLM model ==="
+grep -n "currentLlmModel" apps/web/src/components/bot/BotCard.tsx 2>/dev/null
+echo "↑ Should show model label rendered below bot name"
+
+echo ""
+echo "=== Bot profile page shows model history section ==="
+grep -n "llmModelHistory\|LLM Model History\|currentLlmModel" apps/web/src/app/bots/\[id\]/page.tsx | head -10
+echo "↑ Should show: current model badge near name + model history section with first/last used dates"
 
 echo ""
 echo "=== SSE route shape ==="
@@ -1072,6 +1157,16 @@ echo "↑ All must be ≥ 1"
 ```bash
 echo "=== Full leaderboard.routes.ts ==="
 cat apps/api/src/routes/leaderboard.routes.ts
+
+echo ""
+echo "=== LLM model history in bot profile endpoint ==="
+grep -c "llmModelHistory" apps/api/src/routes/leaderboard.routes.ts
+echo "↑ Should be 1+ (GROUP BY query deriving model history from solutions table)"
+
+echo ""
+echo "=== currentLlmModel in leaderboard endpoint ==="
+grep -c "currentLlmModel" apps/api/src/routes/leaderboard.routes.ts
+echo "↑ Should be 1+ (batch subquery adding current model to each leaderboard bot)"
 
 echo ""
 echo "=== Full ActivityFeed.tsx ==="
@@ -1783,7 +1878,7 @@ echo "Contact route: $(grep -c "fastify\." apps/api/src/routes/contact.routes.ts
     - BT: db.transaction() + FOR UPDATE? (yes/no)
     - Maturity: atomic WHERE status != 'mature' RETURNING? (yes/no)
     - Double task: partial unique index tasks_bot_assigned_idx? (yes/no)
-    - DB pool: max 30? (yes/no)
+    - DB pool: max 30, postgres max_connections 200 (prod) / 100 (dev)? (yes/no)
     - Duplicate vote: uniqueIndex on comparisons(voter, solA, solB)? (yes/no)
     - Flag herd: Redis INCR/DECR cap at 3? (yes/no)
 21. Flag normalization:
@@ -1834,4 +1929,28 @@ echo "Contact route: $(grep -c "fastify\." apps/api/src/routes/contact.routes.ts
     - Bot rate limit constant (360/hr) matches what is actually registered in rate-limit.middleware.ts? (yes/no)
     - DPA_en.pdf and TOM_en.pdf gitignored? (yes/no)
     - Bot rate limit documented correctly in route group docs as 360/hr (not 60/hr)? (yes/no)
+30. Performance optimizations (PERF-1 session) — confirm all 5 changes are present:
+    - Bot auth cache: `AUTH_CACHE` Map with 300s TTL in bot-auth.middleware.ts? (yes/no)
+    - `invalidateBotAuthCache()` exported from bot-auth.middleware.ts? (yes/no)
+    - `invalidateBotAuthCache()` called in DELETE /user/api-key (auth.routes.ts)? (yes/no)
+    - `invalidateBotAuthCache()` called in PATCH /admin/bots/:id/status (admin.routes.ts)? (yes/no)
+    - `getSameOwnerBotIds()` uses Redis cache key `bot:owner_bots:{ownerId}` in dispatcher.service.ts? (yes/no)
+    - `invalidateOwnerBotsCache()` exported from dispatcher.service.ts and called in PUT /user/bot-profile (new bot branch only)? (yes/no)
+    - tryAssignFlagTask uses Promise.all for botFlaggedProblems + getSameOwnerBotIds? (yes/no)
+    - tryAssignSolveTask uses Promise.all for botSolutions + candidates? (yes/no)
+    - pair-selector selectPair uses Promise.all for allSolutions + botComparisons? (yes/no)
+    - load-balancer canAssign uses Promise.all for hget + hvals (getTotalHourlyCount removed)? (yes/no)
+    - load-balancer recordAssignment uses Promise.all for two parallel chains? (yes/no)
+    - problems table has 3 composite indexes: problems_solve_dispatch_idx, problems_vote_dispatch_idx, problems_flag_dispatch_idx? (yes/no)
+    - docker-compose.prod.yml max_connections=200? (yes/no)
+    - docker-compose.yml (dev) max_connections=100? (yes/no)
+31. LLM model history per bot — confirm LLM-HIST-1 changes:
+    - `/bots/:id` endpoint returns `llmModelHistory` array (llmModel, llmModelVersion, solutionCount, firstUsedAt, lastUsedAt)? (yes/no)
+    - `/bots/:id` endpoint returns `currentLlmModel` object (model, version, lastUsedAt)? (yes/no)
+    - `/leaderboard` endpoint returns `currentLlmModel` and `currentLlmModelVersion` per bot? (yes/no)
+    - Bot profile page (`/bots/[id]`) shows current model badge near bot name? (yes/no)
+    - Bot profile page shows LLM Model History section with solution counts and date ranges? (yes/no)
+    - BotCard component shows current model label? (yes/no)
+    - Bots with no solutions or no reported llm_model show graceful null/empty state? (yes/no)
+    - History is derived from solutions table (no separate history table needed)? (yes/no)
 Target length: 2,000–5,000 lines. Be thorough but do not repeat the same file contents across multiple sections.
