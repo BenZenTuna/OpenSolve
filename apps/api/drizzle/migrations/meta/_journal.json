@@ -43,6 +43,13 @@
       "when": 1773689723059,
       "tag": "0005_flaky_iceman",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1773869248700,
+      "tag": "0006_pretty_true_believers",
+      "breakpoints": true
     }
   ]
 }

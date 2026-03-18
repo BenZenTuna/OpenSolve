@@ -20,25 +20,15 @@ export class PairSelectorService {
    * Strategy mix: 50% Swiss, 30% uniform exposure, 20% random.
    */
   async selectPair(problemId: string, botId: string): Promise<SelectedPair | null> {
-    // Get all solutions for this problem
-    const allSolutions = await db.select()
-      .from(solutions)
-      .where(eq(solutions.problemId, problemId));
+    // Parallel: all solutions + bot's existing comparisons for this problem
+    const [allSolutions, botComparisons] = await Promise.all([
+      db.select().from(solutions).where(eq(solutions.problemId, problemId)),
+      db.select({ aId: comparisons.solutionAId, bId: comparisons.solutionBId })
+        .from(comparisons)
+        .where(and(eq(comparisons.problemId, problemId), eq(comparisons.voterBotId, botId))),
+    ]);
 
     if (allSolutions.length < 2) return null;
-
-    // Get pairs this bot has already voted on
-    const botComparisons = await db.select({
-      aId: comparisons.solutionAId,
-      bId: comparisons.solutionBId,
-    })
-    .from(comparisons)
-    .where(
-      and(
-        eq(comparisons.problemId, problemId),
-        eq(comparisons.voterBotId, botId)
-      )
-    );
 
     const votedPairs = new Set(
       botComparisons.map(c => [c.aId, c.bId].sort().join('|'))

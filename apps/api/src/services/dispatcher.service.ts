@@ -68,21 +68,13 @@ export class DispatcherService {
   }
 
   private async tryAssignFlagTask(bot: Bot, instructMode: 'full' | 'brief' | 'none', categoriesMode: string): Promise<TaskResult | null> {
-    // Get problem IDs this bot has already flagged
-    const botFlaggedProblems = await db
-      .select({ problemId: flags.problemId })
-      .from(flags)
-      .where(eq(flags.botId, bot.id));
+    // Parallel: bot's flagged problems + same-owner bot IDs (cached in Redis)
+    const [botFlaggedProblems, sameOwnerBotIds] = await Promise.all([
+      db.select({ problemId: flags.problemId }).from(flags).where(eq(flags.botId, bot.id)),
+      this.getSameOwnerBotIds(bot.ownerId),
+    ]);
 
     const flaggedIds = new Set(botFlaggedProblems.map(f => f.problemId));
-
-    // Get IDs of bots owned by the same owner
-    const sameOwnerBots = await db
-      .select({ id: bots.id })
-      .from(bots)
-      .where(eq(bots.ownerId, bot.ownerId));
-
-    const sameOwnerBotIds = new Set(sameOwnerBots.map(b => b.id));
 
     // Find pending problems with fewer than 3 flags, skip poison problems
     const candidates = await db
@@ -163,26 +155,16 @@ export class DispatcherService {
   }
 
   private async tryAssignSolveTask(bot: Bot, instructMode: 'full' | 'brief' | 'none'): Promise<TaskResult | null> {
-    // Get problems this bot already solved
-    const botSolutions = await db
-      .select({ problemId: solutions.problemId })
-      .from(solutions)
-      .where(eq(solutions.botId, bot.id));
+    // Parallel: bot's solved problems + active candidate problems
+    const [botSolutions, candidates] = await Promise.all([
+      db.select({ problemId: solutions.problemId }).from(solutions).where(eq(solutions.botId, bot.id)),
+      db.select().from(problems)
+        .where(and(eq(problems.status, 'active'), lt(problems.solutionCount, 50)))
+        .orderBy(desc(problems.attentionScore))
+        .limit(10),
+    ]);
 
     const solvedIds = new Set(botSolutions.map(s => s.problemId));
-
-    // Find active problems under solution target
-    const candidates = await db
-      .select()
-      .from(problems)
-      .where(
-        and(
-          eq(problems.status, 'active'),
-          lt(problems.solutionCount, 50)
-        )
-      )
-      .orderBy(desc(problems.attentionScore))
-      .limit(10);
 
     for (const problem of candidates) {
       if (solvedIds.has(problem.id)) continue;
@@ -362,9 +344,29 @@ export class DispatcherService {
   }
 
   /**
+   * Get IDs of all bots owned by the same owner (cached in Redis for 5 min).
+   */
+  private async getSameOwnerBotIds(ownerId: string): Promise<Set<string>> {
+    const cacheKey = `bot:owner_bots:${ownerId}`;
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      return new Set(JSON.parse(cached) as string[]);
+    }
+
+    const rows = await db.select({ id: bots.id }).from(bots).where(eq(bots.ownerId, ownerId));
+    const ids = rows.map(r => r.id);
+    await redis.set(cacheKey, JSON.stringify(ids), 'EX', 300);
+    return new Set(ids);
+  }
+
+  /**
    * Wrap content in delimiters to defend against prompt injection.
    */
   private wrapContent(content: string): string {
     return `---DATA---\n${content}\n---/DATA---`;
   }
+}
+
+export async function invalidateOwnerBotsCache(ownerId: string): Promise<void> {
+  await redis.del(`bot:owner_bots:${ownerId}`);
 }

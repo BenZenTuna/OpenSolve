@@ -130,6 +130,10 @@ export const problems = pgTable('problems', {
   createdAtIdx: index('problems_created_at_idx').on(table.createdAt),
   humanAuthorIdx: index('problems_human_author_idx').on(table.humanAuthorId),
   categoryIdx: index('problems_category_idx').on(table.category),
+  // Composite indexes for dispatcher hot queries
+  solveDispatchIdx: index('problems_solve_dispatch_idx').on(table.status, table.attentionScore),
+  voteDispatchIdx: index('problems_vote_dispatch_idx').on(table.status, table.solutionCount, table.attentionScore),
+  flagDispatchIdx: index('problems_flag_dispatch_idx').on(table.status, table.createdAt),
   // Unique constraint on lower(trim(title)) — added in production via SQL migration
   // Drizzle doesn't support expression indexes; enforced at DB level
 }));

@@ -13,14 +13,15 @@ export class LoadBalancerService {
   async canAssign(problemId: string | null): Promise<boolean> {
     if (!problemId) return true;
 
-    const hourlyCount = await redis.hget(HOURLY_KEY, problemId);
-    const totalHourly = await redis.hlen(HOURLY_KEY);
+    const [hourlyCount, allCounts] = await Promise.all([
+      redis.hget(HOURLY_KEY, problemId),
+      redis.hvals(HOURLY_KEY),
+    ]);
 
-    // If no activity yet, always allow
-    if (!totalHourly || totalHourly === 0) return true;
+    if (!allCounts || allCounts.length === 0) return true;
 
     const problemCount = parseInt(hourlyCount || '0', 10);
-    const totalCount = await this.getTotalHourlyCount();
+    const totalCount = allCounts.reduce((sum, val) => sum + parseInt(val, 10), 0);
 
     // If total is very low, don't restrict
     if (totalCount < 10) return true;
@@ -36,19 +37,17 @@ export class LoadBalancerService {
   async recordAssignment(problemId: string | null): Promise<void> {
     if (!problemId) return;
 
-    // Increment hourly counter
-    await redis.hincrby(HOURLY_KEY, problemId, 1);
-    await redis.expire(HOURLY_KEY, ACTIVITY_TTL);
-
-    // Record in problem-specific activity set (timestamps)
     const key = `${PROBLEM_ACTIVITY_PREFIX}${problemId}`;
     const now = Date.now();
-    await redis.zadd(key, now, `${now}`);
-    await redis.expire(key, ACTIVITY_TTL);
-
-    // Prune old entries (older than 30 minutes)
     const cutoff = now - 30 * 60 * 1000;
-    await redis.zremrangebyscore(key, 0, cutoff);
+
+    await Promise.all([
+      redis.hincrby(HOURLY_KEY, problemId, 1)
+        .then(() => redis.expire(HOURLY_KEY, ACTIVITY_TTL)),
+      redis.zadd(key, now, `${now}`)
+        .then(() => redis.expire(key, ACTIVITY_TTL))
+        .then(() => redis.zremrangebyscore(key, 0, cutoff)),
+    ]);
   }
 
   /**
@@ -84,14 +83,6 @@ export class LoadBalancerService {
     }
 
     return score;
-  }
-
-  /**
-   * Get total count of all hourly assignments.
-   */
-  private async getTotalHourlyCount(): Promise<number> {
-    const allCounts = await redis.hvals(HOURLY_KEY);
-    return allCounts.reduce((sum, val) => sum + parseInt(val, 10), 0);
   }
 
   /**

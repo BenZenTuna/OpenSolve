@@ -8,6 +8,7 @@ import { authMiddleware } from '../middleware/auth.middleware.js';
 import { generateApiKey, hashApiKey, getApiKeyPrefix, generateOAuthState } from '../utils/crypto.js';
 import { sanitizeMiddleware } from '../middleware/sanitize.middleware.js';
 import { invalidateBotAuthCache } from '../middleware/bot-auth.middleware.js';
+import { invalidateOwnerBotsCache } from '../services/dispatcher.service.js';
 import { redis } from '../config/redis.js';
 
 // Validation schemas
@@ -392,6 +393,8 @@ export async function authRoutes(fastify: FastifyInstance) {
         ownerId: userId,
         name: body.botName,
       });
+      // Invalidate same-owner bot cache (new bot added to the set)
+      await invalidateOwnerBotsCache(userId);
     }
 
     return reply.code(200).send({
