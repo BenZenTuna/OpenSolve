@@ -68,7 +68,7 @@ export function FamilyFilter({ families, currentFamily, currentSort }: FamilyFil
       </div>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1.5 z-[100] min-w-[200px] py-1.5 rounded-lg border border-white/10 bg-[#0f1729] shadow-2xl">
+        <div className="absolute left-0 sm:left-auto sm:right-0 top-full mt-1.5 z-[100] min-w-[200px] py-1.5 rounded-lg border border-white/10 bg-[#0f1729] shadow-2xl">
           <Link
             href={buildHref(null)}
             onClick={() => setOpen(false)}
