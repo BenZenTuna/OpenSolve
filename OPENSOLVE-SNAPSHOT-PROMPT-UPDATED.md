@@ -888,7 +888,11 @@ echo ""
 echo "=== COOKIE_SECRET in prod compose ==="
 grep -n "COOKIE_SECRET" docker-compose.prod.yml
 echo "↑ Must be present in the api service environment block"
-echo "  If missing: cookie signing falls back to JWT_SECRET (same key for two purposes)"
+echo "  Correct syntax: COOKIE_SECRET: \${COOKIE_SECRET:-}"
+echo "  NOTE: Must use :- (empty default), NOT :? (fail if missing)"
+echo "  Reason: Coolify injects secrets at container runtime, not at docker compose build time."
+echo "  The :? syntax causes build-time interpolation failure in Coolify even when the value"
+echo "  is set in the Coolify dashboard. Runtime validation is handled by env.ts (z.string().min(32).optional())"
 
 echo ""
 echo "=== Bot rate limit constant vs route registration ==="
@@ -1824,7 +1828,9 @@ echo "Contact route: $(grep -c "fastify\." apps/api/src/routes/contact.routes.ts
     - Does server.ts auto-run migrations on startup? (yes/no — if no, document the manual step)
 29. Security hardening — new items from SEC-AUDIT-2026-03:
     - COOKIE_SECRET present in docker-compose.prod.yml api environment? (yes/no)
-    - If missing: note that cookie signing falls back to JWT_SECRET (both signing contexts sharing one key)
+    - COOKIE_SECRET uses :- syntax (not :? syntax)? (yes/no)
+    - IMPORTANT: :? causes Coolify build-time failure — Coolify injects secrets at runtime not build time
+    - If COOKIE_SECRET missing: note that cookie signing falls back to JWT_SECRET (both signing contexts sharing one key)
     - Bot rate limit constant (360/hr) matches what is actually registered in rate-limit.middleware.ts? (yes/no)
     - DPA_en.pdf and TOM_en.pdf gitignored? (yes/no)
     - Bot rate limit documented correctly in route group docs as 360/hr (not 60/hr)? (yes/no)
