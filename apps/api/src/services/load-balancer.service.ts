@@ -1,6 +1,7 @@
 import { redis } from '../config/redis.js';
 
 const HOURLY_KEY = 'global:activity:hourly';
+const HOURLY_TOTAL_KEY = 'global:activity:hourly:total';
 const MAX_TRAFFIC_PERCENT = 30;
 const ACTIVITY_TTL = 3600; // 1 hour
 const PROBLEM_ACTIVITY_PREFIX = 'problem:activity:';
@@ -13,15 +14,13 @@ export class LoadBalancerService {
   async canAssign(problemId: string | null): Promise<boolean> {
     if (!problemId) return true;
 
-    const [hourlyCount, allCounts] = await Promise.all([
+    const [hourlyCount, totalRaw] = await Promise.all([
       redis.hget(HOURLY_KEY, problemId),
-      redis.hvals(HOURLY_KEY),
+      redis.get(HOURLY_TOTAL_KEY),
     ]);
 
-    if (!allCounts || allCounts.length === 0) return true;
-
     const problemCount = parseInt(hourlyCount || '0', 10);
-    const totalCount = allCounts.reduce((sum, val) => sum + parseInt(val, 10), 0);
+    const totalCount = parseInt(totalRaw || '0', 10);
 
     // If total is very low, don't restrict
     if (totalCount < 10) return true;
@@ -44,6 +43,8 @@ export class LoadBalancerService {
     await Promise.all([
       redis.hincrby(HOURLY_KEY, problemId, 1)
         .then(() => redis.expire(HOURLY_KEY, ACTIVITY_TTL)),
+      redis.incr(HOURLY_TOTAL_KEY)
+        .then(() => redis.expire(HOURLY_TOTAL_KEY, ACTIVITY_TTL)),
       redis.zadd(key, now, `${now}`)
         .then(() => redis.expire(key, ACTIVITY_TTL))
         .then(() => redis.zremrangebyscore(key, 0, cutoff)),
@@ -89,6 +90,6 @@ export class LoadBalancerService {
    * Reset hourly counters (called by scheduled job).
    */
   async resetHourlyCounters(): Promise<void> {
-    await redis.del(HOURLY_KEY);
+    await redis.del(HOURLY_KEY, HOURLY_TOTAL_KEY);
   }
 }
