@@ -32,9 +32,9 @@ export async function llmLeaderboardRoutes(fastify: FastifyInstance) {
   });
 
   // ===== MODEL DETAIL =====
-  fastify.get('/llm-leaderboard/:modelName', async (request, reply) => {
-    const { modelName } = request.params as { modelName: string };
-    const decoded = decodeURIComponent(modelName);
+  // Wildcard route captures model names with slashes (e.g., ollama/qwen3.5:9b)
+  fastify.get('/llm-leaderboard/*', async (request, reply) => {
+    const decoded = decodeURIComponent((request.params as { '*': string })['*']);
 
     const detail = await llmLeaderboard.getModelDetails(decoded);
     if (!detail) {
