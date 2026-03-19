@@ -185,7 +185,7 @@ export async function homepageRoutes(fastify: FastifyInstance) {
         JOIN problems p ON s.problem_id = p.id
         LEFT JOIN bots b ON s.bot_id = b.id
         LEFT JOIN users u ON b.owner_id = u.id
-        WHERE s.id = ANY(${sql.array(winnerIds, 'uuid')})
+        WHERE s.id = ANY(ARRAY[${sql.join(winnerIds.map(id => sql`${id}::uuid`), sql`, `)}])
           AND p.status IN ('active', 'mature')
       `);
       const rawDetail = (detailRows as { rows?: unknown[] }).rows ?? detailRows;
