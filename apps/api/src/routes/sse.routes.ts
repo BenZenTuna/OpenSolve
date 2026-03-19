@@ -3,11 +3,88 @@ import { db } from '../config/database.js';
 import { bots, activityLog, problems, users } from '../db/schema.js';
 import { desc, sql, gte, eq } from 'drizzle-orm';
 import { env } from '../config/env.js';
+import type { ServerResponse } from 'node:http';
+import { logger } from '../utils/logger.js';
+
+// ── Shared broadcast state ───────────────────────────────────────────────────
+// A single polling loop runs the 2 DB queries every 10 seconds and broadcasts
+// results to ALL connected SSE clients. The loop starts when the first client
+// connects and stops when the last client disconnects.
+
+const MAX_SSE_CLIENTS = 200;
+const BROADCAST_INTERVAL_MS = 10_000;
+
+const clients = new Set<ServerResponse>();
+let broadcastInterval: NodeJS.Timeout | null = null;
+
+function broadcast(event: string, data: string): void {
+  const message = `event: ${event}\ndata: ${data}\n\n`;
+  for (const res of clients) {
+    try {
+      res.write(message);
+    } catch {
+      // Client gone — will be cleaned up by its 'close' handler
+    }
+  }
+}
+
+async function runBroadcastCycle(): Promise<void> {
+  try {
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    const [activeBots] = await db.select({
+      count: sql<number>`count(*)::int`,
+    }).from(bots).where(gte(bots.lastActiveAt, oneHourAgo));
+
+    broadcast('active_bots', JSON.stringify({ count: activeBots.count }));
+
+    const recentActivity = await db.select({
+      id: activityLog.id,
+      action: activityLog.action,
+      botId: activityLog.botId,
+      botName: bots.name,
+      ownerBotName: users.botName,
+      problemId: activityLog.problemId,
+      problemTitle: problems.title,
+      metadata: activityLog.metadata,
+      createdAt: activityLog.createdAt,
+    })
+    .from(activityLog)
+    .leftJoin(bots, eq(activityLog.botId, bots.id))
+    .leftJoin(users, eq(bots.ownerId, users.id))
+    .leftJoin(problems, eq(activityLog.problemId, problems.id))
+    .orderBy(desc(activityLog.createdAt))
+    .limit(5);
+
+    broadcast('activity', JSON.stringify(recentActivity));
+  } catch (err) {
+    logger.error(err, 'SSE broadcast cycle failed');
+  }
+}
+
+function startBroadcastLoop(): void {
+  if (broadcastInterval) return;
+  broadcastInterval = setInterval(runBroadcastCycle, BROADCAST_INTERVAL_MS);
+}
+
+function stopBroadcastLoop(): void {
+  if (broadcastInterval && clients.size === 0) {
+    clearInterval(broadcastInterval);
+    broadcastInterval = null;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 export async function sseRoutes(fastify: FastifyInstance) {
 
   // ===== SSE EVENT STREAM =====
   fastify.get('/events/stream', async (request, reply) => {
+    // Connection cap
+    if (clients.size >= MAX_SSE_CLIENTS) {
+      logger.warn({ current: clients.size, max: MAX_SSE_CLIENTS }, 'SSE connection cap reached');
+      return reply.code(503).send({ error: 'Too many live connections. Try again later.' });
+    }
+
     reply.raw.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
@@ -15,50 +92,18 @@ export async function sseRoutes(fastify: FastifyInstance) {
       'Access-Control-Allow-Origin': env.WEB_URL,
     });
 
-    // Send initial data
+    // Send initial data to the new client
     const stats = await getStats();
     reply.raw.write(`event: stats\ndata: ${JSON.stringify(stats)}\n\n`);
 
-    // Poll for updates
-    const interval = setInterval(async () => {
-      try {
-        // Active bot count (every 10 seconds)
-        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-        const [activeBots] = await db.select({
-          count: sql<number>`count(*)::int`,
-        }).from(bots).where(gte(bots.lastActiveAt, oneHourAgo));
-
-        reply.raw.write(`event: active_bots\ndata: ${JSON.stringify({ count: activeBots.count })}\n\n`);
-
-        // Recent activity with joined bot/problem data
-        const recentActivity = await db.select({
-          id: activityLog.id,
-          action: activityLog.action,
-          botId: activityLog.botId,
-          botName: bots.name,
-          ownerBotName: users.botName,
-          problemId: activityLog.problemId,
-          problemTitle: problems.title,
-          metadata: activityLog.metadata,
-          createdAt: activityLog.createdAt,
-        })
-        .from(activityLog)
-        .leftJoin(bots, eq(activityLog.botId, bots.id))
-        .leftJoin(users, eq(bots.ownerId, users.id))
-        .leftJoin(problems, eq(activityLog.problemId, problems.id))
-        .orderBy(desc(activityLog.createdAt))
-        .limit(5);
-
-        reply.raw.write(`event: activity\ndata: ${JSON.stringify(recentActivity)}\n\n`);
-      } catch {
-        // Client disconnected
-        clearInterval(interval);
-      }
-    }, 10000);
+    // Register this client for broadcasts
+    clients.add(reply.raw);
+    startBroadcastLoop();
 
     // Clean up on disconnect
     request.raw.on('close', () => {
-      clearInterval(interval);
+      clients.delete(reply.raw);
+      stopBroadcastLoop();
     });
   });
 }
