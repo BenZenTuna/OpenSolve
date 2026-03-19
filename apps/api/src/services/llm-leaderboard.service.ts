@@ -40,14 +40,20 @@ export class LlmLeaderboardService {
         })
         .where(eq(llmModels.id, existing.id));
     } else {
-      // Insert new
-      await db.insert(llmModels).values({
-        modelName,
-        modelVersion,
-        modelFamily: family,
-        totalSolutions: 1,
-        uniqueBots: 1,
-      });
+      // Insert new — catch duplicate if concurrent request already inserted
+      try {
+        await db.insert(llmModels).values({
+          modelName,
+          modelVersion,
+          modelFamily: family,
+          totalSolutions: 1,
+          uniqueBots: 1,
+        });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (err: any) {
+        if (err.code === '23505') return; // Concurrent insert won — model exists
+        throw err;
+      }
     }
   }
 
@@ -82,7 +88,7 @@ export class LlmLeaderboardService {
       ? stats.totalWins / stats.totalComparisons
       : 0;
 
-    // Count top 3 placements and #1 placements
+    // Count top 3 placements and #1 placements (ranked against ALL solutions per problem)
     const placements = await db.execute(sql`
       WITH ranked AS (
         SELECT
@@ -91,13 +97,13 @@ export class LlmLeaderboardService {
           s.llm_model,
           ROW_NUMBER() OVER (PARTITION BY s.problem_id ORDER BY s.bt_score DESC) AS rank
         FROM solutions s
-        WHERE s.llm_model = ${modelName}
-          AND s.comparison_count >= 1
+        WHERE s.comparison_count >= 1
       )
       SELECT
         count(*) FILTER (WHERE rank <= 3) AS top3_count,
         count(*) FILTER (WHERE rank = 1) AS first_place_count
       FROM ranked
+      WHERE llm_model = ${modelName}
     `);
 
     const placementRows = (placements as { rows?: unknown[] }).rows ?? placements;

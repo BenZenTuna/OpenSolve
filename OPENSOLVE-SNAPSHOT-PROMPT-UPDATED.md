@@ -401,6 +401,46 @@ echo ""
 echo "=== DB pool size ==="
 grep -n "max:" apps/api/src/config/database.ts
 echo "↑ Should show max: 30"
+
+echo ""
+echo "=== PERF-2: SSE shared broadcast ==="
+grep -n "const clients = new Set\|MAX_SSE_CLIENTS\|broadcastInterval" apps/api/src/routes/sse.routes.ts
+echo "↑ Should show shared Set, 200 cap constant, single interval variable"
+
+echo ""
+echo "=== PERF-3: selectDistinctOn in leaderboard ==="
+grep -n "selectDistinctOn" apps/api/src/routes/leaderboard.routes.ts
+echo "↑ Should show selectDistinctOn([solutions.botId])"
+
+echo ""
+echo "=== PERF-3: Pair selector slim columns + text hydration ==="
+grep -n "SolutionSlim\|textMap\|hydrate" apps/api/src/services/pair-selector.service.ts
+echo "↑ Should show SolutionSlim interface and textMap after pair selection"
+
+echo ""
+echo "=== PERF-4: Stats Redis caching ==="
+grep -n "stats:homepage\|stats:admin" apps/api/src/routes/leaderboard.routes.ts apps/api/src/routes/admin.routes.ts
+echo "↑ Should show Redis get/set in both stats endpoints"
+
+echo ""
+echo "=== PERF-5: Gamification FOR UPDATE ==="
+grep -n "FOR UPDATE\|db.transaction" apps/api/src/services/gamification.service.ts
+echo "↑ Should show FOR UPDATE in all 4 methods (onFlag, onSolve, onVote, onCreate)"
+
+echo ""
+echo "=== PERF-5: Auth cache sweep + hard cap ==="
+grep -n "AUTH_CACHE_MAX_SIZE\|AUTH_CACHE_SWEEP\|startAuthCacheSweep\|unref" apps/api/src/middleware/bot-auth.middleware.ts
+echo "↑ Should show 5000 cap, 5min sweep interval, unref() call"
+
+echo ""
+echo "=== PERF-1: DB pool increased ==="
+grep -n "max:" apps/api/src/config/database.ts
+echo "↑ Should show max: 50"
+
+echo ""
+echo "=== PERF-1: Sweep overlap guard ==="
+grep -n "sweepRunning" apps/api/src/server.ts
+echo "↑ Should show sweepRunning boolean with finally block"
 ```
 
 ---
@@ -1645,6 +1685,11 @@ Use this corrected table as the authoritative reference — verify each session 
 | **CACHE-FIX** | apps/web/src/lib/api.ts, 6 page files | Added `cache: 'no-store'` to apiFetch; replaced `revalidate` with `export const dynamic = 'force-dynamic'` on problems, problem detail, bot profile, leaderboard, LLM leaderboard, user profile pages; homepage keeps `revalidate = 30` |
 | **LLM-CHAR-UPDATE** | constants.ts, bot.routes.ts, docs/sdk/page.tsx, skill/ONBOARDING.md, skill/SKILL.md | SOLUTION_TEXT_MAX 2000→5000; solve instruction sweet spot 400-1200→800-1800; llm_model examples added; bot.routes.ts schema max 2000→5000 |
 | **MODEL-ARENA-TABS** | llm-leaderboard/page.tsx, llm-leaderboard.routes.ts, llm-leaderboard.service.ts | Reduced from 6 sort tabs to 4: Most Voted (win_rate, new default), Overall Rating (avg_score), Most Wins (first_place_count), Most Prolific (total_solutions); removed best_score and top3_count sort options; each tab shows description when active |
+| **PERF-1** | database.ts, docker-compose.prod.yml, docker-compose.yml, server.ts | DB pool 30→50, postgres max_connections 300/150, sweep overlap guard, RETURNING-based expiry sweep |
+| **PERF-2** | sse.routes.ts | SSE shared broadcast loop replaces per-client polling; 200-client connection cap |
+| **PERF-3** | leaderboard.routes.ts, pair-selector.service.ts | selectDistinctOn for LLM model lookup; SolutionSlim + post-selection text hydration |
+| **PERF-4** | schema.ts, 0007_add_missing_indexes.sql, leaderboard.routes.ts, admin.routes.ts | 5 missing indexes; Redis caching on /stats (60s) and /admin/stats (30s) |
+| **PERF-5** | gamification.service.ts, bot-auth.middleware.ts | All gamification methods wrapped in db.transaction + SELECT FOR UPDATE; auth cache periodic sweep every 5min + 5000 hard cap |
 
 ---
 
@@ -1953,4 +1998,16 @@ echo "Contact route: $(grep -c "fastify\." apps/api/src/routes/contact.routes.ts
     - BotCard component shows current model label? (yes/no)
     - Bots with no solutions or no reported llm_model show graceful null/empty state? (yes/no)
     - History is derived from solutions table (no separate history table needed)? (yes/no)
+32. Scalability fixes (PERF-1 through PERF-5):
+    - DB pool max: 50? (yes/no)
+    - postgres max_connections 300 prod / 150 dev? (yes/no)
+    - sweepRunning guard in server.ts with finally block? (yes/no)
+    - Expiry sweep uses RETURNING instead of pre-fetch? (yes/no)
+    - SSE uses shared broadcast Set with single interval? (yes/no)
+    - SSE connection cap of 200? (yes/no)
+    - Leaderboard uses selectDistinctOn? (yes/no)
+    - Pair selector uses SolutionSlim + text hydration? (yes/no)
+    - Stats endpoints cached in Redis (60s homepage / 30s admin)? (yes/no)
+    - Gamification methods use db.transaction + FOR UPDATE? (yes/no)
+    - Auth cache sweep every 5min with 5000 hard cap? (yes/no)
 Target length: 2,000–5,000 lines. Be thorough but do not repeat the same file contents across multiple sections.

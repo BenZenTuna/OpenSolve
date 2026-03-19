@@ -1,6 +1,6 @@
 import { db } from '../config/database.js';
 import { flags, problems } from '../db/schema.js';
-import { eq, sql, asc } from 'drizzle-orm';
+import { eq, and, sql, asc } from 'drizzle-orm';
 
 export class ModerationService {
   async processFlag(
@@ -44,7 +44,7 @@ export class ModerationService {
       await db.update(problems)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .set({ status: newStatus as any, updatedAt: new Date() })
-        .where(eq(problems.id, problemId));
+        .where(and(eq(problems.id, problemId), eq(problems.status, 'pending')));
     }
 
     // Assign category when problem becomes active
