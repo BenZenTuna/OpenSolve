@@ -16,14 +16,16 @@ export class GamificationService {
    * Award points for flagging content.
    */
   async onFlag(botId: string, verdict: string, newStatus: string, problemId?: string): Promise<void> {
-    // Award point for flagging
-    await this.addPoints(botId, POINTS.FLAG_CONTENT);
-    await db.update(bots)
-      .set({
-        totalFlags: sql`${bots.totalFlags} + 1`,
-        updatedAt: new Date(),
-      })
-      .where(eq(bots.id, botId));
+    await db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT id FROM bots WHERE id = ${botId} FOR UPDATE`);
+      await tx.update(bots)
+        .set({
+          totalPoints: sql`${bots.totalPoints} + ${POINTS.FLAG_CONTENT}`,
+          totalFlags: sql`${bots.totalFlags} + 1`,
+          updatedAt: new Date(),
+        })
+        .where(eq(bots.id, botId));
+    });
 
     await this.logActivity(botId, 'flag_submitted', problemId || null, null, { verdict, newStatus });
   }
@@ -32,24 +34,26 @@ export class GamificationService {
    * Award points for submitting a solution.
    */
   async onSolve(botId: string, solutionId: string, problemId?: string): Promise<void> {
-    await this.addPoints(botId, POINTS.SUBMIT_SOLUTION);
-    await db.update(bots)
-      .set({
-        totalSolutions: sql`${bots.totalSolutions} + 1`,
-        updatedAt: new Date(),
-      })
-      .where(eq(bots.id, botId));
+    await db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT id FROM bots WHERE id = ${botId} FOR UPDATE`);
 
-    // Check for first_solve badge
-    const [bot] = await db.select({ totalSolutions: bots.totalSolutions })
-      .from(bots).where(eq(bots.id, botId));
-    if (bot.totalSolutions === 1) {
-      await this.awardBadge(botId, 'first_solve', 'bronze');
-    }
-    // problem_solver badges
-    if (bot.totalSolutions >= 10) await this.awardBadge(botId, 'problem_solver', 'silver');
-    if (bot.totalSolutions >= 100) await this.awardBadge(botId, 'problem_solver', 'gold');
-    if (bot.totalSolutions >= 1000) await this.awardBadge(botId, 'problem_solver', 'platinum');
+      const [updated] = await tx.update(bots)
+        .set({
+          totalPoints: sql`${bots.totalPoints} + ${POINTS.SUBMIT_SOLUTION}`,
+          totalSolutions: sql`${bots.totalSolutions} + 1`,
+          updatedAt: new Date(),
+        })
+        .where(eq(bots.id, botId))
+        .returning({ totalSolutions: bots.totalSolutions });
+
+      // Badge checks using the post-increment value from RETURNING
+      if (updated.totalSolutions === 1) {
+        await this.awardBadgeTx(tx, botId, 'first_solve', 'bronze');
+      }
+      if (updated.totalSolutions >= 10) await this.awardBadgeTx(tx, botId, 'problem_solver', 'silver');
+      if (updated.totalSolutions >= 100) await this.awardBadgeTx(tx, botId, 'problem_solver', 'gold');
+      if (updated.totalSolutions >= 1000) await this.awardBadgeTx(tx, botId, 'problem_solver', 'platinum');
+    });
 
     await this.logActivity(botId, 'solution_submitted', problemId || null, solutionId);
   }
@@ -58,13 +62,16 @@ export class GamificationService {
    * Award points for casting a vote.
    */
   async onVote(botId: string, winner: string, problemId?: string): Promise<void> {
-    await this.addPoints(botId, POINTS.CAST_VOTE);
-    await db.update(bots)
-      .set({
-        totalVotes: sql`${bots.totalVotes} + 1`,
-        updatedAt: new Date(),
-      })
-      .where(eq(bots.id, botId));
+    await db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT id FROM bots WHERE id = ${botId} FOR UPDATE`);
+      await tx.update(bots)
+        .set({
+          totalPoints: sql`${bots.totalPoints} + ${POINTS.CAST_VOTE}`,
+          totalVotes: sql`${bots.totalVotes} + 1`,
+          updatedAt: new Date(),
+        })
+        .where(eq(bots.id, botId));
+    });
 
     await this.logActivity(botId, 'vote_cast', problemId || null, null, { winner });
   }
@@ -73,13 +80,16 @@ export class GamificationService {
    * Award points for creating a problem.
    */
   async onCreate(botId: string, problemId: string): Promise<void> {
-    await this.addPoints(botId, POINTS.CREATE_PROBLEM);
-    await db.update(bots)
-      .set({
-        totalProblemsCreated: sql`${bots.totalProblemsCreated} + 1`,
-        updatedAt: new Date(),
-      })
-      .where(eq(bots.id, botId));
+    await db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT id FROM bots WHERE id = ${botId} FOR UPDATE`);
+      await tx.update(bots)
+        .set({
+          totalPoints: sql`${bots.totalPoints} + ${POINTS.CREATE_PROBLEM}`,
+          totalProblemsCreated: sql`${bots.totalProblemsCreated} + 1`,
+          updatedAt: new Date(),
+        })
+        .where(eq(bots.id, botId));
+    });
 
     await this.logActivity(botId, 'problem_created', problemId);
   }
@@ -131,6 +141,25 @@ export class GamificationService {
         totalPoints: sql`${bots.totalPoints} + ${points}`,
       })
       .where(eq(bots.id, botId));
+  }
+
+  /**
+   * Award a badge within a transaction (idempotent — uses unique constraint).
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private async awardBadgeTx(tx: any, botId: string, badgeType: string, tier: string): Promise<void> {
+    try {
+      await tx.insert(badges).values({
+        botId,
+        badgeType,
+        tier,
+      });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      // Ignore duplicate badge error (unique constraint)
+      if (err.code === '23505') return;
+      throw err;
+    }
   }
 
   /**

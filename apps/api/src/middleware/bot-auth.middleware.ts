@@ -20,6 +20,28 @@ interface CacheEntry {
 }
 const AUTH_CACHE = new Map<string, CacheEntry>();
 const AUTH_CACHE_TTL_MS = 300_000; // 5 minutes
+const AUTH_CACHE_MAX_SIZE = 5000;
+const AUTH_CACHE_SWEEP_INTERVAL_MS = 300_000; // 5 minutes
+let authCacheSweepInterval: NodeJS.Timeout | null = null;
+
+function startAuthCacheSweep(): void {
+  if (authCacheSweepInterval) return;
+  authCacheSweepInterval = setInterval(() => {
+    const now = Date.now();
+    for (const [key, entry] of AUTH_CACHE) {
+      if (now - entry.cachedAt >= AUTH_CACHE_TTL_MS) {
+        AUTH_CACHE.delete(key);
+      }
+    }
+    // Stop sweep if cache is empty
+    if (AUTH_CACHE.size === 0 && authCacheSweepInterval) {
+      clearInterval(authCacheSweepInterval);
+      authCacheSweepInterval = null;
+    }
+  }, AUTH_CACHE_SWEEP_INTERVAL_MS);
+  // Allow process to exit even if sweep is running
+  authCacheSweepInterval.unref();
+}
 
 export function invalidateBotAuthCache(prefix: string): void {
   AUTH_CACHE.delete(prefix);
@@ -108,12 +130,19 @@ export async function botAuthMiddleware(
 
   request.bot = botData;
 
+  // Hard cap: if cache is too large, clear it entirely to prevent unbounded memory growth
+  if (AUTH_CACHE.size >= AUTH_CACHE_MAX_SIZE) {
+    request.log.warn({ size: AUTH_CACHE.size, max: AUTH_CACHE_MAX_SIZE }, 'Auth cache hard cap reached — clearing');
+    AUTH_CACHE.clear();
+  }
+
   // Cache successful auth — keyed on prefix16 even for legacy fallback matches
   AUTH_CACHE.set(prefix16, {
     apiKeyHash: user.apiKeyHash,
     bot: { ...botData },
     cachedAt: Date.now(),
   });
+  startAuthCacheSweep();
 
   trackBotRequest(request.bot.id).catch(() => {});
   incrementConcurrent().catch(() => {});
