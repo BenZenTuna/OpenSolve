@@ -10,6 +10,7 @@ import { eq, desc, sql, asc, isNotNull } from 'drizzle-orm';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { getTrafficStats } from '../services/bot-traffic.service.js';
 import { runRetentionCleanup } from '../services/retention.service.js';
+import { LlmLeaderboardService } from '../services/llm-leaderboard.service.js';
 import { env } from '../config/env.js';
 
 function timingSafeEqual(a: string, b: string): boolean {
@@ -654,5 +655,12 @@ export async function debugRoutes(fastify: FastifyInstance) {
   fastify.post('/internal/debug/retention-cleanup', async (_request, reply) => {
     const result = await runRetentionCleanup();
     return reply.send(result);
+  });
+
+  // ===== RECALCULATE LLM MODEL STATS =====
+  fastify.post('/internal/debug/recalculate-llm-stats', async (_request, reply) => {
+    const llmService = new LlmLeaderboardService();
+    const count = await llmService.recalculateAll();
+    return reply.send({ success: true, modelsRecalculated: count, message: 'LLM stats recalculated' });
   });
 }

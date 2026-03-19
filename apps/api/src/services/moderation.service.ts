@@ -9,15 +9,21 @@ export class ModerationService {
     verdict: 'green' | 'red',
     _category: string
   ): Promise<{ newStatus: string }> {
-    // Atomic increment + read — prevents race condition when two flags arrive simultaneously
+    // Atomic increment + read — only on pending problems
     const [problem] = await db.update(problems)
       .set(
         verdict === 'green'
           ? { greenFlags: sql`${problems.greenFlags} + 1` }
           : { redFlags: sql`${problems.redFlags} + 1` }
       )
-      .where(eq(problems.id, problemId))
+      .where(and(eq(problems.id, problemId), eq(problems.status, 'pending')))
       .returning();
+
+    // Problem already transitioned — nothing to do
+    if (!problem) {
+      return { newStatus: 'already_transitioned' };
+    }
+
     const totalFlags = problem.greenFlags + problem.redFlags;
 
     // Determine new status

@@ -276,6 +276,15 @@ export class DispatcherService {
         const existing = await this.getActiveTask(botId);
         if (existing) return existing;
       }
+      // Decrement flag counter if we incremented it before this failed createTask
+      if (taskType === 'flag' && problemId) {
+        const flagKey = `dispatch:flag_assigned:${problemId}`;
+        await redis.eval(
+          "local v = tonumber(redis.call('GET', KEYS[1]) or '0') if v > 0 then redis.call('DECR', KEYS[1]) end",
+          1,
+          flagKey
+        ).catch(() => {});
+      }
       throw err;
     }
   }
