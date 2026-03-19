@@ -441,6 +441,51 @@ echo ""
 echo "=== PERF-1: Sweep overlap guard ==="
 grep -n "sweepRunning" apps/api/src/server.ts
 echo "↑ Should show sweepRunning boolean with finally block"
+
+echo ""
+echo "=== PERF-A: LLM placements ranks across ALL solutions ==="
+grep -n "WHERE s.comparison_count\|WHERE llm_model" apps/api/src/services/llm-leaderboard.service.ts | head -5
+echo "↑ Inner CTE should have no llm_model filter; outer query should filter WHERE llm_model ="
+
+echo ""
+echo "=== PERF-A: recordModel 23505 guard ==="
+grep -n "23505" apps/api/src/services/llm-leaderboard.service.ts
+echo "↑ Should show catch for concurrent INSERT duplicate"
+
+echo ""
+echo "=== PERF-A: Moderation WHERE status=pending guard ==="
+grep -n "eq(problems.status" apps/api/src/services/moderation.service.ts
+echo "↑ Should show WHERE status='pending' on status transition UPDATE"
+
+echo ""
+echo "=== PERF-B: Homepage top-solutions DISTINCT ON ==="
+grep -n "DISTINCT ON" apps/api/src/routes/homepage.routes.ts
+echo "↑ Should show DISTINCT ON in /top-solutions subquery"
+
+echo ""
+echo "=== PERF-B: Problem list selectDistinctOn ==="
+grep -n "selectDistinctOn" apps/api/src/routes/problem.routes.ts
+echo "↑ Should show selectDistinctOn([solutions.problemId])"
+
+echo ""
+echo "=== PERF-C: withCacheMutex helper ==="
+grep -n "withCacheMutex\|:rebuilding\|NX" apps/api/src/routes/homepage.routes.ts | head -10
+echo "↑ Should show mutex helper, :rebuilding key pattern, SET NX"
+
+echo ""
+echo "=== PERF-D: Batched retention DELETEs ==="
+grep -n "BATCH_SIZE\|BATCH_PAUSE\|batchDelete" apps/api/src/services/retention.service.ts
+echo "↑ Should show 500 batch size, 100ms pause, batchDelete helper"
+
+echo ""
+echo "=== PERF-D: Load balancer total key ==="
+grep -n "HOURLY_TOTAL_KEY\|global:activity:hourly:total" apps/api/src/services/load-balancer.service.ts
+echo "↑ Should show dedicated total key in canAssign (GET) and recordAssignment (INCR)"
+
+echo ""
+echo "=== PERF-E: Singleflight auth deduplication ==="
+grep -n "AUTH_IN_FLIGHT\|verifyApiKey\|singleflight" apps/api/src/middleware/bot-auth.middleware.ts
+echo "↑ Should show AUTH_IN_FLIGHT Map, verifyApiKey function, finally cleanup"
 ```
 
 ---
@@ -1690,6 +1735,11 @@ Use this corrected table as the authoritative reference — verify each session 
 | **PERF-3** | leaderboard.routes.ts, pair-selector.service.ts | selectDistinctOn for LLM model lookup; SolutionSlim + post-selection text hydration |
 | **PERF-4** | schema.ts, 0007_add_missing_indexes.sql, leaderboard.routes.ts, admin.routes.ts | 5 missing indexes; Redis caching on /stats (60s) and /admin/stats (30s) |
 | **PERF-5** | gamification.service.ts, bot-auth.middleware.ts | All gamification methods wrapped in db.transaction + SELECT FOR UPDATE; auth cache periodic sweep every 5min + 5000 hard cap |
+| **PERF-A** | llm-leaderboard.service.ts, moderation.service.ts | ROW_NUMBER ranks across ALL solutions (not per-model); recordModel catches 23505; processFlag status UPDATE guarded with WHERE status='pending' |
+| **PERF-B** | homepage.routes.ts, problem.routes.ts | /top-solutions DISTINCT ON subquery (was 24 sequential queries); /rising-solutions single joined query (was 24 sequential); problem list selectDistinctOn for top solution |
+| **PERF-C** | homepage.routes.ts | withCacheMutex helper: SET NX EX 5 mutex on /spotlight, /top-solutions, /rising-solutions; 200ms retry on lock; safety valve fallthrough |
+| **PERF-D** | retention.service.ts, load-balancer.service.ts | Batched retention DELETEs (500 rows/100ms pause); canAssign uses dedicated total key instead of hvals(); recordAssignment INCRs total key |
+| **PERF-E** | bot-auth.middleware.ts | Singleflight deduplication: AUTH_IN_FLIGHT Map shares one bcrypt Promise across concurrent requests for same API key prefix; cleanup via finally block |
 
 ---
 
@@ -2010,4 +2060,18 @@ echo "Contact route: $(grep -c "fastify\." apps/api/src/routes/contact.routes.ts
     - Stats endpoints cached in Redis (60s homepage / 30s admin)? (yes/no)
     - Gamification methods use db.transaction + FOR UPDATE? (yes/no)
     - Auth cache sweep every 5min with 5000 hard cap? (yes/no)
+33. Scalability fixes (PERF-A through PERF-E):
+    - LLM placements CTE ranks across ALL solutions (llm_model filter on outer query)? (yes/no)
+    - recordModel catches 23505 duplicate INSERT? (yes/no)
+    - processFlag status UPDATE has WHERE status='pending' guard? (yes/no)
+    - /top-solutions uses single DISTINCT ON subquery (not N+1 loop)? (yes/no)
+    - /rising-solutions uses single joined query (not N+1 loop)? (yes/no)
+    - Problem list uses selectDistinctOn for top solution? (yes/no)
+    - withCacheMutex applied to /spotlight, /top-solutions, /rising-solutions? (yes/no)
+    - Retention uses batchDelete with 500 rows and 100ms pause? (yes/no)
+    - canAssign uses redis.get(total key) not redis.hvals()? (yes/no)
+    - recordAssignment INCRs global:activity:hourly:total? (yes/no)
+    - Bot auth uses AUTH_IN_FLIGHT singleflight Map? (yes/no)
+    - AUTH_IN_FLIGHT cleanup in finally block? (yes/no)
+    - Auth check order: AUTH_CACHE → AUTH_IN_FLIGHT → new verification? (yes/no)
 Target length: 2,000–5,000 lines. Be thorough but do not repeat the same file contents across multiple sections.

@@ -1,5 +1,5 @@
 import { db } from '../config/database.js';
-import { solutions, comparisons, problems } from '../db/schema.js';
+import { solutions, comparisons, problems, bots } from '../db/schema.js';
 import { eq, and, sql } from 'drizzle-orm';
 import { redis } from '../config/redis.js';
 import { LlmLeaderboardService } from './llm-leaderboard.service.js';
@@ -100,6 +100,53 @@ export class BradleyTerryService {
       if (winner === 'b') updateB.winCount = sql`${solutions.winCount} + 1`;
       if (winner === 'a') updateB.lossCount = sql`${solutions.lossCount} + 1`;
       await tx.update(solutions).set(updateB).where(eq(solutions.id, solutionBId));
+
+      // ── Update globalElo for both solution bots (avg of top 20 solutions) ──
+      const botIdA = solutionA.botId;
+      const botIdB = solutionB.botId;
+      const botIdsToUpdate = new Set<string>();
+      if (botIdA) botIdsToUpdate.add(botIdA);
+      if (botIdB) botIdsToUpdate.add(botIdB);
+
+      for (const botId of botIdsToUpdate) {
+        await tx.execute(sql`
+          UPDATE bots SET global_elo = COALESCE((
+            SELECT AVG(bt_score)::int FROM (
+              SELECT bt_score FROM solutions
+              WHERE bot_id = ${botId}
+              ORDER BY bt_score DESC
+              LIMIT 20
+            ) top_solutions
+          ), 1200)
+          WHERE id = ${botId}
+        `);
+      }
+
+      // ── Update voteAccuracy for the voting bot ──
+      // Read voter bot's current state (lock for consistency)
+      const [voterBot] = await tx
+        .select({ totalVotes: bots.totalVotes, voteAccuracy: bots.voteAccuracy })
+        .from(bots)
+        .where(eq(bots.id, voterBotId));
+
+      if (voterBot) {
+        // Correct vote = voter picked the solution with higher btScore after update
+        const voterCorrect =
+          (winner === 'a' && newRatingA > newRatingB) ||
+          (winner === 'b' && newRatingB > newRatingA);
+        const correctVal = voterCorrect ? 1 : 0;
+
+        // Rolling update: new_accuracy = ((old * (n-1)) + correct) / n
+        // totalVotes is the pre-gamification count; gamification increments it after this
+        const prevVotes = voterBot.totalVotes;
+        const newAccuracy = prevVotes > 0
+          ? ((voterBot.voteAccuracy * prevVotes) + correctVal) / (prevVotes + 1)
+          : correctVal;
+
+        await tx.update(bots)
+          .set({ voteAccuracy: newAccuracy })
+          .where(eq(bots.id, voterBotId));
+      }
 
       return {
         newRatingA,
