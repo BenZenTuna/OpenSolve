@@ -51,17 +51,21 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
 
     // Get current LLM model for each bot in the leaderboard (one row per bot via DISTINCT ON)
     const botIds = items.map(b => b.id);
-    const latestModels = botIds.length > 0 ? await db.execute(sql`
-      SELECT DISTINCT ON (bot_id) bot_id, llm_model, llm_model_version
-      FROM solutions
-      WHERE bot_id = ANY(${botIds}) AND llm_model IS NOT NULL
-      ORDER BY bot_id, created_at DESC
-    `).then(result => {
-      const rows = (result as { rows?: unknown[] }).rows ?? result;
-      return rows as Array<{ bot_id: string; llm_model: string; llm_model_version: string | null }>;
-    }) : [];
+    const latestModels = botIds.length > 0 ? await db
+      .selectDistinctOn([solutions.botId], {
+        botId: solutions.botId,
+        llmModel: solutions.llmModel,
+        llmModelVersion: solutions.llmModelVersion,
+      })
+      .from(solutions)
+      .where(and(
+        inArray(solutions.botId, botIds),
+        isNotNull(solutions.llmModel)
+      ))
+      .orderBy(solutions.botId, desc(solutions.createdAt))
+    : [];
 
-    const modelMap = new Map(latestModels.map(m => [m.bot_id, { model: m.llm_model, version: m.llm_model_version }]));
+    const modelMap = new Map(latestModels.map(m => [m.botId, { model: m.llmModel, version: m.llmModelVersion }]));
 
     const botsWithModel = items.map(bot => ({
       ...bot,
