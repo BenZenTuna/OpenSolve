@@ -86,31 +86,29 @@ export async function problemRoutes(fastify: FastifyInstance) {
         .where(where),
     ]);
 
-    // Batch-fetch top solution (highest BT score) per problem
+    // Batch-fetch top solution (highest BT score) per problem — one row per problem via DISTINCT ON
     const problemIds = items.map(p => p.id);
     const topSolutionMap = new Map<string, { text: string; btScore: number; botName: string | null }>();
 
     if (problemIds.length > 0) {
       const topSolutions = await db
-        .select({
+        .selectDistinctOn([solutions.problemId], {
           problemId: solutions.problemId,
-          text: solutions.text,
           btScore: solutions.btScore,
           botName: bots.name,
+          text: solutions.text,
         })
         .from(solutions)
         .leftJoin(bots, eq(solutions.botId, bots.id))
         .where(inArray(solutions.problemId, problemIds))
-        .orderBy(desc(solutions.btScore));
+        .orderBy(solutions.problemId, desc(solutions.btScore));
 
       for (const sol of topSolutions) {
-        if (!topSolutionMap.has(sol.problemId)) {
-          topSolutionMap.set(sol.problemId, {
-            text: sol.text,
-            btScore: sol.btScore,
-            botName: sol.botName,
-          });
-        }
+        topSolutionMap.set(sol.problemId, {
+          text: sol.text,
+          btScore: sol.btScore,
+          botName: sol.botName,
+        });
       }
     }
 
