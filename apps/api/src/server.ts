@@ -194,58 +194,53 @@ async function start() {
     logger.info(`Server running at http://localhost:${env.PORT}`);
 
     // Start expiry sweep AFTER listening
+    let sweepRunning = false;
     expiryInterval = setInterval(async () => {
+      if (sweepRunning) return;
+      sweepRunning = true;
       try {
-        // Find flag tasks about to expire so we can track failures
-        const expiringFlagTasks = await db
-          .select({ problemId: tasks.problemId })
-          .from(tasks)
-          .where(
-            and(
-              eq(tasks.status, 'assigned'),
-              eq(tasks.taskType, 'flag'),
-              lt(tasks.expiresAt, new Date())
-            )
-          );
-
-        const result = await db.update(tasks)
+        // Atomically expire all assigned tasks past their deadline and capture what was expired
+        const expiredRows = await db.update(tasks)
           .set({ status: 'expired' })
           .where(
             and(
               eq(tasks.status, 'assigned'),
               lt(tasks.expiresAt, new Date())
             )
-          );
-        const expiredCount = (result as unknown as { count: number }).count;
-        if (expiredCount > 0) {
-          server.log.info(`Expired ${expiredCount} stale tasks`);
+          )
+          .returning({ id: tasks.id, taskType: tasks.taskType, problemId: tasks.problemId });
+
+        if (expiredRows.length > 0) {
+          server.log.info(`Expired ${expiredRows.length} stale tasks`);
         }
 
         // Track expired flag tasks: decrement assignment counter + track failed attempts
-        for (const t of expiringFlagTasks) {
-          if (t.problemId) {
-            await safeDecrFlagCounter(t.problemId);
-            try {
-              const [problem] = await db.update(problems)
-                .set({
-                  failedFlagAttempts: sql`${problems.failedFlagAttempts} + 1`,
-                  updatedAt: new Date(),
-                })
-                .where(eq(problems.id, t.problemId))
-                .returning({ id: problems.id, failedFlagAttempts: problems.failedFlagAttempts, status: problems.status });
+        // Only process rows that were actually expired by THIS update (not pre-fetched)
+        const expiredFlagTasks = expiredRows.filter(t => t.taskType === 'flag' && t.problemId);
+        for (const t of expiredFlagTasks) {
+          await safeDecrFlagCounter(t.problemId!);
+          try {
+            const [problem] = await db.update(problems)
+              .set({
+                failedFlagAttempts: sql`${problems.failedFlagAttempts} + 1`,
+                updatedAt: new Date(),
+              })
+              .where(eq(problems.id, t.problemId!))
+              .returning({ id: problems.id, failedFlagAttempts: problems.failedFlagAttempts, status: problems.status });
 
-              if (problem && problem.failedFlagAttempts >= 5 && problem.status === 'pending') {
-                await db.update(problems)
-                  .set({ status: 'rejected' as any, updatedAt: new Date() })
-                  .where(and(eq(problems.id, t.problemId), eq(problems.status, 'pending')));
-                server.log.warn({ problemId: t.problemId, attempts: problem.failedFlagAttempts },
-                  'Auto-rejected problem after repeated expired flag tasks');
-              }
-            } catch { /* non-critical */ }
-          }
+            if (problem && problem.failedFlagAttempts >= 5 && problem.status === 'pending') {
+              await db.update(problems)
+                .set({ status: 'rejected' as any, updatedAt: new Date() })
+                .where(and(eq(problems.id, t.problemId!), eq(problems.status, 'pending')));
+              server.log.warn({ problemId: t.problemId, attempts: problem.failedFlagAttempts },
+                'Auto-rejected problem after repeated expired flag tasks');
+            }
+          } catch { /* non-critical */ }
         }
       } catch (err) {
         server.log.error(err, 'Task expiry sweep failed');
+      } finally {
+        sweepRunning = false;
       }
     }, TASK_EXPIRY_INTERVAL_MS);
 
