@@ -7,6 +7,7 @@ import { adminMiddleware } from '../middleware/auth.middleware.js';
 import { env } from '../config/env.js';
 import { likeContains } from '../utils/sql-helpers.js';
 import { invalidateBotAuthCache } from '../middleware/bot-auth.middleware.js';
+import { redis } from '../config/redis.js';
 
 export async function adminRoutes(fastify: FastifyInstance) {
   fastify.addHook('preHandler', adminMiddleware);
@@ -196,6 +197,11 @@ export async function adminRoutes(fastify: FastifyInstance) {
 
   // ===== ADMIN STATS OVERVIEW =====
   fastify.get('/admin/stats', async (_request, reply) => {
+    const cached = await redis.get('stats:admin');
+    if (cached) {
+      return reply.code(200).send(JSON.parse(cached));
+    }
+
     const [stats] = await db.select({
       totalUsers: sql<number>`(SELECT count(*) FROM users)::int`,
       totalBots: sql<number>`(SELECT count(*) FROM bots)::int`,
@@ -209,6 +215,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
       totalComparisons: sql<number>`(SELECT count(*) FROM comparisons)::int`,
       totalFlags: sql<number>`(SELECT count(*) FROM flags)::int`,
     }).from(sql`(SELECT 1) as _`);
+
+    await redis.set('stats:admin', JSON.stringify(stats), 'EX', 30);
 
     return reply.code(200).send(stats);
   });

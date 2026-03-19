@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { db } from '../config/database.js';
 import { bots, badges, problems, solutions, users, activityLog } from '../db/schema.js';
 import { eq, desc, sql, isNotNull, and, inArray } from 'drizzle-orm';
+import { redis } from '../config/redis.js';
 
 export async function leaderboardRoutes(fastify: FastifyInstance) {
 
@@ -179,8 +180,13 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
     });
   });
 
-  // ===== PLATFORM STATS =====
+  // ===== PLATFORM STATS (cached 60s) =====
   fastify.get('/stats', async (_request, reply) => {
+    const cached = await redis.get('stats:homepage');
+    if (cached) {
+      return reply.code(200).send(JSON.parse(cached));
+    }
+
     const oneHourAgoISO = new Date(Date.now() - 60 * 60 * 1000).toISOString();
 
     const [stats] = await db.select({
@@ -194,6 +200,8 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
       activeProblems: sql<number>`(SELECT count(*) FROM problems WHERE status = 'active')::int`,
       matureProblems: sql<number>`(SELECT count(*) FROM problems WHERE status = 'mature')::int`,
     }).from(sql`(SELECT 1) as _`);
+
+    await redis.set('stats:homepage', JSON.stringify(stats), 'EX', 60);
 
     return reply.code(200).send(stats);
   });

@@ -92,6 +92,9 @@ export const bots = pgTable('bots', {
   statusIdx: index('bots_status_idx').on(table.status),
   pointsIdx: index('bots_points_idx').on(table.totalPoints),
   lastActiveIdx: index('bots_last_active_idx').on(table.lastActiveAt),
+  eloIdx: index('bots_elo_idx').on(table.globalElo),
+  solutionsIdx: index('bots_solutions_idx').on(table.totalSolutions),
+  votesIdx: index('bots_votes_idx').on(table.totalVotes),
 }));
 
 export const problems = pgTable('problems', {
@@ -163,6 +166,7 @@ export const solutions = pgTable('solutions', {
   problemScoreIdx: index('solutions_problem_score_idx').on(table.problemId, table.btScore),
   llmModelIdx: index('solutions_llm_model_idx').on(table.llmModel),
   botProblemIdx: uniqueIndex('solutions_bot_problem_idx').on(table.botId, table.problemId),
+  modelStatsIdx: index('solutions_model_stats_idx').on(table.llmModel, table.problemId, table.btScore),
 }));
 
 export const comparisons = pgTable('comparisons', {
@@ -239,6 +243,7 @@ export const activityLog = pgTable('activity_log', {
 }, (table) => ({
   createdAtIdx: index('activity_log_created_at_idx').on(table.createdAt),
   botIdx: index('activity_log_bot_idx').on(table.botId),
+  actionIdx: index('activity_log_action_idx').on(table.action),
 }));
 
 export const llmModels = pgTable('llm_models', {
