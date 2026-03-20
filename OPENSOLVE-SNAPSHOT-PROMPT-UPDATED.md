@@ -486,6 +486,36 @@ echo ""
 echo "=== PERF-E: Singleflight auth deduplication ==="
 grep -n "AUTH_IN_FLIGHT\|verifyApiKey\|singleflight" apps/api/src/middleware/bot-auth.middleware.ts
 echo "↑ Should show AUTH_IN_FLIGHT Map, verifyApiKey function, finally cleanup"
+
+echo ""
+echo "=== PERF-F: globalElo updated in BT transaction ==="
+grep -n "global_elo\|AVG(bt_score)\|top_solutions" apps/api/src/services/bradley-terry.service.ts
+echo "↑ Should show UPDATE bots SET global_elo = AVG of top 20 solutions inside transaction"
+
+echo ""
+echo "=== PERF-F: voteAccuracy rolling update ==="
+grep -n "voteAccuracy\|voterCorrect\|newAccuracy" apps/api/src/services/bradley-terry.service.ts
+echo "↑ Should show rolling accuracy calculation and UPDATE inside transaction"
+
+echo ""
+echo "=== PERF-G: Wildcard route for model names with slashes ==="
+grep -n "llm-leaderboard/\*\|request.params.*\*" apps/api/src/routes/llm-leaderboard.routes.ts
+echo "↑ Should show wildcard route and params['*'] extraction"
+
+echo ""
+echo "=== PERF-H: recalculateAll debug endpoint ==="
+grep -n "recalculate-llm-stats\|recalculateAll" apps/api/src/routes/debug.routes.ts
+echo "↑ Should show POST /internal/debug/recalculate-llm-stats endpoint"
+
+echo ""
+echo "=== PERF-H: Flag counter WHERE status=pending on increment ==="
+grep -n "eq(problems.status, 'pending')" apps/api/src/services/moderation.service.ts
+echo "↑ Should show status guard on BOTH the flag counter increment AND the status transition"
+
+echo ""
+echo "=== PERF-H: Flag counter safe DECR on non-23505 failure ==="
+grep -n "taskType === 'flag'\|flag_assigned\|safeDecr" apps/api/src/services/dispatcher.service.ts | head -5
+echo "↑ Should show flag counter DECR in createTask catch block"
 ```
 
 ---
@@ -1740,6 +1770,9 @@ Use this corrected table as the authoritative reference — verify each session 
 | **PERF-C** | homepage.routes.ts | withCacheMutex helper: SET NX EX 5 mutex on /spotlight, /top-solutions, /rising-solutions; 200ms retry on lock; safety valve fallthrough |
 | **PERF-D** | retention.service.ts, load-balancer.service.ts | Batched retention DELETEs (500 rows/100ms pause); canAssign uses dedicated total key instead of hvals(); recordAssignment INCRs total key |
 | **PERF-E** | bot-auth.middleware.ts | Singleflight deduplication: AUTH_IN_FLIGHT Map shares one bcrypt Promise across concurrent requests for same API key prefix; cleanup via finally block |
+| **PERF-F** | bradley-terry.service.ts | globalElo updated inside BT transaction as AVG of bot's top 20 solution btScores; voteAccuracy rolling update using ((old * prevVotes) + correct) / (prevVotes + 1) |
+| **PERF-G** | llm-leaderboard.routes.ts | Wildcard route `/llm-leaderboard/*` replaces `:modelName` param; captures model names with slashes (e.g., ollama/qwen3.5:9b) |
+| **PERF-H** | debug.routes.ts, moderation.service.ts, dispatcher.service.ts | POST /internal/debug/recalculate-llm-stats wired; flag counter WHERE status='pending' guard; flag counter safe DECR on non-23505 createTask failure |
 
 ---
 
@@ -2074,4 +2107,16 @@ echo "Contact route: $(grep -c "fastify\." apps/api/src/routes/contact.routes.ts
     - Bot auth uses AUTH_IN_FLIGHT singleflight Map? (yes/no)
     - AUTH_IN_FLIGHT cleanup in finally block? (yes/no)
     - Auth check order: AUTH_CACHE → AUTH_IN_FLIGHT → new verification? (yes/no)
+34. Correctness fixes (PERF-F through PERF-H):
+    - globalElo updated inside BT transaction as AVG of top 20 solution btScores? (yes/no)
+    - globalElo updated for BOTH solution bots after every vote? (yes/no)
+    - voteAccuracy rolling update uses totalVotes as denominator? (yes/no)
+    - voteAccuracy UPDATE runs inside the BT transaction? (yes/no)
+    - No new DB columns added for globalElo/voteAccuracy? (yes/no)
+    - Model Arena detail route uses wildcard `*` (not `:modelName`)? (yes/no)
+    - Frontend encodes model names with encodeURIComponent? (yes/no)
+    - POST /internal/debug/recalculate-llm-stats endpoint exists? (yes/no)
+    - Flag counter increment has WHERE status='pending' guard? (yes/no)
+    - processFlag returns early if problem already transitioned? (yes/no)
+    - createTask catch block DECRs flag counter on non-23505 failure? (yes/no)
 Target length: 2,000–5,000 lines. Be thorough but do not repeat the same file contents across multiple sections.

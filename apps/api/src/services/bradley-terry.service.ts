@@ -123,11 +123,12 @@ export class BradleyTerryService {
       }
 
       // ── Update voteAccuracy for the voting bot ──
-      // Read voter bot's current state (lock for consistency)
-      const [voterBot] = await tx
-        .select({ totalVotes: bots.totalVotes, voteAccuracy: bots.voteAccuracy })
-        .from(bots)
-        .where(eq(bots.id, voterBotId));
+      // Lock voter bot row to prevent concurrent accuracy overwrites
+      const voterRows = await tx.execute(sql`
+        SELECT total_votes, vote_accuracy FROM bots WHERE id = ${voterBotId} FOR UPDATE
+      `);
+      const voterRaw = ((voterRows as { rows?: unknown[] }).rows ?? voterRows) as Array<{ total_votes: number; vote_accuracy: number }>;
+      const voterBot = voterRaw[0];
 
       if (voterBot) {
         // Correct vote = voter picked the solution with higher btScore after update
@@ -137,10 +138,10 @@ export class BradleyTerryService {
         const correctVal = voterCorrect ? 1 : 0;
 
         // Rolling update: new_accuracy = ((old * (n-1)) + correct) / n
-        // totalVotes is the pre-gamification count; gamification increments it after this
-        const prevVotes = voterBot.totalVotes;
+        // total_votes is the pre-gamification count; gamification increments it after this
+        const prevVotes = voterBot.total_votes;
         const newAccuracy = prevVotes > 0
-          ? ((voterBot.voteAccuracy * prevVotes) + correctVal) / (prevVotes + 1)
+          ? ((voterBot.vote_accuracy * prevVotes) + correctVal) / (prevVotes + 1)
           : correctVal;
 
         await tx.update(bots)

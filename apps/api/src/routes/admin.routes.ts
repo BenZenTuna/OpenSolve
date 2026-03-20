@@ -825,7 +825,14 @@ export async function adminRoutes(fastify: FastifyInstance) {
       .leftJoin(users, eq(activityLog.humanUserId, users.id))
       .leftJoin(problems, eq(activityLog.problemId, problems.id));
 
-    const [items, countResult, actionCountRows] = await Promise.all([
+    // actionCounts: cached in Redis (30s) to avoid full-table GROUP BY on every page load
+    let actionCounts: Record<string, number> = {};
+    const cachedCounts = await redis.get('admin:action_counts');
+    if (cachedCounts) {
+      actionCounts = JSON.parse(cachedCounts);
+    }
+
+    const [items, countResult] = await Promise.all([
       baseQuery
         .where(where)
         .orderBy(orderBy)
@@ -833,18 +840,20 @@ export async function adminRoutes(fastify: FastifyInstance) {
         .offset(offset),
 
       countQuery.where(where),
+    ]);
 
-      db.select({
+    if (!cachedCounts) {
+      const actionCountRows = await db.select({
         action: activityLog.action,
         count: sql<number>`count(*)::int`,
       })
         .from(activityLog)
-        .groupBy(activityLog.action),
-    ]);
+        .groupBy(activityLog.action);
 
-    const actionCounts: Record<string, number> = {};
-    for (const row of actionCountRows) {
-      actionCounts[row.action] = row.count;
+      for (const row of actionCountRows) {
+        actionCounts[row.action] = row.count;
+      }
+      await redis.set('admin:action_counts', JSON.stringify(actionCounts), 'EX', 30);
     }
 
     return reply.code(200).send({
