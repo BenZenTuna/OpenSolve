@@ -51,7 +51,16 @@ export class LlmLeaderboardService {
         });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
-        if (err.code === '23505') return; // Concurrent insert won — model exists
+        if (err.code === '23505') {
+          // Model was inserted by concurrent request — increment its count
+          await db.update(llmModels)
+            .set({
+              totalSolutions: sql`${llmModels.totalSolutions} + 1`,
+              lastSeenAt: new Date(),
+            })
+            .where(eq(llmModels.modelName, modelName));
+          return;
+        }
         throw err;
       }
     }
