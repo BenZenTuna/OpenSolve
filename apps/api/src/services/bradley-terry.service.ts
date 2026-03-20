@@ -42,12 +42,17 @@ export class BradleyTerryService {
 
     // If skip, only increment comparison counts (atomic, no lock needed)
     if (winner === 'skip') {
-      await db.update(solutions)
-        .set({ comparisonCount: sql`${solutions.comparisonCount} + 1` })
-        .where(eq(solutions.id, solutionAId));
-      await db.update(solutions)
-        .set({ comparisonCount: sql`${solutions.comparisonCount} + 1` })
-        .where(eq(solutions.id, solutionBId));
+      await Promise.all([
+        db.update(solutions)
+          .set({ comparisonCount: sql`${solutions.comparisonCount} + 1` })
+          .where(eq(solutions.id, solutionAId)),
+        db.update(solutions)
+          .set({ comparisonCount: sql`${solutions.comparisonCount} + 1` })
+          .where(eq(solutions.id, solutionBId)),
+        db.update(problems)
+          .set({ comparisonCount: sql`${problems.comparisonCount} + 1` })
+          .where(eq(problems.id, problemId)),
+      ]);
 
       const [solA] = await db.select().from(solutions).where(eq(solutions.id, solutionAId));
       const [solB] = await db.select().from(solutions).where(eq(solutions.id, solutionBId));
@@ -149,6 +154,11 @@ export class BradleyTerryService {
           .where(eq(bots.id, voterBotId));
       }
 
+      // Increment problem-level comparison count inside the transaction
+      await tx.update(problems).set({
+        comparisonCount: sql`${problems.comparisonCount} + 1`,
+      }).where(eq(problems.id, problemId));
+
       return {
         newRatingA,
         newRatingB,
@@ -157,11 +167,6 @@ export class BradleyTerryService {
       };
     });
     // === END TRANSACTION ===
-
-    // Post-transaction work (non-critical, safe outside lock)
-    await db.update(problems).set({
-      comparisonCount: sql`${problems.comparisonCount} + 1`,
-    }).where(eq(problems.id, problemId));
 
     await this.checkMaturity(problemId);
 
