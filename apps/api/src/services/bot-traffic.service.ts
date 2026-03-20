@@ -1,4 +1,7 @@
 import { redis } from '../config/redis.js';
+import { db } from '../config/database.js';
+import { bots } from '../db/schema.js';
+import { sql } from 'drizzle-orm';
 
 const KEYS = {
   activeSet: 'bot:traffic:active',
@@ -114,4 +117,19 @@ export async function getTrafficStats(): Promise<BotTrafficStats> {
       red: '2,001+ daily hits',
     },
   };
+}
+
+/**
+ * Reconcile the concurrent_bots counter with the database.
+ * Resets the Redis counter to the true count of bots active in the last 60 seconds.
+ * Called every 60s to prevent permanent upward drift from connection aborts.
+ */
+export async function reconcileConcurrentBots(): Promise<void> {
+  const oneMinuteAgo = new Date(Date.now() - 60 * 1000).toISOString();
+  const [result] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(bots)
+    .where(sql`${bots.lastActiveAt} > ${oneMinuteAgo}::timestamptz`);
+  const trueCount = result?.count ?? 0;
+  await redis.set(KEYS.concurrent, String(trueCount));
 }

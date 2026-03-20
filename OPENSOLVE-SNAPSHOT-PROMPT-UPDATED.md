@@ -516,6 +516,31 @@ echo ""
 echo "=== PERF-H: Flag counter safe DECR on non-23505 failure ==="
 grep -n "taskType === 'flag'\|flag_assigned\|safeDecr" apps/api/src/services/dispatcher.service.ts | head -5
 echo "↑ Should show flag counter DECR in createTask catch block"
+
+echo ""
+echo "=== PERF-I: voteAccuracy FOR UPDATE on voter bot ==="
+grep -n "FOR UPDATE" apps/api/src/services/bradley-terry.service.ts
+echo "↑ Should show FOR UPDATE on both solution rows AND voter bot row"
+
+echo ""
+echo "=== PERF-I: Admin actionCounts cached in Redis ==="
+grep -n "admin:action_counts" apps/api/src/routes/admin.routes.ts
+echo "↑ Should show redis.get and redis.set with 30s TTL"
+
+echo ""
+echo "=== PERF-J: recordModel 23505 retries UPDATE ==="
+grep -n -A 5 "23505" apps/api/src/services/llm-leaderboard.service.ts | head -10
+echo "↑ Should show UPDATE totalSolutions + 1 in the 23505 catch block (not just return)"
+
+echo ""
+echo "=== PERF-K: Redis pipeline in recordAssignment ==="
+grep -n "pipeline\|\.exec()" apps/api/src/services/load-balancer.service.ts
+echo "↑ Should show redis.pipeline().hincrby().expire().incr().expire().exec()"
+
+echo ""
+echo "=== PERF-K: Hourly counter reset interval in server.ts ==="
+grep -n "resetHourlyCounters\|msUntilNextHour\|LoadBalancerService" apps/api/src/server.ts
+echo "↑ Should show setTimeout at top of hour then setInterval every hour"
 ```
 
 ---
@@ -1773,6 +1798,9 @@ Use this corrected table as the authoritative reference — verify each session 
 | **PERF-F** | bradley-terry.service.ts | globalElo updated inside BT transaction as AVG of bot's top 20 solution btScores; voteAccuracy rolling update using ((old * prevVotes) + correct) / (prevVotes + 1) |
 | **PERF-G** | llm-leaderboard.routes.ts | Wildcard route `/llm-leaderboard/*` replaces `:modelName` param; captures model names with slashes (e.g., ollama/qwen3.5:9b) |
 | **PERF-H** | debug.routes.ts, moderation.service.ts, dispatcher.service.ts | POST /internal/debug/recalculate-llm-stats wired; flag counter WHERE status='pending' guard; flag counter safe DECR on non-23505 createTask failure |
+| **PERF-I** | bradley-terry.service.ts, admin.routes.ts | voteAccuracy SELECT uses FOR UPDATE on voter bot row inside BT transaction; admin actionCounts GROUP BY cached in Redis (admin:action_counts, 30s TTL) |
+| **PERF-J** | llm-leaderboard.service.ts | recordModel 23505 catch now retries UPDATE (totalSolutions + 1, lastSeenAt) instead of returning silently — prevents solution count loss on concurrent new model insertion |
+| **PERF-K** | load-balancer.service.ts, server.ts | recordAssignment uses Redis pipeline for atomic HINCRBY+EXPIRE+INCR+EXPIRE; hourly counter reset interval fires at top of each hour via setTimeout→setInterval |
 
 ---
 
@@ -2119,4 +2147,15 @@ echo "Contact route: $(grep -c "fastify\." apps/api/src/routes/contact.routes.ts
     - Flag counter increment has WHERE status='pending' guard? (yes/no)
     - processFlag returns early if problem already transitioned? (yes/no)
     - createTask catch block DECRs flag counter on non-23505 failure? (yes/no)
+35. Concurrency & infrastructure fixes (PERF-I through PERF-K):
+    - voteAccuracy SELECT uses FOR UPDATE on voter bot row? (yes/no)
+    - voteAccuracy field references use snake_case (total_votes, vote_accuracy) from raw SQL? (yes/no)
+    - Admin actionCounts cached in Redis (admin:action_counts, 30s TTL)? (yes/no)
+    - Paginated activity list is NOT cached (only actionCounts)? (yes/no)
+    - recordModel 23505 catch retries UPDATE (totalSolutions + 1) instead of silent return? (yes/no)
+    - recordAssignment uses redis.pipeline() for HINCRBY+EXPIRE+INCR+EXPIRE? (yes/no)
+    - Per-problem zset operations unchanged (still separate)? (yes/no)
+    - Hourly counter reset fires at top of each hour via setTimeout→setInterval? (yes/no)
+    - LoadBalancerService imported in server.ts? (yes/no)
+    - resetHourlyCounters errors logged (not swallowed)? (yes/no)
 Target length: 2,000–5,000 lines. Be thorough but do not repeat the same file contents across multiple sections.

@@ -258,10 +258,18 @@ export class LlmLeaderboardService {
       .select({ modelName: llmModels.modelName })
       .from(llmModels);
 
-    for (const m of allModels) {
-      await this.recalculateModelStats(m.modelName);
+    const CHUNK_SIZE = 5;
+    let recalculated = 0;
+
+    for (let i = 0; i < allModels.length; i += CHUNK_SIZE) {
+      const chunk = allModels.slice(i, i + CHUNK_SIZE);
+      await Promise.all(chunk.map(m => this.recalculateModelStats(m.modelName)));
+      recalculated += chunk.length;
+      if (i + CHUNK_SIZE < allModels.length) {
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
     }
 
-    return allModels.length;
+    return recalculated;
   }
 }

@@ -37,7 +37,7 @@ import { newsletterRoutes } from './routes/newsletter.routes.js';
 import { adminEmailRoutes } from './routes/admin.email.routes.js';
 import { contactRoutes } from './routes/contact.routes.js';
 import { userProfileRoutes } from './routes/user-profile.routes.js';
-import { decrementConcurrent } from './services/bot-traffic.service.js';
+import { decrementConcurrent, reconcileConcurrentBots } from './services/bot-traffic.service.js';
 import { runRetentionCleanup } from './services/retention.service.js';
 import { DispatcherService } from './services/dispatcher.service.js';
 import { LoadBalancerService } from './services/load-balancer.service.js';
@@ -287,6 +287,13 @@ async function start() {
         );
       }, 60 * 60 * 1000);
     }, msUntilNextHour);
+
+    // Reconcile concurrent_bots counter every 60s to prevent drift
+    setInterval(() => {
+      reconcileConcurrentBots().catch(err =>
+        server.log.error(err, 'Failed to reconcile concurrent bots counter')
+      );
+    }, 60 * 1000);
   } catch (err) {
     logger.error(err, 'Failed to start server');
     process.exit(1);
