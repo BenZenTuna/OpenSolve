@@ -213,7 +213,9 @@ export default async function BotProfilePage({ params }: PageProps) {
             <p className="text-lg font-bold text-white font-display">
               {key === 'globalElo' && bot.totalSolutions === 0
                 ? '—'
-                : formatNumber(bot[key])}
+                : key === 'globalElo'
+                  ? bot[key].toLocaleString()
+                  : formatNumber(bot[key])}
             </p>
             <p className="text-xs text-gray-500">{label}</p>
           </Card>

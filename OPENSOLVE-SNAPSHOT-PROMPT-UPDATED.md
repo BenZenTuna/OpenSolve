@@ -556,6 +556,21 @@ echo ""
 echo "=== PERF-N: Reconciliation interval in server.ts ==="
 grep -n "reconcileConcurrentBots" apps/api/src/server.ts
 echo "↑ Should show import and 60s setInterval call"
+
+echo ""
+echo "=== URL-FIX: Bot API base URL uses api. subdomain ==="
+grep "Base URL" skill/SKILL.md
+echo "↑ Should show api.opensolve.ai/api/v1 (not www.opensolve.ai)"
+
+echo ""
+echo "=== URL-FIX: No www.opensolve.ai/api in bot-facing files ==="
+grep -rn "www\.opensolve\.ai/api" skill/ bots/ apps/web/src/app/docs/ 2>/dev/null
+echo "↑ Must be empty (zero results)"
+
+echo ""
+echo "=== URL-FIX: ONBOARDING.md has API endpoint note ==="
+grep -n "api\.opensolve\.ai" skill/ONBOARDING.md | head -5
+echo "↑ Should show api.opensolve.ai in Quick Start and cron example"
 ```
 
 ---
@@ -1818,6 +1833,7 @@ Use this corrected table as the authoritative reference — verify each session 
 | **PERF-K** | load-balancer.service.ts, server.ts | recordAssignment uses Redis pipeline for atomic HINCRBY+EXPIRE+INCR+EXPIRE; hourly counter reset interval fires at top of each hour via setTimeout→setInterval |
 | **PERF-M** | llm-leaderboard.service.ts | recalculateAll processes models in chunks of 5 with Promise.all; 50ms pause between chunks to yield connection pool |
 | **PERF-N** | bot-traffic.service.ts, server.ts | reconcileConcurrentBots resets Redis counter to true DB count (bots active in last 60s); runs every 60s via setInterval to prevent permanent counter drift |
+| **URL-FIX** | skill/SKILL.md, skill/ONBOARDING.md, docs/api/page.tsx, docs/sdk/page.tsx, bots/python/README.md | Bot API base URL changed from www.opensolve.ai/api/v1 to api.opensolve.ai/api/v1; bots were hitting web frontend access gate instead of API directly |
 
 ---
 
@@ -2184,4 +2200,13 @@ echo "Contact route: $(grep -c "fastify\." apps/api/src/routes/contact.routes.ts
     - reconcileConcurrentBots uses KEYS.concurrent (bot:traffic:concurrent)? (yes/no)
     - server.ts calls reconcileConcurrentBots every 60s via setInterval? (yes/no)
     - reconcileConcurrentBots imported from bot-traffic.service.ts in server.ts? (yes/no)
+37. Bot API URL fix (URL-FIX):
+    - SKILL.md base URL is api.opensolve.ai/api/v1 (not www)? (yes/no)
+    - ONBOARDING.md Quick Start has API endpoint note with api.opensolve.ai? (yes/no)
+    - ONBOARDING.md cron example uses api.opensolve.ai? (yes/no)
+    - docs/api/page.tsx base URL is api.opensolve.ai? (yes/no)
+    - docs/sdk/page.tsx Python example uses api.opensolve.ai? (yes/no)
+    - bots/python/README.md mentions production URL api.opensolve.ai? (yes/no)
+    - docker-compose.prod.yml NEXT_PUBLIC_API_URL still www.opensolve.ai (correct for browser)? (yes/no)
+    - Zero www.opensolve.ai/api references in skill/, bots/, docs/ pages? (yes/no)
 Target length: 2,000–5,000 lines. Be thorough but do not repeat the same file contents across multiple sections.
