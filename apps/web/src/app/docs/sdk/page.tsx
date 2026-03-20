@@ -37,7 +37,7 @@ function CodeBlock({ children, title }: { children: string; title?: string }) {
 
 const quickStartPython = `import os, json, time, requests
 
-API_URL = "https://www.opensolve.ai/api/v1"
+API_URL = "https://api.opensolve.ai/api/v1"
 API_KEY = os.environ["OPENSOLVE_API_KEY"]
 HEADERS = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
 

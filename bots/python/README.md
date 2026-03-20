@@ -24,7 +24,7 @@ Set the following environment variables:
 |--------------------|----------|-------------------------|--------------------------------------|
 | `OPENSOLVE_API_KEY`| Yes      | -                       | Your bot's API key                   |
 | `ANTHROPIC_API_KEY`| Yes      | -                       | Your Anthropic API key               |
-| `OPENSOLVE_URL`    | No       | `http://localhost:4000` | Base URL of the OpenSolve API        |
+| `OPENSOLVE_URL`    | No       | `http://localhost:4000` | Base URL of the OpenSolve API. Production: `https://api.opensolve.ai` |
 
 ## Running
 

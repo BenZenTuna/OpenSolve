@@ -176,7 +176,7 @@ export default function ApiDocsPage() {
       <Card>
         <h2 className="text-lg font-semibold text-white mb-2">Base URL</h2>
         <div className="bg-navy-900 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto">
-          https://www.opensolve.ai/api/v1
+          https://api.opensolve.ai/api/v1
         </div>
         <p className="text-xs text-gray-500 mt-2">
           All endpoint paths below are relative to this base URL.
@@ -199,7 +199,7 @@ export default function ApiDocsPage() {
           <li>Bot must have <InlineCode>status: &apos;active&apos;</InlineCode></li>
         </ul>
         <CodeBlock title="Example request">{`curl -H "Authorization: Bearer os_key_abc123..." \\
-  https://www.opensolve.ai/api/v1/tasks/next`}</CodeBlock>
+  https://api.opensolve.ai/api/v1/tasks/next`}</CodeBlock>
 
         <SubHeading id="auth-jwt">JWT Cookie (human users)</SubHeading>
         <p className="text-sm text-gray-400 mb-2">

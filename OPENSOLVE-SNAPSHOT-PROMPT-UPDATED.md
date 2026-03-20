@@ -541,6 +541,21 @@ echo ""
 echo "=== PERF-K: Hourly counter reset interval in server.ts ==="
 grep -n "resetHourlyCounters\|msUntilNextHour\|LoadBalancerService" apps/api/src/server.ts
 echo "↑ Should show setTimeout at top of hour then setInterval every hour"
+
+echo ""
+echo "=== PERF-M: recalculateAll chunked with Promise.all ==="
+grep -n "CHUNK_SIZE\|Promise.all\|recalculated" apps/api/src/services/llm-leaderboard.service.ts | tail -5
+echo "↑ Should show CHUNK_SIZE = 5, Promise.all on chunk, 50ms pause"
+
+echo ""
+echo "=== PERF-N: reconcileConcurrentBots function ==="
+grep -n "reconcileConcurrentBots\|lastActiveAt.*60\|KEYS.concurrent" apps/api/src/services/bot-traffic.service.ts
+echo "↑ Should show function querying bots active in last 60s and setting Redis counter"
+
+echo ""
+echo "=== PERF-N: Reconciliation interval in server.ts ==="
+grep -n "reconcileConcurrentBots" apps/api/src/server.ts
+echo "↑ Should show import and 60s setInterval call"
 ```
 
 ---
@@ -1801,6 +1816,8 @@ Use this corrected table as the authoritative reference — verify each session 
 | **PERF-I** | bradley-terry.service.ts, admin.routes.ts | voteAccuracy SELECT uses FOR UPDATE on voter bot row inside BT transaction; admin actionCounts GROUP BY cached in Redis (admin:action_counts, 30s TTL) |
 | **PERF-J** | llm-leaderboard.service.ts | recordModel 23505 catch now retries UPDATE (totalSolutions + 1, lastSeenAt) instead of returning silently — prevents solution count loss on concurrent new model insertion |
 | **PERF-K** | load-balancer.service.ts, server.ts | recordAssignment uses Redis pipeline for atomic HINCRBY+EXPIRE+INCR+EXPIRE; hourly counter reset interval fires at top of each hour via setTimeout→setInterval |
+| **PERF-M** | llm-leaderboard.service.ts | recalculateAll processes models in chunks of 5 with Promise.all; 50ms pause between chunks to yield connection pool |
+| **PERF-N** | bot-traffic.service.ts, server.ts | reconcileConcurrentBots resets Redis counter to true DB count (bots active in last 60s); runs every 60s via setInterval to prevent permanent counter drift |
 
 ---
 
@@ -2158,4 +2175,13 @@ echo "Contact route: $(grep -c "fastify\." apps/api/src/routes/contact.routes.ts
     - Hourly counter reset fires at top of each hour via setTimeout→setInterval? (yes/no)
     - LoadBalancerService imported in server.ts? (yes/no)
     - resetHourlyCounters errors logged (not swallowed)? (yes/no)
+36. Final fixes (PERF-M and PERF-N):
+    - recalculateAll uses CHUNK_SIZE = 5 with Promise.all? (yes/no)
+    - 50ms pause between chunks in recalculateAll? (yes/no)
+    - Return value is still count of models recalculated? (yes/no)
+    - reconcileConcurrentBots queries bots.lastActiveAt > 60s ago? (yes/no)
+    - reconcileConcurrentBots uses redis.set to overwrite counter? (yes/no)
+    - reconcileConcurrentBots uses KEYS.concurrent (bot:traffic:concurrent)? (yes/no)
+    - server.ts calls reconcileConcurrentBots every 60s via setInterval? (yes/no)
+    - reconcileConcurrentBots imported from bot-traffic.service.ts in server.ts? (yes/no)
 Target length: 2,000–5,000 lines. Be thorough but do not repeat the same file contents across multiple sections.
