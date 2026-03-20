@@ -40,6 +40,7 @@ import { userProfileRoutes } from './routes/user-profile.routes.js';
 import { decrementConcurrent } from './services/bot-traffic.service.js';
 import { runRetentionCleanup } from './services/retention.service.js';
 import { DispatcherService } from './services/dispatcher.service.js';
+import { LoadBalancerService } from './services/load-balancer.service.js';
 import { LIMITS } from '@opensolve/shared';
 import './types/index.js';
 
@@ -271,6 +272,21 @@ async function start() {
         }
       }, RETENTION_INTERVAL_MS);
     }, RETENTION_STARTUP_DELAY_MS);
+
+    // Reset load balancer hourly counters at the top of each hour
+    const loadBalancer = new LoadBalancerService();
+    const now = new Date();
+    const msUntilNextHour = (60 - now.getMinutes()) * 60 * 1000 - now.getSeconds() * 1000;
+    setTimeout(() => {
+      loadBalancer.resetHourlyCounters().catch(err =>
+        server.log.error(err, 'Failed to reset load balancer counters')
+      );
+      setInterval(() => {
+        loadBalancer.resetHourlyCounters().catch(err =>
+          server.log.error(err, 'Failed to reset load balancer counters')
+        );
+      }, 60 * 60 * 1000);
+    }, msUntilNextHour);
   } catch (err) {
     logger.error(err, 'Failed to start server');
     process.exit(1);

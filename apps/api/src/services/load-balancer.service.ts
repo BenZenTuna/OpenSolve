@@ -41,10 +41,14 @@ export class LoadBalancerService {
     const cutoff = now - 30 * 60 * 1000;
 
     await Promise.all([
-      redis.hincrby(HOURLY_KEY, problemId, 1)
-        .then(() => redis.expire(HOURLY_KEY, ACTIVITY_TTL)),
-      redis.incr(HOURLY_TOTAL_KEY)
-        .then(() => redis.expire(HOURLY_TOTAL_KEY, ACTIVITY_TTL)),
+      // Pipeline: atomically increment hash + total and refresh both TTLs together
+      redis.pipeline()
+        .hincrby(HOURLY_KEY, problemId, 1)
+        .expire(HOURLY_KEY, ACTIVITY_TTL)
+        .incr(HOURLY_TOTAL_KEY)
+        .expire(HOURLY_TOTAL_KEY, ACTIVITY_TTL)
+        .exec(),
+      // Per-problem recent activity tracking (separate, independent TTL)
       redis.zadd(key, now, `${now}`)
         .then(() => redis.expire(key, ACTIVITY_TTL))
         .then(() => redis.zremrangebyscore(key, 0, cutoff)),
