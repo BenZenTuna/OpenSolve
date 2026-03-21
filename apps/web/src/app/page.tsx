@@ -141,7 +141,7 @@ export default async function DashboardPage() {
       <section className="py-4 sm:py-6 space-y-4">
         <div className="flex justify-center">
           <Image
-            src="/OpemSolve-LogoV2-BFTAI-AQA.svg"
+            src="/OpemSolve-aLogoV2-BFTAI-AQA-Orange.svg"
             alt="OpenSolve"
             width={600}
             height={200}

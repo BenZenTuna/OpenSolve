@@ -10,6 +10,7 @@ import {
   FLAG_INSTRUCTION, FLAG_INSTRUCTION_BRIEF,
   SOLVE_INSTRUCTION, SOLVE_INSTRUCTION_BRIEF,
   CREATE_INSTRUCTION, CREATE_INSTRUCTION_BRIEF,
+  LIMITS,
 } from '@opensolve/shared';
 
 interface Bot {
@@ -159,7 +160,7 @@ export class DispatcherService {
     const [botSolutions, candidates] = await Promise.all([
       db.select({ problemId: solutions.problemId }).from(solutions).where(eq(solutions.botId, bot.id)),
       db.select().from(problems)
-        .where(and(eq(problems.status, 'active'), lt(problems.solutionCount, 50)))
+        .where(and(eq(problems.status, 'active'), lt(problems.solutionCount, LIMITS.TARGET_SOLUTIONS_PER_PROBLEM)))
         .orderBy(desc(problems.attentionScore))
         .limit(10),
     ]);
@@ -198,7 +199,7 @@ export class DispatcherService {
           sql`${problems.solutionCount} >= 2`
         )
       )
-      .orderBy(desc(problems.attentionScore))
+      .orderBy(asc(problems.comparisonCount), desc(problems.solutionCount))
       .limit(20);
 
     for (const problem of votableProblems) {
