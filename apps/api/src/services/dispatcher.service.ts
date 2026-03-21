@@ -161,7 +161,7 @@ export class DispatcherService {
       db.select({ problemId: solutions.problemId }).from(solutions).where(eq(solutions.botId, bot.id)),
       db.select().from(problems)
         .where(and(eq(problems.status, 'active'), lt(problems.solutionCount, LIMITS.TARGET_SOLUTIONS_PER_PROBLEM)))
-        .orderBy(desc(problems.attentionScore))
+        .orderBy(asc(problems.solutionCount))
         .limit(10),
     ]);
 
