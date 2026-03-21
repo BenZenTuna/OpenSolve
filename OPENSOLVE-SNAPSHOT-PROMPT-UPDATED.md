@@ -606,6 +606,21 @@ echo ""
 echo "=== BUGFIX-4: Admin activate assigns category ==="
 grep -n "suggestedCategory\|flagCategories" apps/api/src/routes/admin.routes.ts | head -5
 echo "↑ Should show category assignment from green flags when admin sets status to active"
+
+echo ""
+echo "=== SEC-FIX-8/S11: Prompt injection activity log action ==="
+grep -n "prompt_injection_flagged" apps/api/src/routes/bot.routes.ts
+echo "↑ Should show activity log insert with promptInjectionDetected metadata"
+
+echo ""
+echo "=== SEC-FIX-9/S12: Newsletter stale token check ==="
+grep -n "tokenIssuedAt\|token_expired_after_unsubscribe" apps/api/src/routes/newsletter.routes.ts
+echo "↑ Should show updatedAt vs issuedAt comparison"
+
+echo ""
+echo "=== SEC-FIX-8/S13: Problem creation rate limit ==="
+grep -n "rateLimit\|max: 20" apps/api/src/routes/problem.routes.ts | head -5
+echo "↑ Should show 20/day per-user limit"
 ```
 
 ---
@@ -1873,6 +1888,8 @@ Use this corrected table as the authoritative reference — verify each session 
 | **BUGFIX-2** | bot.routes.ts | Duplicate solve/create 23505 early returns now update totalTasksCompleted + lastActiveAt; solution INSERT + solutionCount wrapped in db.transaction() |
 | **BUGFIX-3** | server.ts | Expired flag tasks no longer increment failedFlagAttempts (expiry ≠ content failure); Redis counter decrement preserved |
 | **BUGFIX-4** | bot.routes.ts, admin.routes.ts, bradley-terry.service.ts | lastBotActivityAt updated on vote/flag (was solve-only); admin activate assigns category from flags; voteAccuracy uses pre-update scores (not circular post-update) |
+| **SEC-FIX-8** | server.ts, env.ts, next.config.js, auth.middleware.ts, email.service.ts, bot.routes.ts, problem.routes.ts, newsletter.routes.ts, migration 0008 | Global sanitize middleware, CSP unsafe-eval removed, JWT min 32, Resend tracking headers (reverted in SEC-FIX-9), FK cascade migration, prompt injection log flag, 20/day problem rate limit, prod COOKIE_SECRET warning, prod localhost CORS block |
+| **SEC-FIX-9** | auth.middleware.ts, email.service.ts, bot.routes.ts, newsletter.routes.ts, newsletter-tokens.ts | Reverted S6 DB check in authMiddleware (perf concern), reverted S9 X-Entity-Ref-ID headers (tracking disabled in Resend dashboard), S11 prompt_injection_flagged activity log entry, S12 stale confirm token rejection after unsubscribe |
 
 ---
 
@@ -2261,4 +2278,17 @@ echo "Contact route: $(grep -c "fastify\." apps/api/src/routes/contact.routes.ts
     - Admin activate assigns category from green flags when category is null? (yes/no)
     - voteAccuracy uses pre-update scores (rA, rB) not post-update (newRatingA, newRatingB)? (yes/no)
     - voteAccuracy skipped when pre-update scores are exactly equal? (yes/no)
+39. Security hardening (SEC-FIX-8 and SEC-FIX-9):
+    - sanitizeMiddleware registered globally in server.ts (not per-route)? (yes/no)
+    - CSP script-src does NOT contain 'unsafe-eval'? (yes/no)
+    - JWT_SECRET minimum is 32 characters? (yes/no)
+    - authMiddleware does NOT have DB existence check (reverted in SEC-FIX-9)? (yes/no)
+    - Email sends do NOT have X-Entity-Ref-ID headers (reverted in SEC-FIX-9)? (yes/no)
+    - Migration 0008 adds ON DELETE SET NULL to tasks.problemId and activityLog FKs? (yes/no)
+    - prompt_injection_flagged activity log entry created on detection? (yes/no)
+    - POST /problems rate-limited to 20/day per user? (yes/no)
+    - Production warning when COOKIE_SECRET not set? (yes/no)
+    - Production exit when WEB_URL contains localhost? (yes/no)
+    - Newsletter confirm blocks stale tokens after unsubscribe (updatedAt > issuedAt)? (yes/no)
+    - verifyConfirmToken returns issuedAt field? (yes/no)
 Target length: 2,000–5,000 lines. Be thorough but do not repeat the same file contents across multiple sections.

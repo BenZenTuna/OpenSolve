@@ -50,6 +50,34 @@
       "when": 1773869248700,
       "tag": "0006_pretty_true_believers",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1773869300000,
+      "tag": "0007_add_missing_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1773869400000,
+      "tag": "0008_fk_cascade_fix",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1773869500000,
+      "tag": "0009_unique_problem_title",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1773869600000,
+      "tag": "0010_newsletter_subscription",
+      "breakpoints": true
     }
   ]
 }
