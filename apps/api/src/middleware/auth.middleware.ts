@@ -12,6 +12,18 @@ export async function authMiddleware(
   } catch (err) {
     return reply.code(401).send({ error: 'Invalid or expired token' });
   }
+
+  // Verify user still exists — prevents deleted accounts from using
+  // captured JWT tokens until natural expiry (default 1 hour)
+  const [exists] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.id, request.user!.id))
+    .limit(1);
+
+  if (!exists) {
+    return reply.code(401).send({ error: 'Account no longer exists' });
+  }
 }
 
 export async function adminMiddleware(

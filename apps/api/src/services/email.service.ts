@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { Resend } from 'resend';
 import { logger } from '../utils/logger.js';
 import { env } from '../config/env.js';
@@ -49,6 +50,7 @@ export class EmailService {
 
       const { data, error } = await this.resend.emails.send({
         from: this.from,
+        headers: { 'X-Entity-Ref-ID': crypto.randomUUID() }, // Unique ID prevents open-tracking pixel caching
         to: params.to,
         subject: params.subject,
         html: params.html,
@@ -89,6 +91,7 @@ export class EmailService {
 
       const { data, error } = await this.resend.emails.send({
         from: this.from,
+        headers: { 'X-Entity-Ref-ID': crypto.randomUUID() }, // Unique ID prevents open-tracking pixel caching
         to: params.to,
         subject: params.subject,
         html,
@@ -140,6 +143,7 @@ export class EmailService {
 
         const { error } = await this.resend.emails.send({
           from: this.from,
+          headers: { 'X-Entity-Ref-ID': crypto.randomUUID() },
           to: recipient.email,
           subject: params.subject,
           html,
@@ -183,6 +187,7 @@ export class EmailService {
 
       const { error } = await this.resend.emails.send({
         from: this.from,
+        headers: { 'X-Entity-Ref-ID': crypto.randomUUID() }, // Unique ID prevents open-tracking pixel caching
         to: params.to,
         subject: 'Confirm your OpenSolve newsletter subscription',
         html,
@@ -218,6 +223,7 @@ export class EmailService {
 
       const { error } = await this.resend.emails.send({
         from: this.from,
+        headers: { 'X-Entity-Ref-ID': crypto.randomUUID() }, // Unique ID prevents open-tracking pixel caching
         to: params.to,
         subject: "You've been unsubscribed from OpenSolve",
         html,

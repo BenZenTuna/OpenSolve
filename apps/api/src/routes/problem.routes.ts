@@ -5,7 +5,7 @@ import { problems, solutions, bots, users } from '../db/schema.js';
 import { eq, desc, asc, sql, and, ne, isNotNull, inArray } from 'drizzle-orm';
 import { CATEGORIES } from '@opensolve/shared/categories.js';
 import { authMiddleware } from '../middleware/auth.middleware.js';
-import { sanitizeMiddleware } from '../middleware/sanitize.middleware.js';
+// sanitizeMiddleware registered globally in server.ts
 import { revalidateForProblem } from '../services/revalidate.service.js';
 
 const createProblemSchema = z.object({
@@ -34,7 +34,6 @@ const listQuerySchema = z.object({
 });
 
 export async function problemRoutes(fastify: FastifyInstance) {
-  fastify.addHook('preHandler', sanitizeMiddleware);
 
   // ===== LIST PROBLEMS =====
   fastify.get('/problems', async (request, reply) => {
@@ -252,7 +251,10 @@ export async function problemRoutes(fastify: FastifyInstance) {
   });
 
   // ===== CREATE PROBLEM (human only) =====
-  fastify.post('/problems', { preHandler: [authMiddleware] }, async (request, reply) => {
+  fastify.post('/problems', {
+    preHandler: [authMiddleware],
+    config: { rateLimit: { max: 20, timeWindow: '1 day', keyGenerator: (req: { user?: { id: string } }) => req.user?.id || 'anon' } },
+  }, async (request, reply) => {
     const userId = request.user!.id;
     const body = createProblemSchema.parse(request.body);
 

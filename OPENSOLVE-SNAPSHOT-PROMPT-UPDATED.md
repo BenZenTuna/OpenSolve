@@ -571,6 +571,41 @@ echo ""
 echo "=== URL-FIX: ONBOARDING.md has API endpoint note ==="
 grep -n "api\.opensolve\.ai" skill/ONBOARDING.md | head -5
 echo "↑ Should show api.opensolve.ai in Quick Start and cron example"
+
+echo ""
+echo "=== BUGFIX-1: comparisonCount incremented for skip votes ==="
+grep -n "problems.comparisonCount\|comparisonCount.*\+ 1" apps/api/src/services/bradley-terry.service.ts
+echo "↑ Should show increment in BOTH skip path (Promise.all) and non-skip path (inside tx)"
+
+echo ""
+echo "=== BUGFIX-2: Atomic solution insert + solutionCount ==="
+grep -n "db.transaction\|tx\.insert\|tx\.update" apps/api/src/routes/bot.routes.ts | head -5
+echo "↑ Should show transaction wrapping solution insert + solutionCount increment"
+
+echo ""
+echo "=== BUGFIX-2: Duplicate early returns update bot stats ==="
+grep -n "totalTasksCompleted" apps/api/src/routes/bot.routes.ts
+echo "↑ Should show 3 occurrences: solve duplicate + create duplicate + main completion"
+
+echo ""
+echo "=== BUGFIX-3: No failedFlagAttempts in expiry sweep ==="
+grep -n "failedFlagAttempts" apps/api/src/server.ts
+echo "↑ Should show 0 DB operations (only a comment)"
+
+echo ""
+echo "=== BUGFIX-4: lastBotActivityAt on vote and flag ==="
+grep -n "lastBotActivityAt" apps/api/src/routes/bot.routes.ts
+echo "↑ Should show 3 occurrences: flag, solve (in tx), vote"
+
+echo ""
+echo "=== BUGFIX-4: voteAccuracy uses pre-update scores ==="
+grep -n "rA.*rB\|rB.*rA\|rA !== rB" apps/api/src/services/bradley-terry.service.ts | head -5
+echo "↑ Should show rA/rB comparisons (NOT newRatingA/newRatingB) and equal-score skip"
+
+echo ""
+echo "=== BUGFIX-4: Admin activate assigns category ==="
+grep -n "suggestedCategory\|flagCategories" apps/api/src/routes/admin.routes.ts | head -5
+echo "↑ Should show category assignment from green flags when admin sets status to active"
 ```
 
 ---
@@ -1834,6 +1869,10 @@ Use this corrected table as the authoritative reference — verify each session 
 | **PERF-M** | llm-leaderboard.service.ts | recalculateAll processes models in chunks of 5 with Promise.all; 50ms pause between chunks to yield connection pool |
 | **PERF-N** | bot-traffic.service.ts, server.ts | reconcileConcurrentBots resets Redis counter to true DB count (bots active in last 60s); runs every 60s via setInterval to prevent permanent counter drift |
 | **URL-FIX** | skill/SKILL.md, skill/ONBOARDING.md, docs/api/page.tsx, docs/sdk/page.tsx, bots/python/README.md | Bot API base URL changed from www.opensolve.ai/api/v1 to api.opensolve.ai/api/v1; bots were hitting web frontend access gate instead of API directly |
+| **BUGFIX-1** | bradley-terry.service.ts | problems.comparisonCount now incremented for skip votes (was missing — early return skipped it); non-skip increment moved inside BT transaction |
+| **BUGFIX-2** | bot.routes.ts | Duplicate solve/create 23505 early returns now update totalTasksCompleted + lastActiveAt; solution INSERT + solutionCount wrapped in db.transaction() |
+| **BUGFIX-3** | server.ts | Expired flag tasks no longer increment failedFlagAttempts (expiry ≠ content failure); Redis counter decrement preserved |
+| **BUGFIX-4** | bot.routes.ts, admin.routes.ts, bradley-terry.service.ts | lastBotActivityAt updated on vote/flag (was solve-only); admin activate assigns category from flags; voteAccuracy uses pre-update scores (not circular post-update) |
 
 ---
 
@@ -2209,4 +2248,17 @@ echo "Contact route: $(grep -c "fastify\." apps/api/src/routes/contact.routes.ts
     - bots/python/README.md mentions production URL api.opensolve.ai? (yes/no)
     - docker-compose.prod.yml NEXT_PUBLIC_API_URL still www.opensolve.ai (correct for browser)? (yes/no)
     - Zero www.opensolve.ai/api references in skill/, bots/, docs/ pages? (yes/no)
+38. Bug fixes (BUGFIX-1 through BUGFIX-4):
+    - problems.comparisonCount incremented for skip votes (in Promise.all)? (yes/no)
+    - problems.comparisonCount incremented inside BT transaction for non-skip votes? (yes/no)
+    - Duplicate solve 23505 early return updates totalTasksCompleted + lastActiveAt? (yes/no)
+    - Duplicate create 23505 early return updates totalTasksCompleted + lastActiveAt? (yes/no)
+    - Solution INSERT + solutionCount wrapped in db.transaction()? (yes/no)
+    - Expired flag tasks do NOT increment failedFlagAttempts (only Redis decrement)? (yes/no)
+    - trackFailedFlagAttempt still called in bot.routes.ts on parse/validation errors? (yes/no)
+    - lastBotActivityAt updated on vote submissions? (yes/no)
+    - lastBotActivityAt updated on flag submissions? (yes/no)
+    - Admin activate assigns category from green flags when category is null? (yes/no)
+    - voteAccuracy uses pre-update scores (rA, rB) not post-update (newRatingA, newRatingB)? (yes/no)
+    - voteAccuracy skipped when pre-update scores are exactly equal? (yes/no)
 Target length: 2,000–5,000 lines. Be thorough but do not repeat the same file contents across multiple sections.

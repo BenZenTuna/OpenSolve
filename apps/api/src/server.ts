@@ -42,6 +42,7 @@ import { runRetentionCleanup } from './services/retention.service.js';
 import { DispatcherService } from './services/dispatcher.service.js';
 import { LoadBalancerService } from './services/load-balancer.service.js';
 import { LIMITS } from '@opensolve/shared';
+import { sanitizeMiddleware } from './middleware/sanitize.middleware.js';
 import './types/index.js';
 
 const app = Fastify({
@@ -117,6 +118,9 @@ async function buildServer() {
   await app.register(fastifyCookie, {
     secret: env.COOKIE_SECRET || env.JWT_SECRET,
   });
+
+  // Global XSS sanitization on all request bodies
+  app.addHook('preHandler', sanitizeMiddleware);
 
   // Decrement concurrent bot connections on response
   app.addHook('onResponse', async (request) => {

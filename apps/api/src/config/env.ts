@@ -15,7 +15,7 @@ const envSchema = z.object({
   REDIS_URL: z.string().min(1),
 
   // JWT
-  JWT_SECRET: z.string().min(16),
+  JWT_SECRET: z.string().min(32),
   JWT_EXPIRES_IN: z.coerce.number().default(3600),
 
   // Cookie signing (separate from JWT for defense-in-depth; falls back to JWT_SECRET if omitted)
@@ -51,3 +51,14 @@ const envSchema = z.object({
 
 export const env = envSchema.parse(process.env);
 export type Env = z.infer<typeof envSchema>;
+
+// Production safety checks
+if (env.NODE_ENV === 'production') {
+  if (!env.COOKIE_SECRET) {
+    console.warn('[SECURITY] COOKIE_SECRET not set — cookie signing falls back to JWT_SECRET. Set a separate COOKIE_SECRET for defense-in-depth.');
+  }
+  if (env.WEB_URL.includes('localhost')) {
+    console.error('[SECURITY] WEB_URL contains "localhost" in production — CORS is misconfigured. Exiting.');
+    process.exit(1);
+  }
+}

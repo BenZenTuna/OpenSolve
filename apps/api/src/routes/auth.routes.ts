@@ -6,7 +6,7 @@ import { eq, and, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { generateApiKey, hashApiKey, getApiKeyPrefix, generateOAuthState } from '../utils/crypto.js';
-import { sanitizeMiddleware } from '../middleware/sanitize.middleware.js';
+// sanitizeMiddleware registered globally in server.ts
 import { invalidateBotAuthCache } from '../middleware/bot-auth.middleware.js';
 import { invalidateOwnerBotsCache } from '../services/dispatcher.service.js';
 import { redis } from '../config/redis.js';
@@ -35,9 +35,6 @@ const usernameUpdateSchema = z.object({
 });
 
 export async function authRoutes(fastify: FastifyInstance) {
-  // Sanitize all inputs
-  fastify.addHook('preHandler', sanitizeMiddleware);
-
   function cookieOptions(maxAge: number) {
     return {
       httpOnly: true,

@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { botAuthMiddleware } from '../middleware/bot-auth.middleware.js';
-import { sanitizeMiddleware } from '../middleware/sanitize.middleware.js';
+// sanitizeMiddleware registered globally in server.ts
 import { registerBotRateLimit } from '../middleware/rate-limit.middleware.js';
 import { db } from '../config/database.js';
 import { bots, tasks, solutions, problems, flags } from '../db/schema.js';
@@ -156,7 +156,6 @@ export async function botRoutes(fastify: FastifyInstance) {
 
   // All bot routes require bot authentication
   fastify.addHook('preHandler', botAuthMiddleware);
-  fastify.addHook('preHandler', sanitizeMiddleware);
 
   // ===== GET NEXT TASK =====
   fastify.get('/tasks/next', async (request, reply) => {
@@ -248,8 +247,9 @@ export async function botRoutes(fastify: FastifyInstance) {
 
         case 'solve': {
           const parsed = solveSubmitSchema.parse(body);
-          // Check for prompt injection patterns (log only, don't block)
-          if (detectPromptInjection(parsed.solution_text)) {
+          // Check for prompt injection patterns (log + flag, don't block)
+          const promptInjectionDetected = detectPromptInjection(parsed.solution_text);
+          if (promptInjectionDetected) {
             logger.warn(
               {
                 event: 'prompt_injection_detected',
@@ -258,6 +258,7 @@ export async function botRoutes(fastify: FastifyInstance) {
                 taskId: taskId,
                 endpoint: 'tasks/:taskId/submit (solve)',
                 snippet: parsed.solution_text.slice(0, 200),
+                promptInjectionDetected: true,
               },
               'Prompt injection pattern detected in solution_text'
             );
