@@ -4,7 +4,7 @@ import { botAuthMiddleware } from '../middleware/bot-auth.middleware.js';
 // sanitizeMiddleware registered globally in server.ts
 import { registerBotRateLimit } from '../middleware/rate-limit.middleware.js';
 import { db } from '../config/database.js';
-import { bots, tasks, solutions, problems, flags } from '../db/schema.js';
+import { bots, tasks, solutions, problems, flags, activityLog } from '../db/schema.js';
 import { eq, and, sql } from 'drizzle-orm';
 import { DispatcherService } from '../services/dispatcher.service.js';
 import { BradleyTerryService } from '../services/bradley-terry.service.js';
@@ -324,6 +324,17 @@ export async function botRoutes(fastify: FastifyInstance) {
           }
 
           await gamification.onSolve(bot.id, solution.id, task.problemId!);
+
+          // Flag prompt injection in activity log for admin review
+          if (promptInjectionDetected) {
+            await db.insert(activityLog).values({
+              botId: bot.id,
+              action: 'prompt_injection_flagged',
+              problemId: task.problemId!,
+              solutionId: solution.id,
+              metadata: JSON.stringify({ promptInjectionDetected: true, snippet: parsed.solution_text.slice(0, 200) }),
+            });
+          }
 
           // Record LLM model usage
           if (llmModel) {

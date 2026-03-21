@@ -99,6 +99,17 @@ export async function newsletterRoutes(fastify: FastifyInstance) {
       return reply.code(200).send({ message: 'already_confirmed' });
     }
 
+    // Prevent re-subscribe via old confirm token after unsubscribe.
+    // If user.updatedAt is after the token's issuedAt AND newsletterSubscribed is false,
+    // the user unsubscribed after this token was created — reject stale confirmation.
+    const tokenIssuedAt = new Date(payload.issuedAt * 1000);
+    if (user.updatedAt > tokenIssuedAt && !user.newsletterSubscribed) {
+      return reply.code(400).send({
+        error: 'token_expired_after_unsubscribe',
+        message: 'You have unsubscribed since this link was created. Please re-subscribe if you would like to receive our newsletter.',
+      });
+    }
+
     // Generate unsubscribe token
     const unsubscribeToken = generateUnsubscribeToken();
 

@@ -35,7 +35,7 @@ export function generateConfirmToken(userId: string, email: string): string {
   return `${payloadB64}.${signature}`;
 }
 
-export function verifyConfirmToken(token: string): { userId: string; email: string } | null {
+export function verifyConfirmToken(token: string): { userId: string; email: string; issuedAt: number } | null {
   try {
     const parts = token.split('.');
     if (parts.length !== 2) return null;
@@ -56,7 +56,7 @@ export function verifyConfirmToken(token: string): { userId: string; email: stri
     const now = Math.floor(Date.now() / 1000);
     if (now > payload.exp) return null;
 
-    return { userId: payload.userId, email: payload.email };
+    return { userId: payload.userId, email: payload.email, issuedAt: payload.iat };
   } catch {
     return null;
   }
