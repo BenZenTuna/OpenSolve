@@ -150,6 +150,30 @@ export async function adminRoutes(fastify: FastifyInstance) {
       .set({ status: status as any, updatedAt: new Date() })
       .where(eq(problems.id, id));
 
+    // When activating a problem, assign category from flags if not already set
+    if (status === 'active') {
+      const [current] = await db.select({ category: problems.category })
+        .from(problems).where(eq(problems.id, id)).limit(1);
+      if (current && !current.category) {
+        const flagCategories = await db.select({
+          suggestedCategory: flags.suggestedCategory,
+          count: sql<number>`count(*)::int`,
+        })
+          .from(flags)
+          .where(and(eq(flags.problemId, id), eq(flags.verdict, 'green'), isNotNull(flags.suggestedCategory)))
+          .groupBy(flags.suggestedCategory)
+          .orderBy(desc(sql`count(*)`))
+          .limit(1);
+
+        if (flagCategories.length > 0 && flagCategories[0].suggestedCategory) {
+          await db.update(problems)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .set({ category: flagCategories[0].suggestedCategory as any })
+            .where(eq(problems.id, id));
+        }
+      }
+    }
+
     return reply.code(200).send({ success: true, newStatus: status });
   });
 

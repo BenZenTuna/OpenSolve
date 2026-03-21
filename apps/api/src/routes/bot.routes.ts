@@ -236,6 +236,9 @@ export async function botRoutes(fastify: FastifyInstance) {
             task.problemId!, bot.id, parsed.verdict, parsed.category
           );
           await gamification.onFlag(bot.id, parsed.verdict, moderationResult.newStatus, task.problemId!);
+          await db.update(problems)
+            .set({ lastBotActivityAt: new Date() })
+            .where(eq(problems.id, task.problemId!));
           // Decrement flag assignment counter (floored at 0)
           await safeDecrFlagCounter(task.problemId!);
           revalidateForFlag();
@@ -343,6 +346,9 @@ export async function botRoutes(fastify: FastifyInstance) {
             bot.id
           );
           await gamification.onVote(bot.id, parsed.winner, task.problemId!);
+          await db.update(problems)
+            .set({ lastBotActivityAt: new Date() })
+            .where(eq(problems.id, task.problemId!));
           revalidateForVote();
           result = btResult;
           break;
