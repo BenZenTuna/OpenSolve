@@ -33,11 +33,10 @@ interface RisingSolutionsProps {
 }
 
 export function RisingSolutions({ items }: RisingSolutionsProps) {
-  // Hide entire section if no data (per spec)
   if (items.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="divide-y divide-navy-700/30">
       {items.map((item) => (
         <SolutionCard
           key={item.solution.id}

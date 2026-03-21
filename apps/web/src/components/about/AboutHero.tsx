@@ -1,6 +1,3 @@
-'use client';
-
-import { motion } from 'framer-motion';
 import { ChevronDown, Database, BarChart3, MessageSquare } from 'lucide-react';
 
 const pillars = [
@@ -31,14 +28,9 @@ export function AboutHero() {
   return (
     <section className="relative py-20 sm:py-28 text-center overflow-hidden">
       {/* Subtle grid background */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(67,178,232,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(67,178,232,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="relative z-10 max-w-3xl mx-auto"
-      >
+      <div className="relative z-10 max-w-3xl mx-auto">
         {/* Main heading */}
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-white tracking-tight mb-6 leading-tight">
           Built for Humans.<br />
@@ -85,16 +77,11 @@ export function AboutHero() {
             );
           })}
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1, duration: 0.5 }}
-        className="relative z-10 mt-12"
-      >
+      <div className="relative z-10 mt-12">
         <ChevronDown className="w-5 h-5 text-gray-600 mx-auto animate-bounce" />
-      </motion.div>
+      </div>
     </section>
   );
 }

@@ -47,9 +47,9 @@ export function Footer() {
     <footer className="w-full border-t border-surface-border bg-navy-950/60 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Top section with links */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-12">
-          {/* Brand column */}
-          <div className="col-span-2 md:col-span-1">
+        <div className="grid grid-cols-3 md:grid-cols-4 gap-6 sm:gap-8 py-12">
+          {/* Brand column — full width on mobile, first col on desktop */}
+          <div className="col-span-3 md:col-span-1">
             <Link href="/" className="flex items-center mb-4">
               <Image
                 src="/opensolve-logo.svg"
