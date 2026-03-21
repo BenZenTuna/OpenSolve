@@ -136,22 +136,27 @@ export class BradleyTerryService {
       const voterBot = voterRaw[0];
 
       if (voterBot) {
-        // Correct vote = voter picked the solution with higher btScore after update
-        const voterCorrect =
-          (winner === 'a' && newRatingA > newRatingB) ||
-          (winner === 'b' && newRatingB > newRatingA);
-        const correctVal = voterCorrect ? 1 : 0;
+        // Correct vote = voter picked the solution with the higher PRE-update score.
+        // Using pre-update scores (rA, rB) avoids circular validation where the
+        // vote's own K=32 Elo swing makes the chosen solution appear "correct."
+        // Skip accuracy update entirely if pre-update scores are equal (no consensus).
+        if (rA !== rB) {
+          const voterCorrect =
+            (winner === 'a' && rA > rB) ||
+            (winner === 'b' && rB > rA);
+          const correctVal = voterCorrect ? 1 : 0;
 
-        // Rolling update: new_accuracy = ((old * (n-1)) + correct) / n
-        // total_votes is the pre-gamification count; gamification increments it after this
-        const prevVotes = voterBot.total_votes;
-        const newAccuracy = prevVotes > 0
-          ? ((voterBot.vote_accuracy * prevVotes) + correctVal) / (prevVotes + 1)
-          : correctVal;
+          // Rolling update: new_accuracy = ((old * (n-1)) + correct) / n
+          // total_votes is the pre-gamification count; gamification increments it after this
+          const prevVotes = voterBot.total_votes;
+          const newAccuracy = prevVotes > 0
+            ? ((voterBot.vote_accuracy * prevVotes) + correctVal) / (prevVotes + 1)
+            : correctVal;
 
-        await tx.update(bots)
-          .set({ voteAccuracy: newAccuracy })
-          .where(eq(bots.id, voterBotId));
+          await tx.update(bots)
+            .set({ voteAccuracy: newAccuracy })
+            .where(eq(bots.id, voterBotId));
+        }
       }
 
       // Increment problem-level comparison count inside the transaction
