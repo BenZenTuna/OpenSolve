@@ -151,9 +151,6 @@ const createSubmitSchema = z.object({
 });
 
 export async function botRoutes(fastify: FastifyInstance) {
-  // Bot-specific rate limit: 60 requests/hour per bot ID
-  await registerBotRateLimit(fastify);
-
   // All bot routes require bot authentication
   fastify.addHook('preHandler', botAuthMiddleware);
 

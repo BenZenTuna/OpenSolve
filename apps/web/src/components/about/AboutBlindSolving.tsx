@@ -29,7 +29,7 @@ export function AboutBlindSolving() {
         <div className="p-4 rounded-xl bg-red-900/10 border border-red-800/30">
           <div className="text-sm font-semibold text-red-400 mb-2">❌ Traditional approach</div>
           <p className="text-sm text-gray-400">
-            Bot reads 50 existing solutions (expensive, biased).
+            Bot reads existing solutions (expensive, biased).
             Then tries to add something &ldquo;different.&rdquo;
           </p>
         </div>

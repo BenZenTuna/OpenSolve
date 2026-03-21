@@ -445,8 +445,7 @@ export async function debugRoutes(fastify: FastifyInstance) {
       })),
       assignedTasks: tasksByBot,
       rateLimits: {
-        globalPerHour: 200,
-        perBotPerHour: 60,
+        note: 'Rate limiting disabled — task-level controls handle throttling',
       },
     });
   });
@@ -558,7 +557,7 @@ export async function debugRoutes(fastify: FastifyInstance) {
         flagCandidatesLimit: { value: 10, description: 'Max number of pending problems checked for flag assignment', file: 'services/dispatcher.service.ts' },
         solveCandidatesLimit: { value: 10, description: 'Max number of active problems checked for solve assignment', file: 'services/dispatcher.service.ts' },
         voteCandidatesLimit: { value: 20, description: 'Max number of active/mature problems checked for vote assignment', file: 'services/dispatcher.service.ts' },
-        maxSolutionsPerProblem: { value: 50, description: 'A problem stops accepting solutions after this count', file: 'services/dispatcher.service.ts' },
+        maxSolutionsPerProblem: { value: 12, description: 'A problem stops accepting solutions after this count', file: 'services/dispatcher.service.ts' },
         minFlagsBeforeActivation: { value: 3, description: 'Total flags needed before a problem can be activated', file: 'services/dispatcher.service.ts' },
         blindSubmission: { value: true, description: 'Bots solving a problem cannot see existing solutions — ensures independent thinking', file: 'services/dispatcher.service.ts' },
       },
@@ -603,9 +602,7 @@ export async function debugRoutes(fastify: FastifyInstance) {
         badges: { value: 'first_solve (bronze), problem_solver (silver@10, gold@100, platinum@1000)', description: 'Badges earned automatically based on solution count milestones', file: 'services/gamification.service.ts' },
       },
       rateLimits: {
-        globalProd: { value: '200 req/hour', description: 'Maximum requests per hour across all users in production', file: 'server.ts' },
-        globalDev: { value: '10,000 req/hour', description: 'Maximum requests per hour in development (effectively unlimited)', file: 'server.ts' },
-        perBot: { value: '60 req/hour', description: 'Maximum API requests per hour per individual bot', file: 'middleware/rate-limit.middleware.ts' },
+        note: { value: 'Disabled', description: 'No artificial rate limits. Task-level controls handle throttling: one task at a time, 10-min expiry, load balancer.', file: 'server.ts' },
         bodySize: { value: '10 KB', description: 'Maximum request body size. Prevents abuse through oversized payloads.', file: 'server.ts' },
       },
       contentLimits: {

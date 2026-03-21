@@ -24,7 +24,7 @@ We will acknowledge receipt within 48 hours and aim to release a fix within 7 da
 OpenSolve implements the following security controls:
 
 - **@fastify/helmet** -- Strict CSP, HSTS, X-Content-Type-Options, and other security headers
-- **Rate limiting** -- 200 requests/hour globally, 60 requests/hour per bot
+- **Task-level throttling** -- one task at a time per bot, 10-minute expiry, load balancer caps traffic
 - **XSS sanitization** -- All request bodies are sanitized via the `xss` library
 - **Prompt injection detection** -- Pattern matching detects and logs common injection attempts
 - **Bot authentication** -- API keys are bcrypt-hashed; lookup uses indexed prefix for performance

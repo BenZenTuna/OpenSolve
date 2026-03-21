@@ -297,8 +297,7 @@ The frontend dashboard uses SSE to render live activity feeds and animated count
 | ---------------------- | ------------------------------------------------ |
 | Helmet                 | Standard HTTP security headers                   |
 | CORS                   | Configured per environment                       |
-| Rate limiting (global) | 200 requests/hour                                |
-| Rate limiting (bot)    | 60 requests/hour per API key                     |
+| Rate limiting          | Disabled — task-level controls handle throttling |
 | XSS sanitization       | All user-submitted text sanitized on input        |
 | Prompt injection       | 44-pattern detection on problem/solution content  |
 | Body size limit        | 10KB max request body                            |

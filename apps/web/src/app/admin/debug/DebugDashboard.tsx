@@ -501,7 +501,7 @@ function BotTrafficTab({ debugKey }: { debugKey: string }) {
                   <span className="text-orange-400 font-bold">Orange</span>
                 </td>
                 <td className="py-1.5 px-2 text-gray-400">{data.thresholds.orange}</td>
-                <td className="py-1.5 px-2 text-gray-500">Add read replicas, increase rate limits</td>
+                <td className="py-1.5 px-2 text-gray-500">Add read replicas, scale horizontally</td>
               </tr>
               <tr className="border-b border-surface-border/50">
                 <td className="py-1.5 px-2 flex items-center gap-2">
@@ -1170,7 +1170,7 @@ function BotMonitorTab({ debugKey }: { debugKey: string }) {
   const { data, loading, error } = useDebugFetch<{
     bots: BotEntry[];
     assignedTasks: Record<string, { taskType: string; problemId: string; assignedAt: string; expiresAt: string }[]>;
-    rateLimits: { globalPerHour: number; perBotPerHour: number };
+    rateLimits: { note: string };
   }>('bots', debugKey, 10000);
 
   if (loading && !data) return <LoadingState />;
@@ -1178,7 +1178,6 @@ function BotMonitorTab({ debugKey }: { debugKey: string }) {
 
   const bots = data?.bots || [];
   const assignedTasks = data?.assignedTasks || {};
-  const rateLimits = data?.rateLimits;
 
   return (
     <div className="space-y-4">
@@ -1187,7 +1186,7 @@ function BotMonitorTab({ debugKey }: { debugKey: string }) {
           <Bot className="w-4 h-4 text-purple-400" /> Registered Bots ({bots.length})
         </h3>
         <span className="text-xs text-gray-600 font-mono">
-          Rate limit: {rateLimits?.perBotPerHour || 60}/hr per bot &middot; {rateLimits?.globalPerHour || 200}/hr global
+          No rate limits &middot; task-level throttling
         </span>
       </div>
 

@@ -635,7 +635,7 @@ echo ""
 echo "=== Unnumbered migration files (Drizzle migrator skips these) ==="
 ls apps/api/drizzle/migrations/*.sql | grep -v "^apps/api/drizzle/migrations/[0-9]" | grep -v "meta"
 echo "↑ Should be 0 files — all migrations must be numbered (0000_, 0001_, etc.)"
-echo "  Known problematic files: newsletter_subscription.sql, widen_api_key_prefix.sql"
+echo "  FIXED in MIG-CLEANUP: newsletter_subscription.sql → 0010, 0003_unique_problem_title.sql renumbered → 0009"
 
 echo ""
 echo "=== Duplicate migration number prefixes ==="
@@ -1890,6 +1890,8 @@ Use this corrected table as the authoritative reference — verify each session 
 | **BUGFIX-4** | bot.routes.ts, admin.routes.ts, bradley-terry.service.ts | lastBotActivityAt updated on vote/flag (was solve-only); admin activate assigns category from flags; voteAccuracy uses pre-update scores (not circular post-update) |
 | **SEC-FIX-8** | server.ts, env.ts, next.config.js, auth.middleware.ts, email.service.ts, bot.routes.ts, problem.routes.ts, newsletter.routes.ts, migration 0008 | Global sanitize middleware, CSP unsafe-eval removed, JWT min 32, Resend tracking headers (reverted in SEC-FIX-9), FK cascade migration, prompt injection log flag, 20/day problem rate limit, prod COOKIE_SECRET warning, prod localhost CORS block |
 | **SEC-FIX-9** | auth.middleware.ts, email.service.ts, bot.routes.ts, newsletter.routes.ts, newsletter-tokens.ts | Reverted S6 DB check in authMiddleware (perf concern), reverted S9 X-Entity-Ref-ID headers (tracking disabled in Resend dashboard), S11 prompt_injection_flagged activity log entry, S12 stale confirm token rejection after unsubscribe |
+| **MIG-CLEANUP** | drizzle/migrations/ (renames + meta/_journal.json) | Fixed migration numbering: duplicate 0003 prefix resolved (0003_unique_problem_title.sql → 0009), unnumbered newsletter_subscription.sql → 0010; added 0007-0010 entries to _journal.json; clean 0000–0010 sequence with 11 journal entries |
+| **SIM-LOAD** | scripts/simulate-load.ts (NEW), scripts/cleanup-sim-bots.ts (NEW), .gitignore | Load simulation: seeds 50 synthetic bots via direct DB insert, drives them through full task lifecycle (flag→solve→vote→create) via real HTTP API, reports BT scores/maturity/leaderboard; cleanup script cascades deletes + Redis FLUSHALL; .sim-keys.json gitignored |
 
 ---
 
@@ -2158,9 +2160,10 @@ echo "Contact route: $(grep -c "fastify\." apps/api/src/routes/contact.routes.ts
     - Default sort is win_rate (not avg_score)? (yes/no)
     - best_score and top3_count removed from backend Zod enum and service orderBy? (yes/no)
     - Each tab has a description shown when active? (yes/no)
-28. Migration health — confirm migration files are deployable to a fresh database:
-    - All migration files are numbered (no unnumbered .sql files in migrations/)? (yes/no)
+28. Migration health — confirm migration files are deployable to a fresh database (FIXED in MIG-CLEANUP):
+    - All migration files are numbered 0000–0010 (no unnumbered .sql files in migrations/)? (yes/no)
     - No duplicate migration number prefixes? (yes/no)
+    - _journal.json has 11 entries (idx 0–10) matching all .sql files? (yes/no)
     - All `ALTER TYPE ADD VALUE` include `IF NOT EXISTS`? (yes/no)
     - All `ALTER TABLE ADD COLUMN` include `IF NOT EXISTS`? (yes/no)
     - `api_key_prefix` defined as varchar(16) in base migration? (yes/no)
@@ -2291,4 +2294,12 @@ echo "Contact route: $(grep -c "fastify\." apps/api/src/routes/contact.routes.ts
     - Production exit when WEB_URL contains localhost? (yes/no)
     - Newsletter confirm blocks stale tokens after unsubscribe (updatedAt > issuedAt)? (yes/no)
     - verifyConfirmToken returns issuedAt field? (yes/no)
+40. Load simulation scripts (SIM-LOAD):
+    - `scripts/simulate-load.ts` exists? (yes/no)
+    - `scripts/cleanup-sim-bots.ts` exists? (yes/no)
+    - `scripts/.sim-keys.json` in .gitignore? (yes/no)
+    - simulate-load.ts uses `postgres` + `bcrypt` (no extra deps)? (yes/no)
+    - cleanup-sim-bots.ts uses `ioredis` for FLUSHALL? (yes/no)
+    - Seed is idempotent (checks for existing sim-bot users + caches keys)? (yes/no)
+
 Target length: 2,000–5,000 lines. Be thorough but do not repeat the same file contents across multiple sections.

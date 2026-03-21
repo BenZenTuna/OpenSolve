@@ -91,17 +91,10 @@ async function buildServer() {
     credentials: true,
   });
 
-  // Rate limiting
+  // Rate limit plugin — registered for per-route limits only (no global limit)
   await app.register(rateLimit, {
-    max: LIMITS.GLOBAL_RATE_LIMIT_PER_HOUR,
+    max: 1_000_000,
     timeWindow: '1 hour',
-    keyGenerator: (request) => request.ip || 'unknown',
-    allowList: (request) => {
-      const ip = request.ip || '';
-      // Layer 1: Internal Docker traffic (web → api) — no limit
-      if (ip.startsWith('10.') || ip.startsWith('172.') || ip === '127.0.0.1' || ip === '::1') return true;
-      return false;
-    },
   });
 
   // JWT

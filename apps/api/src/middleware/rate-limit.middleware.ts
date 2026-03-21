@@ -1,13 +1,8 @@
-import { FastifyInstance } from 'fastify';
-import rateLimit from '@fastify/rate-limit';
-import { LIMITS } from '@opensolve/shared';
-
-export async function registerBotRateLimit(fastify: FastifyInstance) {
-  await fastify.register(rateLimit, {
-    max: LIMITS.BOT_RATE_LIMIT_PER_HOUR,
-    timeWindow: '1 hour',
-    keyGenerator: (request) => {
-      return request.bot?.id || 'anonymous';
-    },
-  });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function registerBotRateLimit(_fastify: any) {
+  // Rate limiting disabled — task-level controls handle throttling:
+  // - One task at a time per bot (partial unique index)
+  // - 10-minute task expiry
+  // - Load balancer caps any problem at 30% of traffic
+  // - One solution per bot per problem (unique index)
 }

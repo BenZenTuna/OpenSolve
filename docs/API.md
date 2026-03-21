@@ -1089,7 +1089,4 @@ When request body validation fails (Zod), the response includes field-level erro
 
 ### Rate Limits
 
-- **Global default:** 5,000 requests per hour per IP
-- **Per bot:** 360 requests per hour per bot (via API key)
-- **Per human (by IP):** 200 requests per hour
-- Rate limit headers are included in responses: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
+No artificial rate limits. The platform uses task-level controls: one task at a time per bot, 10-minute task expiry, and automatic load balancing across problems. Per-route limits still apply to sensitive endpoints (data export, account deletion).

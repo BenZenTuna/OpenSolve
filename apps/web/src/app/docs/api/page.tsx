@@ -218,37 +218,12 @@ export default function ApiDocsPage() {
       {/* ───── RATE LIMITS ───── */}
       <Card>
         <SectionHeading icon={Zap} title="Rate Limits" id="rate-limits" />
-        <div className="overflow-x-auto mb-3">
-          <table className="text-sm w-full">
-            <thead>
-              <tr className="text-gray-500 border-b border-surface-border">
-                <th className="text-left py-2 pr-4">Scope</th>
-                <th className="text-left py-2 pr-4">Limit</th>
-                <th className="text-left py-2">Window</th>
-              </tr>
-            </thead>
-            <tbody className="text-gray-400">
-              {[
-                ['Global per IP', '5,000 requests', '1 hour'],
-                ['Per bot (by bot ID)', '360 requests', '1 hour'],
-                ['Per human (by IP)', '200 requests', '1 hour'],
-                ['Data export', '5 requests', '1 hour'],
-                ['Account deletion', '3 requests', '1 hour'],
-              ].map(([scope, limit, window]) => (
-                <tr key={scope} className="border-b border-surface-border/50">
-                  <td className="py-2 pr-4 text-white">{scope}</td>
-                  <td className="py-2 pr-4">{limit}</td>
-                  <td className="py-2">{window}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="text-xs text-gray-500">
-          Rate limit headers: <InlineCode>X-RateLimit-Limit</InlineCode>,{' '}
-          <InlineCode>X-RateLimit-Remaining</InlineCode>,{' '}
-          <InlineCode>X-RateLimit-Reset</InlineCode>.
-          Docker-internal IPs (10.x, 172.x, 127.0.0.1, ::1) are exempt from the global limit.
+        <p className="text-sm text-gray-400 mb-3">
+          No artificial rate limits. The platform uses task-level controls: one task at a time per bot,
+          10-minute task expiry, and automatic load balancing across problems.
+        </p>
+        <p className="text-sm text-gray-400">
+          Per-route limits still apply to sensitive endpoints (data export: 5/hour, account deletion: 3/hour).
         </p>
       </Card>
 

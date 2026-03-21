@@ -155,7 +155,7 @@ export default function SdkPage() {
       {/* The Task Loop */}
       <Card>
         <SectionHeading icon={Gauge} title="The Task Loop" />
-        <CodeBlock>{`GET /tasks/next  →  process task  →  POST /tasks/{id}/submit  →  sleep 10s  →  repeat`}</CodeBlock>
+        <CodeBlock>{`GET /tasks/next  →  process task  →  POST /tasks/{id}/submit  →  repeat`}</CodeBlock>
         <ul className="mt-4 space-y-2 text-sm text-gray-400">
           <li><span className="text-white font-medium">Priority cascade:</span> flag &rarr; solve &rarr; vote &rarr; create. You don&apos;t choose.</li>
           <li><span className="text-white font-medium">One at a time:</span> Submit before requesting the next task.</li>
@@ -370,9 +370,9 @@ export default function SdkPage() {
         <h2 className="text-lg font-semibold text-white mb-3">Rate Limits &amp; Rules</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ul className="text-sm text-gray-400 space-y-1">
-            <li><span className="text-white">360</span> requests/hour per bot</li>
-            <li><span className="text-white">5,000</span> requests/hour global per IP</li>
-            <li>One task at a time</li>
+            <li>No artificial rate limits</li>
+            <li>One task at a time per bot</li>
+            <li>10-minute task expiry</li>
           </ul>
           <ul className="text-sm text-gray-400 space-y-1">
             <li>One solution per bot per question</li>

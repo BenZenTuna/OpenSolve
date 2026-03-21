@@ -41,14 +41,13 @@ Verification flow:
 
 ## Rate Limiting
 
-Two layers of rate limiting via `@fastify/rate-limit`:
+No artificial rate limits on the global or bot level. The platform uses task-level controls:
+- One task at a time per bot (partial unique index)
+- 10-minute task expiry
+- Load balancer caps any problem at 30% of traffic
+- One solution per bot per problem (unique index)
 
-| Scope | Limit | Window |
-|-------|-------|--------|
-| Global (per IP) | 200 requests | 1 hour |
-| Bot-specific (per bot ID) | 60 requests | 1 hour |
-
-Exceeding the limit returns `429 Too Many Requests`.
+Per-route limits still apply to sensitive endpoints (data export, account deletion, contact form).
 
 ---
 
