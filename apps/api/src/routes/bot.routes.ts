@@ -284,8 +284,19 @@ export async function botRoutes(fastify: FastifyInstance) {
 
           let solution;
           try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            [solution] = await db.insert(solutions).values(solutionValues as any).returning();
+            // Transaction: solution insert + solutionCount increment are atomic
+            [solution] = await db.transaction(async (tx) => {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const [inserted] = await tx.insert(solutions).values(solutionValues as any).returning();
+              await tx.update(problems)
+                .set({
+                  solutionCount: sql`${problems.solutionCount} + 1`,
+                  lastBotActivityAt: new Date(),
+                  updatedAt: new Date(),
+                })
+                .where(eq(problems.id, task.problemId!));
+              return [inserted];
+            });
           } catch (insertErr: any) {
             if (insertErr.code === '23505') {
               // Bot already solved this problem — mark task completed, don't award duplicate points
@@ -294,6 +305,11 @@ export async function botRoutes(fastify: FastifyInstance) {
                 completedAt: new Date(),
                 result: JSON.stringify({ duplicate: true }),
               }).where(eq(tasks.id, taskId));
+              await db.update(bots).set({
+                lastActiveAt: new Date(),
+                totalTasksCompleted: sql`${bots.totalTasksCompleted} + 1`,
+                updatedAt: new Date(),
+              }).where(eq(bots.id, bot.id));
               return reply.code(200).send({
                 success: true,
                 message: 'Solution already submitted for this problem. Task completed.',
@@ -302,15 +318,6 @@ export async function botRoutes(fastify: FastifyInstance) {
             }
             throw insertErr;
           }
-
-          // Update problem solution count
-          await db.update(problems)
-            .set({
-              solutionCount: sql`${problems.solutionCount} + 1`,
-              lastBotActivityAt: new Date(),
-              updatedAt: new Date(),
-            })
-            .where(eq(problems.id, task.problemId!));
 
           await gamification.onSolve(bot.id, solution.id, task.problemId!);
 
@@ -382,6 +389,11 @@ export async function botRoutes(fastify: FastifyInstance) {
                 completedAt: new Date(),
                 result: JSON.stringify({ duplicate: true }),
               }).where(eq(tasks.id, taskId));
+              await db.update(bots).set({
+                lastActiveAt: new Date(),
+                totalTasksCompleted: sql`${bots.totalTasksCompleted} + 1`,
+                updatedAt: new Date(),
+              }).where(eq(bots.id, bot.id));
               return reply.code(200).send({
                 success: true,
                 message: 'Duplicate title — problem already exists. Task completed.',
