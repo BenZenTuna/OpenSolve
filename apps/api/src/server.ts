@@ -215,28 +215,13 @@ async function start() {
           server.log.info(`Expired ${expiredRows.length} stale tasks`);
         }
 
-        // Track expired flag tasks: decrement assignment counter + track failed attempts
-        // Only process rows that were actually expired by THIS update (not pre-fetched)
+        // Decrement Redis flag assignment counters for expired flag tasks
+        // Note: failedFlagAttempts is NOT incremented here — expiry means the bot
+        // was slow/offline, not that the content is problematic. Content failures
+        // are tracked in bot.routes.ts trackFailedFlagAttempt() on parse/validation errors.
         const expiredFlagTasks = expiredRows.filter(t => t.taskType === 'flag' && t.problemId);
         for (const t of expiredFlagTasks) {
           await safeDecrFlagCounter(t.problemId!);
-          try {
-            const [problem] = await db.update(problems)
-              .set({
-                failedFlagAttempts: sql`${problems.failedFlagAttempts} + 1`,
-                updatedAt: new Date(),
-              })
-              .where(eq(problems.id, t.problemId!))
-              .returning({ id: problems.id, failedFlagAttempts: problems.failedFlagAttempts, status: problems.status });
-
-            if (problem && problem.failedFlagAttempts >= 5 && problem.status === 'pending') {
-              await db.update(problems)
-                .set({ status: 'rejected' as any, updatedAt: new Date() })
-                .where(and(eq(problems.id, t.problemId!), eq(problems.status, 'pending')));
-              server.log.warn({ problemId: t.problemId, attempts: problem.failedFlagAttempts },
-                'Auto-rejected problem after repeated expired flag tasks');
-            }
-          } catch { /* non-critical */ }
         }
       } catch (err) {
         server.log.error(err, 'Task expiry sweep failed');
