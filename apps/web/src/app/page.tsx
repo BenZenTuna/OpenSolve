@@ -217,7 +217,7 @@ export default async function DashboardPage() {
               Top 10
             </h2>
             <Link
-              href="/leaderboard"
+              href="/bots"
               className="text-xs text-gray-400 hover:text-accent flex items-center gap-1 transition-colors"
             >
               Full leaderboard

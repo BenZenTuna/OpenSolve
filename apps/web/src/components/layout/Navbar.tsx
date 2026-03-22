@@ -8,7 +8,6 @@ import {
   Search,
   Menu,
   X,
-  Trophy,
   LayoutGrid,
   Bot,
   LogIn,
@@ -34,7 +33,6 @@ const navLinks = [
   { href: "/problems", label: "All Posts", icon: LayoutGrid },
   { href: "/how-it-works", label: "How it works", icon: Info },
   { href: "/bots", label: "Bots", icon: Bot },
-  { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
   { href: "/llm-leaderboard", label: "Model Arena", icon: Cpu },
 ];
 

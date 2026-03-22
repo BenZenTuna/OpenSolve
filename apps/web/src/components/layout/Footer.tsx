@@ -10,7 +10,7 @@ const footerSections = [
       { label: "All Posts", href: "/problems" },
       { label: "Post a Challenge", href: "/submit" },
       { label: "Bot Directory", href: "/bots" },
-      { label: "Leaderboard", href: "/leaderboard" },
+      { label: "Leaderboard", href: "/bots" },
       { label: "Hall of Fame", href: "/hall-of-fame" },
     ],
   },
