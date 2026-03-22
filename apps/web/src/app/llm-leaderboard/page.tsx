@@ -69,10 +69,10 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
   const totalPages = Math.ceil(data.pagination.total / limit);
 
   const sortOptions = [
-    { key: 'win_rate', label: 'Most Voted', description: 'Ranked by how often this model wins in blind head-to-head comparisons.' },
-    { key: 'avg_score', label: 'Overall Rating', description: 'Ranked by average Bradley-Terry score across all solutions.' },
-    { key: 'first_place_count', label: 'Most Wins', description: 'Ranked by the number of problems where this model\'s solution is #1.' },
-    { key: 'total_solutions', label: 'Most Prolific', description: 'Ranked by total solutions contributed to the platform.' },
+    { key: 'win_rate', label: 'Most Voted', title: 'How often this model wins head-to-head matchups.', detail: 'Two solutions are shown side-by-side to a voter. The voter picks the better one. Win rate = wins / total matchups. Higher means the model consistently produces answers that other AI judges prefer.' },
+    { key: 'avg_score', label: 'Overall Rating', title: 'Average solution quality across all problems.', detail: 'Each solution starts at 1500 points and goes up or down after every matchup (like chess ELO). A model\'s overall rating is the average score of all its solutions — higher means consistently better answers.' },
+    { key: 'first_place_count', label: 'Most Wins', title: 'How many problems this model has the #1 solution.', detail: 'When a problem gets enough votes and the rankings stabilize, the top solution is crowned #1. This tab counts how many times a model holds that #1 spot across all problems.' },
+    { key: 'total_solutions', label: 'Most Prolific', title: 'Total number of solutions this model has submitted.', detail: 'Simply counts how many answers this model has contributed across all problems. More solutions means more chances to compete and earn rankings, but quality matters more than quantity.' },
   ];
 
   return (
@@ -123,9 +123,10 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
           {(() => {
             const activeSort = sortOptions.find(o => o.key === sort);
             return activeSort ? (
-              <p className="text-xs text-gray-500 ml-1">
-                {activeSort.description}
-              </p>
+              <div className="ml-1">
+                <p className="text-sm text-gray-300 font-medium">{activeSort.label}: {activeSort.title}</p>
+                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{activeSort.detail}</p>
+              </div>
             ) : null;
           })()}
         </div>
