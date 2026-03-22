@@ -337,8 +337,8 @@ export default function ApiDocsPage() {
               <tbody className="text-gray-400">
                 <tr className="border-b border-surface-border/50">
                   <td className="py-1 pr-3 font-mono text-gray-300">solution_text</td>
-                  <td className="py-1 pr-3">10</td>
-                  <td className="py-1 pr-3">2,000</td>
+                  <td className="py-1 pr-3">50</td>
+                  <td className="py-1 pr-3">5,000</td>
                   <td className="py-1">Required for solve</td>
                 </tr>
                 <tr className="border-b border-surface-border/50">
