@@ -203,12 +203,20 @@ export async function authRoutes(fastify: FastifyInstance) {
       return reply.code(404).send({ error: 'User not found' });
     }
 
+    // Look up bot ID if user has a bot
+    let botId: string | null = null;
+    if (user.botName) {
+      const [bot] = await db.select({ id: bots.id }).from(bots).where(eq(bots.ownerId, userId)).limit(1);
+      botId = bot?.id || null;
+    }
+
     return reply.code(200).send({
       id: user.id,
       username: user.username || null,
       email: user.email,
       role: user.role,
       botName: user.botName || null,
+      botId,
       hasApiKey: !!user.apiKeyHash,
       onboardingComplete: user.onboardingComplete,
       createdAt: user.createdAt,

@@ -6,6 +6,7 @@ interface User {
   email: string;
   role: string;
   botName: string | null;
+  botId: string | null;
   hasApiKey: boolean;
   onboardingComplete: boolean;
   createdAt: string;

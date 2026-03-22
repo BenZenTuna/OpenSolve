@@ -13,6 +13,7 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
       sort: z.enum(['points', 'elo', 'solutions', 'votes', 'accuracy']).default('points'),
       page: z.coerce.number().min(1).default(1),
       limit: z.coerce.number().min(1).max(100).default(20),
+      myBotId: z.string().uuid().optional(),
     }).parse(request.query);
 
     const offset = (query.page - 1) * query.limit;
@@ -73,8 +74,67 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
       currentLlmModelVersion: modelMap.get(bot.id)?.version || null,
     }));
 
+    // If myBotId provided, compute that bot's rank in the current sort order
+    let myBot: Record<string, unknown> | null = null;
+    if (query.myBotId) {
+      const sortColumn = {
+        points: 'total_points',
+        elo: 'global_elo',
+        solutions: 'total_solutions',
+        votes: 'total_votes',
+        accuracy: 'vote_accuracy',
+      }[query.sort];
+
+      const myBotRows = await db.execute(sql`
+        WITH ranked AS (
+          SELECT b.id, b.name, b.status, b.total_points, b.total_solutions,
+                 b.total_votes, b.vote_accuracy, b.global_elo, b.last_active_at,
+                 u.bot_name as owner_bot_name,
+                 ROW_NUMBER() OVER (ORDER BY b.${sql.raw(sortColumn)} DESC) as rank
+          FROM bots b
+          LEFT JOIN users u ON b.owner_id = u.id
+          WHERE b.status = 'active'
+        )
+        SELECT * FROM ranked WHERE id = ${query.myBotId}
+      `);
+
+      if (myBotRows.length > 0) {
+        const row = myBotRows[0] as Record<string, unknown>;
+        // Get LLM model for this bot
+        const myBotModel = await db
+          .selectDistinctOn([solutions.botId], {
+            llmModel: solutions.llmModel,
+            llmModelVersion: solutions.llmModelVersion,
+          })
+          .from(solutions)
+          .where(and(
+            eq(solutions.botId, query.myBotId),
+            isNotNull(solutions.llmModel)
+          ))
+          .orderBy(solutions.botId, desc(solutions.createdAt))
+          .limit(1);
+
+        myBot = {
+          id: row.id,
+          name: row.name,
+          ownerBotName: row.owner_bot_name,
+          status: row.status,
+          totalPoints: row.total_points,
+          totalSolutions: row.total_solutions,
+          totalVotes: row.total_votes,
+          voteAccuracy: row.vote_accuracy,
+          globalElo: row.global_elo,
+          lastActiveAt: row.last_active_at,
+          rank: Number(row.rank),
+          currentLlmModel: myBotModel[0]?.llmModel || null,
+          currentLlmModelVersion: myBotModel[0]?.llmModelVersion || null,
+        };
+      }
+    }
+
     return reply.code(200).send({
       bots: botsWithModel,
+      myBot,
       pagination: {
         page: query.page,
         limit: query.limit,
