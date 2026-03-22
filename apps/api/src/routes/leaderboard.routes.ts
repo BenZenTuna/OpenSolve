@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { db } from '../config/database.js';
 import { bots, badges, problems, solutions, users, activityLog } from '../db/schema.js';
-import { eq, desc, sql, isNotNull, and, inArray } from 'drizzle-orm';
+import { eq, desc, asc, sql, isNotNull, and, inArray } from 'drizzle-orm';
 import { redis } from '../config/redis.js';
 
 export async function leaderboardRoutes(fastify: FastifyInstance) {
@@ -10,10 +10,11 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
   // ===== BOT LEADERBOARD =====
   fastify.get('/leaderboard', async (request, reply) => {
     const query = z.object({
-      sort: z.enum(['points', 'elo', 'solutions', 'votes', 'accuracy']).default('points'),
+      sort: z.enum(['points', 'elo', 'solutions', 'votes', 'accuracy', 'name']).default('points'),
       page: z.coerce.number().min(1).default(1),
       limit: z.coerce.number().min(1).max(100).default(20),
       myBotId: z.string().uuid().optional(),
+      letter: z.string().length(1).regex(/^[A-Za-z]$/).optional(),
     }).parse(request.query);
 
     const offset = (query.page - 1) * query.limit;
@@ -23,7 +24,15 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
       solutions: desc(bots.totalSolutions),
       votes: desc(bots.totalVotes),
       accuracy: desc(bots.voteAccuracy),
+      name: asc(bots.name),
     }[query.sort];
+
+    // Build WHERE conditions
+    const whereConditions = [eq(bots.status, 'active')];
+    if (query.letter) {
+      const upper = query.letter.toUpperCase();
+      whereConditions.push(sql`UPPER(COALESCE(${users.botName}, ${bots.name})) LIKE ${upper + '%'}`);
+    }
 
     const [items, countResult] = await Promise.all([
       db.select({
@@ -40,14 +49,15 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
       })
       .from(bots)
       .leftJoin(users, eq(bots.ownerId, users.id))
-      .where(eq(bots.status, 'active'))
+      .where(and(...whereConditions))
       .orderBy(orderBy)
       .limit(query.limit)
       .offset(offset),
 
       db.select({ count: sql<number>`count(*)::int` })
         .from(bots)
-        .where(eq(bots.status, 'active')),
+        .leftJoin(users, eq(bots.ownerId, users.id))
+        .where(and(...whereConditions)),
     ]);
 
     // Get current LLM model for each bot in the leaderboard (one row per bot via DISTINCT ON)
@@ -77,20 +87,23 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
     // If myBotId provided, compute that bot's rank in the current sort order
     let myBot: Record<string, unknown> | null = null;
     if (query.myBotId) {
-      const sortColumn = {
+      const sortColumnMap: Record<string, string> = {
         points: 'total_points',
         elo: 'global_elo',
         solutions: 'total_solutions',
         votes: 'total_votes',
         accuracy: 'vote_accuracy',
-      }[query.sort];
+        name: 'name',
+      };
+      const sortColumn = sortColumnMap[query.sort] || 'total_points';
+      const sortDir = query.sort === 'name' ? 'ASC' : 'DESC';
 
       const myBotRows = await db.execute(sql`
         WITH ranked AS (
           SELECT b.id, b.name, b.status, b.total_points, b.total_solutions,
                  b.total_votes, b.vote_accuracy, b.global_elo, b.last_active_at,
                  u.bot_name as owner_bot_name,
-                 ROW_NUMBER() OVER (ORDER BY b.${sql.raw(sortColumn)} DESC) as rank
+                 ROW_NUMBER() OVER (ORDER BY b.${sql.raw(sortColumn)} ${sql.raw(sortDir)}) as rank
           FROM bots b
           LEFT JOIN users u ON b.owner_id = u.id
           WHERE b.status = 'active'
