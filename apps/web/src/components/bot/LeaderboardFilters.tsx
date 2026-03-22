@@ -47,7 +47,7 @@ export function LeaderboardFilters({ currentSort, basePath = '/bots' }: { curren
   const active = sortOptions.find(o => o.value === currentSort) || sortOptions[0];
 
   function handleSort(value: string) {
-    router.push(`${basePath}?sort=${value}`);
+    router.push(`${basePath}?sort=${value}#leaderboard`);
   }
 
   return (

@@ -76,14 +76,14 @@ export default async function BotsPage({ searchParams }: PageProps) {
   const { bots: allBots, pagination: dirPagination } = directoryData;
   const startRank = (page - 1) * pagination.limit;
 
-  // Build URL helper that preserves all current params
-  function buildUrl(overrides: Record<string, string | undefined>) {
+  // Build URL helper that preserves all current params + optional anchor
+  function buildUrl(overrides: Record<string, string | undefined>, anchor?: string) {
     const p = new URLSearchParams();
     const merged = { sort, page: String(page), letter, dirPage: String(dirPage), ...overrides };
     for (const [k, v] of Object.entries(merged)) {
       if (v) p.set(k, v);
     }
-    return `/bots?${p.toString()}`;
+    return `/bots?${p.toString()}${anchor ? `#${anchor}` : ''}`;
   }
 
   return (
@@ -103,7 +103,7 @@ export default async function BotsPage({ searchParams }: PageProps) {
       <MyBotSpotlight sort={sort} />
 
       {/* ═══ LEADERBOARD ═══ */}
-      <section className="space-y-4">
+      <section id="leaderboard" className="space-y-4 scroll-mt-20">
         <div className="flex items-center gap-2">
           <Trophy className="w-5 h-5 text-yellow-400" />
           <h2 className="text-lg font-semibold text-white">Leaderboard</h2>
@@ -124,7 +124,7 @@ export default async function BotsPage({ searchParams }: PageProps) {
         {pagination.totalPages > 1 && (
           <nav className="flex items-center justify-center gap-2">
             {page > 1 && (
-              <Link href={buildUrl({ page: String(page - 1) })} className="btn-secondary text-sm">
+              <Link href={buildUrl({ page: String(page - 1) }, 'leaderboard')} scroll={false} className="btn-secondary text-sm">
                 Previous
               </Link>
             )}
@@ -132,7 +132,7 @@ export default async function BotsPage({ searchParams }: PageProps) {
               Page {page} of {pagination.totalPages}
             </span>
             {page < pagination.totalPages && (
-              <Link href={buildUrl({ page: String(page + 1) })} className="btn-secondary text-sm">
+              <Link href={buildUrl({ page: String(page + 1) }, 'leaderboard')} scroll={false} className="btn-secondary text-sm">
                 Next
               </Link>
             )}
@@ -141,14 +141,14 @@ export default async function BotsPage({ searchParams }: PageProps) {
       </section>
 
       {/* ═══ BOT DIRECTORY ═══ */}
-      <section className="space-y-4">
+      <section id="directory" className="space-y-4 scroll-mt-20">
         <div className="border-t border-surface-border pt-8">
           <div className="flex items-center gap-2">
             <BotIcon className="w-5 h-5 text-accent" />
             <h2 className="text-lg font-semibold text-white">All Bots</h2>
           </div>
           <p className="text-sm text-gray-500 mt-1">
-            Browse {letter ? `"${letter}" bots` : `all ${dirPagination.total} registered bots`}
+            Browse {letter === 'num' ? 'bots starting with numbers/symbols' : letter ? `"${letter}" bots` : `all ${dirPagination.total} registered bots`}
           </p>
         </div>
 
@@ -156,7 +156,8 @@ export default async function BotsPage({ searchParams }: PageProps) {
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex flex-row flex-wrap md:flex-col gap-1 md:gap-0.5 shrink-0">
             <Link
-              href={buildUrl({ letter: undefined, dirPage: '1' })}
+              href={buildUrl({ letter: undefined, dirPage: '1' }, 'directory')}
+              scroll={false}
               className={`px-2 py-1 md:px-2 md:py-0.5 rounded text-xs font-medium transition-colors ${
                 !letter
                   ? 'bg-accent text-white'
@@ -168,7 +169,8 @@ export default async function BotsPage({ searchParams }: PageProps) {
             {ALPHABET.map((l) => (
               <Link
                 key={l}
-                href={buildUrl({ letter: l, dirPage: '1' })}
+                href={buildUrl({ letter: l, dirPage: '1' }, 'directory')}
+                scroll={false}
                 className={`px-2 py-1 md:px-2 md:py-0.5 rounded text-xs font-medium transition-colors text-center ${
                   letter?.toUpperCase() === l
                     ? 'bg-accent text-white'
@@ -178,6 +180,17 @@ export default async function BotsPage({ searchParams }: PageProps) {
                 {l}
               </Link>
             ))}
+            <Link
+              href={buildUrl({ letter: 'num', dirPage: '1' }, 'directory')}
+              scroll={false}
+              className={`px-2 py-1 md:px-2 md:py-0.5 rounded text-xs font-medium transition-colors text-center ${
+                letter === 'num'
+                  ? 'bg-accent text-white'
+                  : 'text-gray-500 hover:text-white hover:bg-navy-800'
+              }`}
+            >
+              #
+            </Link>
           </div>
 
           {/* Bot grid */}
@@ -186,7 +199,7 @@ export default async function BotsPage({ searchParams }: PageProps) {
               <Card className="text-center py-16">
                 <BotIcon className="w-10 h-10 mx-auto mb-3 text-gray-600" />
                 <p className="text-gray-400 font-medium">
-                  {letter ? `No bots starting with "${letter}"` : 'No bots registered yet'}
+                  {letter === 'num' ? 'No bots starting with numbers or symbols' : letter ? `No bots starting with "${letter}"` : 'No bots registered yet'}
                 </p>
               </Card>
             ) : (
@@ -197,7 +210,7 @@ export default async function BotsPage({ searchParams }: PageProps) {
             {dirPagination.totalPages > 1 && (
               <nav className="flex items-center justify-center gap-2 mt-4">
                 {dirPage > 1 && (
-                  <Link href={buildUrl({ dirPage: String(dirPage - 1) })} className="btn-secondary text-sm">
+                  <Link href={buildUrl({ dirPage: String(dirPage - 1) }, 'directory')} scroll={false} className="btn-secondary text-sm">
                     Previous
                   </Link>
                 )}
@@ -205,7 +218,7 @@ export default async function BotsPage({ searchParams }: PageProps) {
                   Page {dirPage} of {dirPagination.totalPages}
                 </span>
                 {dirPage < dirPagination.totalPages && (
-                  <Link href={buildUrl({ dirPage: String(dirPage + 1) })} className="btn-secondary text-sm">
+                  <Link href={buildUrl({ dirPage: String(dirPage + 1) }, 'directory')} scroll={false} className="btn-secondary text-sm">
                     Next
                   </Link>
                 )}

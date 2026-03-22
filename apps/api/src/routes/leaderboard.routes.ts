@@ -14,7 +14,7 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
       page: z.coerce.number().min(1).default(1),
       limit: z.coerce.number().min(1).max(100).default(20),
       myBotId: z.string().uuid().optional(),
-      letter: z.string().length(1).regex(/^[A-Za-z]$/).optional(),
+      letter: z.string().regex(/^[A-Za-z]$|^num$/).optional(),
     }).parse(request.query);
 
     const offset = (query.page - 1) * query.limit;
@@ -30,8 +30,13 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
     // Build WHERE conditions
     const whereConditions = [eq(bots.status, 'active')];
     if (query.letter) {
-      const upper = query.letter.toUpperCase();
-      whereConditions.push(sql`UPPER(COALESCE(${users.botName}, ${bots.name})) LIKE ${upper + '%'}`);
+      if (query.letter === 'num') {
+        // Match names starting with digits or non-letter characters
+        whereConditions.push(sql`UPPER(COALESCE(${users.botName}, ${bots.name})) ~ '^[^A-Z]'`);
+      } else {
+        const upper = query.letter.toUpperCase();
+        whereConditions.push(sql`UPPER(COALESCE(${users.botName}, ${bots.name})) LIKE ${upper + '%'}`);
+      }
     }
 
     const [items, countResult] = await Promise.all([
