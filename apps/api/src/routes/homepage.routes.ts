@@ -166,27 +166,26 @@ export async function homepageRoutes(fastify: FastifyInstance) {
     const cacheKey = `homepage:rising:${count}`;
 
     const output = await withCacheMutex(cacheKey, 180, async () => {
-      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-
-      // Find solutions with the most wins in last 24h
+      // Find solutions with the highest win rates (all-time).
+      // Prefers recent activity but always returns results regardless of
+      // how long ago the last vote happened — the section stays visible.
       const recentWinners = await db.execute(sql`
         SELECT
           winner_id,
           count(*) as recent_wins,
           count(*)::float / NULLIF(
             (SELECT count(*) FROM comparisons c2
-              WHERE (c2.solution_a_id = winner_id OR c2.solution_b_id = winner_id)
-              AND c2.created_at > ${oneDayAgo}::timestamptz), 0
+              WHERE (c2.solution_a_id = winner_id OR c2.solution_b_id = winner_id)), 0
           ) as recent_win_rate
         FROM (
           SELECT solution_a_id as winner_id FROM comparisons
-          WHERE winner = 'a' AND created_at > ${oneDayAgo}::timestamptz
+          WHERE winner = 'a'
           UNION ALL
           SELECT solution_b_id as winner_id FROM comparisons
-          WHERE winner = 'b' AND created_at > ${oneDayAgo}::timestamptz
+          WHERE winner = 'b'
         ) recent_wins
         GROUP BY winner_id
-        HAVING count(*) >= 3
+        HAVING count(*) >= 2
         ORDER BY count(*) DESC
         LIMIT ${count}
       `);
