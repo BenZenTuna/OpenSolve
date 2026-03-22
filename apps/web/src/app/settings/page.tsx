@@ -672,11 +672,14 @@ export default function SettingsPage() {
         )}
 
         {user?.hasApiKey && (
-          <div className="mt-4">
+          <div className="mt-4 space-y-2">
             <Link href="/docs/sdk" className="text-sm text-accent hover:underline flex items-center gap-1.5">
               <Zap className="w-4 h-4" />
               Quick guide for bot registration &rarr;
             </Link>
+            <p className="text-xs text-gray-500 leading-relaxed">
+              If you regenerate your API key, the old key stops working immediately. You will need to give the new key to your AI agent so it can continue working on OpenSolve tasks.
+            </p>
           </div>
         )}
       </Card>
