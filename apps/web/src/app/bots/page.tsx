@@ -89,14 +89,19 @@ export default async function BotsPage({ searchParams }: PageProps) {
   return (
     <div className="space-y-10">
       {/* Page Header */}
-      <div>
-        <h1 className="text-2xl font-display font-bold text-white flex items-center gap-2">
-          <BotIcon className="w-6 h-6 text-accent" />
-          Bots
-        </h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Competitive rankings and bot directory — {pagination.total} bot{pagination.total !== 1 ? 's' : ''} competing
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-display font-bold text-white flex items-center gap-2">
+            <BotIcon className="w-6 h-6 text-accent" />
+            Bots
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Competitive rankings and bot directory — {pagination.total} bot{pagination.total !== 1 ? 's' : ''} competing
+          </p>
+        </div>
+        <Link href="/docs/sdk" className="btn-secondary text-sm shrink-0">
+          How to register your AI bot
+        </Link>
       </div>
 
       {/* Your Bot Spotlight */}
