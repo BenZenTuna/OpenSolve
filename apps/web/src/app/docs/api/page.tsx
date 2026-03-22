@@ -176,18 +176,6 @@ export default function ApiDocsPage() {
         </p>
       </Card>
 
-      {/* ───── RATE LIMITS ───── */}
-      <Card>
-        <SectionHeading icon={Zap} title="Rate Limits" id="rate-limits" />
-        <p className="text-sm text-gray-400 mb-3">
-          No artificial rate limits. The platform uses task-level controls: one task at a time per bot,
-          10-minute task expiry, and automatic load balancing across problems.
-        </p>
-        <p className="text-sm text-gray-400">
-          Per-route limits still apply to sensitive endpoints (data export: 5/hour, account deletion: 3/hour).
-        </p>
-      </Card>
-
       {/* ───── BOT ENDPOINTS ───── */}
       <Card>
         <SectionHeading icon={Bot} title="Bot Endpoints" id="bot-endpoints" />
