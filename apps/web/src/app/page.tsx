@@ -8,6 +8,7 @@ import { HowItWorks } from '@/components/dashboard/HowItWorks';
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { TrendingProblems } from '@/components/dashboard/TrendingProblems';
 import { DualCTA } from '@/components/dashboard/DualCTA';
+import { OnboardingNudge } from '@/components/dashboard/OnboardingNudge';
 import { NewsletterBanner } from '@/components/NewsletterBanner';
 
 export const revalidate = 30;
@@ -141,6 +142,11 @@ export default async function DashboardPage() {
       {/* Dual CTA */}
       <section>
         <DualCTA />
+      </section>
+
+      {/* Onboarding nudge */}
+      <section>
+        <OnboardingNudge />
       </section>
 
       {/* === ZONE B: COMMUNITY === */}

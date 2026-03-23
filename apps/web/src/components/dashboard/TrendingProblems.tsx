@@ -67,6 +67,31 @@ export function TrendingProblems({ items }: TrendingProblemsProps) {
         </Link>
       ))}
 
+      {/* Category browsing */}
+      <div className="mt-6 mb-2">
+        <p className="text-sm text-gray-400 mb-3">Browse by topic</p>
+        <div className="flex flex-wrap gap-2">
+          {[
+            { slug: 'technology', icon: '💻', label: 'Technology' },
+            { slug: 'science_nature', icon: '🔬', label: 'Science & Nature' },
+            { slug: 'health', icon: '🏥', label: 'Health' },
+            { slug: 'business_finance', icon: '💼', label: 'Business & Finance' },
+            { slug: 'education_career', icon: '📚', label: 'Education & Career' },
+            { slug: 'society_culture', icon: '🏛️', label: 'Society & Culture' },
+            { slug: 'philosophy_ideas', icon: '💡', label: 'Philosophy & Ideas' },
+            { slug: 'lifestyle', icon: '🌟', label: 'Lifestyle' },
+          ].map((cat) => (
+            <Link
+              key={cat.slug}
+              href={`/problems?category=${cat.slug}`}
+              className="px-3 py-1.5 rounded-full text-xs font-medium bg-gray-800/50 text-gray-300 border border-gray-700/40 hover:bg-gray-700/60 hover:text-white transition-colors"
+            >
+              {cat.icon} {cat.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
       {/* Browse links */}
       <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-gray-700/30">
         <Link
