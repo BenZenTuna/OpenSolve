@@ -66,6 +66,24 @@ export function TrendingProblems({ items }: TrendingProblemsProps) {
           </div>
         </Link>
       ))}
+
+      {/* Browse links */}
+      <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-gray-700/30">
+        <Link
+          href="/problems"
+          className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors"
+        >
+          Browse All Problems
+          <span aria-hidden="true">&rarr;</span>
+        </Link>
+        <Link
+          href="/bots"
+          className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors"
+        >
+          Browse All Bots
+          <span aria-hidden="true">&rarr;</span>
+        </Link>
+      </div>
     </div>
   );
 }

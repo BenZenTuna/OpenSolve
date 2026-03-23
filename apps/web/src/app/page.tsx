@@ -1,14 +1,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Trophy, Bot, Activity, Flame } from 'lucide-react';
+import { ArrowRight, Trophy, Bot, Activity } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { StatsBar } from '@/components/dashboard/StatsBar';
 import { HowItWorks } from '@/components/dashboard/HowItWorks';
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
-import { SolutionSpotlight } from '@/components/dashboard/SolutionSpotlight';
-import { TopSolutionsGallery } from '@/components/dashboard/TopSolutionsGallery';
-import { RisingSolutions } from '@/components/dashboard/RisingSolutions';
 import { TrendingProblems } from '@/components/dashboard/TrendingProblems';
 import { DualCTA } from '@/components/dashboard/DualCTA';
 import { NewsletterBanner } from '@/components/NewsletterBanner';
@@ -50,60 +47,6 @@ interface LeaderboardResponse {
   bots: LeaderboardBot[];
 }
 
-interface SpotlightData {
-  problem: {
-    id: string;
-    title: string;
-    category: string | null;
-    authorType: 'human' | 'bot';
-    solutionCount: number;
-    comparisonCount: number;
-  };
-  solution: {
-    id: string;
-    text: string;
-    btScore: number;
-    comparisonCount: number;
-    winCount: number;
-    confidenceInterval: number;
-  };
-  bot: {
-    id: string;
-    name: string;
-    globalElo: number;
-    ownerBotName?: string | null;
-  };
-}
-
-interface TopSolutionItem {
-  problem: {
-    id: string;
-    title: string;
-    category: string | null;
-    authorType: 'human' | 'bot';
-    solutionCount: number;
-  };
-  solution: {
-    id: string;
-    text: string;
-    btScore: number;
-    comparisonCount: number;
-    winCount: number;
-    rank: number;
-  };
-  bot: {
-    id: string;
-    name: string;
-    ownerBotName?: string | null;
-  };
-}
-
-interface RisingSolutionItem extends TopSolutionItem {
-  rising: {
-    recentWinRate: number;
-  };
-}
-
 interface TrendingProblem {
   id: string;
   title: string;
@@ -118,22 +61,16 @@ interface TrendingProblem {
 
 async function getPageData() {
   try {
-    const [stats, activityData, leaderboardData, spotlightData, topSolutionsData, risingSolutionsData, trendingProblemsData] = await Promise.all([
+    const [stats, activityData, leaderboardData, trendingProblemsData] = await Promise.all([
       apiFetch<Stats>('/stats'),
       apiFetch<{ activities: Activity[] }>('/activity?limit=15'),
       apiFetch<LeaderboardResponse>('/leaderboard?sort=points&limit=10').catch(() => ({ bots: [] })),
-      apiFetch<SpotlightData>('/spotlight').catch(() => null),
-      apiFetch<TopSolutionItem[]>('/top-solutions?limit=6').catch(() => []),
-      apiFetch<RisingSolutionItem[]>('/rising-solutions?limit=3').catch(() => []),
       apiFetch<TrendingProblem[]>('/trending-problems').catch(() => []),
     ]);
     return {
       stats,
       activities: activityData.activities,
       topBots: leaderboardData.bots,
-      spotlight: spotlightData,
-      topSolutions: topSolutionsData ?? [],
-      risingSolutions: risingSolutionsData ?? [],
       trendingProblems: trendingProblemsData ?? [],
     };
   } catch {
@@ -141,16 +78,13 @@ async function getPageData() {
       stats: { totalProblems: 0, totalSolutions: 0, totalComparisons: 0, totalBots: 0, activeBots: 0, activeProblems: 0 },
       activities: [],
       topBots: [],
-      spotlight: null,
-      topSolutions: [],
-      risingSolutions: [],
       trendingProblems: [],
     };
   }
 }
 
 export default async function DashboardPage() {
-  const { stats, activities, topBots, spotlight, topSolutions, risingSolutions, trendingProblems } = await getPageData();
+  const { stats, activities, topBots, trendingProblems } = await getPageData();
 
   return (
     <div className="space-y-8">
@@ -208,46 +142,6 @@ export default async function DashboardPage() {
       <section>
         <DualCTA />
       </section>
-
-      {/* === ZONE A: SOLUTION SHOWCASE === */}
-
-      {/* Rising Solutions */}
-      {risingSolutions.length > 0 && (
-        <section className="space-y-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-xl sm:text-2xl font-bold text-white">
-                Rising Right Now
-              </h2>
-              <Flame className="w-5 h-5 text-orange-400" />
-            </div>
-            <p className="mt-1 text-sm text-gray-400">
-              Solutions winning their matchups and climbing the rankings
-            </p>
-          </div>
-          <RisingSolutions items={risingSolutions} />
-        </section>
-      )}
-
-      {/* Solution Spotlight */}
-      <section>
-        <SolutionSpotlight data={spotlight} />
-      </section>
-
-      {/* Top Solutions Gallery */}
-      {(topSolutions.length > 0 || spotlight) && (
-        <section className="space-y-4">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-white">
-              Top-Ranked Solutions
-            </h2>
-            <p className="mt-1 text-sm text-gray-400">
-              The highest-rated ideas across the platform, chosen by thousands of pairwise comparisons
-            </p>
-          </div>
-          <TopSolutionsGallery items={topSolutions} />
-        </section>
-      )}
 
       {/* === ZONE B: COMMUNITY === */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
