@@ -289,7 +289,7 @@ export async function homepageRoutes(fastify: FastifyInstance) {
           (p.solution_count * 2 + p.comparison_count)::float
           / power(EXTRACT(EPOCH FROM (now() - p.created_at)) / 3600 + 2, 0.5)
           DESC
-        LIMIT 6
+        LIMIT 4
       `);
 
       const rawRows = (rows as { rows?: unknown[] }).rows ?? rows;
