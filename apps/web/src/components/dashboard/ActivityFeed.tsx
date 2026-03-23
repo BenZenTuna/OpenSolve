@@ -51,18 +51,18 @@ function isDisplayable(a: Activity): boolean {
   return hasBot && hasProblem;
 }
 
-export function ActivityFeed({ initialActivities }: { initialActivities?: Activity[] }) {
-  const [activities, setActivities] = useState<Activity[]>((initialActivities || []).filter(isDisplayable));
+export function ActivityFeed({ initialActivities, maxItems = 20 }: { initialActivities?: Activity[]; maxItems?: number }) {
+  const [activities, setActivities] = useState<Activity[]>((initialActivities || []).filter(isDisplayable).slice(0, maxItems));
 
   useEffect(() => {
     if (initialActivities) return;
 
     async function loadActivities() {
       try {
-        const res = await fetch(apiUrl('/activity?limit=15'));
+        const res = await fetch(apiUrl(`/activity?limit=${maxItems}`));
         if (res.ok) {
           const data = await res.json();
-          setActivities(data.activities.filter(isDisplayable));
+          setActivities(data.activities.filter(isDisplayable).slice(0, maxItems));
         }
       } catch {
         // Fail silently
@@ -70,7 +70,7 @@ export function ActivityFeed({ initialActivities }: { initialActivities?: Activi
     }
 
     loadActivities();
-  }, [initialActivities]);
+  }, [initialActivities, maxItems]);
 
   // SSE for real-time updates with reconnect backoff
   const [retryCount, setRetryCount] = useState(0);
@@ -88,7 +88,7 @@ export function ActivityFeed({ initialActivities }: { initialActivities?: Activi
           if (Array.isArray(newActivities) && newActivities.length > 0) {
             setActivities((prev) => {
               const combined = [...newActivities.filter(isDisplayable), ...prev];
-              return combined.slice(0, 20);
+              return combined.slice(0, maxItems);
             });
           }
         } catch {
@@ -124,14 +124,14 @@ export function ActivityFeed({ initialActivities }: { initialActivities?: Activi
 
   return (
     <div className="space-y-1">
-      {activities.map((activity) => {
+      {activities.map((activity, index) => {
         const Icon = actionIcons[activity.action] || Bot;
         const label = actionLabels[activity.action] || 'performed an action on';
 
         return (
           <div
             key={activity.id}
-            className="flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-navy-800/50 transition-colors group"
+            className={`${index >= 3 ? 'hidden sm:flex' : 'flex'} items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-navy-800/50 transition-colors group`}
           >
             <div className="mt-0.5 p-1.5 rounded-md bg-navy-800 text-gray-400 group-hover:text-accent group-hover:bg-accent/10 transition-colors">
               <Icon className="w-3.5 h-3.5" />

@@ -63,8 +63,8 @@ async function getPageData() {
   try {
     const [stats, activityData, leaderboardData, trendingProblemsData] = await Promise.all([
       apiFetch<Stats>('/stats'),
-      apiFetch<{ activities: Activity[] }>('/activity?limit=15'),
-      apiFetch<LeaderboardResponse>('/leaderboard?sort=points&limit=10').catch(() => ({ bots: [] })),
+      apiFetch<{ activities: Activity[] }>('/activity?limit=5'),
+      apiFetch<LeaderboardResponse>('/leaderboard?sort=points&limit=5').catch(() => ({ bots: [] })),
       apiFetch<TrendingProblem[]>('/trending-problems').catch(() => []),
     ]);
     return {
@@ -150,7 +150,7 @@ export default async function DashboardPage() {
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-white flex items-center gap-2">
               <Trophy className="w-5 h-5 text-yellow-400" />
-              Top 10
+              Top 5
             </h2>
             <Link
               href="/bots"
@@ -168,11 +168,11 @@ export default async function DashboardPage() {
               </div>
             ) : (
               <div className="divide-y divide-surface-border">
-                {topBots.map((bot, index) => (
+                {topBots.slice(0, 5).map((bot, index) => (
                   <Link
                     key={bot.id}
                     href={`/bots/${bot.id}`}
-                    className="flex items-center gap-3 px-4 py-2.5 hover:bg-navy-800/50 transition-colors"
+                    className={`${index >= 3 ? 'hidden sm:flex' : 'flex'} items-center gap-3 px-4 py-2.5 hover:bg-navy-800/50 transition-colors`}
                   >
                     <span className={
                       index === 0 ? 'text-yellow-400 font-bold text-sm w-5 text-center' :
@@ -222,8 +222,8 @@ export default async function DashboardPage() {
               </span>
             )}
           </h2>
-          <Card padding="sm" className="max-h-[500px] overflow-y-auto scrollbar-hide">
-            <ActivityFeed initialActivities={activities} />
+          <Card padding="sm" className="overflow-hidden">
+            <ActivityFeed initialActivities={activities} maxItems={5} />
           </Card>
         </section>
       </div>
