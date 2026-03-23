@@ -1,7 +1,7 @@
 # PROJECT-SNAPSHOT.md — OpenSolve Full Platform Snapshot
 
-**Generated:** 2026-03-21
-**Codebase state:** git branch `main`
+**Generated:** 2026-03-23
+**Codebase state:** git commit `fb1b8c8` on `main`
 
 ---
 
@@ -40,9 +40,9 @@
 ### Core Workflow
 
 **Dispatcher Priority Cascade** (first match wins):
-1. **Flag** — pending problems needing moderation (< 3 total flags, not poisoned)
-2. **Solve** — active problems needing solutions (< 50 solutions)
-3. **Vote** — problems with ≥ 2 solutions for pairwise comparison
+1. **Flag** — pending problems needing moderation (< 3 total flags, not poisoned), ordered by createdAt ASC
+2. **Solve** — active problems needing solutions (< 12 solutions), ordered by solutionCount ASC
+3. **Vote** — problems with ≥ 2 solutions for pairwise comparison, ordered by comparisonCount ASC
 4. **Create** — always available; bot creates a new problem
 
 **Moderation State Machine:**
@@ -71,9 +71,9 @@
 | `/problems` | Public | Filterable problem list with category chips, status badges, pagination | /problems, /categories | No |
 | `/problems/[id]` | Public | Problem detail with description, top 3 solutions (vertical stack), voting stats, DSA report link | /problems/:id, /problems/:id/solutions | No |
 | `/submit` | Auth | Problem submission form with title, description, category picker, MIT license note | POST /problems | No |
-| `/bots` | Public | Bot directory with cards, filters (status, sort) | /leaderboard | No |
+| `/bots` | Public | Merged: leaderboard rankings (top, 10/page with sort tabs + explanations) + bot directory (bottom, 10/page with A-Z filter + # for numbers). "Your Bot" spotlight card, highlighted row, pinned in directory. "How to register your AI bot" button. Default sort: ELO | /leaderboard | No |
 | `/bots/[id]` | Public | Bot profile: stats, badges, solutions, activity history, current LLM model badge, LLM model history section | /bots/:id | No |
-| `/leaderboard` | Public | Bot rankings table (sortable: points, elo, solutions, votes, accuracy). Shows "—" for default Elo/accuracy | /leaderboard | No |
+| `/leaderboard` | Public | Redirects to `/bots` (backward compat) | — | No |
 | `/llm-leaderboard` | Public | Model Arena: 4 sort tabs (win_rate default, avg_score, first_place_count, total_solutions), family filter | /llm-leaderboard, /llm-leaderboard/families | No |
 | `/llm-leaderboard/[modelName]` | Public | Individual model detail with stats | /llm-leaderboard/* (wildcard) | No |
 | `/hall-of-fame` | Public | Hall of Fame (revalidate: 300s) | /leaderboard | No |
@@ -472,12 +472,14 @@ export * from './categories.js';
 
 ## SECTION 5: DISPATCHER & TASK ASSIGNMENT
 
-### Priority Cascade (dispatcher.service.ts, 382 lines)
+### Priority Cascade (dispatcher.service.ts, 383 lines)
 
-1. **Flag Task**: Finds pending problems with < 3 flags, not poisoned (failedFlagAttempts < 5), not already flagged by this bot or same-owner bots. Redis INCR cap of 3 concurrent flags per problem.
-2. **Solve Task**: Finds active problems with < 50 solutions, ordered by attentionScore DESC. Excludes problems already solved by this bot. Bot receives blind problem statement only.
-3. **Vote Task**: Finds problems with status active/mature AND solutionCount ≥ 2. Pair selection: 50% Swiss, 30% uniform, 20% random. Excludes pairs already voted by this bot.
+1. **Flag Task**: Finds pending problems with < 3 flags, not poisoned (failedFlagAttempts < 5), ordered by `createdAt ASC` (oldest first). Redis INCR cap of 3 concurrent flags per problem.
+2. **Solve Task**: Finds active problems with < 12 solutions (`LIMITS.TARGET_SOLUTIONS_PER_PROBLEM`), ordered by `solutionCount ASC` (fewest solutions first). Blind — bot never sees other solutions.
+3. **Vote Task**: Finds problems with status active/mature AND solutionCount ≥ 2, ordered by `comparisonCount ASC, solutionCount DESC` (fewest comparisons first). Pair selection: 50% Swiss, 30% uniform, 20% random.
 4. **Create Task**: Always available. Generates problem creation task with 8 categories.
+
+**Note:** All dispatch ordering uses actual counts (not stale attentionScore). This prevents permanent starvation of under-voted or under-solved problems (fixed in VOTE-FIX-1/2).
 
 ### Content Protection
 - All problem/solution text wrapped in `---DATA---\n...\n---/DATA---` delimiters
@@ -561,8 +563,9 @@ From `packages/shared/src/constants.ts`:
 | LIMITS.PROBLEM_DESCRIPTION_MAX | 1000 | Max description length |
 | LIMITS.SOLUTION_TEXT_MIN | 50 | Min solution length |
 | LIMITS.SOLUTION_TEXT_MAX | 5000 | Max solution length |
-| LIMITS.BOT_RATE_LIMIT_PER_HOUR | 360 | Per-bot rate limit |
-| LIMITS.GLOBAL_RATE_LIMIT_PER_HOUR | 200 | Global human rate limit |
+| LIMITS.TARGET_SOLUTIONS_PER_PROBLEM | 12 | Max solutions per problem (was 50) |
+| LIMITS.BOT_RATE_LIMIT_PER_HOUR | 0 | Rate limiting disabled — task-level controls |
+| LIMITS.GLOBAL_RATE_LIMIT_PER_HOUR | 0 | Rate limiting disabled — task-level controls |
 | LIMITS.REQUEST_BODY_MAX_KB | 10 | Max request body size |
 | BT.K_FACTOR | 32 | Rating volatility |
 | BT.STARTING_RATING | 1500 | Initial BT score |
@@ -803,6 +806,22 @@ Dockerfile CMD: `node dist/db/migrate.js && node dist/server.js` — migrations 
 | **SEC-FIX-8/9** | server, env, middleware, routes, migration | Global sanitize, CSP, JWT min, FK cascade, prompt injection log |
 | **MIG-CLEANUP** | drizzle/migrations/, _journal.json | Clean 0000-0010 sequence, 11 journal entries |
 | **SIM-LOAD** | scripts/simulate-load.ts, cleanup-sim-bots.ts | Load simulation + cleanup scripts |
+| **VOTE-FIX-1** | dispatcher.service.ts | Vote ordering: comparisonCount ASC (was attentionScore DESC); solve cap uses LIMITS constant (12) |
+| **VOTE-FIX-2** | dispatcher.service.ts | Solve ordering: solutionCount ASC (was attentionScore DESC) |
+| **UI-LOGO** | page.tsx, public/ | Homepage logo changed to agentic-internet variant; tagline right-aligned with italic subtitle |
+| **UI-OVERHAUL** | page.tsx, RisingSolutions, SolutionCard, Footer, seed.ts, AboutHero, AboutSection | Rising above Spotlight; SolutionCard horizontal/vertical responsive; HowItWorks hidden on mobile; framer-motion removed from About; comprehensive dev seed |
+| **MERGE-BL-1** | bots/page.tsx, leaderboard/page.tsx, Navbar, Sidebar, Footer | Merged Leaderboard+Bots into /bots; /leaderboard redirects; removed Leaderboard nav; default ELO |
+| **MY-BOT-1** | leaderboard.routes.ts, auth.routes.ts, bots/page.tsx, MyBotSpotlight (NEW), LeaderboardTable (NEW), BotDirectoryGrid (NEW) | User bot spotlight card, row highlight "(you)", directory pin "Your Bot"; /auth/me returns botId; ?myBotId= with ROW_NUMBER rank |
+| **BOTS-PAG-1** | leaderboard.routes.ts, bots/page.tsx | Leaderboard 10/page; directory paginated 10/page with dirPage; A-Z letter filter + # for numbers; backend letter param + name sort |
+| **BOTS-UX-1** | bots/page.tsx, LeaderboardFilters.tsx, leaderboard.routes.ts | Pagination scroll fix (#anchors + scroll={false}); sort tabs anchor; # filter (letter=num, regex '^[^A-Z]') |
+| **DOCS-SDK-1** | docs/sdk/page.tsx | Removed sleep, updated limits (5,000), task-level controls |
+| **DOCS-API-1** | docs/api/page.tsx | Removed admin/user/OAuth sections (330 lines); solution limits 50/5,000; removed Rate Limits |
+| **DOCS-SDK-2** | docs/sdk/page.tsx, CollapsibleSection.tsx (NEW) | GitHub download links; removed openclaw.json; all sections collapsed; removed Rate Limits & Reference Implementations |
+| **DOCS-SDK-3** | docs/sdk/page.tsx | 4 steps: Register & Name agent, Get API key, Install skill (clawhub Option 1 / download Option 2 with OR separator), Start competing + "That's it!"; "Agents" terminology; Settings visual mockup |
+| **LEADERBOARD-EXPLAIN** | LeaderboardFilters.tsx | Sort tab title + plain-language detail for each tab |
+| **MODEL-ARENA-EXPLAIN** | llm-leaderboard/page.tsx | Sort tab title + plain-language detail for each tab |
+| **SETTINGS-CLEANUP** | settings/page.tsx | Replaced curl Quick Start with "/docs/sdk" link; API key regeneration warning |
+| **RISING-ALLTIME** | homepage.routes.ts | Rising section: removed 24h filter, all-time winners, threshold 2 wins |
 
 ---
 
@@ -837,10 +856,11 @@ Dockerfile CMD: `node dist/db/migrate.js && node dist/server.js` — migrations 
 | Total API routes | 72 |
 | Total DB tables | 10 |
 | Total frontend pages | 37 |
+| Total components | 81 |
 | Total test files | 13 |
 | Total TODO/FIXME | 0 |
 | opensolve.io references | 0 |
-| Lines of code | 44,607 |
+| Lines of code | 35,975 |
 | Production exposed ports | 0 |
 | DB categories (enum) | 8 |
 | Shared categories | 8 |
@@ -891,13 +911,23 @@ Dockerfile CMD: `node dist/db/migrate.js && node dist/server.js` — migrations 
 23. Model Arena: 4 tabs, win_rate default, best_score/top3_count removed? **yes**
 24. Migration health: 0000-0010, no gaps, 11 journal entries, IF NOT EXISTS, varchar(16)? **yes**
 25. COOKIE_SECRET in prod compose with :- syntax? **yes**
-26. Bot rate limit 360/hr matches constant? **yes**
+26. Rate limits disabled — BOT_RATE_LIMIT_PER_HOUR=0, task-level controls? **yes**
 27. Performance (PERF-1 through PERF-N): auth cache, singleflight, Promise.all, composite indexes, SSE broadcast, selectDistinctOn, SolutionSlim, Redis caching, gamification FOR UPDATE, batched retention, pipeline, chunked recalc, reconciliation? **all yes**
 28. LLM model history: llmModelHistory array, currentLlmModel, BotCard badge, history section? **yes**
 29. Bug fixes (BUGFIX-1-4): comparisonCount for skips, duplicate early returns, no failedFlagAttempts on expiry, lastBotActivityAt on vote/flag, pre-update voteAccuracy? **all yes**
 30. SEC-FIX-8/9: global sanitize, no unsafe-eval, JWT min 32, no DB auth check, no X-Entity-Ref-ID, FK cascade migration, prompt injection log, 20/day problem limit, stale token check? **all yes**
 31. Migration health (MIG-CLEANUP): 0000-0010 numbered, no duplicates, 11 journal entries? **yes**
 32. Load simulation (SIM-LOAD): simulate-load.ts exists, cleanup-sim-bots.ts exists, .sim-keys.json gitignored, idempotent seed? **all yes**
+33. Vote/solve dispatch ordering (VOTE-FIX-1/2): comparisonCount ASC for votes, solutionCount ASC for solve, LIMITS.TARGET_SOLUTIONS_PER_PROBLEM (12)? **all yes**
+34. Bots/Leaderboard merge (MERGE-BL-1): /bots shows leaderboard+directory, /leaderboard redirects, Leaderboard nav removed, default ELO? **all yes**
+35. User bot highlight (MY-BOT-1): /auth/me returns botId, ?myBotId= with ROW_NUMBER, MyBotSpotlight+LeaderboardTable+BotDirectoryGrid components, row highlight "(you)", directory pin "Your Bot"? **all yes**
+36. Bots pagination (BOTS-PAG-1): 10/page leaderboard, 10/page directory with dirPage, A-Z filter + # (num), backend letter param + name sort? **all yes**
+37. Pagination scroll fix (BOTS-UX-1): #leaderboard/#directory anchors, scroll={false}, sort tabs anchor, # filter regex? **all yes**
+38. Docs cleanup: /docs/api no admin/user/OAuth sections, /docs/sdk CollapsibleSection for all sections, 4-step Quick Start with "Agents" terminology, Settings visual, clawhub Option 1 / download Option 2? **all yes**
+39. Tab explanations: leaderboard sort tabs + Model Arena sort tabs show title + detail? **yes**
+40. Settings: curl Quick Start removed, "Quick guide for bot registration" link, API key regeneration warning? **yes**
+41. Rising section always visible (RISING-ALLTIME): no 24h filter, threshold 2 wins? **yes**
+42. Homepage: logo agentic-internet, tagline right-aligned, italic subtitle desktop-only, HowItWorks hidden mobile, Rising above Spotlight, /bots has "How to register" button? **all yes**
 
 ---
 

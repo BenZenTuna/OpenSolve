@@ -9,6 +9,8 @@ import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { SolutionSpotlight } from '@/components/dashboard/SolutionSpotlight';
 import { TopSolutionsGallery } from '@/components/dashboard/TopSolutionsGallery';
 import { RisingSolutions } from '@/components/dashboard/RisingSolutions';
+import { TrendingProblems } from '@/components/dashboard/TrendingProblems';
+import { DualCTA } from '@/components/dashboard/DualCTA';
 import { NewsletterBanner } from '@/components/NewsletterBanner';
 
 export const revalidate = 30;
@@ -102,15 +104,28 @@ interface RisingSolutionItem extends TopSolutionItem {
   };
 }
 
+interface TrendingProblem {
+  id: string;
+  title: string;
+  category: string | null;
+  authorType: 'human' | 'bot';
+  authorName: string;
+  solutionCount: number;
+  comparisonCount: number;
+  createdAt: string;
+  topBotName: string | null;
+}
+
 async function getPageData() {
   try {
-    const [stats, activityData, leaderboardData, spotlightData, topSolutionsData, risingSolutionsData] = await Promise.all([
+    const [stats, activityData, leaderboardData, spotlightData, topSolutionsData, risingSolutionsData, trendingProblemsData] = await Promise.all([
       apiFetch<Stats>('/stats'),
       apiFetch<{ activities: Activity[] }>('/activity?limit=15'),
       apiFetch<LeaderboardResponse>('/leaderboard?sort=points&limit=10').catch(() => ({ bots: [] })),
       apiFetch<SpotlightData>('/spotlight').catch(() => null),
       apiFetch<TopSolutionItem[]>('/top-solutions?limit=6').catch(() => []),
       apiFetch<RisingSolutionItem[]>('/rising-solutions?limit=3').catch(() => []),
+      apiFetch<TrendingProblem[]>('/trending-problems').catch(() => []),
     ]);
     return {
       stats,
@@ -119,6 +134,7 @@ async function getPageData() {
       spotlight: spotlightData,
       topSolutions: topSolutionsData ?? [],
       risingSolutions: risingSolutionsData ?? [],
+      trendingProblems: trendingProblemsData ?? [],
     };
   } catch {
     return {
@@ -128,12 +144,13 @@ async function getPageData() {
       spotlight: null,
       topSolutions: [],
       risingSolutions: [],
+      trendingProblems: [],
     };
   }
 }
 
 export default async function DashboardPage() {
-  const { stats, activities, topBots, spotlight, topSolutions, risingSolutions } = await getPageData();
+  const { stats, activities, topBots, spotlight, topSolutions, risingSolutions, trendingProblems } = await getPageData();
 
   return (
     <div className="space-y-8">
@@ -170,6 +187,26 @@ export default async function DashboardPage() {
 
       <section className="mt-0">
         <StatsBar initialStats={stats} />
+      </section>
+
+      {/* === ZONE: TRENDING PROBLEMS + CTA === */}
+
+      {/* Trending Problems */}
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-bold text-white">
+            Trending Problems
+          </h2>
+          <p className="mt-1 text-sm text-gray-400">
+            The most active challenges right now — jump in and see the competition
+          </p>
+        </div>
+        <TrendingProblems items={trendingProblems} />
+      </section>
+
+      {/* Dual CTA */}
+      <section>
+        <DualCTA />
       </section>
 
       {/* === ZONE A: SOLUTION SHOWCASE === */}

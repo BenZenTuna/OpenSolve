@@ -1892,6 +1892,22 @@ Use this corrected table as the authoritative reference — verify each session 
 | **SEC-FIX-9** | auth.middleware.ts, email.service.ts, bot.routes.ts, newsletter.routes.ts, newsletter-tokens.ts | Reverted S6 DB check in authMiddleware (perf concern), reverted S9 X-Entity-Ref-ID headers (tracking disabled in Resend dashboard), S11 prompt_injection_flagged activity log entry, S12 stale confirm token rejection after unsubscribe |
 | **MIG-CLEANUP** | drizzle/migrations/ (renames + meta/_journal.json) | Fixed migration numbering: duplicate 0003 prefix resolved (0003_unique_problem_title.sql → 0009), unnumbered newsletter_subscription.sql → 0010; added 0007-0010 entries to _journal.json; clean 0000–0010 sequence with 11 journal entries |
 | **SIM-LOAD** | scripts/simulate-load.ts (NEW), scripts/cleanup-sim-bots.ts (NEW), .gitignore | Load simulation: seeds 50 synthetic bots via direct DB insert, drives them through full task lifecycle (flag→solve→vote→create) via real HTTP API, reports BT scores/maturity/leaderboard; cleanup script cascades deletes + Redis FLUSHALL; .sim-keys.json gitignored |
+| **VOTE-FIX-1** | dispatcher.service.ts | Vote dispatch ordering changed from stale attentionScore DESC to comparisonCount ASC — fixes permanent starvation of problems with 0 comparisons; solve cap uses LIMITS.TARGET_SOLUTIONS_PER_PROBLEM (12) instead of hardcoded 50 |
+| **VOTE-FIX-2** | dispatcher.service.ts | Solve dispatch ordering changed from attentionScore DESC to solutionCount ASC — prevents solve task starvation for new problems |
+| **UI-LOGO** | apps/web/src/app/page.tsx, apps/web/public/ | Homepage logo changed to OpemSolve-LogoV2-BFTAI-agentic-internet.svg; value prop tagline with bold white highlights added next to logo; italic "LLM gamification" subtitle (desktop only) |
+| **UI-OVERHAUL** | page.tsx, RisingSolutions.tsx, SolutionCard.tsx, Footer.tsx, seed.ts, AboutHero.tsx, AboutSection.tsx | Rising section moved above Spotlight; SolutionCard redesigned (horizontal desktop, clean vertical mobile); HowItWorks hidden on mobile with link; footer 3-col mobile; AboutHero/AboutSection removed framer-motion (fixes blank /how-it-works); comprehensive dev seed script (14 users, 8 bots, 13 problems, 80 solutions, 186 comparisons) |
+| **MERGE-BL-1** | bots/page.tsx, leaderboard/page.tsx, Navbar.tsx, Sidebar.tsx, Footer.tsx | Merged Leaderboard and Bots into single /bots page — leaderboard rankings on top, bot directory below; /leaderboard redirects to /bots; removed Leaderboard nav item; default sort ELO |
+| **MY-BOT-1** | leaderboard.routes.ts, auth.routes.ts, bots/page.tsx, MyBotSpotlight.tsx (NEW), LeaderboardTable.tsx (NEW), BotDirectoryGrid.tsx (NEW) | User's bot highlighted on /bots page — spotlight card above leaderboard with rank/stats, highlighted row in table with "(you)" label, pinned first in bot directory with "Your Bot" badge; /auth/me returns botId; /leaderboard accepts ?myBotId= with ROW_NUMBER rank |
+| **BOTS-PAG-1** | leaderboard.routes.ts, bots/page.tsx | Leaderboard 10/page (was 20); bot directory paginated 10/page with dirPage param; A-Z letter filter with vertical strip (desktop) / horizontal (mobile); backend letter param + name sort + WHERE LIKE filter |
+| **BOTS-UX-1** | bots/page.tsx, LeaderboardFilters.tsx, leaderboard.routes.ts | Fixed pagination scroll-to-top with section anchors (#leaderboard, #directory) + scroll={false}; sort tabs anchor to #leaderboard; added # filter for numbers/symbols (letter=num, regex '^[^A-Z]') |
+| **DOCS-SDK-1** | docs/sdk/page.tsx | SDK docs audited — removed time.sleep from Python example, solution limit "Over 2000" → "API accepts up to 5,000", replaced sleep tip with task-level controls |
+| **DOCS-API-1** | docs/api/page.tsx | Removed 330 lines: admin (9 endpoints), user (11), OAuth (2) sections + Quick Reference tables; fixed "21 categories" → "8 categories"; solution_text limits 50/5,000; Rate Limits section removed |
+| **DOCS-SDK-2** | docs/sdk/page.tsx, CollapsibleSection.tsx (NEW) | Replaced repo copy with raw GitHub download links for SKILL.md + ONBOARDING.md; removed openclaw.json config step; Custom Bot section collapsed by default; all sections below OpenClaw collapsed (Task Loop, Task Types, Token Optimization, API Reference, Scoring, Tips); removed Rate Limits & Reference Implementations sections |
+| **DOCS-SDK-3** | docs/sdk/page.tsx | Quick Start restructured to 4 steps: (1) Register & Name your agent with Settings visual mockup, (2) Get an API key, (3) Install skill — clawhub Option 1 / download Option 2 with OR separator, (4) Start competing + "That's it!"; "Bots" → "Agents" terminology; headline "Register Your OpenClaw Type AI Agents (Recommended)" |
+| **LEADERBOARD-EXPLAIN** | LeaderboardFilters.tsx | Each leaderboard sort tab (Points, ELO, Solutions, Votes, Accuracy) shows title + plain-language detail |
+| **MODEL-ARENA-EXPLAIN** | llm-leaderboard/page.tsx | Each Model Arena sort tab (Most Voted, Overall Rating, Most Wins, Most Prolific) shows title + plain-language detail |
+| **SETTINGS-CLEANUP** | settings/page.tsx | Replaced Quick Start curl examples with single "Quick guide for bot registration →" link to /docs/sdk; added API key regeneration warning |
+| **RISING-ALLTIME** | homepage.routes.ts | Rising Right Now section: removed 24h time filter, now shows all-time top winners so section always visible; threshold lowered from 3 to 2 wins |
 
 ---
 
@@ -2301,5 +2317,51 @@ echo "Contact route: $(grep -c "fastify\." apps/api/src/routes/contact.routes.ts
     - simulate-load.ts uses `postgres` + `bcrypt` (no extra deps)? (yes/no)
     - cleanup-sim-bots.ts uses `ioredis` for FLUSHALL? (yes/no)
     - Seed is idempotent (checks for existing sim-bot users + caches keys)? (yes/no)
+
+41. Vote/solve dispatch fix (VOTE-FIX-1, VOTE-FIX-2):
+    - Vote candidates ordered by comparisonCount ASC (not attentionScore DESC)? (yes/no)
+    - Solve candidates ordered by solutionCount ASC (not attentionScore DESC)? (yes/no)
+    - Solve cap uses LIMITS.TARGET_SOLUTIONS_PER_PROBLEM (12)? (yes/no)
+42. Bots & Leaderboard merge (MERGE-BL-1):
+    - /bots page shows leaderboard on top + bot directory below? (yes/no)
+    - /leaderboard redirects to /bots? (yes/no)
+    - Leaderboard nav item removed from Navbar/Sidebar? (yes/no)
+    - Default sort is ELO (not points)? (yes/no)
+43. User's bot highlight (MY-BOT-1):
+    - /auth/me returns botId? (yes/no)
+    - /leaderboard accepts ?myBotId= with ROW_NUMBER rank? (yes/no)
+    - MyBotSpotlight, LeaderboardTable, BotDirectoryGrid components exist? (yes/no)
+    - User's row highlighted with accent + "(you)" label? (yes/no)
+    - User's bot pinned first in directory with "Your Bot" badge? (yes/no)
+44. Bots page pagination (BOTS-PAG-1):
+    - Leaderboard 10/page? (yes/no)
+    - Bot directory paginated with dirPage param? (yes/no)
+    - A-Z letter filter + # (num) option? (yes/no)
+    - Backend accepts letter param with name sort? (yes/no)
+    - Pagination scroll fixed with #anchors + scroll={false}? (yes/no)
+45. Docs cleanup (DOCS-API-1, DOCS-SDK-2, DOCS-SDK-3):
+    - /docs/api: no admin/user/OAuth sections? (yes/no)
+    - /docs/sdk: CollapsibleSection component for all sections below OpenClaw? (yes/no)
+    - /docs/sdk: 4 steps (Register & Name, Get API key, Install skill, Start competing)? (yes/no)
+    - /docs/sdk: "Agents" terminology (not "bots")? (yes/no)
+    - /docs/sdk: Settings visual mockup in step 1? (yes/no)
+    - /docs/sdk: clawhub Option 1, download Option 2 with OR separator? (yes/no)
+46. Tab explanations:
+    - Leaderboard sort tabs show title + detail? (yes/no)
+    - Model Arena sort tabs show title + detail? (yes/no)
+47. Settings cleanup:
+    - Quick Start curl examples removed? (yes/no)
+    - "Quick guide for bot registration →" link to /docs/sdk? (yes/no)
+    - API key regeneration warning present? (yes/no)
+48. Rising section always visible (RISING-ALLTIME):
+    - 24h time filter removed from rising-solutions query? (yes/no)
+    - Threshold lowered from 3 to 2 wins? (yes/no)
+49. Homepage layout:
+    - Logo: OpemSolve-LogoV2-BFTAI-agentic-internet.svg? (yes/no)
+    - Tagline right-aligned on desktop? (yes/no)
+    - "LLM gamification" italic subtitle hidden on mobile? (yes/no)
+    - HowItWorks hidden on mobile with "learn how it works →" link? (yes/no)
+    - Rising Right Now section above Solution Spotlight? (yes/no)
+    - /bots page has "How to register your AI bot" button? (yes/no)
 
 Target length: 2,000–5,000 lines. Be thorough but do not repeat the same file contents across multiple sections.

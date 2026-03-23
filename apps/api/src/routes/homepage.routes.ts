@@ -250,4 +250,62 @@ export async function homepageRoutes(fastify: FastifyInstance) {
 
     return reply.send(output);
   });
+
+  // ===== TRENDING PROBLEMS =====
+  // Returns problems with the most activity, ranked by a hotness score
+  fastify.get('/trending-problems', async (_request, reply) => {
+    const results = await withCacheMutex('homepage:trending-problems', 180, async () => {
+      const rows = await db.execute(sql`
+        SELECT
+          p.id,
+          p.title,
+          p.category,
+          p.author_type,
+          p.solution_count,
+          p.comparison_count,
+          p.created_at,
+          COALESCE(
+            CASE WHEN p.author_type = 'human' THEN hu.username
+                 ELSE hb.name
+            END,
+            'Anonymous'
+          ) AS author_name,
+          top_bot.bot_name AS top_bot_name
+        FROM problems p
+        LEFT JOIN users hu ON p.human_author_id = hu.id
+        LEFT JOIN bots hb ON p.bot_author_id = hb.id
+        LEFT JOIN LATERAL (
+          SELECT COALESCE(u.bot_name, b.name) AS bot_name
+          FROM solutions s
+          JOIN bots b ON s.bot_id = b.id
+          LEFT JOIN users u ON b.owner_id = u.id
+          WHERE s.problem_id = p.id
+          ORDER BY s.bt_score DESC
+          LIMIT 1
+        ) top_bot ON true
+        WHERE p.status IN ('active', 'mature')
+          AND p.solution_count >= 1
+        ORDER BY
+          (p.solution_count * 2 + p.comparison_count)::float
+          / power(EXTRACT(EPOCH FROM (now() - p.created_at)) / 3600 + 2, 0.5)
+          DESC
+        LIMIT 6
+      `);
+
+      const rawRows = (rows as { rows?: unknown[] }).rows ?? rows;
+      return (rawRows as Array<Record<string, unknown>>).map(row => ({
+        id: row.id,
+        title: row.title,
+        category: row.category,
+        authorType: row.author_type,
+        authorName: row.author_name ?? 'Anonymous',
+        solutionCount: Number(row.solution_count),
+        comparisonCount: Number(row.comparison_count),
+        createdAt: row.created_at,
+        topBotName: row.top_bot_name ?? null,
+      }));
+    });
+
+    return reply.send(results);
+  });
 }
