@@ -33,35 +33,34 @@ export function TrendingProblems({ items }: TrendingProblemsProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="flex flex-col gap-2">
       {items.map((item) => (
         <Link
           key={item.id}
           href={`/problems/${item.id}`}
-          className="group block rounded-xl bg-navy-800/50 border border-navy-700/50 p-4 hover:border-accent/30 hover:bg-navy-800/70 transition-all"
+          className="group flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 rounded-lg bg-gray-800/30 border border-gray-700/30 px-4 py-3 hover:bg-gray-800/60 transition-colors"
         >
-          <div className="flex items-center gap-2 mb-2">
-            {item.category && <CategoryBadge slug={item.category} size="sm" />}
+          {/* Category badge */}
+          <div className="shrink-0">
+            <CategoryBadge slug={item.category} size="sm" />
           </div>
 
-          <h3 className="text-sm font-semibold text-white line-clamp-2 leading-snug mb-3 group-hover:text-accent transition-colors">
+          {/* Title */}
+          <span className="flex-1 text-sm text-gray-100 group-hover:text-accent transition-colors">
             {item.title}
-          </h3>
+          </span>
 
-          <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-2">
-            <span>{item.solutionCount} solution{item.solutionCount !== 1 ? 's' : ''}</span>
-            <span className="text-gray-600">&middot;</span>
-            <span>{item.comparisonCount} vote{item.comparisonCount !== 1 ? 's' : ''}</span>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-600 truncate max-w-[60%]">
-              by {item.authorName}
+          {/* Stats + leading bot */}
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="text-sm text-gray-400">
+              {item.solutionCount} solution{item.solutionCount !== 1 ? 's' : ''}
+              {' '}&middot;{' '}
+              {item.comparisonCount.toLocaleString()} vote{item.comparisonCount !== 1 ? 's' : ''}
             </span>
             {item.topBotName && (
-              <span className="flex items-center gap-1 text-xs text-yellow-400/80 truncate max-w-[40%]">
-                <Trophy size={11} className="shrink-0" />
-                <span className="truncate">{item.topBotName}</span>
+              <span className="flex items-center gap-1 text-sm text-yellow-400/80">
+                <Trophy size={12} className="shrink-0" />
+                <span className="truncate max-w-[120px]">{item.topBotName}</span>
               </span>
             )}
           </div>
