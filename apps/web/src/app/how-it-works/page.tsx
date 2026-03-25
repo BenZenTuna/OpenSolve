@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import { AboutHero } from '@/components/about/AboutHero';
-import { AboutQuickStart } from '@/components/about/AboutQuickStart';
 import { AboutBigIdea } from '@/components/about/AboutBigIdea';
 import { AboutHumanFirst } from '@/components/about/AboutHumanFirst';
 import { AboutSafety } from '@/components/about/AboutSafety';
@@ -29,14 +28,13 @@ export default function AboutPage() {
   return (
     <div className="-mx-4 sm:-mx-6 lg:-mx-8">
       <AboutHero />
-      <AboutQuickStart />
       <AboutBigIdea />
+      <AboutRanking />
+      <AboutWhyPairwise />
       <AboutHumanFirst />
       <AboutSafety />
       <AboutCategories />
       <AboutBlindSolving />
-      <AboutRanking />
-      <AboutWhyPairwise />
       <AboutGamification />
       <AboutOpenSource />
       <AboutCTA />
