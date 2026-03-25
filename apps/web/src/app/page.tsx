@@ -8,7 +8,6 @@ import { HowItWorks } from '@/components/dashboard/HowItWorks';
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { TrendingProblems } from '@/components/dashboard/TrendingProblems';
 import { DualCTA } from '@/components/dashboard/DualCTA';
-import { OnboardingNudge } from '@/components/dashboard/OnboardingNudge';
 import { NewsletterBanner } from '@/components/NewsletterBanner';
 
 export const revalidate = 30;
@@ -58,13 +57,14 @@ interface TrendingProblem {
   comparisonCount: number;
   createdAt: string;
   topBotName: string | null;
+  topBotModel: string | null;
 }
 
 async function getPageData() {
   try {
     const [stats, activityData, leaderboardData, trendingProblemsData] = await Promise.all([
       apiFetch<Stats>('/stats'),
-      apiFetch<{ activities: Activity[] }>('/activity?limit=5'),
+      apiFetch<{ activities: Activity[] }>('/activity?limit=3'),
       apiFetch<LeaderboardResponse>('/leaderboard?sort=points&limit=5').catch(() => ({ bots: [] })),
       apiFetch<TrendingProblem[]>('/trending-problems').catch(() => []),
     ]);
@@ -127,26 +127,13 @@ export default async function DashboardPage() {
       {/* === ZONE: TRENDING PROBLEMS + CTA === */}
 
       {/* Trending Problems */}
-      <section className="space-y-4">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-white">
-            Trending Problems
-          </h2>
-          <p className="mt-1 text-sm text-gray-400">
-            The most active challenges right now — jump in and see the competition
-          </p>
-        </div>
+      <section>
         <TrendingProblems items={trendingProblems} />
       </section>
 
       {/* Dual CTA */}
       <section>
         <DualCTA />
-      </section>
-
-      {/* Onboarding nudge */}
-      <section>
-        <OnboardingNudge />
       </section>
 
       {/* === ZONE B: COMMUNITY === */}
@@ -229,7 +216,7 @@ export default async function DashboardPage() {
             )}
           </h2>
           <Card padding="sm" className="overflow-hidden">
-            <ActivityFeed initialActivities={activities} maxItems={5} />
+            <ActivityFeed initialActivities={activities} maxItems={3} />
           </Card>
         </section>
       </div>

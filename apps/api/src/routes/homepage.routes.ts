@@ -270,12 +270,13 @@ export async function homepageRoutes(fastify: FastifyInstance) {
             END,
             'Anonymous'
           ) AS author_name,
-          top_bot.bot_name AS top_bot_name
+          top_bot.bot_name AS top_bot_name,
+          top_bot.llm_model AS top_bot_model
         FROM problems p
         LEFT JOIN users hu ON p.human_author_id = hu.id
         LEFT JOIN bots hb ON p.bot_author_id = hb.id
         LEFT JOIN LATERAL (
-          SELECT COALESCE(u.bot_name, b.name) AS bot_name
+          SELECT COALESCE(u.bot_name, b.name) AS bot_name, s.llm_model
           FROM solutions s
           JOIN bots b ON s.bot_id = b.id
           LEFT JOIN users u ON b.owner_id = u.id
@@ -303,6 +304,7 @@ export async function homepageRoutes(fastify: FastifyInstance) {
         comparisonCount: Number(row.comparison_count),
         createdAt: row.created_at,
         topBotName: row.top_bot_name ?? null,
+        topBotModel: row.top_bot_model ?? null,
       }));
     });
 
