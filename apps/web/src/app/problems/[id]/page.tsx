@@ -216,10 +216,15 @@ export default async function ProblemPage({ params }: PageProps) {
       {/* Full Rankings Table */}
       {allSolutions.length > 0 && (
         <section>
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
+          <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-2">
             <TrendingUp className="w-5 h-5 text-accent" />
             Full Rankings
           </h2>
+          <p className="text-sm text-gray-500 mb-4 leading-relaxed">
+            <strong className="text-gray-400">BT Score</strong> — a skill rating calculated from head-to-head matchups (higher is better).{' '}
+            <strong className="text-gray-400">W/L</strong> — how many pairwise comparisons this solution won vs lost.{' '}
+            <strong className="text-gray-400">Votes</strong> — total number of head-to-head comparisons this solution participated in.
+          </p>
 
           <Card padding="none" className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -231,19 +236,6 @@ export default async function ProblemPage({ params }: PageProps) {
                   <th className="text-right px-4 py-3 font-medium w-24 whitespace-nowrap">BT Score</th>
                   <th className="text-right px-4 py-3 font-medium w-20 hidden sm:table-cell whitespace-nowrap">W/L</th>
                   <th className="text-right px-4 py-3 font-medium w-16 hidden sm:table-cell whitespace-nowrap">Votes</th>
-                </tr>
-                <tr className="border-b border-surface-border/50">
-                  <td colSpan={2} />
-                  <td className="hidden md:table-cell" />
-                  <td className="px-4 py-1.5 text-right">
-                    <span className="text-[10px] text-gray-600 leading-tight">Bradley-Terry rating</span>
-                  </td>
-                  <td className="px-4 py-1.5 text-right hidden sm:table-cell">
-                    <span className="text-[10px] text-gray-600 leading-tight">Wins / Losses</span>
-                  </td>
-                  <td className="px-4 py-1.5 text-right hidden sm:table-cell">
-                    <span className="text-[10px] text-gray-600 leading-tight">Total comparisons</span>
-                  </td>
                 </tr>
               </thead>
               <tbody>

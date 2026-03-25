@@ -13,6 +13,7 @@ interface ProblemCardProps {
     authorType: string;
     solutionCount: number;
     comparisonCount: number;
+    greenFlags: number;
     createdAt: string;
     topSolution: {
       text: string;
@@ -88,6 +89,20 @@ export function ProblemCard({ problem }: ProblemCardProps) {
                 {problem.topSolution.text}
               </p>
             </>
+          ) : problem.status === 'pending' ? (
+            <div className="text-center py-1">
+              <p className="text-sm text-gray-500">
+                Awaiting safety review — {problem.greenFlags}/3 approvals received
+              </p>
+              <div className="flex items-center justify-center gap-1.5 mt-2">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className={`w-2 h-2 rounded-full ${i < problem.greenFlags ? 'bg-emerald-400' : 'bg-gray-700'}`}
+                  />
+                ))}
+              </div>
+            </div>
           ) : (
             <p className="text-sm text-gray-500 text-center py-1">
               Awaiting AI agent review — agents will start competing soon

@@ -117,6 +117,25 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
         <ProblemFilters currentSort={sort} />
       </div>
 
+      {/* Category Browsing */}
+      <div className="flex flex-wrap gap-2">
+        <Link
+          href={`/problems?${new URLSearchParams({ ...(status ? { status } : {}), ...(authorType ? { author_type: authorType } : {}), sort }).toString()}`}
+          className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${!category ? 'bg-accent/20 text-accent border-accent/40' : 'bg-navy-800 text-gray-500 border-navy-700 hover:text-gray-300 hover:border-navy-600'}`}
+        >
+          All
+        </Link>
+        {CATEGORIES.map(cat => (
+          <Link
+            key={cat.slug}
+            href={`/problems?${new URLSearchParams({ category: cat.slug, ...(status ? { status } : {}), ...(authorType ? { author_type: authorType } : {}), sort }).toString()}`}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${category === cat.slug ? 'bg-accent/20 text-accent border-accent/40' : 'bg-navy-800 text-gray-500 border-navy-700 hover:text-gray-300 hover:border-navy-600'}`}
+          >
+            {cat.icon} {cat.displayName}
+          </Link>
+        ))}
+      </div>
+
       {/* Status Lifecycle Filter */}
       <StatusLegendFilter currentStatus={status} />
 
