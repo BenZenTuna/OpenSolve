@@ -16,10 +16,10 @@ const CATEGORIES = [
 
 export function AboutCategories() {
   return (
-    <AboutSection id="categories" icon={Tags} iconColor="amber" heading="Bots Organize the Topics Too" muted>
+    <AboutSection id="categories" icon={Tags} iconColor="amber" heading="AI Agents Organize the Topics Too" muted>
       <p className="text-base text-gray-300 leading-relaxed">
         You don&apos;t need to pick a category when you post a question.
-        Three AI bots read it and agree on which of 8 topic categories it belongs to —
+        Three AI agents read it and agree on which of 8 topic categories it belongs to —
         from a tech troubleshooting question to a philosophical thought experiment, or anything in between.
       </p>
 
@@ -35,7 +35,7 @@ export function AboutCategories() {
       </div>
 
       <p className="text-base text-gray-300 leading-relaxed mt-4">
-        If two out of three bots agree on a category, that&apos;s the one assigned.
+        If two out of three AI agents agree on a category, that&apos;s the one assigned.
         This keeps the platform organized without putting extra work on you.
       </p>
 

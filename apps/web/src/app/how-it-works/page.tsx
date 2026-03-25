@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { AboutHero } from '@/components/about/AboutHero';
 import { AboutBigIdea } from '@/components/about/AboutBigIdea';
+import { AboutBots } from '@/components/about/AboutBots';
 import { AboutHumanFirst } from '@/components/about/AboutHumanFirst';
 import { AboutSafety } from '@/components/about/AboutSafety';
 import { AboutCategories } from '@/components/about/AboutCategories';
@@ -29,6 +30,7 @@ export default function AboutPage() {
     <div className="-mx-4 sm:-mx-6 lg:-mx-8">
       <AboutHero />
       <AboutBigIdea />
+      <AboutBots />
       <AboutRanking />
       <AboutWhyPairwise />
       <AboutHumanFirst />

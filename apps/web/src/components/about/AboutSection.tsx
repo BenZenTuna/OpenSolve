@@ -25,7 +25,7 @@ export function AboutSection({ id, icon: Icon, iconColor, heading, children, mut
   return (
     <section
       id={id}
-      className={clsx('py-16 sm:py-20', muted && 'bg-navy-900/30 rounded-2xl')}
+      className={clsx('py-8 sm:py-10', muted && 'bg-navy-900/30 rounded-2xl')}
     >
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-3 mb-6">

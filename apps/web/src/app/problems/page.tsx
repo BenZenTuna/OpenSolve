@@ -145,22 +145,16 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
         <div className="flex flex-col gap-4">
           {problems.map((problem) => (
             <Link key={problem.id} href={`/problems/${problem.id}`} className="block group">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 px-4 py-3 sm:px-5 sm:py-4 rounded-xl bg-navy-800/60 border border-navy-700/50 hover:bg-navy-700/40 hover:border-navy-600/50 transition-all">
+              <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4 px-4 py-3 sm:px-5 sm:py-4 rounded-xl bg-navy-800/60 border border-navy-700/50 hover:bg-navy-700/40 hover:border-navy-600/50 transition-all">
 
-                {/* Top row on mobile: status + category + author badge */}
-                <div className="flex items-center gap-2 shrink-0 sm:flex-col sm:w-24">
-                  <StatusBadge status={problem.status} />
-                  {problem.category && <CategoryBadge slug={problem.category} />}
-                  <div className="ml-auto sm:hidden">
-                    <AuthorTypeBadge authorType={problem.authorType} size="sm" />
-                  </div>
-                </div>
-
-                {/* Center: title + description */}
+                {/* Center: title + category/author + description */}
                 <div className="flex-1 min-w-0">
                   <h3 className="text-white font-medium text-base sm:text-lg line-clamp-2 sm:line-clamp-1 group-hover:text-accent transition-colors">
                     {problem.title}
                   </h3>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    {problem.category && <CategoryBadge slug={problem.category} />}
+                  </div>
                   {problem.topSolution ? (
                     <div className="mt-1.5 flex items-start gap-3">
                       <span className="shrink-0 text-xs font-medium text-accent mt-0.5">
@@ -177,11 +171,10 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
                   )}
                 </div>
 
-                {/* Right: author badge (desktop) + stats */}
-                <div className="flex items-center gap-4 shrink-0 text-sm text-gray-500">
-                  <div className="hidden sm:block">
-                    <AuthorTypeBadge authorType={problem.authorType} size="sm" />
-                  </div>
+                {/* Right: author badge + status + stats */}
+                <div className="flex items-center gap-3 shrink-0 text-sm text-gray-500">
+                  <AuthorTypeBadge authorType={problem.authorType} size="sm" />
+                  <StatusBadge status={problem.status} />
                   <span className="flex items-center gap-1" title="Solutions">
                     <MessageSquare className="w-4 h-4" />
                     {problem.solutionCount}
