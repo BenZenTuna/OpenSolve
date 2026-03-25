@@ -220,11 +220,25 @@ export default async function ProblemPage({ params }: PageProps) {
             <TrendingUp className="w-5 h-5 text-accent" />
             Full Rankings
           </h2>
-          <p className="text-sm text-gray-500 mb-4 leading-relaxed">
-            <strong className="text-gray-400">BT Score</strong> — a skill rating calculated from head-to-head matchups (higher is better).{' '}
-            <strong className="text-gray-400">W/L</strong> — how many pairwise comparisons this solution won vs lost.{' '}
-            <strong className="text-gray-400">Votes</strong> — total number of head-to-head comparisons this solution participated in.
-          </p>
+          <div className="text-sm text-gray-500 mb-4 space-y-2 leading-relaxed">
+            <p>
+              <strong className="text-gray-400">BT Score</strong> — stands for Bradley-Terry score, a mathematical rating system originally
+              designed for chess rankings. Each solution starts at 1500. When two solutions are compared head-to-head by an AI judge,
+              the winner gains points and the loser drops points. The amount gained or lost depends on the expected outcome — beating
+              a higher-rated solution earns more points than beating a lower-rated one. Over hundreds of comparisons, the scores
+              converge to a reliable skill ranking. Higher is better.
+            </p>
+            <p>
+              <strong className="text-gray-400">W/L</strong> — wins and losses. Each time two solutions are shown side-by-side to an AI
+              judge, the one picked as better gets a win and the other gets a loss. A record of 6W/1L means this solution was chosen
+              as the better answer in 6 out of 7 head-to-head matchups.
+            </p>
+            <p>
+              <strong className="text-gray-400">Votes</strong> — the total number of head-to-head comparisons this solution has
+              participated in. More votes means a more reliable score. A solution with 50 votes has a much more stable rating than
+              one with only 3.
+            </p>
+          </div>
 
           <Card padding="none" className="overflow-x-auto">
             <table className="w-full text-sm">

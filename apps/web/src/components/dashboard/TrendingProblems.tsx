@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Flame, Trophy } from 'lucide-react';
+import { Flame, MessageSquare, ArrowUpDown, Trophy } from 'lucide-react';
 
 interface TrendingProblem {
   id: string;
@@ -70,52 +70,67 @@ export function TrendingProblems({ items }: TrendingProblemsProps) {
       </div>
       <p className="text-sm text-gray-400 mb-4">The most active challenges right now</p>
 
-      {/* Problem rows */}
-      <div className="flex flex-col gap-2">
-        {items.map((item, index) => (
-          <Link
-            key={item.id}
-            href={`/problems/${item.id}`}
-            className="group flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 rounded-lg bg-gray-800/40 border border-gray-700/30 px-4 py-3 hover:bg-gray-700/50 hover:border-gray-600/50 hover:border-l-2 hover:border-l-accent transition-all duration-150"
-          >
-            {/* Rank number */}
-            <span className={`text-sm font-bold w-6 text-center shrink-0 ${index < 2 ? 'text-yellow-400' : 'text-gray-500'}`}>
-              {index + 1}
-            </span>
+      {/* Problem cards */}
+      <div className="space-y-2">
+        {items.map((item, index) => {
+          const rankBorder = index === 0 ? 'border-l-purple-500' : index === 1 ? 'border-l-emerald-500' : index === 2 ? 'border-l-blue-500' : 'border-l-gray-600';
+          const rankBg = index === 0 ? 'bg-purple-900/40 text-purple-400' : index === 1 ? 'bg-emerald-900/40 text-emerald-400' : index === 2 ? 'bg-blue-900/40 text-blue-400' : 'bg-gray-800 text-gray-400';
 
-            {/* Category badge */}
-            {item.category && (
-              <span className={`shrink-0 px-2 py-0.5 rounded text-xs font-medium border ${CATEGORY_COLORS[item.category] || 'bg-gray-500/20 text-gray-300 border-gray-500/30'}`}>
-                {CATEGORY_LABELS[item.category] || item.category}
-              </span>
-            )}
+          return (
+            <Link
+              key={item.id}
+              href={`/problems/${item.id}`}
+              className={`group block rounded-r-xl border border-gray-800 border-l-[3px] ${rankBorder} bg-gray-900/60 px-4 py-3.5 hover:border-gray-700 transition-colors`}
+            >
+              <div className="flex items-start gap-3.5">
+                {/* Rank circle */}
+                <span className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-medium shrink-0 ${rankBg}`}>
+                  {index + 1}
+                </span>
 
-            {/* Title */}
-            <span className="flex-1 text-sm text-gray-100 group-hover:text-accent transition-colors">
-              {item.title}
-            </span>
-
-            {/* Stats + leading bot */}
-            <div className="flex items-center gap-3 shrink-0">
-              <span className="text-sm text-gray-400">
-                {item.solutionCount} solution{item.solutionCount !== 1 ? 's' : ''}
-                {' '}&middot;{' '}
-                {item.comparisonCount.toLocaleString()} vote{item.comparisonCount !== 1 ? 's' : ''}
-              </span>
-              {item.topBotName && (
-                <span className="flex items-center gap-1 text-sm font-medium text-yellow-400/80">
-                  <Trophy size={12} className="shrink-0" />
-                  <span className="truncate max-w-[120px]">{item.topBotName}</span>
-                  {item.topBotModel && (
-                    <span className="text-[10px] text-purple-400/60 truncate max-w-[90px] hidden lg:inline">
-                      {item.topBotModel}
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  {/* Category pill */}
+                  {item.category && (
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border mb-1.5 ${CATEGORY_COLORS[item.category] || 'bg-gray-500/20 text-gray-300 border-gray-500/30'}`}>
+                      {CATEGORY_LABELS[item.category] || item.category}
                     </span>
                   )}
-                </span>
-              )}
-            </div>
-          </Link>
-        ))}
+
+                  {/* Title */}
+                  <p className="text-[15px] font-medium text-gray-100 leading-snug mb-2 group-hover:text-accent transition-colors">
+                    {item.title}
+                  </p>
+
+                  {/* Stats + leading bot */}
+                  <div className="flex items-center gap-3 flex-wrap text-xs text-gray-400">
+                    <span className="flex items-center gap-1">
+                      <MessageSquare size={13} />
+                      {item.solutionCount} solution{item.solutionCount !== 1 ? 's' : ''}
+                    </span>
+                    <span className="text-gray-600">&middot;</span>
+                    <span className="flex items-center gap-1">
+                      <ArrowUpDown size={13} />
+                      {item.comparisonCount.toLocaleString()} vote{item.comparisonCount !== 1 ? 's' : ''}
+                    </span>
+                    {item.topBotName && (
+                      <>
+                        <span className="text-gray-600">&middot;</span>
+                        <span className="flex items-center gap-1">
+                          <Trophy size={13} className="text-emerald-400" />
+                          <span className="text-emerald-400 font-medium">{item.topBotName}</span>
+                          {item.topBotModel && (
+                            <span className="text-gray-500 text-[11px] hidden sm:inline">{item.topBotModel}</span>
+                          )}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Link>
+          );
+        })}
       </div>
 
       {/* Category browsing */}
