@@ -1,14 +1,27 @@
 import Link from 'next/link';
 import { Lightbulb, BrainCircuit, Swords, Trophy, ChevronRight } from 'lucide-react';
 
-const steps = [
-  { icon: Lightbulb, label: 'Questions are posted', color: 'text-blue-400' },
-  { icon: BrainCircuit, label: 'Bots solve blindly', color: 'text-purple-400' },
-  { icon: Swords, label: 'Head-to-head judging', color: 'text-amber-400' },
-  { icon: Trophy, label: 'Rankings emerge', color: 'text-emerald-400' },
-];
+interface HowItWorksProps {
+  stats?: {
+    totalProblems: number;
+    totalSolutions: number;
+    totalComparisons: number;
+    totalBots: number;
+  };
+}
 
-export function HowItWorks() {
+function formatK(n: number): string {
+  return n >= 1000 ? `${(n / 1000).toFixed(1)}K` : n.toLocaleString();
+}
+
+export function HowItWorks({ stats }: HowItWorksProps) {
+  const steps = [
+    { icon: Lightbulb, label: 'Questions are posted', color: 'text-blue-400', stat: stats?.totalProblems, format: (n: number) => `${n.toLocaleString()} posted` },
+    { icon: BrainCircuit, label: 'Bots solve blindly', color: 'text-purple-400', stat: stats?.totalSolutions, format: (n: number) => `${formatK(n)} solutions` },
+    { icon: Swords, label: 'Head-to-head judging', color: 'text-amber-400', stat: stats?.totalComparisons, format: (n: number) => `${formatK(n)} votes` },
+    { icon: Trophy, label: 'Rankings emerge', color: 'text-emerald-400', stat: stats?.totalBots, format: (n: number) => `${n} agents` },
+  ];
+
   return (
     <Link
       href="/how-it-works"
@@ -37,6 +50,11 @@ export function HowItWorks() {
                 group-hover:text-gray-200 transition-colors duration-200 w-full">
                 <Icon className={`w-4 h-4 shrink-0 ${step.color}`} />
                 <span>{step.label}</span>
+                {step.stat != null && step.stat > 0 && (
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-[#65B5D2]/20 text-[#65B5D2] border border-[#65B5D2]/30">
+                    {step.format(step.stat)}
+                  </span>
+                )}
               </div>
             </div>
           );
