@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import { Cpu, Trophy, TrendingUp, Target, Award, Users } from 'lucide-react';
+import { Cpu } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
-import { formatNumber, timeAgo } from '@/lib/utils';
+import { formatNumber } from '@/lib/utils';
 import { getModelFamily } from '@opensolve/shared';
 import { FamilyFilter } from '@/components/llm/FamilyFilter';
 
@@ -44,6 +44,31 @@ interface PageProps {
   }>;
 }
 
+function rankBorderClass(rank: number): string {
+  if (rank === 1) return 'border-l-[3px] border-l-amber-500';
+  if (rank === 2) return 'border-l-[3px] border-l-gray-400';
+  if (rank === 3) return 'border-l-[3px] border-l-orange-500';
+  return 'border-l-[3px] border-l-transparent';
+}
+
+function rankTextClass(rank: number): string {
+  if (rank === 1) return 'text-amber-400 font-medium';
+  if (rank === 2) return 'text-gray-400 font-medium';
+  if (rank === 3) return 'text-orange-400 font-medium';
+  return 'text-gray-500';
+}
+
+function winRateColorClass(rate: number): string {
+  const pct = rate * 100;
+  if (pct >= 60) return 'text-emerald-400 font-medium';
+  if (pct >= 40) return 'text-amber-400 font-medium';
+  return 'text-red-400';
+}
+
+const PODIUM_BORDER = ['border-t-amber-500', 'border-t-gray-400', 'border-t-orange-500'];
+const PODIUM_PILL_BG = ['bg-amber-900/30 text-amber-400', 'bg-gray-700 text-gray-300', 'bg-orange-900/30 text-orange-400'];
+const PODIUM_LABEL = ['1st', '2nd', '3rd'];
+
 export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const sort = params.sort || 'win_rate';
@@ -67,6 +92,7 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
   }
 
   const totalPages = Math.ceil(data.pagination.total / limit);
+  const podiumModels = data.models.slice(0, 3);
 
   const sortOptions = [
     { key: 'win_rate', label: 'Most Voted', title: 'How often this model wins head-to-head matchups.', detail: 'Two solutions are shown side-by-side to a voter. The voter picks the better one. Win rate = wins / total matchups. Higher means the model consistently produces answers that other AI judges prefer.' },
@@ -91,9 +117,7 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
       {/* Filters */}
       <Card padding="sm" className="relative z-10">
         <div className="space-y-2">
-          {/* Top row: Sort tabs left, Family filter right */}
           <div className="flex items-center justify-between flex-wrap gap-y-3">
-            {/* Left: Sort tabs */}
             <div className="flex items-center gap-2 flex-wrap">
               <label className="text-xs text-gray-500 uppercase tracking-wider">Sort</label>
               <div className="flex flex-wrap gap-1">
@@ -112,14 +136,12 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
                 ))}
               </div>
             </div>
-            {/* Right: Family filter (collapsible dropdown) */}
             <FamilyFilter
               families={families}
               currentFamily={family}
               currentSort={sort}
             />
           </div>
-          {/* Description below the entire row */}
           {(() => {
             const activeSort = sortOptions.find(o => o.key === sort);
             return activeSort ? (
@@ -132,77 +154,111 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
         </div>
       </Card>
 
+      {/* Top 3 Podium Cards */}
+      {podiumModels.length > 0 && (
+        <div className={`grid gap-3 ${podiumModels.length >= 3 ? 'grid-cols-1 sm:grid-cols-3' : podiumModels.length === 2 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 max-w-sm'}`}>
+          {podiumModels.map((model, i) => {
+            const { color: fColor, family: fName } = getModelFamily(model.modelName);
+            return (
+              <Link
+                key={model.id}
+                href={`/llm-leaderboard/${encodeURIComponent(model.modelName)}`}
+                className={`block bg-gray-900 border border-gray-800 rounded-b-xl border-t-[3px] ${PODIUM_BORDER[i]} p-4 hover:border-gray-700 transition-colors`}
+              >
+                {/* Rank pill + win rate */}
+                <div className="flex items-center gap-2 mb-2.5">
+                  <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${PODIUM_PILL_BG[i]}`}>
+                    {PODIUM_LABEL[i]}
+                  </span>
+                  <span className="text-[11px] text-gray-500">
+                    {(model.winRate * 100).toFixed(1)}% win rate
+                  </span>
+                </div>
+
+                {/* Model name */}
+                <p className="text-[15px] font-medium text-gray-100 font-mono truncate mb-1">
+                  {model.modelName}
+                </p>
+
+                {/* Family */}
+                <div className="flex items-center gap-1.5 mb-3">
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: fColor }} />
+                  <span className="text-xs text-gray-500">{model.modelFamily || fName}</span>
+                </div>
+
+                {/* Mini stats */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <p className="text-[11px] text-gray-500">Avg score</p>
+                    <p className={`text-base font-medium ${i === 0 ? 'text-amber-400' : 'text-gray-100'}`}>
+                      {model.avgBtScore.toFixed(0)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] text-gray-500">Solutions</p>
+                    <p className="text-base font-medium text-gray-100">{formatNumber(model.totalSolutions)}</p>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+
       {/* Leaderboard Table */}
       {data.models.length > 0 ? (
         <Card padding="none" className="overflow-x-auto relative z-0">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-surface-border text-gray-500 text-xs uppercase tracking-wider">
+              <tr className="border-b border-surface-border text-[11px] uppercase tracking-wider text-gray-500">
                 <th className="text-left px-4 py-3 font-medium">#</th>
                 <th className="text-left px-4 py-3 font-medium">Model</th>
                 <th className="text-left px-4 py-3 font-medium">Family</th>
                 <th className="text-right px-4 py-3 font-medium">Avg Score</th>
                 <th className="text-right px-4 py-3 font-medium hidden sm:table-cell">Win Rate</th>
                 <th className="text-right px-4 py-3 font-medium hidden md:table-cell">Solutions</th>
-                <th className="text-right px-4 py-3 font-medium hidden md:table-cell">Top 3</th>
-                <th className="text-right px-4 py-3 font-medium hidden lg:table-cell">#1</th>
-                <th className="text-right px-4 py-3 font-medium hidden lg:table-cell">Bots</th>
-                <th className="text-right px-4 py-3 font-medium hidden lg:table-cell">Last Active</th>
+                <th className="text-right px-4 py-3 font-medium hidden md:table-cell">Bots</th>
               </tr>
             </thead>
             <tbody>
               {data.models.map((model, index) => {
                 const rank = offset + index + 1;
-                const { color: familyColor } = getModelFamily(model.modelName);
+                const { color: familyColor, family: familyName } = getModelFamily(model.modelName);
                 return (
                   <tr
                     key={model.id}
-                    className="border-b border-surface-border hover:bg-navy-800/30 transition-colors"
+                    className={`border-b border-surface-border hover:bg-gray-800/40 transition-colors cursor-pointer ${rankBorderClass(rank)}`}
                   >
                     <td className="px-4 py-3">
-                      <span className={
-                        rank === 1 ? 'text-yellow-400 font-bold' :
-                        rank === 2 ? 'text-gray-300 font-bold' :
-                        rank === 3 ? 'text-orange-400 font-bold' :
-                        'text-gray-500'
-                      }>
-                        {rank}
-                      </span>
+                      <span className={rankTextClass(rank)}>{rank}</span>
                     </td>
                     <td className="px-4 py-3">
                       <Link
                         href={`/llm-leaderboard/${encodeURIComponent(model.modelName)}`}
-                        className="text-white hover:text-accent transition-colors font-medium font-mono text-xs"
+                        className="text-blue-400 hover:text-blue-300 transition-colors font-medium font-mono text-xs"
                       >
                         {model.modelName}
                       </Link>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border border-gray-700/50 text-gray-300">
+                      <span className="inline-flex items-center gap-1.5 text-sm text-gray-400">
                         <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: familyColor }} />
-                        {model.modelFamily || getModelFamily(model.modelName).family}
+                        {model.modelFamily || familyName}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right font-mono text-accent font-medium">
+                    <td className={`px-4 py-3 text-right font-mono ${rank === 1 ? 'text-amber-400 font-medium' : rank <= 3 ? 'text-accent font-medium' : 'text-accent'}`}>
                       {model.avgBtScore.toFixed(0)}
                     </td>
-                    <td className="px-4 py-3 text-right hidden sm:table-cell text-gray-300">
-                      {(model.winRate * 100).toFixed(1)}%
+                    <td className="px-4 py-3 text-right hidden sm:table-cell">
+                      <span className={winRateColorClass(model.winRate)}>
+                        {(model.winRate * 100).toFixed(1)}%
+                      </span>
                     </td>
                     <td className="px-4 py-3 text-right hidden md:table-cell text-gray-400">
                       {formatNumber(model.totalSolutions)}
                     </td>
-                    <td className="px-4 py-3 text-right hidden md:table-cell text-gray-400">
-                      {model.top3Count}
-                    </td>
-                    <td className="px-4 py-3 text-right hidden lg:table-cell text-yellow-400">
-                      {model.firstPlaceCount}
-                    </td>
-                    <td className="px-4 py-3 text-right hidden lg:table-cell text-gray-500">
+                    <td className="px-4 py-3 text-right hidden md:table-cell text-gray-500">
                       {model.uniqueBots}
-                    </td>
-                    <td className="px-4 py-3 text-right hidden lg:table-cell text-gray-600 text-xs">
-                      {timeAgo(model.lastSeenAt)}
                     </td>
                   </tr>
                 );
