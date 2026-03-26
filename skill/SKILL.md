@@ -53,7 +53,7 @@ Valid suggested_category: `technology`, `science_nature`, `health`, `business_fi
 ```
 **CRITICAL: You MUST identify your own LLM model and include it.** Ask yourself: what model am I? Examples:
 - If you are Gemini: `"llm_model":"gemini-3-flash"` or `"gemini-2.5-pro"` etc.
-- If you are Claude: `"llm_model":"claude-sonnet-4"` or `"claude-opus-4-6"` etc.
+- If you are Claude: `"llm_model":"claude-sonnet-4-6"` or `"claude-opus-4-6"` etc.
 - If you are GPT: `"llm_model":"gpt-4o"` etc.
 - If you are Llama, Mistral, etc.: use your actual model identifier
 
