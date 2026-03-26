@@ -26,6 +26,28 @@ interface LeaderboardTableProps {
   startRank: number;
 }
 
+function rankBorderClass(rank: number): string {
+  if (rank === 1) return 'border-l-[3px] border-l-amber-500';
+  if (rank === 2) return 'border-l-[3px] border-l-gray-400';
+  if (rank === 3) return 'border-l-[3px] border-l-orange-500';
+  return 'border-l-[3px] border-l-transparent';
+}
+
+function rankAvatarClass(rank: number): string {
+  if (rank === 1) return 'bg-amber-900/30 text-amber-400';
+  if (rank === 2) return 'bg-gray-700 text-gray-300';
+  if (rank === 3) return 'bg-orange-900/30 text-orange-400';
+  return 'bg-navy-800 text-gray-400';
+}
+
+function accuracyColor(accuracy: number, hasVotes: boolean): string {
+  if (!hasVotes) return 'text-gray-500';
+  const pct = accuracy * 100;
+  if (pct >= 65) return 'text-emerald-400 font-medium';
+  if (pct >= 40) return 'text-amber-400 font-medium';
+  return 'text-gray-400';
+}
+
 export function LeaderboardTable({ bots, startRank }: LeaderboardTableProps) {
   const myBotId = useMyBotId();
 
@@ -33,7 +55,7 @@ export function LeaderboardTable({ bots, startRank }: LeaderboardTableProps) {
     <Card padding="none" className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-surface-border text-gray-500 text-xs uppercase tracking-wider">
+          <tr className="border-b border-surface-border text-[11px] uppercase tracking-wider text-gray-500">
             <th className="text-left px-4 py-3 font-medium w-12">#</th>
             <th className="text-left px-4 py-3 font-medium">Bot</th>
             <th className="text-right px-4 py-3 font-medium">
@@ -53,45 +75,46 @@ export function LeaderboardTable({ bots, startRank }: LeaderboardTableProps) {
         <tbody>
           {bots.map((bot, index) => {
             const rank = startRank + index + 1;
-            const isTop3 = rank <= 3;
             const isMyBot = myBotId === bot.id;
+            const hasVotes = bot.totalVotes > 0;
             return (
               <tr
                 key={bot.id}
-                className={`border-b border-surface-border hover:bg-navy-800/30 transition-colors ${
-                  isMyBot ? 'bg-accent/10 border-l-2 border-l-accent' : ''
+                className={`border-b border-surface-border hover:bg-gray-800/40 transition-colors ${rankBorderClass(rank)} ${
+                  isMyBot ? 'bg-blue-900/10' : ''
                 }`}
               >
                 <td className="px-4 py-3">
                   <span className={
-                    rank === 1 ? 'text-yellow-400 font-bold text-base' :
-                    rank === 2 ? 'text-gray-300 font-bold text-base' :
+                    rank === 1 ? 'text-amber-400 font-bold text-base' :
+                    rank === 2 ? 'text-gray-400 font-bold text-base' :
                     rank === 3 ? 'text-orange-400 font-bold text-base' :
                     'text-gray-500'
                   }>{rank}</span>
                 </td>
                 <td className="px-4 py-3">
                   <Link href={`/bots/${bot.id}`} className="flex items-center gap-3 group">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${
-                      isTop3 ? 'bg-accent/15 text-accent' : 'bg-navy-800 text-gray-400'
-                    }`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${rankAvatarClass(rank)}`}>
                       {(bot.ownerBotName || bot.name || '?').charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0">
-                      <p className={`font-medium truncate group-hover:text-accent transition-colors flex items-center gap-1.5 ${bot.ownerBotName || bot.name ? 'text-white' : 'text-slate-500 italic'}`}>
+                      <p className="font-medium truncate flex items-center gap-1.5 text-blue-400 group-hover:text-blue-300 transition-colors">
                         <Bot className="w-3.5 h-3.5 text-purple-400 shrink-0" />
                         {bot.ownerBotName || bot.name || '[deleted]'}
                         {isMyBot && <span className="text-[10px] text-accent font-normal ml-1">(you)</span>}
+                        {rank <= 3 && (
+                          <Badge
+                            variant={rank === 1 ? 'gold' : rank === 2 ? 'silver' : 'bronze'}
+                            className="hidden sm:inline-flex text-[10px] px-1.5 py-0.5"
+                          >
+                            {rank === 1 ? 'Champion' : rank === 2 ? 'Runner-up' : 'Bronze'}
+                          </Badge>
+                        )}
                       </p>
                       {bot.currentLlmModel && (
-                        <p className="text-[11px] text-purple-400/70 truncate max-w-[150px]">{bot.currentLlmModel}</p>
+                        <p className="text-[11px] text-gray-500 truncate max-w-[150px]">{bot.currentLlmModel}</p>
                       )}
                     </div>
-                    {isTop3 && (
-                      <Badge variant={rank === 1 ? 'gold' : rank === 2 ? 'silver' : 'bronze'} className="hidden sm:inline-flex">
-                        {rank === 1 ? 'Champion' : rank === 2 ? 'Runner-up' : 'Bronze'}
-                      </Badge>
-                    )}
                   </Link>
                 </td>
                 <td className="px-4 py-3 text-right font-mono font-medium text-accent">{formatNumber(bot.totalPoints)}</td>
@@ -99,8 +122,8 @@ export function LeaderboardTable({ bots, startRank }: LeaderboardTableProps) {
                 <td className="px-4 py-3 text-right text-gray-400 hidden sm:table-cell">{bot.totalSolutions}</td>
                 <td className="px-4 py-3 text-right text-gray-400 hidden sm:table-cell">{formatNumber(bot.totalVotes)}</td>
                 <td className="px-4 py-3 text-right hidden lg:table-cell">
-                  {bot.totalVotes > 0 ? (
-                    <span className={bot.voteAccuracy >= 0.7 ? 'text-emerald-400' : bot.voteAccuracy >= 0.5 ? 'text-amber-400' : 'text-red-400'}>
+                  {hasVotes ? (
+                    <span className={accuracyColor(bot.voteAccuracy, hasVotes)}>
                       {(bot.voteAccuracy * 100).toFixed(1)}%
                     </span>
                   ) : <span className="text-gray-500">—</span>}

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Bot, Trophy, Zap, TrendingUp, Target, MessageSquare, Activity, ArrowRight } from 'lucide-react';
+import { Bot, ArrowRight } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { formatNumber } from '@/lib/utils';
 
@@ -30,6 +30,14 @@ interface MyBotSpotlightProps {
   sort: string;
 }
 
+function accuracyColor(accuracy: number, hasVotes: boolean): string {
+  if (!hasVotes) return 'text-gray-500';
+  const pct = accuracy * 100;
+  if (pct >= 65) return 'text-emerald-400';
+  if (pct >= 40) return 'text-amber-400';
+  return 'text-gray-400';
+}
+
 export function MyBotSpotlight({ sort }: MyBotSpotlightProps) {
   const [myBot, setMyBot] = useState<MyBot | null>(null);
   const [loading, setLoading] = useState(true);
@@ -37,11 +45,9 @@ export function MyBotSpotlight({ sort }: MyBotSpotlightProps) {
   useEffect(() => {
     async function load() {
       try {
-        // Get current user
         const user = await apiFetch<User>('/auth/me', { credentials: 'include', cache: 'no-store' });
         if (!user?.botId) { setLoading(false); return; }
 
-        // Get bot's rank in current sort
         const data = await apiFetch<{ myBot: MyBot | null }>(
           `/leaderboard?sort=${sort}&limit=1&myBotId=${user.botId}`,
           { cache: 'no-store' }
@@ -58,66 +64,67 @@ export function MyBotSpotlight({ sort }: MyBotSpotlightProps) {
   if (loading || !myBot) return null;
 
   const isSuspended = myBot.status !== 'active';
-  const hasStats = myBot.totalSolutions > 0;
+  const hasVotes = myBot.totalVotes > 0;
+  const accPct = hasVotes ? (myBot.voteAccuracy * 100).toFixed(1) : null;
 
   return (
-    <div className="rounded-xl border border-accent/30 bg-accent/5 p-4 sm:p-5">
-      <div className="flex items-center justify-between mb-3">
-        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-accent uppercase tracking-wider">
-          <Bot className="w-3.5 h-3.5" />
-          Your Bot
-        </span>
-        {isSuspended && (
-          <span className="text-xs font-medium text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full">
-            {myBot.status}
-          </span>
-        )}
-        <Link href={`/bots/${myBot.id}`} className="text-xs text-gray-400 hover:text-accent flex items-center gap-1 transition-colors">
-          View Profile <ArrowRight className="w-3 h-3" />
+    <div className="border border-gray-800 border-l-[3px] border-l-blue-500 rounded-r-xl p-5">
+      {/* Header row */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center text-base font-bold bg-blue-900/30 text-blue-400 shrink-0">
+            {(myBot.ownerBotName || myBot.name || '?').charAt(0).toUpperCase()}
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="text-base font-medium text-gray-100 truncate flex items-center gap-1.5">
+                <Bot className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                {myBot.ownerBotName || myBot.name}
+              </p>
+              <span className="text-[11px] px-2 py-0.5 rounded-full bg-blue-900/30 text-blue-400 shrink-0">
+                Your bot
+              </span>
+              {isSuspended && (
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 shrink-0">
+                  {myBot.status}
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-gray-500 truncate">
+              {myBot.currentLlmModel || 'No model info'}
+            </p>
+          </div>
+        </div>
+        <Link href={`/bots/${myBot.id}`} className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors shrink-0 ml-3">
+          View profile <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>
 
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-lg flex items-center justify-center text-base font-bold bg-accent/15 text-accent shrink-0">
-          {(myBot.ownerBotName || myBot.name || '?').charAt(0).toUpperCase()}
-        </div>
-        <div className="min-w-0">
-          <p className="text-white font-semibold truncate flex items-center gap-1.5">
-            <Bot className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-            {myBot.ownerBotName || myBot.name}
+      {/* Stat cards grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <div className="bg-gray-800/50 rounded-lg p-3">
+          <p className="text-[11px] text-gray-500 mb-1">Rank</p>
+          <p className="text-xl font-medium text-gray-100">
+            {myBot.rank > 0 ? `#${myBot.rank}` : '#—'}
           </p>
-          {myBot.currentLlmModel && (
-            <p className="text-[11px] text-purple-400/70 truncate">{myBot.currentLlmModel}</p>
-          )}
+        </div>
+        <div className="bg-gray-800/50 rounded-lg p-3">
+          <p className="text-[11px] text-gray-500 mb-1">ELO</p>
+          <p className="text-xl font-medium text-gray-100">
+            {myBot.totalSolutions > 0 ? formatNumber(myBot.globalElo) : '—'}
+          </p>
+        </div>
+        <div className="bg-gray-800/50 rounded-lg p-3">
+          <p className="text-[11px] text-gray-500 mb-1">Solutions</p>
+          <p className="text-xl font-medium text-gray-100">{myBot.totalSolutions}</p>
+        </div>
+        <div className="bg-gray-800/50 rounded-lg p-3">
+          <p className="text-[11px] text-gray-500 mb-1">Accuracy</p>
+          <p className={`text-xl font-medium ${accuracyColor(myBot.voteAccuracy, hasVotes)}`}>
+            {accPct ? `${accPct}%` : '—'}
+          </p>
         </div>
       </div>
-
-      {hasStats ? (
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-          <StatItem icon={Trophy} label="Rank" value={`#${myBot.rank}`} color="text-yellow-400" />
-          <StatItem icon={Zap} label="Points" value={formatNumber(myBot.totalPoints)} color="text-accent" />
-          <StatItem icon={TrendingUp} label="ELO" value={String(myBot.globalElo)} color="text-emerald-400" />
-          <StatItem icon={MessageSquare} label="Solutions" value={String(myBot.totalSolutions)} color="text-blue-400" />
-          <StatItem icon={Activity} label="Votes" value={formatNumber(myBot.totalVotes)} color="text-purple-400" />
-          <StatItem icon={Target} label="Accuracy" value={myBot.totalVotes > 0 ? `${(myBot.voteAccuracy * 100).toFixed(0)}%` : '—'} color="text-amber-400" />
-        </div>
-      ) : (
-        <p className="text-sm text-gray-500">
-          No rankings yet — complete tasks to start climbing!
-        </p>
-      )}
-    </div>
-  );
-}
-
-function StatItem({ icon: Icon, label, value, color }: { icon: React.ElementType; label: string; value: string; color: string }) {
-  return (
-    <div className="text-center">
-      <div className="flex items-center justify-center gap-1 mb-0.5">
-        <Icon className={`w-3.5 h-3.5 ${color}`} />
-      </div>
-      <p className="text-sm font-mono font-medium text-white">{value}</p>
-      <p className="text-[10px] text-gray-500">{label}</p>
     </div>
   );
 }
