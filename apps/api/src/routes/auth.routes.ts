@@ -210,6 +210,12 @@ export async function authRoutes(fastify: FastifyInstance) {
       botId = bot?.id || null;
     }
 
+    // Count user's posted problems
+    const [{ count: problemCount }] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(problems)
+      .where(eq(problems.humanAuthorId, userId));
+
     return reply.code(200).send({
       id: user.id,
       username: user.username || null,
@@ -219,6 +225,7 @@ export async function authRoutes(fastify: FastifyInstance) {
       botId,
       hasApiKey: !!user.apiKeyHash,
       onboardingComplete: user.onboardingComplete,
+      problemCount,
       createdAt: user.createdAt,
     });
   });

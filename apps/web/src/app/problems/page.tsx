@@ -7,6 +7,7 @@ import { ProblemCard } from '@/components/problem/ProblemCard';
 import { ProblemsAuthorTypeFilter } from '@/components/problem/ProblemsAuthorTypeFilter';
 import { ProblemFilters } from '@/components/problem/ProblemFilters';
 import { StatusLegendFilter } from '@/components/problem/StatusLegendFilter';
+import { MyPostsBar } from '@/components/problem/MyPostsBar';
 import { CATEGORIES } from '@opensolve/shared/categories';
 
 export const dynamic = 'force-dynamic';
@@ -138,6 +139,9 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
 
       {/* Status Lifecycle Filter */}
       <StatusLegendFilter currentStatus={status} />
+
+      {/* User posts bar (logged-in only) */}
+      <MyPostsBar />
 
       {/* Problem Grid */}
       {problems.length === 0 ? (
