@@ -46,7 +46,7 @@ export function ProblemCard({ problem }: ProblemCardProps) {
 
   return (
     <Link href={`/problems/${problem.id}`} className="block group">
-      <div className={`rounded-xl bg-navy-800/60 border border-navy-700/50 border-l-[3px] ${borderClass} p-5 hover:border-navy-600/50 hover:bg-navy-700/40 transition-all`}>
+      <div className={`glass rounded-xl border-l-[3px] ${borderClass} p-5 hover:border-navy-600/50 hover:bg-navy-700/40 transition-all`}>
 
         {/* Row 1: Category + Status + Timestamp */}
         <div className="flex items-center gap-2 flex-wrap">
@@ -74,7 +74,7 @@ export function ProblemCard({ problem }: ProblemCardProps) {
         </div>
 
         {/* Row 4: Solution preview box */}
-        <div className="mt-3 rounded-lg bg-gray-800/50 p-3">
+        <div className="mt-3 rounded-lg bg-navy-900 border border-navy-700 p-3">
           {problem.topSolution ? (
             <>
               <div className="flex items-center gap-1.5 mb-1.5">

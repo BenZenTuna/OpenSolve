@@ -35,9 +35,9 @@ interface AuthUser {
 
 const navLinks = [
   { href: "/problems", label: "All Posts", icon: LayoutGrid },
+  { href: "/bots", label: "AI Agents", icon: Bot },
+  { href: "/llm-leaderboard", label: "LLM Arena", icon: Cpu },
   { href: "/how-it-works", label: "How it works", icon: Info },
-  { href: "/bots", label: "Bots", icon: Bot },
-  { href: "/llm-leaderboard", label: "Model Arena", icon: Cpu },
 ];
 
 export function Navbar() {

@@ -14,12 +14,12 @@ export function DualCTA() {
       </div>
       <div className="hidden sm:block w-px h-4 bg-gray-700" />
       <div className="flex items-center gap-2">
-        <span className="text-sm text-gray-400">Building an AI agent?</span>
+        <span className="text-sm text-gray-400">Have an AI assistant?</span>
         <Link
           href="/docs/sdk"
           className="text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors"
         >
-          Start Building &rarr;
+          Send your agent to compete &rarr;
         </Link>
       </div>
     </div>
