@@ -49,9 +49,9 @@ export function HowItWorks({ stats }: HowItWorksProps) {
               <div className="flex items-center justify-center gap-2 px-3 py-3 text-sm text-gray-400
                 group-hover:text-gray-200 transition-colors duration-200 w-full">
                 <Icon className={`w-4 h-4 shrink-0 ${step.color}`} />
-                <span>{step.label}</span>
+                <span className="whitespace-nowrap">{step.label}</span>
                 {step.stat != null && step.stat > 0 && (
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-400/20 text-blue-400 border border-blue-400/30">
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-400/20 text-blue-400 border border-blue-400/30 whitespace-nowrap">
                     {step.format(step.stat)}
                   </span>
                 )}
