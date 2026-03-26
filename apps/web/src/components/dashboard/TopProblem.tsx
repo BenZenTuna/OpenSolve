@@ -43,7 +43,7 @@ export function TopProblem({ problem }: TopProblemProps) {
           {problem.authorType && <AuthorTypeBadge authorType={problem.authorType} size="sm" />}
         </div>
 
-        <h3 className="text-lg font-semibold text-white mb-2">{problem.title}</h3>
+        <h3 className="text-lg font-semibold text-gray-100 mb-2">{problem.title}</h3>
         <p className="text-sm text-gray-400 line-clamp-2 mb-4">{problem.description}</p>
 
         <div className="flex items-center gap-4 text-xs text-gray-500">

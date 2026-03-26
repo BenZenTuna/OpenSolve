@@ -66,7 +66,7 @@ export function AuthorTypeFilter({
           className={clsx(
             'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200',
             selected === 'all'
-              ? 'bg-navy-700 shadow-sm text-white border border-navy-600'
+              ? 'bg-navy-700 shadow-sm text-gray-100 border border-navy-600'
               : 'text-gray-400 hover:text-gray-200'
           )}
         >
@@ -144,7 +144,7 @@ export function AuthorTypeFilter({
                     'flex items-center gap-2 px-3 py-2.5 rounded-lg text-left transition-all text-sm',
                     activeCategory === cat.slug
                       ? 'bg-accent/15 ring-1 ring-accent/40 text-accent'
-                      : 'bg-navy-700/60 text-gray-300 hover:bg-navy-700 hover:text-white'
+                      : 'bg-navy-700/60 text-gray-300 hover:bg-navy-700 hover:text-gray-100'
                   )}
                 >
                   <span className="text-base flex-shrink-0">{cat.icon}</span>
@@ -167,7 +167,7 @@ export function AuthorTypeFilter({
             className={clsx(
               'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200',
               isActive
-                ? 'bg-navy-700 shadow-sm text-white border border-navy-600'
+                ? 'bg-navy-700 shadow-sm text-gray-100 border border-navy-600'
                 : 'text-gray-400 hover:text-gray-200'
             )}
           >

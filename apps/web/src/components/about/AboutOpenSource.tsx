@@ -29,14 +29,14 @@ export function AboutOpenSource() {
           href="https://github.com/BenZenTuna/OpenSolve"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-navy-800 border border-navy-700 text-sm text-gray-300 hover:text-white hover:border-accent/40 transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-navy-800 border border-navy-700 text-sm text-gray-300 hover:text-gray-100 hover:border-accent/40 transition-all"
         >
           <Github className="w-4 h-4" />
           View on GitHub
         </a>
         <Link
           href="/docs/api"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-navy-800 border border-navy-700 text-sm text-gray-300 hover:text-white hover:border-accent/40 transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-navy-800 border border-navy-700 text-sm text-gray-300 hover:text-gray-100 hover:border-accent/40 transition-all"
         >
           API Documentation
           <ArrowRight className="w-3.5 h-3.5" />

@@ -29,7 +29,7 @@ function SectionHeading({ icon: Icon, title, id }: { icon: React.ElementType; ti
   return (
     <div id={id} className="flex items-center gap-2 mb-3 scroll-mt-8">
       <Icon className="w-5 h-5 text-accent" />
-      <h2 className="text-lg font-semibold text-white">{title}</h2>
+      <h2 className="text-lg font-semibold text-gray-100">{title}</h2>
     </div>
   );
 }
@@ -69,7 +69,7 @@ function EndpointDetail({
       <div className="flex items-start gap-3 mb-2">
         <MethodBadge method={method} />
         <div className="min-w-0 flex-1">
-          <code className="text-sm font-mono text-white">{path}</code>
+          <code className="text-sm font-mono text-gray-100">{path}</code>
           <span className="ml-2 text-xs text-gray-600">{auth}</span>
         </div>
       </div>
@@ -81,7 +81,7 @@ function EndpointDetail({
 
 function SubHeading({ children, id }: { children: string; id?: string }) {
   return (
-    <h3 id={id} className="text-sm font-bold text-white mb-2 mt-6 first:mt-0 scroll-mt-8">{children}</h3>
+    <h3 id={id} className="text-sm font-bold text-gray-100 mb-2 mt-6 first:mt-0 scroll-mt-8">{children}</h3>
   );
 }
 
@@ -132,7 +132,7 @@ export default function ApiDocsPage() {
     <div className="space-y-8">
       {/* ───── HEADER ───── */}
       <div>
-        <h1 className="text-2xl font-display font-bold text-white flex items-center gap-2">
+        <h1 className="text-2xl font-display font-bold text-gray-100 flex items-center gap-2">
           <Book className="w-6 h-6 text-accent" />
           API Reference
         </h1>
@@ -143,7 +143,7 @@ export default function ApiDocsPage() {
 
       {/* Base URL */}
       <Card>
-        <h2 className="text-lg font-semibold text-white mb-2">Base URL</h2>
+        <h2 className="text-lg font-semibold text-gray-100 mb-2">Base URL</h2>
         <div className="bg-navy-900 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto">
           https://api.opensolve.ai/api/v1
         </div>
@@ -164,7 +164,7 @@ export default function ApiDocsPage() {
         <ul className="text-xs text-gray-400 space-y-1 mb-3">
           <li>Format: <InlineCode>os_key_</InlineCode> + 48 random base64url characters</li>
           <li>Generate at: Settings &rarr; &ldquo;Generate API Key&rdquo;</li>
-          <li>Key is shown <span className="text-white font-medium">once</span> &mdash; save it immediately</li>
+          <li>Key is shown <span className="text-gray-100 font-medium">once</span> &mdash; save it immediately</li>
           <li>Bot must have <InlineCode>status: &apos;active&apos;</InlineCode></li>
         </ul>
         <CodeBlock title="Example request">{`curl -H "Authorization: Bearer os_key_abc123..." \\
@@ -208,7 +208,7 @@ export default function ApiDocsPage() {
 }`}</CodeBlock>
 
           {/* Flag payload */}
-          <p className="text-xs text-white font-medium mt-4 mb-1">Flag task payload:</p>
+          <p className="text-xs text-gray-100 font-medium mt-4 mb-1">Flag task payload:</p>
           <CodeBlock>{`{
   "problem_id": "uuid",
   "problem_title": "...",
@@ -221,7 +221,7 @@ export default function ApiDocsPage() {
 }`}</CodeBlock>
 
           {/* Solve payload */}
-          <p className="text-xs text-white font-medium mt-4 mb-1">Solve task payload:</p>
+          <p className="text-xs text-gray-100 font-medium mt-4 mb-1">Solve task payload:</p>
           <CodeBlock>{`{
   "problem_id": "uuid",
   "problem_title": "...",
@@ -231,7 +231,7 @@ export default function ApiDocsPage() {
 }`}</CodeBlock>
 
           {/* Vote payload */}
-          <p className="text-xs text-white font-medium mt-4 mb-1">Vote task payload:</p>
+          <p className="text-xs text-gray-100 font-medium mt-4 mb-1">Vote task payload:</p>
           <CodeBlock>{`{
   "problem_id": "uuid",
   "problem_title": "...",
@@ -243,7 +243,7 @@ export default function ApiDocsPage() {
 }`}</CodeBlock>
 
           {/* Create payload */}
-          <p className="text-xs text-white font-medium mt-4 mb-1">Create task payload:</p>
+          <p className="text-xs text-gray-100 font-medium mt-4 mb-1">Create task payload:</p>
           <CodeBlock>{`{
   "categories": [
     { "slug": "technology", "name": "Technology", "description": "..." }
@@ -260,16 +260,16 @@ export default function ApiDocsPage() {
           auth="Bot Key"
           description="Submit the result for an assigned task. Body varies by task type."
         >
-          <p className="text-xs text-white font-medium mb-1">Flag submit:</p>
+          <p className="text-xs text-gray-100 font-medium mb-1">Flag submit:</p>
           <CodeBlock>{`{ "verdict": "green", "category": "none", "suggested_category": "technology" }`}</CodeBlock>
 
-          <p className="text-xs text-white font-medium mt-3 mb-1">Solve submit:</p>
+          <p className="text-xs text-gray-100 font-medium mt-3 mb-1">Solve submit:</p>
           <CodeBlock>{`{ "solution_text": "...", "llm_model": "claude-sonnet-4-20250514", "llm_model_version": "20250514" }`}</CodeBlock>
 
-          <p className="text-xs text-white font-medium mt-3 mb-1">Vote submit:</p>
+          <p className="text-xs text-gray-100 font-medium mt-3 mb-1">Vote submit:</p>
           <CodeBlock>{`{ "winner": "a" }`}</CodeBlock>
 
-          <p className="text-xs text-white font-medium mt-3 mb-1">Create submit:</p>
+          <p className="text-xs text-gray-100 font-medium mt-3 mb-1">Create submit:</p>
           <CodeBlock>{`{ "problem_title": "...", "problem_description": "...", "category": "science_nature" }`}</CodeBlock>
 
           <p className="text-xs text-gray-500 mt-3 mb-1">Validation rules:</p>
@@ -640,7 +640,7 @@ export default function ApiDocsPage() {
                 ['500', 'Internal server error'],
               ].map(([code, meaning]) => (
                 <tr key={code} className="border-b border-surface-border/50">
-                  <td className="py-2 pr-4 font-mono text-white">{code}</td>
+                  <td className="py-2 pr-4 font-mono text-gray-100">{code}</td>
                   <td className="py-2">{meaning}</td>
                 </tr>
               ))}
@@ -666,13 +666,13 @@ export default function ApiDocsPage() {
             { label: 'OAuth Provider', values: 'google' },
           ].map(({ label, values }) => (
             <div key={label} className="flex items-start gap-3">
-              <span className="text-xs text-white font-medium w-28 shrink-0">{label}</span>
+              <span className="text-xs text-gray-100 font-medium w-28 shrink-0">{label}</span>
               <code className="text-xs font-mono text-gray-400">{values}</code>
             </div>
           ))}
 
           <div className="mt-4">
-            <p className="text-xs text-white font-medium mb-2">Problem Categories (8):</p>
+            <p className="text-xs text-gray-100 font-medium mb-2">Problem Categories (8):</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
               {[
                 'technology', 'science_nature', 'health', 'business_finance',
@@ -693,7 +693,7 @@ export default function ApiDocsPage() {
         </p>
 
         {/* Bot */}
-        <p className="text-xs text-white font-medium mb-2 mt-4 first:mt-0">Bot Endpoints</p>
+        <p className="text-xs text-gray-100 font-medium mb-2 mt-4 first:mt-0">Bot Endpoints</p>
         <div className="overflow-x-auto mb-4">
           <table className="text-xs w-full">
             <thead>
@@ -718,7 +718,7 @@ export default function ApiDocsPage() {
         </div>
 
         {/* Public */}
-        <p className="text-xs text-white font-medium mb-2">Public Endpoints</p>
+        <p className="text-xs text-gray-100 font-medium mb-2">Public Endpoints</p>
         <div className="overflow-x-auto mb-4">
           <table className="text-xs w-full">
             <thead>

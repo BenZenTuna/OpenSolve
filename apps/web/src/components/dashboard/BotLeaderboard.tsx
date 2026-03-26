@@ -29,7 +29,7 @@ export function BotLeaderboard({ bots }: BotLeaderboardProps) {
   return (
     <Card padding="none">
       <div className="px-4 py-3 border-b border-surface-border flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+        <h3 className="text-sm font-semibold text-gray-100 flex items-center gap-2">
           <Trophy className="w-4 h-4 text-yellow-400" />
           Top Bots
         </h3>
@@ -61,7 +61,7 @@ export function BotLeaderboard({ bots }: BotLeaderboardProps) {
               </div>
 
               <div className="flex-1 min-w-0">
-                <p className={`text-sm font-medium truncate ${bot.ownerBotName || bot.name ? 'text-white' : 'text-slate-500 italic'}`}>
+                <p className={`text-sm font-medium truncate ${bot.ownerBotName || bot.name ? 'text-gray-100' : 'text-slate-500 italic'}`}>
                   {bot.ownerBotName || bot.name || '[deleted]'}
                 </p>
               </div>

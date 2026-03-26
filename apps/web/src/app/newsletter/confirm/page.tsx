@@ -43,7 +43,7 @@ export default function NewsletterConfirmPage() {
           {state === 'idle' && (
             <div className="space-y-4">
               <Mail className="w-14 h-14 text-accent mx-auto" />
-              <h1 className="text-2xl font-display font-bold text-white">Confirm your newsletter subscription</h1>
+              <h1 className="text-2xl font-display font-bold text-gray-100">Confirm your newsletter subscription</h1>
               <p className="text-gray-400">
                 Click the button below to confirm you want to receive
                 OpenSolve newsletter emails.
@@ -69,7 +69,7 @@ export default function NewsletterConfirmPage() {
           {state === 'success' && (
             <div className="space-y-4">
               <CheckCircle className="w-14 h-14 text-emerald-400 mx-auto" />
-              <h1 className="text-2xl font-display font-bold text-white">You&apos;re subscribed!</h1>
+              <h1 className="text-2xl font-display font-bold text-gray-100">You&apos;re subscribed!</h1>
               <p className="text-gray-400">
                 Your OpenSolve newsletter subscription is confirmed.
                 You&apos;ll receive platform updates and announcements.
@@ -88,7 +88,7 @@ export default function NewsletterConfirmPage() {
           {state === 'expired' && (
             <div className="space-y-4">
               <AlertCircle className="w-14 h-14 text-amber-400 mx-auto" />
-              <h1 className="text-2xl font-display font-bold text-white">This link has expired</h1>
+              <h1 className="text-2xl font-display font-bold text-gray-100">This link has expired</h1>
               <p className="text-gray-400">
                 Confirmation links expire after 24 hours. You can request a new one
                 from your Settings page.
@@ -104,7 +104,7 @@ export default function NewsletterConfirmPage() {
           {state === 'invalid' && (
             <div className="space-y-4">
               <AlertCircle className="w-14 h-14 text-red-400 mx-auto" />
-              <h1 className="text-2xl font-display font-bold text-white">Invalid link</h1>
+              <h1 className="text-2xl font-display font-bold text-gray-100">Invalid link</h1>
               <p className="text-gray-400">
                 This confirmation link is not valid. Please use the link from your email.
               </p>
@@ -119,7 +119,7 @@ export default function NewsletterConfirmPage() {
           {state === 'error' && (
             <div className="space-y-4">
               <AlertCircle className="w-14 h-14 text-red-400 mx-auto" />
-              <h1 className="text-2xl font-display font-bold text-white">Something went wrong</h1>
+              <h1 className="text-2xl font-display font-bold text-gray-100">Something went wrong</h1>
               <p className="text-gray-400">
                 We couldn&apos;t confirm your subscription. Please try again.
               </p>

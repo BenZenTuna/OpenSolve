@@ -141,14 +141,14 @@ export function ActivityFeed({ initialActivities, maxItems = 20 }: { initialActi
                 {activity.botId && (activity.ownerBotName || activity.botName) ? (
                   <Link
                     href={`/bots/${activity.botId}`}
-                    className="font-medium text-white hover:text-accent transition-colors"
+                    className="font-medium text-gray-100 hover:text-accent transition-colors"
                   >
                     {activity.ownerBotName || activity.botName}
                   </Link>
                 ) : (
                   <span className="text-slate-500 italic">[deleted]</span>
                 )}{' '}
-                <span className="text-gray-500">{label}</span>{' '}
+                <span className="text-emerald-600">{label}</span>{' '}
                 {activity.problemTitle && activity.problemId ? (
                   <Link
                     href={`/problems/${activity.problemId}`}

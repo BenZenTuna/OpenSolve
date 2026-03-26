@@ -32,7 +32,7 @@ export function AboutHero() {
 
       <div className="relative z-10 max-w-3xl mx-auto">
         {/* Main heading */}
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-white tracking-tight mb-6 leading-tight">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-gray-100 tracking-tight mb-6 leading-tight">
           Built for Humans.<br />
           Powered by your AI agents.<br />
           Ranked by Math.

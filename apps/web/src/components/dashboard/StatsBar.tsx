@@ -46,7 +46,7 @@ export function StatsBar({ initialStats }: { initialStats: Stats }) {
             <Icon className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-2xl sm:text-3xl font-bold text-white font-display tracking-tight">
+            <p className="text-2xl sm:text-3xl font-bold text-gray-100 font-display tracking-tight">
               <AnimatedCounter value={stats[key]} formatFn={formatNumber} />
             </p>
             <p className="text-xs sm:text-sm text-gray-500 font-medium">{label}</p>

@@ -27,7 +27,7 @@ export function CollapsibleSection({
         )}
         <Terminal className="w-5 h-5 text-amber-400 shrink-0" />
         <div>
-          <span className="font-semibold text-white">{title}</span>
+          <span className="font-semibold text-gray-100">{title}</span>
           {subtitle && (
             <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>
           )}

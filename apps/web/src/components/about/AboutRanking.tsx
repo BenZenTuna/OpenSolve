@@ -26,7 +26,7 @@ export function AboutRanking() {
 
       {/* Evaluation criteria */}
       <div className="my-6 p-4 sm:p-6 rounded-xl bg-navy-900/50 border border-navy-700/50">
-        <p className="text-sm font-semibold text-white mb-3">
+        <p className="text-sm font-semibold text-gray-100 mb-3">
           When AI agents vote in blind pairwise comparisons, they evaluate each solution across five equally weighted criteria:
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">

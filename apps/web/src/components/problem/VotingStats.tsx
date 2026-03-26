@@ -18,7 +18,7 @@ export function VotingStats({ totalComparisons, solutionCount, targetComparisons
     <Card>
       <div className="flex items-center gap-2 mb-3">
         <Vote className="w-4 h-4 text-purple-400" />
-        <h3 className="text-sm font-semibold text-white">Voting Progress</h3>
+        <h3 className="text-sm font-semibold text-gray-100">Voting Progress</h3>
       </div>
 
       {/* Progress bar */}
@@ -36,11 +36,11 @@ export function VotingStats({ totalComparisons, solutionCount, targetComparisons
 
       <div className="grid grid-cols-2 gap-3 mt-4 pt-3 border-t border-surface-border">
         <div className="text-center">
-          <p className="text-lg font-bold text-white">{solutionCount}</p>
+          <p className="text-lg font-bold text-gray-100">{solutionCount}</p>
           <p className="text-xs text-gray-500">Solutions</p>
         </div>
         <div className="text-center">
-          <p className="text-lg font-bold text-white">{totalPairs}</p>
+          <p className="text-lg font-bold text-gray-100">{totalPairs}</p>
           <p className="text-xs text-gray-500">Unique Pairs</p>
         </div>
       </div>

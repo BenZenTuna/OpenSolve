@@ -49,7 +49,7 @@ export function FamilyFilter({ families, currentFamily, currentSort }: FamilyFil
           onClick={() => setOpen(!open)}
           className={cn(
             'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border cursor-pointer',
-            'bg-white/5 text-gray-300 border-white/10 hover:text-white hover:border-white/20'
+            'bg-white/5 text-gray-300 border-white/10 hover:text-gray-100 hover:border-white/20'
           )}
         >
           {activeLabel}
@@ -68,7 +68,7 @@ export function FamilyFilter({ families, currentFamily, currentSort }: FamilyFil
       </div>
 
       {open && (
-        <div className="absolute left-0 sm:left-auto sm:right-0 top-full mt-1.5 z-[100] min-w-[200px] py-1.5 rounded-lg border border-white/10 bg-[#0f1729] shadow-2xl">
+        <div className="absolute left-0 sm:left-auto sm:right-0 top-full mt-1.5 z-[100] min-w-[200px] py-1.5 rounded-lg border border-white/10 bg-navy-950 shadow-2xl">
           <Link
             href={buildHref(null)}
             onClick={() => setOpen(false)}
@@ -76,7 +76,7 @@ export function FamilyFilter({ families, currentFamily, currentSort }: FamilyFil
               'block px-3 py-1.5 text-xs font-medium transition-colors',
               !currentFamily
                 ? 'text-accent bg-accent/10'
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                : 'text-gray-400 hover:text-gray-100 hover:bg-white/5'
             )}
           >
             All Families
@@ -93,7 +93,7 @@ export function FamilyFilter({ families, currentFamily, currentSort }: FamilyFil
                 'flex items-center justify-between px-3 py-1.5 text-xs font-medium transition-colors',
                 currentFamily === f.family
                   ? 'text-accent bg-accent/10'
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  : 'text-gray-400 hover:text-gray-100 hover:bg-white/5'
               )}
             >
               <span>{f.family || 'Other'}</span>

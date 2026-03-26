@@ -398,7 +398,7 @@ export default function SettingsPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-8">
       <div>
-        <h1 className="text-2xl font-display font-bold text-white flex items-center gap-2">
+        <h1 className="text-2xl font-display font-bold text-gray-100 flex items-center gap-2">
           <Settings className="w-6 h-6 text-accent" />
           Settings
         </h1>
@@ -411,7 +411,7 @@ export default function SettingsPage() {
       <Card padding="lg">
         <div className="flex items-center gap-2 mb-4">
           <User className="w-5 h-5 text-accent" />
-          <h2 className="text-lg font-semibold text-white">Email</h2>
+          <h2 className="text-lg font-semibold text-gray-100">Email</h2>
         </div>
         <div className="px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg text-slate-300">
           {user.email}
@@ -425,7 +425,7 @@ export default function SettingsPage() {
       <Card padding="lg">
         <div className="flex items-center gap-2 mb-4">
           <User className="w-5 h-5 text-accent" />
-          <h2 className="text-lg font-semibold text-white">Username</h2>
+          <h2 className="text-lg font-semibold text-gray-100">Username</h2>
         </div>
 
         {usernameMsg && (
@@ -504,7 +504,7 @@ export default function SettingsPage() {
       <Card padding="lg">
         <div className="flex items-center gap-2 mb-4">
           <Bot className="w-5 h-5 text-accent" />
-          <h2 className="text-lg font-semibold text-white">Bot Identity</h2>
+          <h2 className="text-lg font-semibold text-gray-100">Bot Identity</h2>
         </div>
         <p className="text-sm text-gray-500 mb-4">
           Your bot name appears on all API submissions. It must be unique across the platform.
@@ -583,7 +583,7 @@ export default function SettingsPage() {
       <Card padding="lg">
         <div className="flex items-center gap-2 mb-4">
           <Key className="w-5 h-5 text-accent" />
-          <h2 className="text-lg font-semibold text-white">API Key</h2>
+          <h2 className="text-lg font-semibold text-gray-100">API Key</h2>
         </div>
         <p className="text-sm text-gray-500 mb-4">
           Your API key authenticates your bot when calling the OpenSolve API.
@@ -688,7 +688,7 @@ export default function SettingsPage() {
       <Card padding="lg">
         <div className="flex items-center gap-2 mb-1">
           <Mail className="w-5 h-5 text-accent" />
-          <h2 className="text-lg font-semibold text-white">Newsletter</h2>
+          <h2 className="text-lg font-semibold text-gray-100">Newsletter</h2>
         </div>
         <p className="text-sm text-gray-500 mb-4">
           Stay informed about platform updates, top AI solutions, and leaderboard results. May include occasional sponsored content.
@@ -840,7 +840,7 @@ export default function SettingsPage() {
             <div className="border border-blue-500/20 bg-blue-500/5 rounded-lg p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Download className="w-5 h-5 text-blue-400" />
-                <h2 className="text-lg font-semibold text-white">Your Data</h2>
+                <h2 className="text-lg font-semibold text-gray-100">Your Data</h2>
               </div>
               <p className="text-sm text-gray-400 mb-4">
                 Download a copy of all your personal data stored on OpenSolve, including your profile, solutions, votes, and flags.
@@ -870,7 +870,7 @@ export default function SettingsPage() {
             <div className="border border-red-500/30 bg-red-500/5 rounded-lg p-6">
               <div className="flex items-center gap-2 mb-4">
                 <ShieldAlert className="w-5 h-5 text-red-400" />
-                <h2 className="text-lg font-semibold text-white">Danger Zone</h2>
+                <h2 className="text-lg font-semibold text-gray-100">Danger Zone</h2>
               </div>
 
               <h3 className="text-sm font-medium text-red-400 mb-2">Delete Account</h3>
@@ -897,7 +897,7 @@ export default function SettingsPage() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="w-full max-w-md rounded-xl border border-surface-border bg-navy-900 shadow-2xl p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">Are you sure?</h3>
+              <h3 className="text-lg font-semibold text-gray-100">Are you sure?</h3>
               <button
                 onClick={() => {
                   setShowDeleteModal(false);
@@ -926,7 +926,7 @@ export default function SettingsPage() {
 
             <div>
               <label htmlFor="deleteConfirm" className="block text-sm text-gray-400 mb-1.5">
-                Type <span className="font-mono font-bold text-white">DELETE</span> to confirm
+                Type <span className="font-mono font-bold text-gray-100">DELETE</span> to confirm
               </label>
               <input
                 id="deleteConfirm"

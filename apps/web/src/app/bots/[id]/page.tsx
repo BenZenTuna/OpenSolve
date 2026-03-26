@@ -150,7 +150,7 @@ export default async function BotProfilePage({ params }: PageProps) {
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-1">
-              <h1 className={`text-xl sm:text-2xl font-display font-bold ${bot.ownerBotName || bot.name ? 'text-white' : 'text-slate-500 italic'}`}>
+              <h1 className={`text-xl sm:text-2xl font-display font-bold ${bot.ownerBotName || bot.name ? 'text-gray-100' : 'text-slate-500 italic'}`}>
                 {bot.ownerBotName || bot.name || '[deleted]'}
               </h1>
               <div className="flex items-center gap-2">
@@ -197,7 +197,7 @@ export default async function BotProfilePage({ params }: PageProps) {
 
           {/* Vote accuracy highlight */}
           <div className="glass-prominent p-4 text-center shrink-0">
-            <p className="text-2xl font-bold text-white font-display">
+            <p className="text-2xl font-bold text-gray-100 font-display">
               {bot.totalVotes > 0 ? `${(bot.voteAccuracy * 100).toFixed(1)}%` : '—'}
             </p>
             <p className="text-xs text-gray-500">Vote Accuracy</p>
@@ -210,7 +210,7 @@ export default async function BotProfilePage({ params }: PageProps) {
         {statItems.map(({ key, label, icon: Icon, color }) => (
           <Card key={key} className="text-center">
             <Icon className={`w-5 h-5 ${color} mx-auto mb-2`} />
-            <p className="text-lg font-bold text-white font-display">
+            <p className="text-lg font-bold text-gray-100 font-display">
               {key === 'globalElo' && bot.totalSolutions === 0
                 ? '—'
                 : key === 'globalElo'
@@ -225,7 +225,7 @@ export default async function BotProfilePage({ params }: PageProps) {
       {/* Badges Showcase */}
       {bot.badges.length > 0 && (
         <section>
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
+          <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2 mb-4">
             <Award className="w-5 h-5 text-yellow-400" />
             Badges ({bot.badges.length})
           </h2>
@@ -238,7 +238,7 @@ export default async function BotProfilePage({ params }: PageProps) {
               >
                 <Award className="w-4 h-4 text-yellow-400" />
                 <div>
-                  <p className="text-sm font-medium text-white">{badge.name}</p>
+                  <p className="text-sm font-medium text-gray-100">{badge.name}</p>
                   {badge.description && (
                     <p className="text-xs text-gray-500">{badge.description}</p>
                   )}
@@ -272,7 +272,7 @@ export default async function BotProfilePage({ params }: PageProps) {
                       Current
                     </span>
                   )}
-                  <span className="text-sm font-medium text-white">
+                  <span className="text-sm font-medium text-gray-100">
                     {entry.llmModel}
                   </span>
                   {entry.llmModelVersion && (
@@ -298,7 +298,7 @@ export default async function BotProfilePage({ params }: PageProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Best Solutions */}
         <section>
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
+          <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2 mb-4">
             <Trophy className="w-5 h-5 text-accent" />
             Best Solutions
           </h2>
@@ -323,7 +323,7 @@ export default async function BotProfilePage({ params }: PageProps) {
                       {solution.problemTitle && (
                         <Link
                           href={`/problems/${solution.problemId}`}
-                          className="text-sm font-medium text-white hover:text-accent transition-colors line-clamp-1"
+                          className="text-sm font-medium text-gray-100 hover:text-accent transition-colors line-clamp-1"
                         >
                           {solution.problemTitle}
                         </Link>
@@ -349,7 +349,7 @@ export default async function BotProfilePage({ params }: PageProps) {
 
         {/* Recent Activity */}
         <section>
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
+          <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2 mb-4">
             <Activity className="w-5 h-5 text-emerald-400" />
             Recent Activity
           </h2>

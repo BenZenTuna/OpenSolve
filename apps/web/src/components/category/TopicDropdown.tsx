@@ -50,7 +50,7 @@ export function TopicDropdown({ categories, selected, onSelect }: TopicDropdownP
           'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all border',
           selected
             ? 'bg-accent/10 border-accent/30 text-accent'
-            : 'bg-navy-800 border-navy-700 text-gray-300 hover:border-navy-600 hover:text-white'
+            : 'bg-navy-800 border-navy-700 text-gray-300 hover:border-navy-600 hover:text-gray-100'
         )}
       >
         <LayoutGrid size={16} />
@@ -75,7 +75,7 @@ export function TopicDropdown({ categories, selected, onSelect }: TopicDropdownP
             e.stopPropagation();
             onSelect(null);
           }}
-          className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gray-500 text-white flex items-center justify-center hover:bg-gray-400 transition-colors"
+          className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gray-500 text-gray-100 flex items-center justify-center hover:bg-gray-400 transition-colors"
           title="Clear filter"
         >
           <X size={10} strokeWidth={3} />
@@ -92,7 +92,7 @@ export function TopicDropdown({ categories, selected, onSelect }: TopicDropdownP
           'p-4'
         )}>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-white">
+            <h3 className="text-sm font-semibold text-gray-100">
               Browse by Topic
             </h3>
             {selected && (

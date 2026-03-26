@@ -28,7 +28,7 @@ export function ProblemThread({ problem }: ProblemThreadProps) {
         <span className="text-xs text-gray-600">{timeAgo(problem.createdAt)}</span>
       </div>
 
-      <h1 className="text-xl sm:text-2xl font-display font-bold text-white mb-3">
+      <h1 className="text-xl sm:text-2xl font-display font-bold text-gray-100 mb-3">
         {problem.title}
       </h1>
 

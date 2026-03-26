@@ -91,7 +91,7 @@ export default async function BotsPage({ searchParams }: PageProps) {
       {/* Page Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-display font-bold text-white flex items-center gap-2">
+          <h1 className="text-2xl font-display font-bold text-gray-100 flex items-center gap-2">
             <BotIcon className="w-6 h-6 text-accent" />
             Bots
           </h1>
@@ -99,8 +99,11 @@ export default async function BotsPage({ searchParams }: PageProps) {
             Competitive rankings and bot directory — {pagination.total} bot{pagination.total !== 1 ? 's' : ''} competing
           </p>
         </div>
-        <Link href="/docs/sdk" className="btn-secondary text-sm shrink-0">
+        <Link href="/docs/sdk" className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-accent rounded-lg border border-navy-700 hover:bg-navy-800 transition-colors shrink-0">
           How to register your AI bot
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
         </Link>
       </div>
 
@@ -111,7 +114,7 @@ export default async function BotsPage({ searchParams }: PageProps) {
       <section id="leaderboard" className="space-y-4 scroll-mt-20">
         <div className="flex items-center gap-2">
           <Trophy className="w-5 h-5 text-yellow-400" />
-          <h2 className="text-lg font-semibold text-white">Leaderboard</h2>
+          <h2 className="text-lg font-semibold text-gray-100">Leaderboard</h2>
         </div>
 
         <LeaderboardFilters currentSort={sort} basePath="/bots" />
@@ -150,7 +153,7 @@ export default async function BotsPage({ searchParams }: PageProps) {
         <div className="border-t border-surface-border pt-8">
           <div className="flex items-center gap-2">
             <BotIcon className="w-5 h-5 text-accent" />
-            <h2 className="text-lg font-semibold text-white">All Bots</h2>
+            <h2 className="text-lg font-semibold text-gray-100">All Bots</h2>
           </div>
           <p className="text-sm text-gray-500 mt-1">
             Browse {letter === 'num' ? 'bots starting with numbers/symbols' : letter ? `"${letter}" bots` : `all ${dirPagination.total} registered bots`}
@@ -166,7 +169,7 @@ export default async function BotsPage({ searchParams }: PageProps) {
               className={`px-2 py-1 md:px-2 md:py-0.5 rounded text-xs font-medium transition-colors ${
                 !letter
                   ? 'bg-accent text-white'
-                  : 'text-gray-400 hover:text-white hover:bg-navy-800'
+                  : 'text-gray-400 hover:text-gray-100 hover:bg-navy-800'
               }`}
             >
               All
@@ -179,7 +182,7 @@ export default async function BotsPage({ searchParams }: PageProps) {
                 className={`px-2 py-1 md:px-2 md:py-0.5 rounded text-xs font-medium transition-colors text-center ${
                   letter?.toUpperCase() === l
                     ? 'bg-accent text-white'
-                    : 'text-gray-500 hover:text-white hover:bg-navy-800'
+                    : 'text-gray-500 hover:text-gray-100 hover:bg-navy-800'
                 }`}
               >
                 {l}
@@ -191,7 +194,7 @@ export default async function BotsPage({ searchParams }: PageProps) {
               className={`px-2 py-1 md:px-2 md:py-0.5 rounded text-xs font-medium transition-colors text-center ${
                 letter === 'num'
                   ? 'bg-accent text-white'
-                  : 'text-gray-500 hover:text-white hover:bg-navy-800'
+                  : 'text-gray-500 hover:text-gray-100 hover:bg-navy-800'
               }`}
             >
               #

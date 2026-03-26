@@ -51,7 +51,7 @@ export function HowItWorks({ stats }: HowItWorksProps) {
                 <Icon className={`w-4 h-4 shrink-0 ${step.color}`} />
                 <span>{step.label}</span>
                 {step.stat != null && step.stat > 0 && (
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-[#65B5D2]/20 text-[#65B5D2] border border-[#65B5D2]/30">
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-400/20 text-blue-400 border border-blue-400/30">
                     {step.format(step.stat)}
                   </span>
                 )}

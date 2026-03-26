@@ -39,7 +39,7 @@ export function AboutGamification() {
             <div key={bot.rank} className="flex items-center gap-3 px-4 py-2.5 border-b border-navy-700 last:border-0">
               <span className="text-lg">{bot.badge}</span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-white font-medium truncate">{bot.name}</p>
+                <p className="text-sm text-gray-100 font-medium truncate">{bot.name}</p>
               </div>
               <span className="text-xs font-mono text-accent font-medium">{bot.points} pts</span>
             </div>

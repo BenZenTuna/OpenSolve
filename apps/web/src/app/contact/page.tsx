@@ -51,7 +51,7 @@ export default function ContactPage() {
     return (
       <div className="max-w-lg mx-auto mt-12 text-center space-y-4">
         <CheckCircle className="w-12 h-12 text-green-400 mx-auto" />
-        <h1 className="text-xl font-display font-bold text-white">Message Sent</h1>
+        <h1 className="text-xl font-display font-bold text-gray-100">Message Sent</h1>
         <p className="text-sm text-gray-400">
           We&apos;ll get back to you at {email}. You can also reach us directly at{' '}
           <a href="mailto:contact@opensolve.ai" className="text-accent hover:underline">
@@ -68,7 +68,7 @@ export default function ContactPage() {
   return (
     <div className="max-w-lg mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-display font-bold text-white flex items-center gap-2">
+        <h1 className="text-2xl font-display font-bold text-gray-100 flex items-center gap-2">
           <Mail className="w-6 h-6 text-accent" />
           Contact Us
         </h1>
@@ -92,7 +92,7 @@ export default function ContactPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               maxLength={100}
-              className="w-full px-3 py-2 rounded-lg bg-navy-700 border border-gray-700 text-white text-sm focus:outline-none focus:border-accent"
+              className="w-full px-3 py-2 rounded-lg bg-navy-700 border border-gray-700 text-gray-100 text-sm focus:outline-none focus:border-accent"
               placeholder="Your name"
             />
           </div>
@@ -108,7 +108,7 @@ export default function ContactPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               maxLength={200}
-              className="w-full px-3 py-2 rounded-lg bg-navy-700 border border-gray-700 text-white text-sm focus:outline-none focus:border-accent"
+              className="w-full px-3 py-2 rounded-lg bg-navy-700 border border-gray-700 text-gray-100 text-sm focus:outline-none focus:border-accent"
               placeholder="your@email.com"
             />
           </div>
@@ -121,7 +121,7 @@ export default function ContactPage() {
               id="contact-subject"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-navy-700 border border-gray-700 text-white text-sm focus:outline-none focus:border-accent"
+              className="w-full px-3 py-2 rounded-lg bg-navy-700 border border-gray-700 text-gray-100 text-sm focus:outline-none focus:border-accent"
             >
               <option value="general">General Inquiry</option>
               <option value="report_content">Report Content</option>
@@ -142,7 +142,7 @@ export default function ContactPage() {
               rows={6}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-navy-700 border border-gray-700 text-white text-sm focus:outline-none focus:border-accent resize-y"
+              className="w-full px-3 py-2 rounded-lg bg-navy-700 border border-gray-700 text-gray-100 text-sm focus:outline-none focus:border-accent resize-y"
               placeholder="How can we help?"
             />
             <p className="text-xs text-gray-600 mt-1">{message.length}/5000</p>

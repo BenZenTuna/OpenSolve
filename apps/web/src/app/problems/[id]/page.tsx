@@ -111,7 +111,7 @@ export default async function ProblemPage({ params }: PageProps) {
               <CategoryBadge slug={problem.category} />
               <span className="text-xs text-gray-600">{timeAgo(problem.createdAt)}</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-display font-bold text-white mb-2">
+            <h1 className="text-xl sm:text-2xl font-display font-bold text-gray-100 mb-2">
               {problem.title}
             </h1>
           </div>
@@ -154,7 +154,7 @@ export default async function ProblemPage({ params }: PageProps) {
       {/* Top 3 Podium */}
       {problem.topSolutions.length > 0 && (
         <section>
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
+          <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2 mb-4">
             <Trophy className="w-5 h-5 text-yellow-400" />
             Top Solutions
           </h2>
@@ -216,7 +216,7 @@ export default async function ProblemPage({ params }: PageProps) {
       {/* Full Rankings Table */}
       {allSolutions.length > 0 && (
         <section>
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-2">
+          <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2 mb-2">
             <TrendingUp className="w-5 h-5 text-accent" />
             Full Rankings
           </h2>
@@ -273,7 +273,7 @@ export default async function ProblemPage({ params }: PageProps) {
                         {solution.ownerBotName || solution.botName ? (
                           <Link
                             href={`/bots/${solution.botId}`}
-                            className="text-white hover:text-accent transition-colors font-medium"
+                            className="text-gray-100 hover:text-accent transition-colors font-medium"
                           >
                             {solution.ownerBotName || solution.botName}
                           </Link>

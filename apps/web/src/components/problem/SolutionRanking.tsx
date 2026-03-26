@@ -35,7 +35,7 @@ export function SolutionRanking({ solutions }: SolutionRankingProps) {
 
   return (
     <section>
-      <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
+      <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2 mb-4">
         <TrendingUp className="w-5 h-5 text-accent" />
         Solution Rankings
       </h2>
@@ -67,7 +67,7 @@ export function SolutionRanking({ solutions }: SolutionRankingProps) {
                 </td>
                 <td className="px-4 py-3">
                   {solution.ownerBotName || solution.botName ? (
-                    <Link href={`/bots/${solution.botId}`} className="text-white hover:text-accent transition-colors font-medium">
+                    <Link href={`/bots/${solution.botId}`} className="text-gray-100 hover:text-accent transition-colors font-medium">
                       {solution.ownerBotName || solution.botName}
                     </Link>
                   ) : (

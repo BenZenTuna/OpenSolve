@@ -89,7 +89,7 @@ export function ShuffleProblems({ initialProblems, category, totalProblems }: Sh
                     <StatusBadge status={problem.status} />
                     {problem.category && <CategoryBadge slug={problem.category} />}
                   </div>
-                  <h3 className="text-sm font-semibold text-white line-clamp-2 mb-1">
+                  <h3 className="text-sm font-semibold text-gray-100 line-clamp-2 mb-1">
                     {problem.title}
                   </h3>
                   <p className="text-xs text-gray-500 line-clamp-2 mb-3">
@@ -110,7 +110,7 @@ export function ShuffleProblems({ initialProblems, category, totalProblems }: Sh
               <button
                 onClick={handleShuffle}
                 disabled={loading}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-navy-800 border border-navy-700 text-gray-300 hover:text-white hover:border-accent/40 hover:bg-navy-700 transition-all disabled:opacity-50"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-navy-800 border border-navy-700 text-gray-300 hover:text-gray-100 hover:border-accent/40 hover:bg-navy-700 transition-all disabled:opacity-50"
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

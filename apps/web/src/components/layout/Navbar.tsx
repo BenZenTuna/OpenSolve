@@ -18,10 +18,13 @@ import {
   Shield,
   PenLine,
   FileText,
+  Sun,
+  Moon,
 } from "lucide-react";
 import clsx from "clsx";
 import { apiFetch } from "@/lib/api";
 import { DefaultAvatar } from "@/components/DefaultAvatar";
+import { useTheme } from "@/components/ThemeProvider";
 
 interface AuthUser {
   id: string;
@@ -45,6 +48,7 @@ export function Navbar() {
   const [searchFocused, setSearchFocused] = useState(false);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     apiFetch<AuthUser>('/auth/me', { credentials: 'include', cache: 'no-store' })
@@ -95,7 +99,7 @@ export function Navbar() {
             className="flex items-center shrink-0"
           >
             <Image
-              src="/opensolve-logo.svg"
+              src={theme === 'dark' ? '/OpemSolve-LogoV2-agentic-internet--Footer-BlackBackground.svg' : '/OpemSolve-LogoV2-agentic-internet-Footer-WhiteBackground.svg'}
               alt="OpenSolve"
               width={140}
               height={50}
@@ -180,7 +184,7 @@ export function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => setUserMenuOpen((prev) => !prev)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-navy-800 transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-gray-100 hover:bg-navy-800 transition-colors"
                 >
                   <DefaultAvatar name={userLabel} size="sm" />
                   <span className="max-w-[120px] truncate">{userLabel}</span>
@@ -190,14 +194,14 @@ export function Navbar() {
                     <Link
                       href="/submit"
                       onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-navy-700 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-gray-100 hover:bg-navy-700 transition-colors"
                     >
                       Post a Challenge
                     </Link>
                     <Link
                       href={`/users/${user.id}`}
                       onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-navy-700 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-gray-100 hover:bg-navy-700 transition-colors"
                     >
                       <FileText className="w-4 h-4" />
                       My Posts
@@ -205,7 +209,7 @@ export function Navbar() {
                     <Link
                       href="/settings"
                       onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-navy-700 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-gray-100 hover:bg-navy-700 transition-colors"
                     >
                       <Settings className="w-4 h-4" />
                       Settings
@@ -222,7 +226,7 @@ export function Navbar() {
                     )}
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-navy-700 transition-colors"
+                      className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-300 hover:text-gray-100 hover:bg-navy-700 transition-colors"
                     >
                       <LogOut className="w-4 h-4" />
                       Sign Out
@@ -236,12 +240,21 @@ export function Navbar() {
                 Sign In
               </Link>
             )}
+
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg text-gray-400 hover:text-gray-100 hover:bg-navy-800 transition-colors"
+              aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+            >
+              {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+            </button>
           </div>
 
           {/* Mobile menu toggle */}
           <button
             onClick={toggleMobileMenu}
-            className="md:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-navy-800 transition-colors"
+            className="md:hidden p-2 rounded-lg text-gray-400 hover:text-gray-100 hover:bg-navy-800 transition-colors"
             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
           >
             {mobileMenuOpen ? (

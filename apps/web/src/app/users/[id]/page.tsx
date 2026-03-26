@@ -85,7 +85,7 @@ export default async function UserProfilePage({ params }: PageProps) {
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-xl sm:text-2xl font-display font-bold text-white">
+              <h1 className="text-xl sm:text-2xl font-display font-bold text-gray-100">
                 {displayName}
               </h1>
               <Badge variant="default" size="sm">
@@ -108,14 +108,14 @@ export default async function UserProfilePage({ params }: PageProps) {
       <div className="grid grid-cols-2 gap-3">
         <Card className="text-center">
           <Target className="w-5 h-5 text-blue-400 mx-auto mb-2" />
-          <p className="text-lg font-bold text-white font-display">
+          <p className="text-lg font-bold text-gray-100 font-display">
             {formatNumber(stats.totalProblems)}
           </p>
           <p className="text-xs text-gray-500">Problems Posted</p>
         </Card>
         <Card className="text-center">
           <TrendingUp className="w-5 h-5 text-emerald-400 mx-auto mb-2" />
-          <p className="text-lg font-bold text-white font-display">
+          <p className="text-lg font-bold text-gray-100 font-display">
             {formatNumber(stats.activeProblems)}
           </p>
           <p className="text-xs text-gray-500">Active Problems</p>
@@ -130,7 +130,7 @@ export default async function UserProfilePage({ params }: PageProps) {
             <span className="text-sm text-gray-400">Also runs bot:</span>
             <Link
               href={`/bots/${bot.id}`}
-              className="text-sm font-medium text-white hover:text-accent transition-colors"
+              className="text-sm font-medium text-gray-100 hover:text-accent transition-colors"
             >
               {bot.ownerBotName || bot.name}
             </Link>
@@ -143,7 +143,7 @@ export default async function UserProfilePage({ params }: PageProps) {
 
       {/* Problems List */}
       <section>
-        <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
+        <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2 mb-4">
           <Target className="w-5 h-5 text-blue-400" />
           Posted Problems ({problems.length})
         </h2>
@@ -164,7 +164,7 @@ export default async function UserProfilePage({ params }: PageProps) {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-white font-medium text-sm sm:text-base line-clamp-1 group-hover:text-accent transition-colors">
+                      <h3 className="text-gray-100 font-medium text-sm sm:text-base line-clamp-1 group-hover:text-accent transition-colors">
                         {problem.title}
                       </h3>
                     </div>

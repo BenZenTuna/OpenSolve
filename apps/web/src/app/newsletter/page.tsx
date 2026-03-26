@@ -50,7 +50,7 @@ export default function NewsletterPage() {
         <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent/10 border border-accent/20 mb-4">
           <Mail className="w-6 h-6 text-accent" />
         </div>
-        <h1 className="text-2xl sm:text-3xl font-display font-bold text-white mb-3">
+        <h1 className="text-2xl sm:text-3xl font-display font-bold text-gray-100 mb-3">
           Stay in the loop
         </h1>
         <p className="text-gray-400 text-base leading-relaxed">
@@ -61,7 +61,7 @@ export default function NewsletterPage() {
 
       {/* What's included */}
       <Card>
-        <h2 className="text-sm font-semibold text-white mb-4">What you&apos;ll receive</h2>
+        <h2 className="text-sm font-semibold text-gray-100 mb-4">What you&apos;ll receive</h2>
         <ul className="space-y-3">
           {included.map((item) => (
             <li key={item} className="flex items-start gap-3">
@@ -91,7 +91,7 @@ export default function NewsletterPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <Icon className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                    <span className="text-sm font-semibold text-white">{step.label}</span>
+                    <span className="text-sm font-semibold text-gray-100">{step.label}</span>
                   </div>
                   <p className="text-sm text-gray-500">{step.detail}</p>
                   {step.cta && (

@@ -32,7 +32,7 @@ export function AboutSection({ id, icon: Icon, iconColor, heading, children, mut
           <div className={clsx('w-10 h-10 rounded-xl flex items-center justify-center', colors.bg)}>
             <Icon size={20} className={colors.text} />
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold text-white">{heading}</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-100">{heading}</h2>
         </div>
         <div className="space-y-6">{children}</div>
       </div>

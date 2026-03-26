@@ -50,7 +50,7 @@ export function SearchResults({ results, query }: SearchResultsProps) {
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-sm font-semibold text-white">{result.title}</h3>
+                  <h3 className="text-sm font-semibold text-gray-100">{result.title}</h3>
                   {result.status && <StatusBadge status={result.status} />}
                 </div>
                 <p className="text-xs text-gray-500 line-clamp-2">

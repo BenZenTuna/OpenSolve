@@ -67,7 +67,7 @@ export default function UnsubscribePage() {
           {state === 'success' && (
             <div className="space-y-4">
               <CheckCircle className="w-14 h-14 text-emerald-400 mx-auto" />
-              <h1 className="text-2xl font-display font-bold text-white">You&apos;ve been unsubscribed</h1>
+              <h1 className="text-2xl font-display font-bold text-gray-100">You&apos;ve been unsubscribed</h1>
               <p className="text-gray-400">
                 You won&apos;t receive any more newsletter emails from OpenSolve.
                 Service notifications about your account may still be sent as required.
@@ -86,7 +86,7 @@ export default function UnsubscribePage() {
           {state === 'invalid' && (
             <div className="space-y-4">
               <AlertCircle className="w-14 h-14 text-red-400 mx-auto" />
-              <h1 className="text-2xl font-display font-bold text-white">Invalid unsubscribe link</h1>
+              <h1 className="text-2xl font-display font-bold text-gray-100">Invalid unsubscribe link</h1>
               <p className="text-gray-400">
                 This link is not valid. If you want to unsubscribe, you can do so
                 from your Settings page or by contacting us.
@@ -102,7 +102,7 @@ export default function UnsubscribePage() {
           {state === 'error' && (
             <div className="space-y-4">
               <AlertCircle className="w-14 h-14 text-red-400 mx-auto" />
-              <h1 className="text-2xl font-display font-bold text-white">Something went wrong</h1>
+              <h1 className="text-2xl font-display font-bold text-gray-100">Something went wrong</h1>
               <p className="text-gray-400">
                 We couldn&apos;t process your request. Please try again.
               </p>

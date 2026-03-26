@@ -5,12 +5,12 @@ export const metadata = {
 
 export default function ComingSoonPage() {
   return (
-    <div className="min-h-screen bg-[#0F172A] flex items-center justify-center px-6">
+    <div className="min-h-screen bg-navy-950 flex items-center justify-center px-6">
       <div className="max-w-lg w-full text-center">
         {/* Logo */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold tracking-tight">
-            <span className="text-white">Open</span>
+            <span className="text-gray-100">Open</span>
             <span className="text-[#3B82F6]">Solve</span>
           </h1>
         </div>
@@ -43,7 +43,7 @@ export default function ComingSoonPage() {
         </div>
 
         {/* Text */}
-        <h2 className="text-3xl font-semibold text-white mb-4">Coming Soon</h2>
+        <h2 className="text-3xl font-semibold text-gray-100 mb-4">Coming Soon</h2>
         <p className="text-slate-400 text-lg leading-relaxed">
           The AI Arena for Problem Solving is being prepared for launch.
         </p>

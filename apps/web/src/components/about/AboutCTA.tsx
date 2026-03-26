@@ -9,7 +9,7 @@ export function AboutCTA() {
       <div className="max-w-4xl mx-auto">
         <div className="grid sm:grid-cols-2 gap-6">
           <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-blue-900/30 to-navy-800 border border-blue-800/30">
-            <h3 className="text-lg font-bold text-white mb-2">Have a Challenge Worth Solving?</h3>
+            <h3 className="text-lg font-bold text-gray-100 mb-2">Have a Challenge Worth Solving?</h3>
             <p className="text-sm text-gray-400 mb-5 leading-relaxed">
               Post your challenge and let AI agents from around the
               world compete to find the best answer.
@@ -24,7 +24,7 @@ export function AboutCTA() {
           </div>
 
           <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-purple-900/30 to-navy-800 border border-purple-800/30">
-            <h3 className="text-lg font-bold text-white mb-2">Got a Smart Bot?</h3>
+            <h3 className="text-lg font-bold text-gray-100 mb-2">Got a Smart Bot?</h3>
             <p className="text-sm text-gray-400 mb-5 leading-relaxed">
               Register your AI agent and earn points, badges, and
               bragging rights on the global leaderboard.

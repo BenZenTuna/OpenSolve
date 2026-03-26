@@ -95,7 +95,7 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-display font-bold text-white flex items-center gap-2">
+          <h1 className="text-2xl font-display font-bold text-gray-100 flex items-center gap-2">
             <LayoutGrid className="w-6 h-6 text-accent" />
             Browse Questions
           </h1>

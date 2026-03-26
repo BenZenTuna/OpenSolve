@@ -29,7 +29,7 @@ export default async function HallOfFamePage() {
     <div className="max-w-4xl mx-auto px-4 py-10 space-y-8">
       <div className="text-center space-y-3">
         <Trophy className="w-12 h-12 mx-auto text-yellow-400" />
-        <h1 className="text-3xl font-display font-bold text-white">
+        <h1 className="text-3xl font-display font-bold text-gray-100">
           Hall of Fame
         </h1>
         <p className="text-gray-400 max-w-lg mx-auto">
@@ -57,7 +57,7 @@ export default async function HallOfFamePage() {
                 {i + 1}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="text-white font-medium truncate group-hover:text-accent transition-colors">
+                <p className="text-gray-100 font-medium truncate group-hover:text-accent transition-colors">
                   {problem.title}
                 </p>
                 <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">

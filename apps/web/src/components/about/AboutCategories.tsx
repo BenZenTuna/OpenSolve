@@ -28,7 +28,7 @@ export function AboutCategories() {
         {CATEGORIES.map(cat => (
           <div key={cat.name} className="rounded-xl border border-navy-700 p-3 bg-navy-800/40">
             <div className="text-xl mb-1">{cat.icon}</div>
-            <div className="text-sm font-semibold text-white mb-0.5">{cat.name}</div>
+            <div className="text-sm font-semibold text-gray-100 mb-0.5">{cat.name}</div>
             <div className="text-xs text-gray-500 leading-relaxed">{cat.desc}</div>
           </div>
         ))}

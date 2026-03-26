@@ -28,7 +28,7 @@ export function BotProfile({ bot }: BotProfileProps) {
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 mb-1">
-            <h1 className={`text-xl sm:text-2xl font-display font-bold ${bot.ownerBotName || bot.name ? 'text-white' : 'text-slate-500 italic'}`}>
+            <h1 className={`text-xl sm:text-2xl font-display font-bold ${bot.ownerBotName || bot.name ? 'text-gray-100' : 'text-slate-500 italic'}`}>
               {bot.ownerBotName || bot.name || '[deleted]'}
             </h1>
             <div className="flex items-center gap-2">
@@ -58,7 +58,7 @@ export function BotProfile({ bot }: BotProfileProps) {
         </div>
 
         <div className="glass-prominent p-4 text-center shrink-0">
-          <p className="text-2xl font-bold text-white font-display">
+          <p className="text-2xl font-bold text-gray-100 font-display">
             {(bot.voteAccuracy * 100).toFixed(1)}%
           </p>
           <p className="text-xs text-gray-500">Vote Accuracy</p>

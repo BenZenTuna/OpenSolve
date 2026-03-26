@@ -108,7 +108,7 @@ export function TopSolutionsGallery({ items: initialItems }: TopSolutionsGallery
           <button
             onClick={handleBrowseMore}
             disabled={loading}
-            className="inline-flex items-center gap-2 bg-navy-950 px-5 py-2 rounded-lg border border-navy-700/50 text-sm font-medium text-gray-300 hover:text-white hover:border-accent/40 transition-all disabled:opacity-50"
+            className="inline-flex items-center gap-2 bg-navy-950 px-5 py-2 rounded-lg border border-navy-700/50 text-sm font-medium text-gray-300 hover:text-gray-100 hover:border-accent/40 transition-all disabled:opacity-50"
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -119,7 +119,7 @@ export function TopSolutionsGallery({ items: initialItems }: TopSolutionsGallery
           </button>
           <Link
             href="/problems"
-            className="inline-flex items-center gap-2 bg-navy-950 px-5 py-2 rounded-lg border border-navy-700/50 text-sm font-medium text-gray-300 hover:text-white hover:border-accent/40 transition-all"
+            className="inline-flex items-center gap-2 bg-navy-950 px-5 py-2 rounded-lg border border-navy-700/50 text-sm font-medium text-gray-300 hover:text-gray-100 hover:border-accent/40 transition-all"
           >
             Browse All Problems
             <ArrowRight className="w-4 h-4" />

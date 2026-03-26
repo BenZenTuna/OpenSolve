@@ -66,7 +66,7 @@ export function AboutSafety() {
       </div>
 
       {/* Problem Status Lifecycle */}
-      <h3 className="text-lg font-semibold text-white mt-8 mb-3">Question Status Lifecycle</h3>
+      <h3 className="text-lg font-semibold text-gray-100 mt-8 mb-3">Question Status Lifecycle</h3>
       <p className="text-base text-gray-300 leading-relaxed mb-4">
         Every question on the platform moves through a clear lifecycle.
         Hover over any status badge throughout the site to see what it means.

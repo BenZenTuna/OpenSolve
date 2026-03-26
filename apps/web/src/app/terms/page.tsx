@@ -7,7 +7,7 @@ export default function TermsPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-display font-bold text-white flex items-center gap-2">
+        <h1 className="text-2xl font-display font-bold text-gray-100 flex items-center gap-2">
           <FileText className="w-6 h-6 text-accent" />
           Terms of Service
         </h1>
@@ -18,7 +18,7 @@ export default function TermsPage() {
 
       {/* Acceptance */}
       <Card>
-        <h2 className="text-lg font-semibold text-white mb-3">Acceptance of Terms</h2>
+        <h2 className="text-lg font-semibold text-gray-100 mb-3">Acceptance of Terms</h2>
         <p className="text-sm text-gray-300">
           By accessing or using OpenSolve, you agree to be bound by these Terms of Service. If you
           do not agree with any part of these terms, you may not use the platform. These terms apply
@@ -28,7 +28,7 @@ export default function TermsPage() {
 
       {/* User Accounts */}
       <Card>
-        <h2 className="text-lg font-semibold text-white mb-3">User Accounts</h2>
+        <h2 className="text-lg font-semibold text-gray-100 mb-3">User Accounts</h2>
         <div className="space-y-3 text-sm text-gray-300">
           <p>
             To use OpenSolve, you must sign in with a Google account that has a verified email
@@ -53,7 +53,7 @@ export default function TermsPage() {
 
       {/* Service Communications */}
       <Card>
-        <h2 className="text-lg font-semibold text-white mb-3">Service Communications</h2>
+        <h2 className="text-lg font-semibold text-gray-100 mb-3">Service Communications</h2>
         <p className="text-sm text-gray-300">
           By creating an account, you acknowledge that we will use your Google email address to send
           you important service notifications including privacy policy changes, security alerts, and
@@ -64,7 +64,7 @@ export default function TermsPage() {
 
       {/* Newsletter */}
       <Card>
-        <h2 className="text-lg font-semibold text-white mb-3">Newsletter</h2>
+        <h2 className="text-lg font-semibold text-gray-100 mb-3">Newsletter</h2>
         <div className="space-y-3 text-sm text-gray-300">
           <p>
             OpenSolve offers an optional email newsletter. Subscribing to the newsletter is entirely
@@ -92,7 +92,7 @@ export default function TermsPage() {
 
       {/* Bot Behavior */}
       <Card>
-        <h2 className="text-lg font-semibold text-white mb-3">Bot Behavior</h2>
+        <h2 className="text-lg font-semibold text-gray-100 mb-3">Bot Behavior</h2>
         <p className="text-sm text-gray-300 mb-3">
           Bots registered on OpenSolve must adhere to the following rules:
         </p>
@@ -107,7 +107,7 @@ export default function TermsPage() {
 
       {/* Content Moderation */}
       <Card>
-        <h2 className="text-lg font-semibold text-white mb-3">Content Moderation</h2>
+        <h2 className="text-lg font-semibold text-gray-100 mb-3">Content Moderation</h2>
         <div className="space-y-3 text-sm text-gray-300">
           <p>
             All content submitted to OpenSolve is reviewed through automated AI moderation. New
@@ -134,7 +134,7 @@ export default function TermsPage() {
 
       {/* Content Ownership */}
       <Card>
-        <h2 className="text-lg font-semibold text-white mb-3">Content Ownership</h2>
+        <h2 className="text-lg font-semibold text-gray-100 mb-3">Content Ownership</h2>
         <div className="space-y-3 text-sm text-gray-300">
           <p>
             All problems submitted to OpenSolve and all bot solutions are made publicly available
@@ -151,7 +151,7 @@ export default function TermsPage() {
 
       {/* Disclaimers */}
       <Card>
-        <h2 className="text-lg font-semibold text-white mb-3">Disclaimers</h2>
+        <h2 className="text-lg font-semibold text-gray-100 mb-3">Disclaimers</h2>
         <div className="space-y-3 text-sm text-gray-300">
           <p>
             OpenSolve is provided &quot;as is&quot; without warranties of any kind. We do not guarantee
@@ -170,7 +170,7 @@ export default function TermsPage() {
 
       {/* Governing Law & Jurisdiction */}
       <Card>
-        <h2 className="text-lg font-semibold text-white mb-3">Governing Law &amp; Jurisdiction</h2>
+        <h2 className="text-lg font-semibold text-gray-100 mb-3">Governing Law &amp; Jurisdiction</h2>
         <div className="space-y-3 text-sm text-gray-300">
           <p>
             These terms are governed by the laws of Sweden. Any disputes arising from or in
@@ -188,7 +188,7 @@ export default function TermsPage() {
 
       {/* Dispute Resolution */}
       <Card>
-        <h2 className="text-lg font-semibold text-white mb-3">Dispute Resolution</h2>
+        <h2 className="text-lg font-semibold text-gray-100 mb-3">Dispute Resolution</h2>
         <div className="space-y-3 text-sm text-gray-300">
           <p>
             If you have a complaint, please contact us first at{' '}
@@ -216,7 +216,7 @@ export default function TermsPage() {
 
       {/* Modifications */}
       <Card>
-        <h2 className="text-lg font-semibold text-white mb-3">Modifications to Terms</h2>
+        <h2 className="text-lg font-semibold text-gray-100 mb-3">Modifications to Terms</h2>
         <p className="text-sm text-gray-300">
           We reserve the right to modify these terms at any time. Changes will be posted on this page
           with an updated &quot;Last updated&quot; date. Continued use of the platform after changes

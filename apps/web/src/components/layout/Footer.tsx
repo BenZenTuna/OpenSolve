@@ -1,6 +1,6 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Github, ExternalLink } from "lucide-react";
+import { ThemeLogo } from "@/components/ThemeLogo";
 
 const footerSections = [
   {
@@ -49,8 +49,9 @@ export function Footer() {
           {/* Brand column — full width on mobile, first col on desktop */}
           <div className="col-span-3 md:col-span-1">
             <Link href="/" className="flex items-center mb-4">
-              <Image
-                src="/opensolve-logo.svg"
+              <ThemeLogo
+                lightSrc="/OpemSolve-LogoV2-agentic-internet-Footer-WhiteBackground.svg"
+                darkSrc="/OpemSolve-LogoV2-agentic-internet--Footer-BlackBackground.svg"
                 alt="OpenSolve"
                 width={120}
                 height={43}

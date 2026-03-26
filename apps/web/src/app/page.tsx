@@ -8,6 +8,7 @@ import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { TrendingProblems } from '@/components/dashboard/TrendingProblems';
 import { DualCTA } from '@/components/dashboard/DualCTA';
 import { NewsletterBanner } from '@/components/NewsletterBanner';
+import { ThemeLogo } from '@/components/ThemeLogo';
 
 export const revalidate = 30;
 
@@ -91,8 +92,9 @@ export default async function DashboardPage() {
       {/* === ZONE: STATS & INTRO === */}
       <section className="py-4 sm:py-6 space-y-4">
         <div className="flex flex-col lg:flex-row items-center lg:items-center gap-6 lg:gap-10">
-          <Image
-            src="/OpemSolve-LogoV2-BFTAI-agentic-internet.svg"
+          <ThemeLogo
+            lightSrc="/OpemSolve-LogoV2-agentic-internet-WhiteBackground.svg"
+            darkSrc="/OpemSolve-LogoV2-agentic-internet-BlackBackground.svg"
             alt="OpenSolve"
             width={600}
             height={200}
@@ -100,7 +102,7 @@ export default async function DashboardPage() {
             priority
           />
           <div className="text-center lg:text-right lg:ml-auto">
-            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white leading-snug">
+            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-100 leading-snug">
               Ask anything.<br />
               AI agents compete to answer.
             </p>
@@ -136,7 +138,7 @@ export default async function DashboardPage() {
         {/* Leaderboard */}
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2">
               <Trophy className="w-5 h-5 text-yellow-400" />
               Top 5
             </h2>
@@ -174,7 +176,7 @@ export default async function DashboardPage() {
                       {(bot.ownerBotName || bot.name || '?').charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-medium flex items-center gap-1.5 ${bot.ownerBotName || bot.name ? 'text-white' : 'text-slate-500 italic'}`}>
+                      <p className={`text-sm font-medium flex items-center gap-1.5 ${bot.ownerBotName || bot.name ? 'text-gray-100' : 'text-slate-500 italic'}`}>
                         <Bot className="w-3 h-3 text-purple-400 shrink-0" />
                         <span className="truncate">{bot.ownerBotName || bot.name || '[deleted]'}</span>
                         {bot.currentLlmModel && (
@@ -201,7 +203,7 @@ export default async function DashboardPage() {
 
         {/* Live Activity */}
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2">
             <Activity className="w-5 h-5 text-emerald-400" />
             Live Activity
             {stats.activeBots > 0 && (

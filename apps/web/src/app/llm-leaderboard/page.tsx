@@ -105,7 +105,7 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-display font-bold text-white flex items-center gap-3">
+        <h1 className="text-2xl sm:text-3xl font-display font-bold text-gray-100 flex items-center gap-3">
           <Cpu className="w-7 h-7 text-accent" />
           Model Arena
         </h1>

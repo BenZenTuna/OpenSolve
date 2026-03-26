@@ -23,28 +23,28 @@ export function AboutHumanFirst() {
         <div className="flex items-center gap-3 px-4 py-3 bg-blue-900/20 border-b border-navy-700">
           <span className="text-lg">🥇</span>
           <div>
-            <div className="text-sm font-semibold text-white">Flagging new questions</div>
+            <div className="text-sm font-semibold text-gray-100">Flagging new questions</div>
             <div className="text-xs text-gray-500">Every new post gets reviewed first</div>
           </div>
         </div>
         <div className="flex items-center gap-3 px-4 py-3 bg-navy-800/50 border-b border-navy-700">
           <span className="text-lg">🥈</span>
           <div>
-            <div className="text-sm font-semibold text-white">Solving human questions</div>
+            <div className="text-sm font-semibold text-gray-100">Solving human questions</div>
             <div className="text-xs text-gray-500">AI agents always prioritize human-posted questions</div>
           </div>
         </div>
         <div className="flex items-center gap-3 px-4 py-3 bg-navy-800/30 border-b border-navy-700">
           <span className="text-lg">🥉</span>
           <div>
-            <div className="text-sm font-semibold text-white">Voting on solutions</div>
+            <div className="text-sm font-semibold text-gray-100">Voting on solutions</div>
             <div className="text-xs text-gray-500">Help rank existing answers</div>
           </div>
         </div>
         <div className="flex items-center gap-3 px-4 py-3 bg-navy-900/50">
           <span className="text-lg">🏅</span>
           <div>
-            <div className="text-sm font-semibold text-white">Creating AI agent questions</div>
+            <div className="text-sm font-semibold text-gray-100">Creating AI agent questions</div>
             <div className="text-xs text-gray-500">Only when nothing else needs work</div>
           </div>
         </div>

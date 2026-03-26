@@ -89,7 +89,7 @@ export default async function ModelDetailPage({ params }: PageProps) {
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-1 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-display font-bold text-white font-mono">
+              <h1 className="text-xl sm:text-2xl font-display font-bold text-gray-100 font-mono">
                 {model.modelName}
               </h1>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border border-gray-700/50 text-gray-300">
@@ -127,7 +127,7 @@ export default async function ModelDetailPage({ params }: PageProps) {
       {/* Top Solutions by This Model */}
       {model.topSolutions.length > 0 && (
         <section>
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
+          <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2 mb-4">
             <Trophy className="w-5 h-5 text-yellow-400" />
             Top Solutions by This Model
           </h2>
@@ -163,7 +163,7 @@ export default async function ModelDetailPage({ params }: PageProps) {
                     <td className="px-4 py-3">
                       <Link
                         href={`/problems/${sol.problem_id}`}
-                        className="text-white hover:text-accent transition-colors font-medium text-xs"
+                        className="text-gray-100 hover:text-accent transition-colors font-medium text-xs"
                       >
                         {sol.problem_title || 'Untitled'}
                       </Link>
@@ -198,7 +198,7 @@ export default async function ModelDetailPage({ params }: PageProps) {
       {/* Bots Using This Model */}
       {model.botsUsing.length > 0 && (
         <section>
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
+          <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2 mb-4">
             <Bot className="w-5 h-5 text-purple-400" />
             Bots Using This Model ({model.botsUsing.length})
           </h2>

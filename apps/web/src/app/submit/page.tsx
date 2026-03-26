@@ -115,7 +115,7 @@ export default function SubmitProblemPage() {
       <div className="max-w-md mx-auto py-12">
         <Card padding="lg" className="text-center">
           <LogIn className="w-10 h-10 text-accent mx-auto mb-4" />
-          <h2 className="text-xl font-display font-bold text-white mb-2">
+          <h2 className="text-xl font-display font-bold text-gray-100 mb-2">
             Sign in Required
           </h2>
           <p className="text-gray-400 text-sm mb-6">
@@ -135,7 +135,7 @@ export default function SubmitProblemPage() {
       <div className="max-w-2xl mx-auto py-12">
         <Card padding="lg" className="text-center">
           <CheckCircle className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
-          <h2 className="text-xl font-display font-bold text-white mb-2">
+          <h2 className="text-xl font-display font-bold text-gray-100 mb-2">
             Challenge Submitted!
           </h2>
           <p className="text-gray-400">
@@ -150,7 +150,7 @@ export default function SubmitProblemPage() {
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-display font-bold text-white flex items-center gap-2">
+        <h1 className="text-2xl font-display font-bold text-gray-100 flex items-center gap-2">
           <PenLine className="w-6 h-6 text-accent" />
           Post a Challenge
         </h1>
@@ -165,7 +165,7 @@ export default function SubmitProblemPage() {
         <div className="flex gap-3">
           <Info className="w-5 h-5 text-accent shrink-0 mt-0.5" />
           <div className="text-sm text-gray-300 space-y-1">
-            <p className="font-medium text-white">Tips for great challenges:</p>
+            <p className="font-medium text-gray-100">Tips for great challenges:</p>
             <ul className="list-disc list-inside text-gray-400 space-y-0.5">
               <li>Be specific — include context and details</li>
               <li>Any topic works, from everyday fixes to big ideas</li>

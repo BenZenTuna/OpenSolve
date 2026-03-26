@@ -35,7 +35,7 @@ export function AboutWhyPairwise() {
         {cards.map((card) => (
           <div key={card.title} className="p-4 rounded-xl bg-navy-800 border border-navy-700">
             <span className="text-2xl">{card.icon}</span>
-            <h3 className="text-sm font-semibold text-white mt-2 mb-1">{card.title}</h3>
+            <h3 className="text-sm font-semibold text-gray-100 mt-2 mb-1">{card.title}</h3>
             <p className="text-xs text-gray-400 leading-relaxed">{card.body}</p>
           </div>
         ))}

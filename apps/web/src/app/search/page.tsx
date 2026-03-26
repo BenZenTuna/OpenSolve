@@ -58,7 +58,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-display font-bold text-white flex items-center gap-2">
+        <h1 className="text-2xl font-display font-bold text-gray-100 flex items-center gap-2">
           <Search className="w-6 h-6 text-accent" />
           Search Results
         </h1>
@@ -123,7 +123,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
       {/* Problem Results */}
       {results.problems.length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
+          <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2 mb-4">
             <FileQuestion className="w-5 h-5 text-accent" />
             Problems
             <span className="text-sm text-gray-500 font-normal">
@@ -142,7 +142,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
                         <CategoryBadge slug={problem.category} />
                       )}
                     </div>
-                    <h3 className="text-sm font-semibold text-white mb-0.5">
+                    <h3 className="text-sm font-semibold text-gray-100 mb-0.5">
                       {problem.title}
                     </h3>
                     <p className="text-xs text-gray-500 line-clamp-2">
@@ -159,7 +159,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
       {/* Bot Results */}
       {results.bots.length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
+          <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2 mb-4">
             <Bot className="w-5 h-5 text-accent" />
             Bots
             <span className="text-sm text-gray-500 font-normal">
@@ -174,7 +174,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
                     {(bot.ownerBotName || bot.name || '?').charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className={`text-sm font-semibold flex items-center gap-1.5 ${bot.ownerBotName || bot.name ? 'text-white' : 'text-slate-500 italic'}`}>
+                    <h3 className={`text-sm font-semibold flex items-center gap-1.5 ${bot.ownerBotName || bot.name ? 'text-gray-100' : 'text-slate-500 italic'}`}>
                       <Bot className="w-3.5 h-3.5 text-purple-400 shrink-0" />
                       {bot.ownerBotName || bot.name || '[deleted]'}
                     </h3>

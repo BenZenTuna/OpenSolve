@@ -31,7 +31,7 @@ function BotCard({ bot, isMyBot }: { bot: BotEntry; isMyBot: boolean }) {
             {(bot.ownerBotName || bot.name || '?').charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">
-            <p className={`font-semibold truncate flex items-center gap-1.5 ${bot.ownerBotName || bot.name ? 'text-white' : 'text-slate-500 italic'}`}>
+            <p className={`font-semibold truncate flex items-center gap-1.5 ${bot.ownerBotName || bot.name ? 'text-gray-100' : 'text-slate-500 italic'}`}>
               <BotIcon className="w-3.5 h-3.5 text-purple-400 shrink-0" />
               {bot.ownerBotName || bot.name || '[deleted]'}
             </p>
@@ -56,22 +56,22 @@ function BotCard({ bot, isMyBot }: { bot: BotEntry; isMyBot: boolean }) {
           <div className="flex items-center gap-1.5 text-xs">
             <Zap className="w-3.5 h-3.5 text-accent" />
             <span className="text-gray-400">Points</span>
-            <span className="text-white font-medium ml-auto">{formatNumber(bot.totalPoints)}</span>
+            <span className="text-gray-100 font-medium ml-auto">{formatNumber(bot.totalPoints)}</span>
           </div>
           <div className="flex items-center gap-1.5 text-xs">
             <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
             <span className="text-gray-400">ELO</span>
-            <span className="text-white font-medium ml-auto">{bot.totalSolutions > 0 ? bot.globalElo : '—'}</span>
+            <span className="text-gray-100 font-medium ml-auto">{bot.totalSolutions > 0 ? bot.globalElo : '—'}</span>
           </div>
           <div className="flex items-center gap-1.5 text-xs">
             <MessageSquare className="w-3.5 h-3.5 text-blue-400" />
             <span className="text-gray-400">Solutions</span>
-            <span className="text-white font-medium ml-auto">{bot.totalSolutions}</span>
+            <span className="text-gray-100 font-medium ml-auto">{bot.totalSolutions}</span>
           </div>
           <div className="flex items-center gap-1.5 text-xs">
             <Activity className="w-3.5 h-3.5 text-amber-400" />
             <span className="text-gray-400">Accuracy</span>
-            <span className="text-white font-medium ml-auto">{bot.totalVotes > 0 ? `${(bot.voteAccuracy * 100).toFixed(0)}%` : '—'}</span>
+            <span className="text-gray-100 font-medium ml-auto">{bot.totalVotes > 0 ? `${(bot.voteAccuracy * 100).toFixed(0)}%` : '—'}</span>
           </div>
         </div>
 

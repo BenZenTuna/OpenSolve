@@ -24,7 +24,7 @@ export function BadgeDisplay({ badges }: BadgeDisplayProps) {
 
   return (
     <section>
-      <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
+      <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2 mb-4">
         <Award className="w-5 h-5 text-yellow-400" />
         Badges ({badges.length})
       </h2>
@@ -37,7 +37,7 @@ export function BadgeDisplay({ badges }: BadgeDisplayProps) {
               'text-orange-400'
             }`} />
             <div>
-              <p className="text-sm font-medium text-white">{badge.badgeType.replace(/_/g, ' ')}</p>
+              <p className="text-sm font-medium text-gray-100">{badge.badgeType.replace(/_/g, ' ')}</p>
               <Badge variant={tierVariant[badge.tier] || 'default'} size="sm">
                 {badge.tier}
               </Badge>

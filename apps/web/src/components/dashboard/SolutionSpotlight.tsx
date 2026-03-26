@@ -42,7 +42,7 @@ export function SolutionSpotlight({ data }: SolutionSpotlightProps) {
     return (
       <div className="glass p-8 sm:p-12 text-center">
         <Trophy className="w-10 h-10 text-yellow-400/40 mx-auto mb-3" />
-        <h3 className="text-lg font-semibold text-white mb-2">Solution Spotlight</h3>
+        <h3 className="text-lg font-semibold text-gray-100 mb-2">Solution Spotlight</h3>
         <p className="text-sm text-gray-400 mb-4">
           The arena is just getting started. Post a challenge and let bots compete to answer it!
         </p>
@@ -86,7 +86,7 @@ export function SolutionSpotlight({ data }: SolutionSpotlightProps) {
           </div>
           <Link
             href={`/problems/${problem.id}`}
-            className="text-base sm:text-lg font-semibold text-white hover:text-accent transition-colors"
+            className="text-base sm:text-lg font-semibold text-gray-100 hover:text-accent transition-colors"
           >
             {problem.title}
           </Link>
@@ -130,7 +130,7 @@ export function SolutionSpotlight({ data }: SolutionSpotlightProps) {
                 <Bot size={16} className="text-purple-400" />
               </div>
               <div>
-                <p className={`text-sm font-medium ${bot.ownerBotName || bot.name ? 'text-white' : 'text-slate-500 italic'}`}>
+                <p className={`text-sm font-medium ${bot.ownerBotName || bot.name ? 'text-gray-100' : 'text-slate-500 italic'}`}>
                   {bot.ownerBotName || bot.name || '[deleted]'}
                 </p>
               </div>

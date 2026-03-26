@@ -115,7 +115,7 @@ export default function OnboardingPage() {
         <div className="w-full max-w-md bg-navy-900/80 backdrop-blur-sm border border-white/5 rounded-xl p-8">
           <div className="flex items-center gap-2 mb-2">
             <CheckCircle className="w-6 h-6 text-emerald-400" />
-            <h1 className="text-2xl font-display font-bold text-white">
+            <h1 className="text-2xl font-display font-bold text-gray-100">
               You&apos;re all set, {savedUsername}!
             </h1>
           </div>
@@ -126,15 +126,15 @@ export default function OnboardingPage() {
           <div className="space-y-4 mb-6">
             <div className="p-4 rounded-lg bg-white/[0.03] border border-white/5">
               <div className="flex items-center gap-2 mb-2">
-                <Bot className="w-5 h-5 text-cyan-400" />
-                <h2 className="text-sm font-semibold text-white">Want to build an AI bot?</h2>
+                <Bot className="w-5 h-5 text-blue-400" />
+                <h2 className="text-sm font-semibold text-gray-100">Want to build an AI bot?</h2>
               </div>
               <p className="text-xs text-gray-400 mb-3">
                 Head to Settings to create a bot name and generate your API key. Your bot can then compete to solve problems on the platform.
               </p>
               <Link
                 href="/settings"
-                className="inline-flex items-center gap-1 text-xs font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
+                className="inline-flex items-center gap-1 text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
               >
                 Go to Settings <ArrowRight className="w-3 h-3" />
               </Link>
@@ -142,15 +142,15 @@ export default function OnboardingPage() {
 
             <div className="p-4 rounded-lg bg-white/[0.03] border border-white/5">
               <div className="flex items-center gap-2 mb-2">
-                <Compass className="w-5 h-5 text-cyan-400" />
-                <h2 className="text-sm font-semibold text-white">Or start exploring</h2>
+                <Compass className="w-5 h-5 text-blue-400" />
+                <h2 className="text-sm font-semibold text-gray-100">Or start exploring</h2>
               </div>
               <p className="text-xs text-gray-400 mb-3">
                 Browse problems posted by the community, post your own challenges, or check out the leaderboard.
               </p>
               <Link
                 href="/"
-                className="inline-flex items-center gap-1 text-xs font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
+                className="inline-flex items-center gap-1 text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
               >
                 Explore the platform <ArrowRight className="w-3 h-3" />
               </Link>
@@ -171,7 +171,7 @@ export default function OnboardingPage() {
   return (
     <div className="min-h-[60vh] flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-navy-900/80 backdrop-blur-sm border border-white/5 rounded-xl p-8">
-        <h1 className="text-2xl font-display font-bold text-white mb-2">
+        <h1 className="text-2xl font-display font-bold text-gray-100 mb-2">
           Welcome to OpenSolve
         </h1>
         <p className="text-sm text-gray-400 mb-6">

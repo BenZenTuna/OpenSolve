@@ -4,6 +4,312 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   THEME VARIABLES — Light (default) + Dark
+   ============================================ */
+
+/* Light theme (default) */
+:root {
+  /* Gray scale — reversed for light mode */
+  --gray-50:  249 250 251;
+  --gray-100: 17 24 39;
+  --gray-200: 17 24 39;
+  --gray-300: 31 41 55;
+  --gray-400: 55 65 81;
+  --gray-500: 107 114 128;
+  --gray-600: 156 163 175;
+  --gray-700: 209 213 219;
+  --gray-800: 243 244 246;
+  --gray-900: 249 250 251;
+  --gray-950: 255 255 255;
+
+  /* Navy — light equivalents */
+  --navy-950: 255 255 255;
+  --navy-900: 249 250 251;
+  --navy-800: 243 244 246;
+  --navy-700: 229 231 235;
+  --navy-600: 209 213 219;
+
+  /* Surface — semi-transparent white for glass on light */
+  --surface: rgba(255, 255, 255, 0.8);
+  --surface-hover: rgba(255, 255, 255, 0.95);
+  --surface-border: rgba(0, 0, 0, 0.08);
+
+  /* Accent — slightly darker blue for light bg contrast */
+  --accent: 37 99 235;
+  --accent-light: 59 130 246;
+  --accent-dark: 29 78 216;
+  --accent-glow: rgba(37, 99, 235, 0.15);
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+  /* Gray scale — standard Tailwind dark values */
+  --gray-50:  249 250 251;
+  --gray-100: 243 244 246;
+  --gray-200: 229 231 235;
+  --gray-300: 209 213 219;
+  --gray-400: 156 163 175;
+  --gray-500: 107 114 128;
+  --gray-600: 75 85 99;
+  --gray-700: 55 65 81;
+  --gray-800: 31 41 55;
+  --gray-900: 17 24 39;
+  --gray-950: 3 7 18;
+
+  /* Navy — original dark values */
+  --navy-950: 15 23 42;
+  --navy-900: 30 41 59;
+  --navy-800: 26 35 50;
+  --navy-700: 36 48 68;
+  --navy-600: 51 65 85;
+
+  /* Surface — semi-transparent dark for glass */
+  --surface: rgba(30, 41, 59, 0.5);
+  --surface-hover: rgba(30, 41, 59, 0.7);
+  --surface-border: rgba(59, 130, 246, 0.1);
+
+  /* Accent — original values */
+  --accent: 59 130 246;
+  --accent-light: 96 165 250;
+  --accent-dark: 37 99 235;
+  --accent-glow: rgba(59, 130, 246, 0.15);
+}
+
+/* ============================================
+   LIGHT MODE — Accent color contrast fixes
+   Override Tailwind's light -300/-400 shades to
+   darker equivalents for readability on white.
+   Dark mode restores the original lighter shades.
+   ============================================ */
+
+/* Light mode: darken accent text colors */
+:root .text-blue-300 { color: rgb(37 99 235) !important; }
+:root .text-blue-400 { color: rgb(37 99 235) !important; }
+:root .text-emerald-300 { color: rgb(5 150 105) !important; }
+:root .text-emerald-400 { color: rgb(5 150 105) !important; }
+:root .text-amber-300 { color: rgb(217 119 6) !important; }
+:root .text-amber-400 { color: rgb(180 83 9) !important; }
+:root .text-yellow-300 { color: rgb(202 138 4) !important; }
+:root .text-yellow-400 { color: rgb(161 98 7) !important; }
+:root .text-red-300 { color: rgb(220 38 38) !important; }
+:root .text-red-400 { color: rgb(220 38 38) !important; }
+:root .text-purple-300 { color: rgb(126 34 206) !important; }
+:root .text-purple-400 { color: rgb(147 51 234) !important; }
+:root .text-purple-400\/60 { color: rgb(107 33 168) !important; }
+:root .text-purple-400\/70 { color: rgb(107 33 168) !important; }
+:root .text-orange-300 { color: rgb(234 88 12) !important; }
+:root .text-orange-400 { color: rgb(234 88 12) !important; }
+:root .text-slate-300 { color: rgb(71 85 105) !important; }
+:root .text-slate-400 { color: rgb(100 116 139) !important; }
+
+/* Badge/category colors — darken for light bg */
+:root .text-yellow-200 { color: rgb(161 98 7) !important; }
+:root .text-yellow-100 { color: rgb(161 98 7) !important; }
+:root .text-green-300 { color: rgb(21 128 61) !important; }
+:root .text-green-400 { color: rgb(21 128 61) !important; }
+:root .text-pink-300 { color: rgb(190 24 93) !important; }
+:root .text-pink-400 { color: rgb(190 24 93) !important; }
+:root .text-indigo-300 { color: rgb(67 56 202) !important; }
+:root .text-indigo-400 { color: rgb(67 56 202) !important; }
+:root .text-sky-300 { color: rgb(2 132 199) !important; }
+:root .text-sky-400 { color: rgb(2 132 199) !important; }
+
+/* Dark mode: restore original Tailwind values */
+[data-theme="dark"] .text-blue-300 { color: rgb(147 197 253) !important; }
+[data-theme="dark"] .text-blue-400 { color: rgb(96 165 250) !important; }
+[data-theme="dark"] .text-emerald-300 { color: rgb(110 231 183) !important; }
+[data-theme="dark"] .text-emerald-400 { color: rgb(52 211 153) !important; }
+[data-theme="dark"] .text-amber-300 { color: rgb(252 211 77) !important; }
+[data-theme="dark"] .text-amber-400 { color: rgb(251 191 36) !important; }
+[data-theme="dark"] .text-yellow-300 { color: rgb(253 224 71) !important; }
+[data-theme="dark"] .text-yellow-400 { color: rgb(250 204 21) !important; }
+[data-theme="dark"] .text-red-300 { color: rgb(252 165 165) !important; }
+[data-theme="dark"] .text-red-400 { color: rgb(248 113 113) !important; }
+[data-theme="dark"] .text-purple-300 { color: rgb(216 180 254) !important; }
+[data-theme="dark"] .text-purple-400 { color: rgb(192 132 252) !important; }
+[data-theme="dark"] .text-purple-400\/60 { color: rgb(192 132 252 / 0.6) !important; }
+[data-theme="dark"] .text-purple-400\/70 { color: rgb(192 132 252 / 0.7) !important; }
+[data-theme="dark"] .text-orange-300 { color: rgb(253 186 116) !important; }
+[data-theme="dark"] .text-orange-400 { color: rgb(251 146 60) !important; }
+[data-theme="dark"] .text-slate-300 { color: rgb(203 213 225) !important; }
+[data-theme="dark"] .text-slate-400 { color: rgb(148 163 184) !important; }
+[data-theme="dark"] .text-yellow-200 { color: rgb(254 240 138) !important; }
+[data-theme="dark"] .text-yellow-100 { color: rgb(254 249 195) !important; }
+[data-theme="dark"] .text-green-300 { color: rgb(134 239 172) !important; }
+[data-theme="dark"] .text-green-400 { color: rgb(74 222 128) !important; }
+[data-theme="dark"] .text-pink-300 { color: rgb(249 168 212) !important; }
+[data-theme="dark"] .text-pink-400 { color: rgb(244 114 182) !important; }
+[data-theme="dark"] .text-indigo-300 { color: rgb(165 180 252) !important; }
+[data-theme="dark"] .text-indigo-400 { color: rgb(129 140 248) !important; }
+[data-theme="dark"] .text-sky-300 { color: rgb(125 211 252) !important; }
+[data-theme="dark"] .text-sky-400 { color: rgb(56 189 248) !important; }
+
+/* ============================================
+   LIGHT MODE — Cards, borders, backgrounds, hovers
+   ============================================ */
+
+/* Cards — white with visible border + subtle shadow */
+:root .glass {
+  background-color: rgb(255 255 255) !important;
+  border: 1px solid rgb(209 213 219) !important;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.04), 0 1px 2px rgb(0 0 0 / 0.02) !important;
+}
+:root .glass-hover:hover {
+  background-color: rgb(249 250 251) !important;
+  border-color: rgb(156 163 175) !important;
+  box-shadow: 0 4px 6px rgb(0 0 0 / 0.04), 0 2px 4px rgb(0 0 0 / 0.02) !important;
+}
+
+/* Navy borders → visible gray */
+:root .border-navy-700 { border-color: rgb(209 213 219) !important; }
+:root .border-navy-600 { border-color: rgb(156 163 175) !important; }
+:root .border-navy-950\/80 { border-color: rgb(229 231 235) !important; }
+:root .border-surface-border { border-color: rgb(209 213 219) !important; }
+:root .divide-surface-border > * + * { border-color: rgb(229 231 235) !important; }
+:root .divide-navy-700 > * + * { border-color: rgb(229 231 235) !important; }
+
+/* Surfaces */
+:root .bg-surface { background-color: rgb(255 255 255) !important; }
+:root .bg-navy-900\/50 { background-color: rgb(243 244 246) !important; }
+:root .bg-navy-800\/50 { background-color: rgb(243 244 246) !important; }
+:root .bg-navy-900\/30 { background-color: rgb(249 250 251) !important; }
+:root .bg-navy-800\/40 { background-color: rgb(243 244 246) !important; }
+:root .bg-navy-800\/60 { background-color: rgb(243 244 246) !important; }
+
+/* Navbar — solid white with bottom shadow */
+:root .backdrop-blur-xl {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background-color: rgb(255 255 255 / 0.95) !important;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.06) !important;
+}
+
+/* Left-border accents — keep vivid */
+:root .border-l-amber-500 { border-left-color: rgb(245 158 11) !important; }
+:root .border-l-emerald-500 { border-left-color: rgb(16 185 129) !important; }
+:root .border-l-blue-500 { border-left-color: rgb(59 130 246) !important; }
+:root .border-l-purple-500 { border-left-color: rgb(168 85 247) !important; }
+
+/* Medal/status badges — stronger tint */
+:root .bg-amber-500\/10 { background-color: rgb(251 191 36 / 0.2) !important; }
+:root .bg-amber-500\/20 { background-color: rgb(251 191 36 / 0.25) !important; }
+:root .bg-yellow-500\/10 { background-color: rgb(234 179 8 / 0.15) !important; }
+:root .bg-yellow-500\/20 { background-color: rgb(234 179 8 / 0.2) !important; }
+:root .bg-amber-900\/30 { background-color: rgb(251 191 36 / 0.12) !important; }
+:root .bg-orange-900\/30 { background-color: rgb(234 88 12 / 0.12) !important; }
+
+/* Gray with opacity — make visible on white */
+:root .bg-gray-800\/30 { background-color: rgb(243 244 246) !important; }
+:root .bg-gray-800\/40 { background-color: rgb(243 244 246) !important; }
+:root .bg-gray-800\/50 { background-color: rgb(243 244 246) !important; }
+:root .bg-gray-900\/60 { background-color: rgb(249 250 251) !important; }
+:root .bg-gray-900\/80 { background-color: rgb(249 250 251) !important; }
+:root .border-gray-700\/30 { border-color: rgb(209 213 219) !important; }
+:root .border-gray-700\/40 { border-color: rgb(209 213 219) !important; }
+:root .border-gray-700\/50 { border-color: rgb(209 213 219) !important; }
+:root .border-gray-800 { border-color: rgb(229 231 235) !important; }
+:root .border-gray-600\/50 { border-color: rgb(209 213 219) !important; }
+:root .hover\:border-gray-700:hover { border-color: rgb(156 163 175) !important; }
+:root .hover\:border-gray-600\/50:hover { border-color: rgb(156 163 175) !important; }
+:root .hover\:bg-gray-700\/50:hover { background-color: rgb(229 231 235) !important; }
+:root .hover\:bg-gray-800\/60:hover { background-color: rgb(243 244 246) !important; }
+
+[data-theme="dark"] .bg-gray-800\/30 { background-color: rgb(31 41 55 / 0.3) !important; }
+[data-theme="dark"] .bg-gray-800\/40 { background-color: rgb(31 41 55 / 0.4) !important; }
+[data-theme="dark"] .bg-gray-800\/50 { background-color: rgb(31 41 55 / 0.5) !important; }
+[data-theme="dark"] .bg-gray-900\/60 { background-color: rgb(17 24 39 / 0.6) !important; }
+[data-theme="dark"] .bg-gray-900\/80 { background-color: rgb(17 24 39 / 0.8) !important; }
+[data-theme="dark"] .border-gray-700\/30 { border-color: rgb(55 65 81 / 0.3) !important; }
+[data-theme="dark"] .border-gray-700\/40 { border-color: rgb(55 65 81 / 0.4) !important; }
+[data-theme="dark"] .border-gray-700\/50 { border-color: rgb(55 65 81 / 0.5) !important; }
+[data-theme="dark"] .border-gray-800 { border-color: rgb(31 41 55) !important; }
+[data-theme="dark"] .border-gray-600\/50 { border-color: rgb(75 85 99 / 0.5) !important; }
+[data-theme="dark"] .hover\:border-gray-700:hover { border-color: rgb(55 65 81) !important; }
+[data-theme="dark"] .hover\:border-gray-600\/50:hover { border-color: rgb(75 85 99 / 0.5) !important; }
+[data-theme="dark"] .hover\:bg-gray-700\/50:hover { background-color: rgb(55 65 81 / 0.5) !important; }
+[data-theme="dark"] .hover\:bg-gray-800\/60:hover { background-color: rgb(31 41 55 / 0.6) !important; }
+
+/* Hover backgrounds */
+:root .hover\:bg-navy-800:hover { background-color: rgb(243 244 246) !important; }
+:root .hover\:bg-navy-900:hover { background-color: rgb(243 244 246) !important; }
+:root .hover\:bg-navy-700:hover { background-color: rgb(229 231 235) !important; }
+:root .hover\:bg-navy-800\/50:hover { background-color: rgb(243 244 246 / 0.8) !important; }
+:root .hover\:bg-navy-800\/40:hover { background-color: rgb(243 244 246 / 0.7) !important; }
+:root .hover\:bg-navy-800\/30:hover { background-color: rgb(243 244 246 / 0.6) !important; }
+:root .hover\:bg-navy-700\/40:hover { background-color: rgb(229 231 235 / 0.7) !important; }
+:root .hover\:bg-gray-800\/40:hover { background-color: rgb(243 244 246) !important; }
+
+/* Semi-transparent white → semi-transparent dark */
+:root .bg-white\/5 { background-color: rgb(0 0 0 / 0.03) !important; }
+:root .bg-white\/10 { background-color: rgb(0 0 0 / 0.05) !important; }
+:root .bg-white\/20 { background-color: rgb(0 0 0 / 0.08) !important; }
+:root .hover\:bg-white\/5:hover { background-color: rgb(0 0 0 / 0.05) !important; }
+:root .hover\:bg-white\/20:hover { background-color: rgb(0 0 0 / 0.1) !important; }
+:root .border-white\/5 { border-color: rgb(0 0 0 / 0.06) !important; }
+:root .border-white\/10 { border-color: rgb(0 0 0 / 0.08) !important; }
+:root .border-white\/20 { border-color: rgb(0 0 0 / 0.12) !important; }
+:root .hover\:border-white\/20:hover { border-color: rgb(0 0 0 / 0.15) !important; }
+
+/* ============================================
+   DARK MODE — Restore all originals
+   ============================================ */
+[data-theme="dark"] .glass {
+  background-color: var(--surface) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: none !important;
+}
+[data-theme="dark"] .glass-hover:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: none !important;
+}
+[data-theme="dark"] .border-navy-700 { border-color: rgb(var(--navy-700)) !important; }
+[data-theme="dark"] .border-navy-600 { border-color: rgb(var(--navy-600)) !important; }
+[data-theme="dark"] .border-navy-950\/80 { border-color: rgb(var(--navy-950) / 0.8) !important; }
+[data-theme="dark"] .border-surface-border { border-color: rgba(255, 255, 255, 0.08) !important; }
+[data-theme="dark"] .divide-surface-border > * + * { border-color: rgba(255, 255, 255, 0.08) !important; }
+[data-theme="dark"] .divide-navy-700 > * + * { border-color: rgb(var(--navy-700)) !important; }
+[data-theme="dark"] .bg-surface { background-color: var(--surface) !important; }
+[data-theme="dark"] .bg-navy-900\/50 { background-color: rgb(var(--navy-900) / 0.5) !important; }
+[data-theme="dark"] .bg-navy-800\/50 { background-color: rgb(var(--navy-800) / 0.5) !important; }
+[data-theme="dark"] .bg-navy-900\/30 { background-color: rgb(var(--navy-900) / 0.3) !important; }
+[data-theme="dark"] .bg-navy-800\/40 { background-color: rgb(var(--navy-800) / 0.4) !important; }
+[data-theme="dark"] .bg-navy-800\/60 { background-color: rgb(var(--navy-800) / 0.6) !important; }
+[data-theme="dark"] .backdrop-blur-xl {
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+[data-theme="dark"] .border-l-amber-500 { border-left-color: rgb(245 158 11) !important; }
+[data-theme="dark"] .border-l-emerald-500 { border-left-color: rgb(16 185 129) !important; }
+[data-theme="dark"] .border-l-blue-500 { border-left-color: rgb(59 130 246) !important; }
+[data-theme="dark"] .border-l-purple-500 { border-left-color: rgb(168 85 247) !important; }
+[data-theme="dark"] .bg-amber-500\/10 { background-color: rgb(245 158 11 / 0.1) !important; }
+[data-theme="dark"] .bg-amber-500\/20 { background-color: rgb(245 158 11 / 0.2) !important; }
+[data-theme="dark"] .bg-yellow-500\/10 { background-color: rgb(234 179 8 / 0.1) !important; }
+[data-theme="dark"] .bg-yellow-500\/20 { background-color: rgb(234 179 8 / 0.2) !important; }
+[data-theme="dark"] .bg-amber-900\/30 { background-color: rgb(120 53 15 / 0.3) !important; }
+[data-theme="dark"] .bg-orange-900\/30 { background-color: rgb(124 45 18 / 0.3) !important; }
+[data-theme="dark"] .hover\:bg-navy-800:hover { background-color: rgb(var(--navy-800)) !important; }
+[data-theme="dark"] .hover\:bg-navy-900:hover { background-color: rgb(var(--navy-900)) !important; }
+[data-theme="dark"] .hover\:bg-navy-700:hover { background-color: rgb(var(--navy-700)) !important; }
+[data-theme="dark"] .hover\:bg-navy-800\/50:hover { background-color: rgb(var(--navy-800) / 0.5) !important; }
+[data-theme="dark"] .hover\:bg-navy-800\/40:hover { background-color: rgb(var(--navy-800) / 0.4) !important; }
+[data-theme="dark"] .hover\:bg-navy-800\/30:hover { background-color: rgb(var(--navy-800) / 0.3) !important; }
+[data-theme="dark"] .hover\:bg-navy-700\/40:hover { background-color: rgb(var(--navy-700) / 0.4) !important; }
+[data-theme="dark"] .hover\:bg-gray-800\/40:hover { background-color: rgb(31 41 55 / 0.4) !important; }
+[data-theme="dark"] .bg-white\/5 { background-color: rgb(255 255 255 / 0.05) !important; }
+[data-theme="dark"] .bg-white\/10 { background-color: rgb(255 255 255 / 0.1) !important; }
+[data-theme="dark"] .bg-white\/20 { background-color: rgb(255 255 255 / 0.2) !important; }
+[data-theme="dark"] .hover\:bg-white\/5:hover { background-color: rgb(255 255 255 / 0.05) !important; }
+[data-theme="dark"] .hover\:bg-white\/20:hover { background-color: rgb(255 255 255 / 0.2) !important; }
+[data-theme="dark"] .border-white\/5 { border-color: rgb(255 255 255 / 0.05) !important; }
+[data-theme="dark"] .border-white\/10 { border-color: rgb(255 255 255 / 0.1) !important; }
+[data-theme="dark"] .border-white\/20 { border-color: rgb(255 255 255 / 0.2) !important; }
+[data-theme="dark"] .hover\:border-white\/20:hover { border-color: rgb(255 255 255 / 0.2) !important; }
+
 @layer base {
   *,
   *::before,
@@ -12,8 +318,11 @@
   }
 
   html {
-    color-scheme: dark;
     scroll-behavior: smooth;
+  }
+
+  [data-theme="dark"] {
+    color-scheme: dark;
   }
 
   body {
@@ -48,7 +357,11 @@
 @layer components {
   /* Glass morphism card */
   .glass {
-    @apply bg-surface backdrop-blur-xl border border-surface-border rounded-xl shadow-glass;
+    background-color: var(--surface);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--surface-border);
+    @apply rounded-xl shadow-glass;
   }
 
   .glass-hover {
@@ -56,18 +369,22 @@
   }
 
   .glass-hover:hover {
-    @apply bg-surface-hover border-accent/20 shadow-glow;
+    background-color: var(--surface-hover);
+    border-color: rgb(var(--accent) / 0.2);
+    @apply shadow-glow;
   }
 
   /* Glass card with more prominence */
   .glass-prominent {
-    @apply backdrop-blur-xl rounded-xl shadow-glass;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     background: linear-gradient(
       135deg,
-      rgba(30, 41, 59, 0.6) 0%,
-      rgba(30, 41, 59, 0.3) 100%
+      var(--surface) 0%,
+      var(--surface-hover) 100%
     );
-    border: 1px solid rgba(59, 130, 246, 0.12);
+    border: 1px solid var(--surface-border);
+    @apply rounded-xl shadow-glass;
   }
 
   /* Accent glow border effect */
@@ -80,8 +397,8 @@
     @apply absolute -inset-px rounded-xl;
     background: linear-gradient(
       135deg,
-      rgba(59, 130, 246, 0.3),
-      rgba(59, 130, 246, 0.05)
+      rgb(var(--accent) / 0.3),
+      rgb(var(--accent) / 0.05)
     );
     z-index: -1;
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -105,50 +422,71 @@
   /* Accent text gradient */
   .text-gradient {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, #3B82F6, #60A5FA);
+    background-image: linear-gradient(135deg, rgb(var(--accent)), rgb(var(--accent-light)));
   }
 
-  /* Button variants — glass/frosted */
+  /* Button variants */
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300;
-    background: rgba(59, 130, 246, 0.15);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    background: rgb(var(--accent));
+    border: 1px solid rgb(var(--accent-dark));
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
   }
-
   .btn-primary:hover {
-    background: rgba(59, 130, 246, 0.25);
-    border-color: rgba(59, 130, 246, 0.5);
-    box-shadow: 0 0 30px rgba(59, 130, 246, 0.2), 0 0 60px rgba(59, 130, 246, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    background: rgb(var(--accent-dark));
+    border-color: rgb(var(--accent-dark));
+    box-shadow: 0 4px 6px rgb(0 0 0 / 0.1);
     transform: translateY(-1px);
   }
-
   .btn-primary:active {
     transform: translateY(0);
-    background: rgba(59, 130, 246, 0.3);
+    background: rgb(var(--accent-dark));
+  }
+
+  [data-theme="dark"] .btn-primary {
+    background: rgb(var(--accent) / 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgb(var(--accent) / 0.3);
+    box-shadow: 0 0 20px rgb(var(--accent) / 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  [data-theme="dark"] .btn-primary:hover {
+    background: rgb(var(--accent) / 0.25);
+    border-color: rgb(var(--accent) / 0.5);
+    box-shadow: 0 0 30px rgb(var(--accent) / 0.2), 0 0 60px rgb(var(--accent) / 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  [data-theme="dark"] .btn-primary:active {
+    background: rgb(var(--accent) / 0.3);
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-gray-300 transition-all duration-300;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-300;
+    color: rgb(var(--gray-300));
+    background: rgb(0 0 0 / 0.04);
+    border: 1px solid rgb(0 0 0 / 0.08);
   }
-
   .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    color: white;
+    color: rgb(var(--gray-100));
+    background: rgb(0 0 0 / 0.08);
+    border-color: rgb(0 0 0 / 0.12);
     transform: translateY(-1px);
   }
-
   .btn-secondary:active {
     transform: translateY(0);
+    background: rgb(0 0 0 / 0.1);
+  }
+
+  [data-theme="dark"] .btn-secondary {
+    color: rgb(209 213 219);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  [data-theme="dark"] .btn-secondary:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  [data-theme="dark"] .btn-secondary:active {
     background: rgba(255, 255, 255, 0.12);
   }
 
