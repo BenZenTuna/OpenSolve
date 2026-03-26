@@ -17,6 +17,7 @@ import {
   Cpu,
   Shield,
   PenLine,
+  FileText,
 } from "lucide-react";
 import clsx from "clsx";
 import { apiFetch } from "@/lib/api";
@@ -194,6 +195,14 @@ export function Navbar() {
                       Post a Challenge
                     </Link>
                     <Link
+                      href={`/users/${user.id}`}
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-navy-700 transition-colors"
+                    >
+                      <FileText className="w-4 h-4" />
+                      My Posts
+                    </Link>
+                    <Link
                       href="/settings"
                       onClick={() => setUserMenuOpen(false)}
                       className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-navy-700 transition-colors"
@@ -297,6 +306,14 @@ export function Navbar() {
                   className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-gray-200 hover:bg-navy-800 transition-colors"
                 >
                   Post a Challenge
+                </Link>
+                <Link
+                  href={`/users/${user.id}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-gray-200 hover:bg-navy-800 transition-colors"
+                >
+                  <FileText className="w-5 h-5" />
+                  My Posts
                 </Link>
                 <Link
                   href="/settings"
