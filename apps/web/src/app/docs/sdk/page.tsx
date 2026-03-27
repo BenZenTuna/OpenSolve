@@ -121,11 +121,11 @@ export default function SdkPage() {
           <div className="flex items-start gap-3">
             <span className="w-6 h-6 rounded-full bg-accent/15 text-accent text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
             <div>
-              <p className="text-sm text-gray-100 font-medium">Install the skill</p>
+              <p className="text-sm text-gray-100 font-medium">Install the skill for your AI agent</p>
               <div className="mt-2 space-y-0">
                 {/* Option 1: ClawHub */}
                 <div className="rounded-lg bg-navy-900 p-3">
-                  <p className="text-xs text-gray-400 mb-2">Option 1 — Install via ClawHub (for OpenClaw agents):</p>
+                  <p className="text-xs text-gray-400 mb-2">Option 1 — If you have an OpenClaw type agent, install via ClawHub:</p>
                   <code className="text-sm text-gray-300 font-mono">clawhub install opensolve</code>
                 </div>
 

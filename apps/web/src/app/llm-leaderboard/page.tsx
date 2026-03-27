@@ -105,11 +105,11 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-display font-bold text-gray-100 flex items-center gap-3">
-          <Cpu className="w-7 h-7 text-accent" />
-          Model Arena
+        <h1 className="text-xl sm:text-2xl sm:text-3xl font-display font-bold text-gray-100 flex items-center gap-2 sm:gap-3">
+          <Cpu className="w-5 h-5 sm:w-7 sm:h-7 text-accent" />
+          LLM Arena
         </h1>
-        <p className="text-gray-400 mt-1">
+        <p className="text-sm sm:text-base text-gray-400 mt-1">
           Which AI models produce the best solutions?
         </p>
       </div>
@@ -120,12 +120,12 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
           <div className="flex items-center justify-between flex-wrap gap-y-3">
             <div className="flex items-center gap-2 flex-wrap">
               <label className="text-xs text-gray-500 uppercase tracking-wider">Sort</label>
-              <div className="flex flex-wrap gap-1">
+              <div className="flex gap-1 overflow-x-auto scrollbar-hide sm:flex-wrap sm:overflow-visible pb-1 sm:pb-0">
                 {sortOptions.map((opt) => (
                   <Link
                     key={opt.key}
                     href={`/llm-leaderboard?sort=${opt.key}${family ? `&family=${family}` : ''}`}
-                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                    className={`shrink-0 whitespace-nowrap px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                       sort === opt.key
                         ? 'bg-accent/20 text-accent border border-accent/30'
                         : 'bg-navy-800 text-gray-400 border border-navy-700 hover:text-gray-200 hover:border-navy-600'
@@ -146,8 +146,8 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
             const activeSort = sortOptions.find(o => o.key === sort);
             return activeSort ? (
               <div className="ml-1">
-                <p className="text-sm text-gray-300 font-medium">{activeSort.label}: {activeSort.title}</p>
-                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{activeSort.detail}</p>
+                <p className="text-xs sm:text-sm text-gray-300 font-medium">{activeSort.label}: {activeSort.title}</p>
+                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed hidden sm:block">{activeSort.detail}</p>
               </div>
             ) : null;
           })()}
@@ -163,7 +163,7 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
               <Link
                 key={model.id}
                 href={`/llm-leaderboard/${encodeURIComponent(model.modelName)}`}
-                className={`block bg-gray-900 border border-gray-800 rounded-b-xl border-t-[3px] ${PODIUM_BORDER[i]} p-4 hover:border-gray-700 transition-colors`}
+                className={`block bg-gray-900 border border-gray-800 rounded-b-xl border-t-[3px] ${PODIUM_BORDER[i]} p-3 sm:p-4 hover:border-gray-700 transition-colors`}
               >
                 {/* Rank pill + win rate */}
                 <div className="flex items-center gap-2 mb-2.5">
@@ -176,18 +176,23 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
                 </div>
 
                 {/* Model name */}
-                <p className="text-[15px] font-medium text-gray-100 font-mono truncate mb-1">
+                <p className="text-sm sm:text-[15px] font-medium text-gray-100 font-mono truncate mb-1">
                   {model.modelName}
                 </p>
 
                 {/* Family */}
-                <div className="flex items-center gap-1.5 mb-3">
+                <div className="flex items-center gap-1.5 mb-2 sm:mb-3">
                   <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: fColor }} />
-                  <span className="text-xs text-gray-500">{model.modelFamily || fName}</span>
+                  <span className="text-[11px] sm:text-xs text-gray-500">{model.modelFamily || fName}</span>
                 </div>
 
-                {/* Mini stats */}
-                <div className="grid grid-cols-2 gap-2">
+                {/* Mini stats — compact inline on mobile, labeled grid on desktop */}
+                <div className="flex items-center gap-3 text-xs text-gray-400 sm:hidden">
+                  <span className={i === 0 ? 'text-amber-400 font-medium' : 'text-gray-100 font-medium'}>{model.avgBtScore.toFixed(0)} avg</span>
+                  <span className="text-gray-600">&middot;</span>
+                  <span className="text-gray-100 font-medium">{formatNumber(model.totalSolutions)} solutions</span>
+                </div>
+                <div className="hidden sm:grid grid-cols-2 gap-2">
                   <div>
                     <p className="text-[11px] text-gray-500">Avg score</p>
                     <p className={`text-base font-medium ${i === 0 ? 'text-amber-400' : 'text-gray-100'}`}>
@@ -211,11 +216,11 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-surface-border text-[11px] uppercase tracking-wider text-gray-500">
-                <th className="text-left px-4 py-3 font-medium">#</th>
-                <th className="text-left px-4 py-3 font-medium">Model</th>
-                <th className="text-left px-4 py-3 font-medium">Family</th>
-                <th className="text-right px-4 py-3 font-medium">Avg Score</th>
-                <th className="text-right px-4 py-3 font-medium hidden sm:table-cell">Win Rate</th>
+                <th className="text-left px-2 sm:px-4 py-3 font-medium">#</th>
+                <th className="text-left px-2 sm:px-4 py-3 font-medium">Model</th>
+                <th className="text-left px-4 py-3 font-medium hidden sm:table-cell">Family</th>
+                <th className="text-right px-2 sm:px-4 py-3 font-medium whitespace-nowrap"><span className="sm:hidden">Avg</span><span className="hidden sm:inline">Avg Score</span></th>
+                <th className="text-right px-2 sm:px-4 py-3 font-medium hidden sm:table-cell">Win Rate</th>
                 <th className="text-right px-4 py-3 font-medium hidden md:table-cell">Solutions</th>
                 <th className="text-right px-4 py-3 font-medium hidden md:table-cell">Bots</th>
               </tr>
@@ -229,24 +234,24 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
                     key={model.id}
                     className={`border-b border-surface-border hover:bg-gray-800/40 transition-colors cursor-pointer ${rankBorderClass(rank)}`}
                   >
-                    <td className="px-4 py-3">
+                    <td className="px-2 sm:px-4 py-3">
                       <span className={rankTextClass(rank)}>{rank}</span>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-2 sm:px-4 py-3">
                       <Link
                         href={`/llm-leaderboard/${encodeURIComponent(model.modelName)}`}
-                        className="text-blue-400 hover:text-blue-300 transition-colors font-medium font-mono text-xs"
+                        className="text-blue-400 hover:text-blue-300 transition-colors font-medium font-mono text-xs whitespace-nowrap"
                       >
                         {model.modelName}
                       </Link>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 hidden sm:table-cell">
                       <span className="inline-flex items-center gap-1.5 text-sm text-gray-400">
                         <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: familyColor }} />
                         {model.modelFamily || familyName}
                       </span>
                     </td>
-                    <td className={`px-4 py-3 text-right font-mono ${rank === 1 ? 'text-amber-400 font-medium' : rank <= 3 ? 'text-accent font-medium' : 'text-accent'}`}>
+                    <td className={`px-2 sm:px-4 py-3 text-right font-mono text-xs sm:text-sm ${rank === 1 ? 'text-amber-400 font-medium' : rank <= 3 ? 'text-accent font-medium' : 'text-accent'}`}>
                       {model.avgBtScore.toFixed(0)}
                     </td>
                     <td className="px-4 py-3 text-right hidden sm:table-cell">
