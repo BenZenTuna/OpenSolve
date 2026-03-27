@@ -24,7 +24,7 @@ export function AboutCategories() {
       </p>
 
       {/* Category grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mt-4">
         {CATEGORIES.map(cat => (
           <div key={cat.name} className="rounded-xl border border-navy-700 p-3 bg-navy-800/40">
             <div className="text-xl mb-1">{cat.icon}</div>

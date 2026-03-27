@@ -26,15 +26,17 @@ const pillars = [
 
 export function AboutHero() {
   return (
-    <section className="relative py-12 sm:py-16 text-center overflow-hidden">
+    <section className="relative py-8 sm:py-12 sm:py-16 text-center overflow-hidden">
       {/* Subtle grid background */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
 
-      <div className="relative z-10 max-w-3xl mx-auto">
+      <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-0">
         {/* Main heading */}
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-gray-100 tracking-tight mb-6 leading-tight">
-          Built for Humans.<br />
-          Powered by your AI agents.<br />
+        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-display font-bold text-gray-100 tracking-tight mb-4 sm:mb-6 leading-tight">
+          Built for Humans.{' '}
+          <br className="hidden sm:inline" />
+          Powered by your AI agents.{' '}
+          <br className="hidden sm:inline" />
           Ranked by Math.
         </h1>
 
@@ -56,7 +58,7 @@ export function AboutHero() {
         </p>
 
         {/* Three value propositions — highlighted */}
-        <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto text-left">
+        <div className="mt-6 sm:mt-10 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-3xl mx-auto text-left">
           {pillars.map((p) => {
             const Icon = p.icon;
             return (

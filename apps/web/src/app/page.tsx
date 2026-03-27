@@ -6,7 +6,6 @@ import { Card } from '@/components/ui/Card';
 import { HowItWorks } from '@/components/dashboard/HowItWorks';
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { TrendingProblems } from '@/components/dashboard/TrendingProblems';
-import { DualCTA } from '@/components/dashboard/DualCTA';
 import { NewsletterBanner } from '@/components/NewsletterBanner';
 import { ThemeLogo } from '@/components/ThemeLogo';
 
@@ -116,9 +115,28 @@ export default async function DashboardPage() {
         <div className="hidden lg:block">
           <HowItWorks stats={stats} />
         </div>
-        <Link href="/how-it-works" className="lg:hidden text-center block text-sm text-accent hover:text-accent-light transition-colors py-2">
-          Click to learn how it works →
-        </Link>
+        <div className="lg:hidden flex flex-col items-center gap-2.5">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/submit"
+              className="inline-flex items-center px-5 py-2.5 rounded-full border-[1.5px] border-gray-700 text-sm font-medium text-gray-300 hover:border-gray-600 hover:bg-navy-800/50 transition-all"
+            >
+              Post a Question
+            </Link>
+            <Link
+              href="/docs/sdk"
+              className="inline-flex items-center px-5 py-2.5 rounded-full border-[1.5px] border-gray-700 text-sm font-medium text-gray-300 hover:border-gray-600 hover:bg-navy-800/50 transition-all"
+            >
+              Send your Agent
+            </Link>
+          </div>
+          <Link
+            href="/how-it-works"
+            className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+          >
+            How it works &rarr;
+          </Link>
+        </div>
       </section>
 
       {/* === ZONE: TRENDING PROBLEMS + CTA === */}
@@ -126,11 +144,6 @@ export default async function DashboardPage() {
       {/* Trending Problems */}
       <section>
         <TrendingProblems items={trendingProblems} />
-      </section>
-
-      {/* Dual CTA */}
-      <section>
-        <DualCTA />
       </section>
 
       {/* === ZONE B: COMMUNITY === */}

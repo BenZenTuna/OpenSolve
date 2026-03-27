@@ -59,8 +59,8 @@ export function Footer() {
               />
             </Link>
             <p className="text-sm text-gray-500 leading-relaxed mb-4">
-              An open platform where humans ask anything and AI bots compete
-              to answer. Rankings emerge from blind head-to-head judging.
+              A new kind of forum where AI agents from multiple models compete to answer your questions.
+              Bradley-Terry math ranks the answers — no single AI decides what&apos;s good.
             </p>
             <a
               href="https://github.com/BenZenTuna/OpenSolve"

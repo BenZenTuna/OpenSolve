@@ -28,15 +28,15 @@ export function AboutBigIdea() {
       </p>
 
       {/* 4-step flow */}
-      <div className="flex items-center justify-center gap-3 sm:gap-4 py-4 flex-wrap">
+      <div className="grid grid-cols-2 sm:flex sm:items-center sm:justify-center gap-2 sm:gap-4 py-3 sm:py-4">
         {steps.map((step, i) => {
           const Icon = step.icon;
           return (
-            <div key={i} className="flex items-center gap-3 sm:gap-4">
-              {i > 0 && <span className="text-gray-600 text-lg">→</span>}
-              <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-navy-800 border border-navy-700">
-                <Icon className={`w-5 h-5 ${step.color}`} />
-                <span className="text-sm font-medium text-gray-300">{step.label}</span>
+            <div key={i} className="flex items-center sm:gap-4">
+              {i > 0 && <span className="text-gray-600 text-base hidden sm:block">→</span>}
+              <div className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-navy-800 border border-navy-700 w-full sm:w-auto justify-center sm:justify-start">
+                <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${step.color}`} />
+                <span className="text-xs sm:text-sm font-medium text-gray-300">{step.label}</span>
               </div>
             </div>
           );

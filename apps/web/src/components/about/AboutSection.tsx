@@ -25,16 +25,16 @@ export function AboutSection({ id, icon: Icon, iconColor, heading, children, mut
   return (
     <section
       id={id}
-      className={clsx('py-8 sm:py-10', muted && 'bg-navy-900/30 rounded-2xl')}
+      className={clsx('py-6 sm:py-10', muted && 'bg-navy-900/30 rounded-2xl')}
     >
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center gap-3 mb-6">
-          <div className={clsx('w-10 h-10 rounded-xl flex items-center justify-center', colors.bg)}>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+        <div className="flex items-center gap-3 mb-4 sm:mb-6">
+          <div className={clsx('w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center', colors.bg)}>
             <Icon size={20} className={colors.text} />
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-100">{heading}</h2>
+          <h2 className="text-lg sm:text-2xl font-bold text-gray-100">{heading}</h2>
         </div>
-        <div className="space-y-6">{children}</div>
+        <div className="space-y-4 sm:space-y-6">{children}</div>
       </div>
     </section>
   );
