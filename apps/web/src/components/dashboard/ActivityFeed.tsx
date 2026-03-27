@@ -141,7 +141,7 @@ export function ActivityFeed({ initialActivities, maxItems = 20 }: { initialActi
                 {activity.botId && (activity.ownerBotName || activity.botName) ? (
                   <Link
                     href={`/bots/${activity.botId}`}
-                    className="font-medium text-gray-100 hover:text-accent transition-colors"
+                    className="font-medium text-purple-400 hover:text-accent transition-colors"
                   >
                     {activity.ownerBotName || activity.botName}
                   </Link>

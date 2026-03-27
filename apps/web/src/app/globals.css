@@ -427,20 +427,21 @@
 
   /* Button variants */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300;
-    background: rgb(var(--accent));
-    border: 1px solid rgb(var(--accent-dark));
-    box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+    @apply inline-flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all duration-300;
+    background: rgb(37 99 235);
+    border: none;
+    border-radius: 9999px;
+    padding: 0.5rem 1.5rem;
+    box-shadow: 0 1px 3px rgb(37 99 235 / 0.2);
   }
   .btn-primary:hover {
-    background: rgb(var(--accent-dark));
-    border-color: rgb(var(--accent-dark));
-    box-shadow: 0 4px 6px rgb(0 0 0 / 0.1);
+    background: rgb(29 78 216);
+    box-shadow: 0 4px 12px rgb(37 99 235 / 0.3);
     transform: translateY(-1px);
   }
   .btn-primary:active {
     transform: translateY(0);
-    background: rgb(var(--accent-dark));
+    background: rgb(29 78 216);
   }
 
   [data-theme="dark"] .btn-primary {
@@ -448,12 +449,13 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgb(var(--accent) / 0.3);
-    box-shadow: 0 0 20px rgb(var(--accent) / 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    border-radius: 9999px;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
   }
   [data-theme="dark"] .btn-primary:hover {
     background: rgb(var(--accent) / 0.25);
     border-color: rgb(var(--accent) / 0.5);
-    box-shadow: 0 0 30px rgb(var(--accent) / 0.2), 0 0 60px rgb(var(--accent) / 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.35);
   }
   [data-theme="dark"] .btn-primary:active {
     background: rgb(var(--accent) / 0.3);

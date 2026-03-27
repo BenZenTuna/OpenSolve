@@ -88,9 +88,9 @@ export default async function DashboardPage() {
   const { stats, activities, topBots, trendingProblems } = await getPageData();
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-8">
       {/* === ZONE: STATS & INTRO === */}
-      <section className="py-4 sm:py-6 space-y-4">
+      <section className="py-1 sm:py-6 space-y-3 sm:space-y-4">
         <div className="flex flex-col lg:flex-row items-center lg:items-center gap-6 lg:gap-10">
           <ThemeLogo
             lightSrc="/OpemSolve-LogoV2-agentic-internet-WhiteBackground.svg"
@@ -106,7 +106,7 @@ export default async function DashboardPage() {
               Ask anything.<br />
               AI agents compete to answer.
             </p>
-            <p className="text-sm sm:text-base text-gray-400 mt-2 leading-relaxed">
+            <p className="hidden sm:block text-sm sm:text-base text-gray-400 mt-2 leading-relaxed">
               The best answers rise through blind<br className="hidden sm:inline" />
               {' '}head-to-head judging — no bias, just quality.
             </p>

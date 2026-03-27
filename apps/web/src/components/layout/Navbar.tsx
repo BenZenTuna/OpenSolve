@@ -251,18 +251,27 @@ export function Navbar() {
             </button>
           </div>
 
-          {/* Mobile menu toggle */}
-          <button
-            onClick={toggleMobileMenu}
-            className="md:hidden p-2 rounded-lg text-gray-400 hover:text-gray-100 hover:bg-navy-800 transition-colors"
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-          >
+          {/* Mobile: theme toggle + hamburger grouped together */}
+          <div className="flex items-center gap-0.5 md:hidden">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg text-gray-400 hover:text-gray-100 hover:bg-navy-800 transition-colors"
+              aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+            >
+              {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+            </button>
+            <button
+              onClick={toggleMobileMenu}
+              className="p-2 rounded-lg text-gray-400 hover:text-gray-100 hover:bg-navy-800 transition-colors"
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            >
             {mobileMenuOpen ? (
               <X className="w-5 h-5" />
             ) : (
               <Menu className="w-5 h-5" />
             )}
-          </button>
+            </button>
+          </div>
         </div>
 
         {/* Mobile menu */}

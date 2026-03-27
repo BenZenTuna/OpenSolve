@@ -62,7 +62,7 @@ export function TrendingProblems({ items }: TrendingProblemsProps) {
   }
 
   return (
-    <div className="glass rounded-2xl p-6">
+    <div className="glass rounded-2xl p-3 sm:p-6">
       {/* Header */}
       <div className="flex items-center gap-2 mb-1">
         <Flame className="w-5 h-5 text-orange-400" />
@@ -80,9 +80,44 @@ export function TrendingProblems({ items }: TrendingProblemsProps) {
             <Link
               key={item.id}
               href={`/problems/${item.id}`}
-              className={`group block rounded-r-xl border border-gray-800 border-l-[3px] ${rankBorder} bg-gray-900/60 px-4 py-3.5 hover:border-gray-700 transition-colors`}
+              className={`group block border border-gray-800 rounded-lg md:rounded-r-xl md:border-l-[3px] ${rankBorder} bg-gray-900/60 p-3 md:px-4 md:py-3.5 hover:border-gray-700 transition-colors`}
             >
-              <div className="flex items-start gap-3.5">
+              {/* === MOBILE LAYOUT (below md) === */}
+              <div className="md:hidden">
+                {/* Row 1: rank + category + votes */}
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className={`text-xs font-medium ${index === 0 ? 'text-purple-400' : 'text-gray-500'}`}>
+                    {index + 1}
+                  </span>
+                  {item.category && (
+                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium border ${CATEGORY_COLORS[item.category] || 'bg-gray-500/20 text-gray-300 border-gray-500/30'}`}>
+                      {CATEGORY_LABELS[item.category] || item.category}
+                    </span>
+                  )}
+                  <span className="ml-auto text-[11px] text-gray-500">
+                    {item.comparisonCount.toLocaleString()} votes
+                  </span>
+                </div>
+
+                {/* Row 2: title */}
+                <p className="text-sm font-medium text-gray-100 leading-snug mb-1.5 group-hover:text-accent transition-colors">
+                  {item.title}
+                </p>
+
+                {/* Row 3: solutions + bot name */}
+                <div className="flex items-center gap-1.5 text-[11px] text-gray-400">
+                  <span>{item.solutionCount} solution{item.solutionCount !== 1 ? 's' : ''}</span>
+                  {item.topBotName && (
+                    <>
+                      <span className="text-gray-600">&middot;</span>
+                      <span className="text-emerald-400 font-medium">{item.topBotName}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* === DESKTOP LAYOUT (md and above) === */}
+              <div className="hidden md:flex items-start gap-3.5">
                 {/* Rank circle */}
                 <span className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-medium shrink-0 ${rankBg}`}>
                   {index + 1}
@@ -90,40 +125,36 @@ export function TrendingProblems({ items }: TrendingProblemsProps) {
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
-                  {/* Category pill */}
                   {item.category && (
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border mb-1.5 ${CATEGORY_COLORS[item.category] || 'bg-gray-500/20 text-gray-300 border-gray-500/30'}`}>
                       {CATEGORY_LABELS[item.category] || item.category}
                     </span>
                   )}
 
-                  {/* Title */}
                   <p className="text-[15px] font-medium text-gray-100 leading-snug mb-2 group-hover:text-accent transition-colors">
                     {item.title}
                   </p>
 
-                  {/* Stats + leading bot */}
-                  <div className="flex items-center gap-3 flex-wrap text-xs text-gray-400">
-                    <span className="flex items-center gap-1">
-                      <MessageSquare size={13} />
-                      {item.solutionCount} solution{item.solutionCount !== 1 ? 's' : ''}
-                    </span>
-                    <span className="text-gray-600">&middot;</span>
-                    <span className="flex items-center gap-1">
-                      <ArrowUpDown size={13} />
-                      {item.comparisonCount.toLocaleString()} vote{item.comparisonCount !== 1 ? 's' : ''}
-                    </span>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-3 text-xs text-gray-400">
+                      <span className="flex items-center gap-1">
+                        <MessageSquare size={12} />
+                        {item.solutionCount} solution{item.solutionCount !== 1 ? 's' : ''}
+                      </span>
+                      <span className="text-gray-600">&middot;</span>
+                      <span className="flex items-center gap-1">
+                        <ArrowUpDown size={12} />
+                        {item.comparisonCount.toLocaleString()} vote{item.comparisonCount !== 1 ? 's' : ''}
+                      </span>
+                    </div>
                     {item.topBotName && (
-                      <>
-                        <span className="text-gray-600">&middot;</span>
-                        <span className="flex items-center gap-1">
-                          <Trophy size={13} className="text-emerald-400" />
-                          <span className="text-emerald-400 font-medium">{item.topBotName}</span>
-                          {item.topBotModel && (
-                            <span className="text-gray-500 text-[11px] hidden sm:inline">{item.topBotModel}</span>
-                          )}
-                        </span>
-                      </>
+                      <div className="flex items-center gap-1 text-xs">
+                        <Trophy size={12} className="text-emerald-400" />
+                        <span className="text-emerald-400 font-medium">{item.topBotName}</span>
+                        {item.topBotModel && (
+                          <span className="text-gray-500 text-[11px]">{item.topBotModel}</span>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
