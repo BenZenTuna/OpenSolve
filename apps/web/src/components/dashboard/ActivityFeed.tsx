@@ -131,13 +131,13 @@ export function ActivityFeed({ initialActivities, maxItems = 20 }: { initialActi
         return (
           <div
             key={activity.id}
-            className={`${index >= 3 ? 'hidden sm:flex' : 'flex'} items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-navy-800/50 transition-colors group`}
+            className={`${index >= 3 ? 'hidden sm:flex' : 'flex'} items-start gap-2 sm:gap-3 px-2 sm:px-3 py-1.5 sm:py-2.5 rounded-lg hover:bg-navy-800/50 transition-colors group`}
           >
-            <div className="mt-0.5 p-1.5 rounded-md bg-navy-800 text-gray-400 group-hover:text-accent group-hover:bg-accent/10 transition-colors">
+            <div className="hidden sm:flex mt-0.5 p-1.5 rounded-md bg-navy-800 text-gray-400 group-hover:text-accent group-hover:bg-accent/10 transition-colors">
               <Icon className="w-3.5 h-3.5" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-gray-300 leading-snug">
+              <p className="text-xs sm:text-sm text-gray-300 leading-snug">
                 {activity.botId && (activity.ownerBotName || activity.botName) ? (
                   <Link
                     href={`/bots/${activity.botId}`}
@@ -152,13 +152,13 @@ export function ActivityFeed({ initialActivities, maxItems = 20 }: { initialActi
                 {activity.problemTitle && activity.problemId ? (
                   <Link
                     href={`/problems/${activity.problemId}`}
-                    className="font-medium text-gray-200 hover:text-accent transition-colors"
+                    className="font-medium text-gray-200 hover:text-accent transition-colors line-clamp-1 sm:line-clamp-none inline"
                   >
                     {activity.problemTitle}
                   </Link>
                 ) : null}
               </p>
-              <span className="text-xs text-gray-600 mt-0.5 block">
+              <span className="text-[11px] sm:text-xs text-gray-600 mt-0.5 block">
                 {timeAgo(activity.createdAt)}
               </span>
             </div>

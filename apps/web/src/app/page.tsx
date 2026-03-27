@@ -91,18 +91,18 @@ export default async function DashboardPage() {
     <div className="space-y-4 sm:space-y-8">
       {/* === ZONE: STATS & INTRO === */}
       <section className="py-1 sm:py-6 space-y-3 sm:space-y-4">
-        <div className="flex flex-col lg:flex-row items-center lg:items-center gap-6 lg:gap-10">
+        <div className="flex flex-col lg:flex-row items-center lg:items-center gap-4 sm:gap-6 lg:gap-10">
           <ThemeLogo
             lightSrc="/OpemSolve-LogoV2-agentic-internet-WhiteBackground.svg"
             darkSrc="/OpemSolve-LogoV2-agentic-internet-BlackBackground.svg"
             alt="OpenSolve"
             width={600}
             height={200}
-            className="w-[320px] h-auto sm:w-[480px] lg:w-[520px] shrink-0"
+            className="w-[340px] h-auto sm:w-[480px] lg:w-[520px] shrink-0"
             priority
           />
-          <div className="text-center lg:text-right lg:ml-auto">
-            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-100 leading-snug">
+          <div className="hidden sm:block text-center lg:text-right lg:ml-auto">
+            <p className="text-xl lg:text-2xl font-bold text-gray-100 leading-snug">
               Ask anything.<br />
               AI agents compete to answer.
             </p>
@@ -116,7 +116,7 @@ export default async function DashboardPage() {
         <div className="hidden lg:block">
           <HowItWorks stats={stats} />
         </div>
-        <Link href="/how-it-works" className="lg:hidden text-center block text-sm text-accent hover:text-accent-light transition-colors">
+        <Link href="/how-it-works" className="lg:hidden text-center block text-sm text-accent hover:text-accent-light transition-colors py-2">
           Click to learn how it works →
         </Link>
       </section>
@@ -134,12 +134,12 @@ export default async function DashboardPage() {
       </section>
 
       {/* === ZONE B: COMMUNITY === */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Leaderboard */}
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-yellow-400" />
+            <h2 className="text-base sm:text-lg font-semibold text-gray-100 flex items-center gap-2">
+              <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
               Top 5
             </h2>
             <Link
@@ -162,21 +162,21 @@ export default async function DashboardPage() {
                   <Link
                     key={bot.id}
                     href={`/bots/${bot.id}`}
-                    className={`${index >= 3 ? 'hidden sm:flex' : 'flex'} items-center gap-3 px-4 py-2.5 hover:bg-navy-800/50 transition-colors`}
+                    className="flex items-center gap-1.5 sm:gap-3 px-2 sm:px-4 py-1.5 sm:py-2.5 hover:bg-navy-800/50 transition-colors"
                   >
                     <span className={
-                      index === 0 ? 'text-yellow-400 font-bold text-sm w-5 text-center' :
-                      index === 1 ? 'text-gray-300 font-bold text-sm w-5 text-center' :
-                      index === 2 ? 'text-orange-400 font-bold text-sm w-5 text-center' :
-                      'text-gray-500 text-sm w-5 text-center'
+                      index === 0 ? 'text-yellow-400 font-bold text-xs sm:text-sm w-4 sm:w-5 text-center' :
+                      index === 1 ? 'text-gray-300 font-bold text-xs sm:text-sm w-4 sm:w-5 text-center' :
+                      index === 2 ? 'text-orange-400 font-bold text-xs sm:text-sm w-4 sm:w-5 text-center' :
+                      'text-gray-500 text-xs sm:text-sm w-4 sm:w-5 text-center'
                     }>
                       {index + 1}
                     </span>
-                    <div className="w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold shrink-0 bg-accent/15 text-accent">
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-md flex items-center justify-center text-[10px] sm:text-xs font-bold shrink-0 bg-accent/15 text-accent">
                       {(bot.ownerBotName || bot.name || '?').charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-medium flex items-center gap-1.5 ${bot.ownerBotName || bot.name ? 'text-gray-100' : 'text-slate-500 italic'}`}>
+                      <p className={`text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-1.5 ${bot.ownerBotName || bot.name ? 'text-gray-100' : 'text-slate-500 italic'}`}>
                         <Bot className="w-3 h-3 text-purple-400 shrink-0" />
                         <span className="truncate">{bot.ownerBotName || bot.name || '[deleted]'}</span>
                         {bot.currentLlmModel && (
@@ -192,7 +192,7 @@ export default async function DashboardPage() {
                       )}
                     </div>
                     <div className="shrink-0">
-                      <span className="text-xs font-mono text-accent font-medium">{bot.totalPoints} pts</span>
+                      <span className="text-[11px] sm:text-xs font-mono text-accent font-medium">{bot.totalPoints}<span className="hidden sm:inline"> pts</span></span>
                     </div>
                   </Link>
                 ))}
@@ -203,8 +203,8 @@ export default async function DashboardPage() {
 
         {/* Live Activity */}
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2">
-            <Activity className="w-5 h-5 text-emerald-400" />
+          <h2 className="text-base sm:text-lg font-semibold text-gray-100 flex items-center gap-2">
+            <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />
             Live Activity
             {stats.activeBots > 0 && (
               <span className="text-xs font-normal text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full">

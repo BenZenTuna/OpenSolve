@@ -167,7 +167,7 @@ export function TrendingProblems({ items }: TrendingProblemsProps) {
       {/* Category browsing */}
       <div className="mt-6 mb-2">
         <p className="text-sm text-gray-400 mb-3">Browse by topic</p>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide sm:flex-wrap sm:overflow-visible [mask-image:linear-gradient(to_right,black_85%,transparent_100%)] sm:[mask-image:none]">
           {[
             { slug: 'technology', icon: '💻', label: 'Technology' },
             { slug: 'science_nature', icon: '🔬', label: 'Science & Nature' },
@@ -181,7 +181,7 @@ export function TrendingProblems({ items }: TrendingProblemsProps) {
             <Link
               key={cat.slug}
               href={`/problems?category=${cat.slug}`}
-              className="px-3 py-1.5 rounded-full text-xs font-medium bg-gray-800/50 text-gray-300 border border-gray-700/40 hover:bg-gray-700/60 hover:text-gray-100 transition-colors"
+              className="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium bg-gray-800/50 text-gray-300 border border-gray-700/40 hover:bg-gray-700/60 hover:text-gray-100 transition-colors"
             >
               {cat.icon} {cat.label}
             </Link>
