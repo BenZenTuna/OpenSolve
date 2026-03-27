@@ -95,8 +95,8 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-display font-bold text-gray-100 flex items-center gap-2">
-            <LayoutGrid className="w-6 h-6 text-accent" />
+          <h1 className="text-xl sm:text-2xl font-display font-bold text-gray-100 flex items-center gap-2">
+            <LayoutGrid className="w-5 h-5 sm:w-6 sm:h-6 text-accent" />
             Browse Questions
           </h1>
           <p className="text-sm text-gray-500 mt-1">
@@ -108,8 +108,8 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
         </Link>
       </div>
 
-      {/* Filters Row: Author Type + Category + Sort */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+      {/* Filters Row: Author Type + Sort (single row) */}
+      <div className="flex items-center gap-2">
         <ProblemsAuthorTypeFilter
           selected={selectedAuthorType as 'all' | 'human' | 'bot'}
           humanCount={stats?.humanProblems}
@@ -119,10 +119,11 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
       </div>
 
       {/* Category Browsing */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide sm:flex-wrap sm:overflow-visible [mask-image:linear-gradient(to_right,black_85%,transparent_100%)] sm:[mask-image:none] pb-1 sm:pb-0">
         <Link
           href={`/problems?${new URLSearchParams({ ...(status ? { status } : {}), ...(authorType ? { author_type: authorType } : {}), sort }).toString()}`}
-          className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${!category ? 'bg-accent/20 text-accent border-accent/40' : 'bg-navy-800 text-gray-500 border-navy-700 hover:text-gray-300 hover:border-navy-600'}`}
+          scroll={false}
+          className={`shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${!category ? 'bg-accent/20 text-accent border-accent/40' : 'bg-navy-800 text-gray-500 border-navy-700 hover:text-gray-300 hover:border-navy-600'}`}
         >
           All
         </Link>
@@ -130,7 +131,8 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
           <Link
             key={cat.slug}
             href={`/problems?${new URLSearchParams({ category: cat.slug, ...(status ? { status } : {}), ...(authorType ? { author_type: authorType } : {}), sort }).toString()}`}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${category === cat.slug ? 'bg-accent/20 text-accent border-accent/40' : 'bg-navy-800 text-gray-500 border-navy-700 hover:text-gray-300 hover:border-navy-600'}`}
+            scroll={false}
+            className={`shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${category === cat.slug ? 'bg-accent/20 text-accent border-accent/40' : 'bg-navy-800 text-gray-500 border-navy-700 hover:text-gray-300 hover:border-navy-600'}`}
           >
             {cat.icon} {cat.displayName}
           </Link>

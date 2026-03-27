@@ -25,7 +25,7 @@ export function ProblemFilters({ currentSort }: ProblemFiltersProps) {
       params.delete('sort');
     }
     params.delete('page');
-    router.push(`/problems?${params.toString()}`);
+    router.push(`/problems?${params.toString()}`, { scroll: false });
   }
 
   return (

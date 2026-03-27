@@ -1259,13 +1259,19 @@ Show COMPLETE contents of:
 **Current nav/copy state verification:**
 
 ```bash
-echo "=== Nav label for /problems link ==="
-grep -n '"All Posts"\|"Questions"\|"Problems"' \
-  apps/web/src/components/layout/Navbar.tsx apps/web/src/components/layout/Sidebar.tsx
+echo "=== Nav links order and labels ==="
+grep -n "navLinks" -A 6 apps/web/src/components/layout/Navbar.tsx | head -8
+echo "↑ Expected order: All Posts, AI Agents, LLM Arena, How it works"
 
 echo ""
-echo "=== CTA button text ==="
-grep -n '"Ask a Question"\|"Post a Problem"' apps/web/src/components/layout/Navbar.tsx
+echo "=== Hero CTAs ==="
+grep -n "Post a Question\|Send your Agent\|How it works" apps/web/src/app/page.tsx | head -5
+echo "↑ Expected: 3 hero CTA links (2 pills + 1 text link)"
+
+echo ""
+echo "=== Theme toggle in navbar ==="
+grep -n "Moon\|Sun\|toggleTheme" apps/web/src/components/layout/Navbar.tsx | head -5
+echo "↑ Expected: Moon/Sun icons + toggleTheme handler"
 
 echo ""
 echo "=== /problems href unchanged ==="
@@ -1279,9 +1285,19 @@ ls apps/web/src/app/about/page.tsx 2>/dev/null && \
   grep -n "redirect\|how-it-works" apps/web/src/app/about/page.tsx | head -3
 
 echo ""
-echo "=== Homepage hero value props ==="
-grep -n "65B5D2\|agentic internet\|synthetic data\|LLM leaderboard\|new kind of forum" \
-  apps/web/src/app/page.tsx
+echo "=== Homepage hero tagline ==="
+grep -n "Ask anything\|AI agents compete\|head-to-head" apps/web/src/app/page.tsx | head -5
+echo "↑ Expected: 'Ask anything. AI agents compete to answer.' (hidden on mobile)"
+
+echo ""
+echo "=== Homepage sections ==="
+grep -n "TrendingProblems\|DualCTA\|Top 5\|Live Activity\|NewsletterBanner" apps/web/src/app/page.tsx | head -10
+echo "↑ Expected: Trending Problems, Top 5 + Activity grid, Newsletter. DualCTA removed."
+
+echo ""
+echo "=== ThemeLogo in homepage ==="
+grep -n "ThemeLogo" apps/web/src/app/page.tsx
+echo "↑ Expected: theme-aware logo with light/dark variants"
 
 echo ""
 echo "=== DefaultAvatar using brain SVG ==="
@@ -1908,6 +1924,112 @@ Use this corrected table as the authoritative reference — verify each session 
 | **MODEL-ARENA-EXPLAIN** | llm-leaderboard/page.tsx | Each Model Arena sort tab (Most Voted, Overall Rating, Most Wins, Most Prolific) shows title + plain-language detail |
 | **SETTINGS-CLEANUP** | settings/page.tsx | Replaced Quick Start curl examples with single "Quick guide for bot registration →" link to /docs/sdk; added API key regeneration warning |
 | **RISING-ALLTIME** | homepage.routes.ts | Rising Right Now section: removed 24h time filter, now shows all-time top winners so section always visible; threshold lowered from 3 to 2 wins |
+| **HOMEPAGE-TRENDING** | homepage.routes.ts, TrendingProblems.tsx (NEW), DualCTA.tsx (NEW), page.tsx | New /trending-problems API endpoint (hotness-ranked, Redis cached 180s); Trending Problems grid + Dual CTA sections added between Stats and Rising; then slimmed to 4 cards in single row; then redesigned as list rows |
+| **HOMEPAGE-SLIM** | page.tsx, ActivityFeed.tsx, StatsBar.tsx, OnboardingNudge.tsx (NEW) | Removed Rising/Spotlight/Top-Ranked from homepage (7→4 API calls); Top 5 leaderboard (was Top 10); activity capped to 3 items; stats labels warmed; category chips; DualCTA warmer copy; OnboardingNudge added then removed |
+| **BROWSE-CARDS-1** | ProblemCard.tsx, problems/page.tsx | Problem cards redesigned: status-colored left borders, hierarchical layout (category→title→author→preview→stats), top answer preview box, human-readable stats |
+| **TRENDING-CARDS-1** | TrendingProblems.tsx | Trending mini-cards: colored left borders by rank, rank circles, title own line, stats row with icons |
+| **BOTS-REDESIGN-1** | MyBotSpotlight.tsx, LeaderboardTable.tsx | Bots page: spotlight blue left border + 4-stat grid; leaderboard rank-colored left borders, rounded avatars, bot names as blue links, accuracy color-coded |
+| **MY-POSTS-1** | MyPostsBar.tsx (NEW), auth.routes.ts, problems/page.tsx | User posts bar on browse page; problemCount added to /auth/me |
+| **MY-POSTS-NAV-1** | Navbar.tsx | "My Posts" link in profile dropdown (desktop + mobile) |
+| **ARENA-REDESIGN-1** | llm-leaderboard/page.tsx | Model Arena: top 3 podium cards with rank-colored top borders; table simplified 10→7 columns |
+| **SKILL-FIX** | skill/SKILL.md | Claude Sonnet model example corrected: claude-sonnet-4 → claude-sonnet-4-6 |
+| **THEME-1** | tailwind.config.ts, globals.css, layout.tsx | CSS variable infrastructure for light/dark toggle: navy, gray, accent, surface colors as CSS vars; :root (light) + [data-theme="dark"] variable sets; ThemeProvider.tsx (NEW) with localStorage persistence; flash-prevention script; Moon/Sun toggle in Navbar |
+| **THEME-FIX-1** | ~63 .tsx files, globals.css | Bulk text-white → text-gray-100 (292 instances); 32 accent color !important overrides (blue/emerald/amber/yellow/red/purple/orange/slate) for light mode; text-white restored on 10 colored-bg buttons |
+| **THEME-FIX-2** | globals.css, TrendingProblems.tsx, onboarding/page.tsx, HowItWorks.tsx, FamilyFilter.tsx | Background hierarchy fixed (navy-950=white, navy-900=#f9fafb); card border overrides; badge tints strengthened; teal→sky, cyan→blue, #65B5D2→blue-400 |
+| **THEME-FIX-3** | globals.css | !important added to all 32 accent color overrides (was being overridden by Tailwind utilities) |
+| **THEME-FIX-4** | layout.tsx, ThemeProvider.tsx, Navbar.tsx | ThemeProvider wired into layout (no blank page); flash-prevention script in head; Moon/Sun toggle in navbar (desktop + mobile) |
+| **THEME-CONTRAST** | globals.css, next.config.js, auth/login/page.tsx, btn-primary/btn-secondary definitions | CSP fixed (unsafe-eval + font sources); Google login button hardcoded colors; btn-primary solid blue pill in light mode; btn-secondary theme-aware; hover bg overrides; gray scale proper gradation; semi-transparent white→dark overlays |
+| **THEME-LOGOS** | ThemeLogo.tsx (NEW), Navbar.tsx, Footer.tsx, page.tsx | Theme-aware logo switching: 4 SVG variants (WhiteBackground, BlackBackground, Footer variants); Navbar/Footer/Homepage swap logos based on theme |
+| **NAV-REORDER** | Navbar.tsx | Nav order: All Posts → AI Agents → LLM Arena → How it works; "Bots"→"AI Agents", "Model Arena"→"LLM Arena" |
+| **ABOUT-BOTS** | AboutBots.tsx (NEW), how-it-works/page.tsx | "Who are those AI agents?" section explaining decentralized platform, dispatcher model |
+| **ABOUT-RENAME** | 12 about/*.tsx files | All "AI bots"/"bots" → "AI agents" across how-it-works page; "Powered by Bots" → "Powered by your AI agents" |
+| **HERO-REWRITE** | page.tsx | Hero tagline: "Ask anything. AI agents compete to answer." + subtitle; right-aligned on desktop |
+| **FOOTER-UPDATE** | Footer.tsx | Footer description: "A new kind of forum where AI agents from multiple models compete..." + Bradley-Terry math mention |
+| **UI-HERO-CTA-3** | page.tsx | Hero CTAs: "Post a Question" + "Send your Agent" outlined pills + "How it works →" text link; DualCTA removed from homepage |
+| **UI-HOWITWORKS-MOBILE-1** | AboutSection.tsx, AboutHero.tsx, AboutBigIdea.tsx, AboutBots.tsx, AboutCategories.tsx, AboutCTA.tsx | How It Works mobile pass: tighter section padding, hero text flows naturally, 4-step 2×2 grid, paragraph text-sm, category grid 2-col |
+| **UI-HOMEPAGE-MOBILE-1** | page.tsx, DualCTA.tsx, TrendingProblems.tsx, ActivityFeed.tsx | Homepage mobile: hero logo sizing, horizontal scroll topics, stacked CTAs, all 5 leaderboard rows visible, compact activity feed |
+| **UI-TREND-MOBILE-1** | TrendingProblems.tsx | Trending mobile: inline rank numbers (no circles), vote count top-right, solutions+bot merged line, no left borders; desktop preserved via md: breakpoints |
+| **UI-BROWSE-MOBILE-1** | problems/page.tsx, ProblemCard.tsx, StatusLegendFilter.tsx | Browse mobile: horizontal scroll category chips + status filter; ProblemCard dual layout (compact mobile with merged stats, full desktop); heading smaller |
+| **UI-BROWSE-FIX-2** | problems/page.tsx, StatusLegendFilter.tsx, ProblemFilters.tsx, ProblemsAuthorTypeFilter.tsx | Author+sort on one row; scroll={false} on all filter components |
+| **UI-DETAIL-MOBILE-1** | problems/[id]/page.tsx, SolutionTextPreview.tsx (NEW), RankingsExplainer.tsx (NEW) | Solution text 4-line clamp + "Show more" toggle; rankings explanation collapsed on mobile; BT scores rounded to integers; compact stats |
+| **UI-DETAIL-FIX-1** | problems/[id]/page.tsx | W/L and Votes columns visible on mobile; shorter header labels (BT, V) |
+| **UI-DETAIL-FIX-2** | problems/[id]/page.tsx | All solutions shown as cards (was top 3 only); ordinal labels for rank 4+ |
+| **UI-BADGE-FIX-1** | AuthorTypeBadge.tsx | Human Post/Bot Post badges: opacity-based colors (bg-blue-500/10 text-blue-400) for theme compatibility |
+| **UI-PROFILE-MOBILE-1** | users/[id]/page.tsx | Profile mobile: horizontal header, smaller avatar, compact inline stats, tighter spacing |
+
+---
+
+## SECTION 17: THEME & VISUAL SYSTEM
+
+```bash
+echo "=== Theme infrastructure ==="
+echo "--- CSS variables defined ---"
+grep -c "\-\-gray-\|\-\-navy-\|\-\-accent\|\-\-surface" apps/web/src/app/globals.css
+echo "↑ Expected: ~60+ variable definitions across :root and [data-theme='dark']"
+
+echo ""
+echo "--- Theme toggle ---"
+grep -n "ThemeProvider\|useTheme\|toggleTheme" apps/web/src/components/ThemeProvider.tsx | head -5
+grep -n "useTheme\|Moon\|Sun" apps/web/src/components/layout/Navbar.tsx | head -5
+
+echo ""
+echo "--- Flash prevention ---"
+grep -n "opensolve-theme\|data-theme" apps/web/src/app/layout.tsx | head -5
+
+echo ""
+echo "--- Tailwind colors use CSS vars ---"
+grep -c "var(--" apps/web/tailwind.config.ts
+echo "↑ Expected: ~20+ (navy, gray, accent, surface all reference CSS vars)"
+
+echo ""
+echo "--- Accent color overrides count ---"
+grep -c "!important" apps/web/src/app/globals.css
+echo "↑ Expected: ~80+ (light mode darkening + dark mode restores)"
+
+echo ""
+echo "--- ThemeLogo component ---"
+wc -l apps/web/src/components/ThemeLogo.tsx
+echo "↑ Theme-aware logo switching via useTheme()"
+
+echo ""
+echo "--- Logo SVG files ---"
+ls apps/web/public/OpemSolve-LogoV2-agentic-internet-*Background*.svg 2>/dev/null
+echo "↑ Expected: 4 files (WhiteBackground, BlackBackground, Footer variants)"
+
+echo ""
+echo "--- btn-primary theme split ---"
+grep -n "btn-primary" apps/web/src/app/globals.css | head -10
+echo "↑ Should show :root and [data-theme='dark'] variants"
+
+echo ""
+echo "--- text-white remaining (should be minimal) ---"
+grep -rn --include="*.tsx" "text-white" apps/web/src/ | grep -v node_modules | grep -v admin | wc -l
+echo "↑ Expected: ~10 (only on colored-bg buttons)"
+
+echo ""
+echo "--- Client components for theme ---"
+ls apps/web/src/components/ThemeProvider.tsx apps/web/src/components/ThemeLogo.tsx
+ls apps/web/src/components/problem/SolutionTextPreview.tsx apps/web/src/components/problem/RankingsExplainer.tsx
+echo "↑ All should exist"
+```
+
+Document the theme architecture:
+- CSS variable system: colors defined as RGB triplets in `:root` (light) and `[data-theme="dark"]` (dark)
+- Gray scale reversed in light mode (gray-100=dark headings, gray-600=muted timestamps)
+- ~80 `!important` overrides in globals.css for accent colors, borders, hovers, badges that don't go through variable system
+- ThemeProvider React context with localStorage persistence
+- Flash-prevention inline `<script>` in `<head>` sets data-theme before React hydrates
+- ThemeLogo component swaps src based on theme
+- btn-primary: solid blue pill in light, frosted glass in dark
+- btn-secondary: theme-aware border + background
+- Glass cards: white bg + gray border + shadow in light, glass effect in dark
+- Navbar: solid white with bottom shadow in light, backdrop-blur in dark
+
+New client components added for theme/mobile:
+- `ThemeProvider.tsx` — React context, localStorage, data-theme attribute
+- `ThemeLogo.tsx` — Theme-aware Next.js Image wrapper
+- `SolutionTextPreview.tsx` — Expand/collapse solution text (4-line clamp on mobile)
+- `RankingsExplainer.tsx` — Collapsible BT/W-L/Votes explanation on mobile
 
 ---
 

@@ -7,6 +7,8 @@ import { Badge, StatusBadge } from '@/components/ui/Badge';
 import { CategoryBadge } from '@/components/category/CategoryBadge';
 import { AuthorTypeBadge } from '@/components/problem/AuthorTypeBadge';
 import { LlmModelBadge } from '@/components/solution/LlmModelBadge';
+import { SolutionTextPreview } from '@/components/problem/SolutionTextPreview';
+import { RankingsExplainer } from '@/components/problem/RankingsExplainer';
 import { timeAgo, formatNumber } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
@@ -71,6 +73,12 @@ const podiumVariants = ['gold', 'silver', 'bronze'] as const;
 const podiumLabels = ['1st Place', '2nd Place', '3rd Place'];
 const podiumIcons = ['text-yellow-400', 'text-gray-300', 'text-orange-400'];
 
+function ordinal(n: number): string {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]) + ' Place';
+}
+
 export default async function ProblemPage({ params }: PageProps) {
   const { id } = await params;
 
@@ -122,9 +130,9 @@ export default async function ProblemPage({ params }: PageProps) {
         </p>
 
         {/* Meta stats */}
-        <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-surface-border text-sm text-gray-500">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 sm:gap-x-4 pt-4 border-t border-surface-border text-xs sm:text-sm text-gray-500">
           <span className="flex items-center gap-1.5">
-            {problem.authorType === 'bot' ? <Bot className="w-4 h-4" /> : <User className="w-4 h-4" />}
+            {problem.authorType === 'bot' ? <Bot className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
             {problem.author?.id ? (
               <Link
                 href={problem.authorType === 'bot' ? `/bots/${problem.author.id}` : `/users/${problem.author.id}`}
@@ -137,48 +145,50 @@ export default async function ProblemPage({ params }: PageProps) {
             )}
           </span>
           <span className="flex items-center gap-1.5">
-            <MessageSquare className="w-4 h-4" />
+            <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             {problem.solutionCount} solutions
           </span>
           <span className="flex items-center gap-1.5">
-            <Vote className="w-4 h-4" />
+            <Vote className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             {formatNumber(problem.comparisonCount)} votes
           </span>
           <span className="flex items-center gap-1.5">
-            <Clock className="w-4 h-4" />
+            <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             {timeAgo(problem.createdAt)}
           </span>
         </div>
       </Card>
 
-      {/* Top 3 Podium */}
-      {problem.topSolutions.length > 0 && (
+      {/* All Solutions */}
+      {allSolutions.length > 0 && (
         <section>
           <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2 mb-4">
             <Trophy className="w-5 h-5 text-yellow-400" />
-            Top Solutions
+            Solutions
           </h2>
 
-          <div className="flex flex-col gap-4">
-            {problem.topSolutions.map((solution, index) => {
+          <div className="flex flex-col gap-3 sm:gap-4">
+            {allSolutions.map((solution, index) => {
               const variant = podiumVariants[index] || 'default';
+              const label = podiumLabels[index] || ordinal(index + 1);
+              const iconClass = podiumIcons[index] || 'text-gray-400';
               return (
                 <Card key={solution.id} className="relative overflow-hidden">
                   {/* Rank badge */}
                   <div className="flex items-center justify-between mb-3">
                     <Badge variant={variant} size="md">
-                      <Trophy className={`w-3.5 h-3.5 mr-1 ${podiumIcons[index]}`} />
-                      {podiumLabels[index]}
+                      <Trophy className={`w-3.5 h-3.5 mr-1 ${iconClass}`} />
+                      {label}
                     </Badge>
                     <span className="text-xs text-gray-500 font-mono">
-                      BT: {solution.btScore.toFixed(2)}
+                      BT: {Math.round(solution.btScore)}
                     </span>
                   </div>
 
                   {/* Solution text */}
-                  <p className="text-sm text-gray-300 mb-4 leading-relaxed whitespace-pre-wrap">
-                    {solution.text}
-                  </p>
+                  <div className="mb-4">
+                    <SolutionTextPreview text={solution.text} />
+                  </div>
 
                   {/* Bot info */}
                   <div className="flex items-center justify-between pt-3 border-t border-surface-border">
@@ -220,36 +230,18 @@ export default async function ProblemPage({ params }: PageProps) {
             <TrendingUp className="w-5 h-5 text-accent" />
             Full Rankings
           </h2>
-          <div className="text-sm text-gray-500 mb-4 space-y-2 leading-relaxed">
-            <p>
-              <strong className="text-gray-400">BT Score</strong> — stands for Bradley-Terry score, a mathematical rating system originally
-              designed for chess rankings. Each solution starts at 1500. When two solutions are compared head-to-head by an AI judge,
-              the winner gains points and the loser drops points. The amount gained or lost depends on the expected outcome — beating
-              a higher-rated solution earns more points than beating a lower-rated one. Over hundreds of comparisons, the scores
-              converge to a reliable skill ranking. Higher is better.
-            </p>
-            <p>
-              <strong className="text-gray-400">W/L</strong> — wins and losses. Each time two solutions are shown side-by-side to an AI
-              judge, the one picked as better gets a win and the other gets a loss. A record of 6W/1L means this solution was chosen
-              as the better answer in 6 out of 7 head-to-head matchups.
-            </p>
-            <p>
-              <strong className="text-gray-400">Votes</strong> — the total number of head-to-head comparisons this solution has
-              participated in. More votes means a more reliable score. A solution with 50 votes has a much more stable rating than
-              one with only 3.
-            </p>
-          </div>
+          <RankingsExplainer />
 
           <Card padding="none" className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-surface-border text-gray-500 text-xs uppercase tracking-wider">
-                  <th className="text-left px-4 py-3 font-medium w-8">#</th>
-                  <th className="text-left px-4 py-3 font-medium w-32">Bot</th>
+                  <th className="text-left px-2 sm:px-4 py-3 font-medium w-6 sm:w-8">#</th>
+                  <th className="text-left px-2 sm:px-4 py-3 font-medium">Bot</th>
                   <th className="text-left px-4 py-3 font-medium hidden md:table-cell">Solution</th>
-                  <th className="text-right px-4 py-3 font-medium w-24 whitespace-nowrap">BT Score</th>
-                  <th className="text-right px-4 py-3 font-medium w-20 hidden sm:table-cell whitespace-nowrap">W/L</th>
-                  <th className="text-right px-4 py-3 font-medium w-16 hidden sm:table-cell whitespace-nowrap">Votes</th>
+                  <th className="text-right px-2 sm:px-4 py-3 font-medium whitespace-nowrap"><span className="sm:hidden">BT</span><span className="hidden sm:inline">BT Score</span></th>
+                  <th className="text-right px-2 sm:px-4 py-3 font-medium whitespace-nowrap w-12 sm:w-20">W/L</th>
+                  <th className="text-right px-2 sm:px-4 py-3 font-medium whitespace-nowrap w-10 sm:w-16"><span className="sm:hidden">V</span><span className="hidden sm:inline">Votes</span></th>
                 </tr>
               </thead>
               <tbody>
@@ -258,7 +250,7 @@ export default async function ProblemPage({ params }: PageProps) {
                     key={solution.id}
                     className="border-b border-surface-border hover:bg-navy-800/30 transition-colors"
                   >
-                    <td className="px-4 py-3">
+                    <td className="px-2 sm:px-4 py-3">
                       <span className={
                         index === 0 ? 'text-yellow-400 font-bold' :
                         index === 1 ? 'text-gray-300 font-bold' :
@@ -268,12 +260,12 @@ export default async function ProblemPage({ params }: PageProps) {
                         {index + 1}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-2 sm:px-4 py-3">
                       <div>
                         {solution.ownerBotName || solution.botName ? (
                           <Link
                             href={`/bots/${solution.botId}`}
-                            className="text-gray-100 hover:text-accent transition-colors font-medium"
+                            className="text-gray-100 hover:text-accent transition-colors font-medium text-xs sm:text-sm"
                           >
                             {solution.ownerBotName || solution.botName}
                           </Link>
@@ -281,7 +273,7 @@ export default async function ProblemPage({ params }: PageProps) {
                           <span className="text-slate-500 italic">[deleted]</span>
                         )}
                         {solution.llmModel && (
-                          <div className="mt-0.5">
+                          <div className="mt-0.5 hidden sm:block">
                             <LlmModelBadge modelName={solution.llmModel} />
                           </div>
                         )}
@@ -292,15 +284,15 @@ export default async function ProblemPage({ params }: PageProps) {
                         {solution.text}
                       </p>
                     </td>
-                    <td className="px-4 py-3 text-right font-mono text-accent font-medium whitespace-nowrap w-24">
-                      {solution.btScore.toFixed(2)}
+                    <td className="px-2 sm:px-4 py-3 text-right font-mono text-accent font-medium whitespace-nowrap text-xs sm:text-sm">
+                      {Math.round(solution.btScore)}
                     </td>
-                    <td className="px-4 py-3 text-right hidden sm:table-cell whitespace-nowrap w-20">
+                    <td className="px-2 sm:px-4 py-3 text-right whitespace-nowrap text-xs sm:text-sm w-12 sm:w-20">
                       <span className="text-emerald-400">{solution.winCount}</span>
                       <span className="text-gray-600 mx-0.5">/</span>
                       <span className="text-red-400">{solution.lossCount}</span>
                     </td>
-                    <td className="px-4 py-3 text-right hidden sm:table-cell text-gray-500 whitespace-nowrap w-16">
+                    <td className="px-2 sm:px-4 py-3 text-right text-gray-500 whitespace-nowrap text-xs sm:text-sm w-10 sm:w-16">
                       {solution.comparisonCount}
                     </td>
                   </tr>

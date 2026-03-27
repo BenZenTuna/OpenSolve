@@ -65,36 +65,37 @@ export default async function UserProfilePage({ params }: PageProps) {
   const displayName = user.username || '[anonymous]';
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Back link */}
       <Link
         href="/problems"
-        className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-accent transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-accent transition-colors py-1"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to Problems
       </Link>
 
       {/* Profile Header */}
-      <Card padding="lg">
-        <div className="flex flex-col sm:flex-row items-start gap-5">
+      <Card padding="md">
+        <div className="flex items-center sm:items-start gap-3 sm:gap-5">
           {/* Avatar */}
-          <div className="w-16 h-16 rounded-xl bg-purple-500/15 flex items-center justify-center text-2xl font-bold text-purple-400 shrink-0">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-purple-500/15 flex items-center justify-center text-xl sm:text-2xl font-bold text-purple-400 shrink-0">
             {displayName.charAt(0).toUpperCase()}
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-xl sm:text-2xl font-display font-bold text-gray-100">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+              <h1 className="text-lg sm:text-2xl font-display font-bold text-gray-100">
                 {displayName}
               </h1>
               <Badge variant="default" size="sm">
                 <User className="w-3 h-3 mr-1" />
-                Human Contributor
+                <span className="hidden sm:inline">Human Contributor</span>
+                <span className="sm:hidden">Human</span>
               </Badge>
             </div>
 
-            <div className="flex items-center gap-3 mt-3 text-xs text-gray-600">
+            <div className="flex items-center gap-3 mt-1.5 sm:mt-3 text-[11px] sm:text-xs text-gray-600">
               <span className="flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
                 Member since {new Date(user.joinedAt).toLocaleDateString()}
@@ -104,8 +105,13 @@ export default async function UserProfilePage({ params }: PageProps) {
         </div>
       </Card>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* Stats — compact on mobile */}
+      <div className="flex sm:hidden items-center justify-center gap-4 text-sm text-gray-400">
+        <span><strong className="text-gray-100">{formatNumber(stats.totalProblems)}</strong> problems posted</span>
+        <span className="text-gray-600">&middot;</span>
+        <span><strong className="text-gray-100">{formatNumber(stats.activeProblems)}</strong> active</span>
+      </div>
+      <div className="hidden sm:grid grid-cols-2 gap-3">
         <Card className="text-center">
           <Target className="w-5 h-5 text-blue-400 mx-auto mb-2" />
           <p className="text-lg font-bold text-gray-100 font-display">
@@ -143,8 +149,8 @@ export default async function UserProfilePage({ params }: PageProps) {
 
       {/* Problems List */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2 mb-4">
-          <Target className="w-5 h-5 text-blue-400" />
+        <h2 className="text-base sm:text-lg font-semibold text-gray-100 flex items-center gap-2 mb-3 sm:mb-4">
+          <Target className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
           Posted Problems ({problems.length})
         </h2>
 
@@ -169,17 +175,17 @@ export default async function UserProfilePage({ params }: PageProps) {
                       </h3>
                     </div>
 
-                    <div className="flex items-center gap-4 shrink-0 text-sm text-gray-500">
+                    <div className="flex items-center gap-2 sm:gap-4 shrink-0 text-xs sm:text-sm text-gray-500">
                       <span className="flex items-center gap-1" title="Solutions">
-                        <MessageSquare className="w-3.5 h-3.5" />
+                        <MessageSquare className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                         {problem.solutionCount}
                       </span>
                       <span className="flex items-center gap-1" title="Comparisons">
-                        <Vote className="w-3.5 h-3.5" />
+                        <Vote className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                         {problem.comparisonCount}
                       </span>
-                      <span className="text-xs text-gray-600">
-                        <Clock className="w-3 h-3 inline mr-1" />
+                      <span className="text-[11px] sm:text-xs text-gray-600">
+                        <Clock className="w-3 h-3 inline mr-0.5" />
                         {timeAgo(problem.createdAt)}
                       </span>
                     </div>

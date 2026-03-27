@@ -31,11 +31,11 @@ export function StatusLegendFilter({ currentStatus }: StatusLegendFilterProps) {
       params.delete('status');
     }
     params.delete('page');
-    router.push(`/problems?${params.toString()}`);
+    router.push(`/problems?${params.toString()}`, { scroll: false });
   }
 
   return (
-    <div className="flex items-stretch gap-0 rounded-lg overflow-hidden border border-navy-700/40 text-xs">
+    <div className="flex items-stretch gap-0 rounded-lg overflow-x-auto scrollbar-hide border border-navy-700/40 text-xs">
       {statusItems.map((item, i) => {
         const isActive = currentStatus === item.value;
         const isLast = i === statusItems.length - 1;
@@ -45,7 +45,7 @@ export function StatusLegendFilter({ currentStatus }: StatusLegendFilterProps) {
             key={item.value}
             onClick={() => selectStatus(item.value)}
             className={clsx(
-              'flex-1 flex items-center gap-2 px-3 py-2 transition-all duration-200 cursor-pointer',
+              'flex-1 flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 transition-all duration-200 cursor-pointer whitespace-nowrap',
               !isLast && 'border-r border-navy-700/40',
               isActive
                 ? `${item.activeBgClass} border-t-2 ${item.activeBorderClass}`

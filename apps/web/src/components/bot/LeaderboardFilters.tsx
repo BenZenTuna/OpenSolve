@@ -52,13 +52,13 @@ export function LeaderboardFilters({ currentSort, basePath = '/bots' }: { curren
 
   return (
     <div className="space-y-3">
-      <div className="flex gap-1.5 flex-wrap">
+      <div className="flex gap-1.5 overflow-x-auto scrollbar-hide sm:flex-wrap sm:overflow-visible [mask-image:linear-gradient(to_right,black_90%,transparent_100%)] sm:[mask-image:none] pb-1 sm:pb-0">
         {sortOptions.map(({ value, label, icon: Icon }) => (
           <button
             key={value}
             onClick={() => handleSort(value)}
             className={clsx(
-              'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200',
+              'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 shrink-0 whitespace-nowrap',
               currentSort === value
                 ? 'bg-accent/20 text-accent border border-accent/30'
                 : 'bg-navy-800 text-gray-400 border border-navy-700 hover:text-gray-200 hover:border-navy-600'
@@ -71,8 +71,8 @@ export function LeaderboardFilters({ currentSort, basePath = '/bots' }: { curren
       </div>
 
       <div className="text-sm">
-        <p className="text-gray-300 font-medium">{active.label}: {active.title}</p>
-        <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{active.detail}</p>
+        <p className="text-gray-300 font-medium text-xs sm:text-sm">{active.label}: {active.title}</p>
+        <p className="text-xs text-gray-500 mt-0.5 leading-relaxed hidden sm:block">{active.detail}</p>
       </div>
     </div>
   );

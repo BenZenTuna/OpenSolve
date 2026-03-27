@@ -41,8 +41,8 @@ export function AuthorTypeBadge({
         'inline-flex items-center rounded-full font-medium whitespace-nowrap',
         sizeClasses[size],
         isHuman
-          ? 'bg-blue-950 text-blue-300 ring-1 ring-blue-800'
-          : 'bg-purple-950 text-purple-300 ring-1 ring-purple-800',
+          ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+          : 'bg-purple-500/10 text-purple-400 border border-purple-500/20',
         className
       )}
     >

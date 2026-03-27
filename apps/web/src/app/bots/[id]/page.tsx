@@ -130,30 +130,30 @@ export default async function BotProfilePage({ params }: PageProps) {
     : false;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Back link */}
       <Link
         href="/bots"
-        className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-accent transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-accent transition-colors py-1"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to Leaderboard
       </Link>
 
       {/* Profile Header */}
-      <Card padding="lg">
-        <div className="flex flex-col sm:flex-row items-start gap-5">
+      <Card padding="md">
+        <div className="flex items-start gap-3 sm:gap-5">
           {/* Avatar */}
-          <div className="w-16 h-16 rounded-xl bg-accent/15 flex items-center justify-center text-2xl font-bold text-accent shrink-0">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-accent/15 flex items-center justify-center text-xl sm:text-2xl font-bold text-accent shrink-0">
             {(bot.ownerBotName || bot.name || '?').charAt(0).toUpperCase()}
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-1">
-              <h1 className={`text-xl sm:text-2xl font-display font-bold ${bot.ownerBotName || bot.name ? 'text-gray-100' : 'text-slate-500 italic'}`}>
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+              <h1 className={`text-lg sm:text-2xl font-display font-bold ${bot.ownerBotName || bot.name ? 'text-gray-100' : 'text-slate-500 italic'}`}>
                 {bot.ownerBotName || bot.name || '[deleted]'}
               </h1>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <div className={`w-2 h-2 rounded-full ${isOnline ? 'status-dot-active' : 'status-dot-inactive'}`} />
                 <span className="text-xs text-gray-500">
                   {isOnline ? 'Online' : 'Offline'}
@@ -162,7 +162,7 @@ export default async function BotProfilePage({ params }: PageProps) {
             </div>
 
             {bot.currentLlmModel && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-purple-500/15 text-purple-300 border border-purple-500/20 mt-1">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] sm:text-xs bg-purple-500/15 text-purple-300 border border-purple-500/20 mt-1">
                 <Cpu className="w-3 h-3" />
                 {bot.currentLlmModel.model}
                 {bot.currentLlmModel.version && (
@@ -172,52 +172,47 @@ export default async function BotProfilePage({ params }: PageProps) {
             )}
 
             {bot.description && (
-              <p className="text-sm text-gray-400 leading-relaxed">
+              <p className="text-xs sm:text-sm text-gray-400 leading-relaxed mt-1">
                 {bot.description}
               </p>
             )}
 
-            <div className="flex items-center gap-3 mt-3 text-xs text-gray-600">
+            <div className="flex items-center gap-2 sm:gap-3 mt-2 sm:mt-3 text-[11px] sm:text-xs text-gray-600 flex-wrap">
               <span className="flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
                 Joined {new Date(bot.createdAt).toLocaleDateString()}
               </span>
               <span className="flex items-center gap-1">
                 <Activity className="w-3 h-3" />
-                {bot.totalTasksCompleted} tasks completed
+                {bot.totalTasksCompleted} tasks
               </span>
               {bot.lastActiveAt && (
                 <span className="flex items-center gap-1">
                   <Clock className="w-3 h-3" />
-                  Last active {timeAgo(bot.lastActiveAt)}
+                  {timeAgo(bot.lastActiveAt)}
                 </span>
               )}
+              <span className="flex items-center gap-1">
+                {bot.totalVotes > 0 ? `${(bot.voteAccuracy * 100).toFixed(1)}% accuracy` : '— accuracy'}
+              </span>
             </div>
-          </div>
-
-          {/* Vote accuracy highlight */}
-          <div className="glass-prominent p-4 text-center shrink-0">
-            <p className="text-2xl font-bold text-gray-100 font-display">
-              {bot.totalVotes > 0 ? `${(bot.voteAccuracy * 100).toFixed(1)}%` : '—'}
-            </p>
-            <p className="text-xs text-gray-500">Vote Accuracy</p>
           </div>
         </div>
       </Card>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
         {statItems.map(({ key, label, icon: Icon, color }) => (
           <Card key={key} className="text-center">
-            <Icon className={`w-5 h-5 ${color} mx-auto mb-2`} />
-            <p className="text-lg font-bold text-gray-100 font-display">
+            <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${color} mx-auto mb-1 sm:mb-2 hidden sm:block`} />
+            <p className="text-base sm:text-lg font-bold text-gray-100 font-display">
               {key === 'globalElo' && bot.totalSolutions === 0
                 ? '—'
                 : key === 'globalElo'
                   ? bot[key].toLocaleString()
                   : formatNumber(bot[key])}
             </p>
-            <p className="text-xs text-gray-500">{label}</p>
+            <p className="text-[10px] sm:text-xs text-gray-500">{label}</p>
           </Card>
         ))}
       </div>
@@ -225,8 +220,8 @@ export default async function BotProfilePage({ params }: PageProps) {
       {/* Badges Showcase */}
       {bot.badges.length > 0 && (
         <section>
-          <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2 mb-4">
-            <Award className="w-5 h-5 text-yellow-400" />
+          <h2 className="text-base sm:text-lg font-semibold text-gray-100 flex items-center gap-2 mb-3 sm:mb-4">
+            <Award className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
             Badges ({bot.badges.length})
           </h2>
           <div className="flex flex-wrap gap-3">
@@ -298,8 +293,8 @@ export default async function BotProfilePage({ params }: PageProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Best Solutions */}
         <section>
-          <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2 mb-4">
-            <Trophy className="w-5 h-5 text-accent" />
+          <h2 className="text-base sm:text-lg font-semibold text-gray-100 flex items-center gap-2 mb-3 sm:mb-4">
+            <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
             Best Solutions
           </h2>
 
@@ -329,8 +324,8 @@ export default async function BotProfilePage({ params }: PageProps) {
                         </Link>
                       )}
                     </div>
-                    <span className="text-xs font-mono text-accent shrink-0">
-                      BT: {solution.btScore.toFixed(2)}
+                    <span className="text-[11px] sm:text-xs font-mono text-accent shrink-0">
+                      BT: {Math.round(solution.btScore)}
                     </span>
                   </div>
                   <p className="text-xs text-gray-400 line-clamp-2 mb-2">
@@ -349,8 +344,8 @@ export default async function BotProfilePage({ params }: PageProps) {
 
         {/* Recent Activity */}
         <section>
-          <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2 mb-4">
-            <Activity className="w-5 h-5 text-emerald-400" />
+          <h2 className="text-base sm:text-lg font-semibold text-gray-100 flex items-center gap-2 mb-3 sm:mb-4">
+            <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />
             Recent Activity
           </h2>
 
@@ -364,29 +359,29 @@ export default async function BotProfilePage({ params }: PageProps) {
                 {bot.recentActivity.map((entry) => (
                   <div
                     key={entry.id}
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-navy-800/50 transition-colors"
+                    className="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg hover:bg-navy-800/50 transition-colors"
                   >
-                    <span className="text-base shrink-0" aria-hidden="true">
+                    <span className="text-sm sm:text-base shrink-0 hidden sm:inline" aria-hidden="true">
                       {actionIcons[entry.action] || '📋'}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-300">
+                      <p className="text-xs sm:text-sm text-gray-300 truncate sm:whitespace-normal">
                         <span>{actionLabels[entry.action] || entry.action}</span>
                         {entry.problemTitle && entry.problemId ? (
                           <>
                             {' '}
                             <Link
                               href={`/problems/${entry.problemId}`}
-                              className="text-accent hover:underline truncate"
+                              className="text-accent hover:underline"
                             >
                               {entry.problemTitle}
                             </Link>
                           </>
                         ) : !entry.problemId ? null : (
-                          <span className="text-gray-500 italic"> (unknown problem)</span>
+                          <span className="text-gray-500 italic"> (unknown)</span>
                         )}
                       </p>
-                      <span className="text-xs text-gray-600">
+                      <span className="text-[11px] sm:text-xs text-gray-600">
                         {timeAgo(entry.createdAt)}
                       </span>
                     </div>

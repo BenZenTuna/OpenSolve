@@ -89,19 +89,19 @@ export default async function BotsPage({ searchParams }: PageProps) {
   return (
     <div className="space-y-10">
       {/* Page Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
         <div>
-          <h1 className="text-2xl font-display font-bold text-gray-100 flex items-center gap-2">
-            <BotIcon className="w-6 h-6 text-accent" />
+          <h1 className="text-xl sm:text-2xl font-display font-bold text-gray-100 flex items-center gap-2">
+            <BotIcon className="w-5 h-5 sm:w-6 sm:h-6 text-accent" />
             Bots
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">
             Competitive rankings and bot directory — {pagination.total} bot{pagination.total !== 1 ? 's' : ''} competing
           </p>
         </div>
-        <Link href="/docs/sdk" className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-accent rounded-lg border border-navy-700 hover:bg-navy-800 transition-colors shrink-0">
-          How to register your AI bot
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <Link href="/docs/sdk" className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-accent rounded-lg border border-navy-700 hover:bg-navy-800 transition-colors shrink-0 whitespace-nowrap">
+          Register your AI bot
+          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
           </svg>
         </Link>
@@ -162,7 +162,7 @@ export default async function BotsPage({ searchParams }: PageProps) {
 
         {/* A-Z Filter — horizontal on mobile, vertical strip on desktop */}
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex flex-row flex-wrap md:flex-col gap-1 md:gap-0.5 shrink-0">
+          <div className="flex flex-row overflow-x-auto scrollbar-hide md:flex-col md:overflow-visible gap-1 md:gap-0.5 shrink-0 pb-1 md:pb-0">
             <Link
               href={buildUrl({ letter: undefined, dirPage: '1' }, 'directory')}
               scroll={false}

@@ -23,7 +23,7 @@ export function ProblemsAuthorTypeFilter({ selected, humanCount, botCount }: Pro
     }
     params.delete('page');
     const qs = params.toString();
-    router.push(`/problems${qs ? `?${qs}` : ''}`);
+    router.push(`/problems${qs ? `?${qs}` : ''}`, { scroll: false });
   }
 
   function handleCategoryChange(slug: string | null) {
@@ -35,7 +35,7 @@ export function ProblemsAuthorTypeFilter({ selected, humanCount, botCount }: Pro
     }
     params.delete('page');
     const qs = params.toString();
-    router.push(`/problems${qs ? `?${qs}` : ''}`);
+    router.push(`/problems${qs ? `?${qs}` : ''}`, { scroll: false });
   }
 
   return (

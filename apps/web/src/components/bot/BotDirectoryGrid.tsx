@@ -26,13 +26,13 @@ function BotCard({ bot, isMyBot }: { bot: BotEntry; isMyBot: boolean }) {
     <Link href={`/bots/${bot.id}`}>
       <Card hover className={`h-full flex flex-col ${isMyBot ? 'border-accent/30 ring-1 ring-accent/20' : ''}`}>
         {/* Bot header */}
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center text-base font-bold shrink-0 bg-accent/15 text-accent">
+        <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-4">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center text-sm sm:text-base font-bold shrink-0 bg-accent/15 text-accent">
             {(bot.ownerBotName || bot.name || '?').charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">
-            <p className={`font-semibold truncate flex items-center gap-1.5 ${bot.ownerBotName || bot.name ? 'text-gray-100' : 'text-slate-500 italic'}`}>
-              <BotIcon className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+            <p className={`text-sm font-semibold truncate flex items-center gap-1.5 ${bot.ownerBotName || bot.name ? 'text-gray-100' : 'text-slate-500 italic'}`}>
+              <BotIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-purple-400 shrink-0" />
               {bot.ownerBotName || bot.name || '[deleted]'}
             </p>
             {bot.currentLlmModel && (
@@ -51,8 +51,17 @@ function BotCard({ bot, isMyBot }: { bot: BotEntry; isMyBot: boolean }) {
           </div>
         </div>
 
-        {/* Stats grid */}
-        <div className="grid grid-cols-2 gap-3 flex-1">
+        {/* Stats — compact inline on mobile, grid on desktop */}
+        <div className="flex items-center gap-3 text-xs text-gray-400 sm:hidden">
+          <span>{formatNumber(bot.totalPoints)} pts</span>
+          <span className="text-gray-600">&middot;</span>
+          <span>{bot.totalSolutions > 0 ? bot.globalElo : '—'} ELO</span>
+          <span className="text-gray-600">&middot;</span>
+          <span>{bot.totalSolutions} sol</span>
+          <span className="text-gray-600">&middot;</span>
+          <span>{bot.totalVotes > 0 ? `${(bot.voteAccuracy * 100).toFixed(0)}%` : '—'}</span>
+        </div>
+        <div className="hidden sm:grid grid-cols-2 gap-3 flex-1">
           <div className="flex items-center gap-1.5 text-xs">
             <Zap className="w-3.5 h-3.5 text-accent" />
             <span className="text-gray-400">Points</span>
@@ -76,7 +85,7 @@ function BotCard({ bot, isMyBot }: { bot: BotEntry; isMyBot: boolean }) {
         </div>
 
         {/* Last active */}
-        <div className="mt-4 pt-3 border-t border-surface-border text-xs text-gray-600">
+        <div className="mt-2 sm:mt-4 pt-2 sm:pt-3 border-t border-surface-border text-[11px] sm:text-xs text-gray-600">
           Last active: {bot.lastActiveAt ? timeAgo(bot.lastActiveAt) : 'Never'}
         </div>
       </Card>
@@ -96,7 +105,7 @@ export function BotDirectoryGrid({ bots }: BotDirectoryGridProps) {
   const otherBots = myBot ? bots.filter(b => b.id !== myBotId) : bots;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
       {myBot && <BotCard bot={myBot} isMyBot={true} />}
       {otherBots.map((bot) => (
         <BotCard key={bot.id} bot={bot} isMyBot={false} />
