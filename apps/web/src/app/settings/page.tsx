@@ -396,10 +396,10 @@ export default function SettingsPage() {
   if (!user) return null;
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
+    <div className="max-w-2xl mx-auto space-y-4 sm:space-y-8">
       <div>
-        <h1 className="text-2xl font-display font-bold text-gray-100 flex items-center gap-2">
-          <Settings className="w-6 h-6 text-accent" />
+        <h1 className="text-xl sm:text-2xl font-display font-bold text-gray-100 flex items-center gap-2">
+          <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-accent" />
           Settings
         </h1>
         <p className="text-sm text-gray-500 mt-1">
@@ -408,12 +408,12 @@ export default function SettingsPage() {
       </div>
 
       {/* Email Section — read-only */}
-      <Card padding="lg">
+      <Card padding="none" className="p-4 sm:p-6">
         <div className="flex items-center gap-2 mb-4">
           <User className="w-5 h-5 text-accent" />
           <h2 className="text-lg font-semibold text-gray-100">Email</h2>
         </div>
-        <div className="px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg text-slate-300">
+        <div className="px-3 py-2 sm:px-4 sm:py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg text-sm sm:text-base text-slate-300">
           {user.email}
         </div>
         <p className="text-xs text-slate-500 mt-1">
@@ -422,7 +422,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Username Section */}
-      <Card padding="lg">
+      <Card padding="none" className="p-4 sm:p-6">
         <div className="flex items-center gap-2 mb-4">
           <User className="w-5 h-5 text-accent" />
           <h2 className="text-lg font-semibold text-gray-100">Username</h2>
@@ -501,7 +501,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Bot Identity Section */}
-      <Card padding="lg">
+      <Card padding="none" className="p-4 sm:p-6">
         <div className="flex items-center gap-2 mb-4">
           <Bot className="w-5 h-5 text-accent" />
           <h2 className="text-lg font-semibold text-gray-100">Bot Identity</h2>
@@ -510,7 +510,7 @@ export default function SettingsPage() {
           Your bot name appears on all API submissions. It must be unique across the platform.
         </p>
 
-        <div className="flex items-center gap-2 mb-6 text-xs text-gray-500">
+        <div className="hidden sm:flex items-center gap-2 mb-6 text-xs text-gray-500">
           <span className="flex items-center justify-center w-5 h-5 rounded-full bg-accent text-navy-950 font-bold text-[10px]">1</span>
           <span className={user?.botName ? 'line-through text-gray-600' : 'text-gray-400'}>
             Set a bot name
@@ -580,7 +580,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* API Key Section */}
-      <Card padding="lg">
+      <Card padding="none" className="p-4 sm:p-6">
         <div className="flex items-center gap-2 mb-4">
           <Key className="w-5 h-5 text-accent" />
           <h2 className="text-lg font-semibold text-gray-100">API Key</h2>
@@ -607,7 +607,7 @@ export default function SettingsPage() {
               Save this key now. It will not be shown again.
             </p>
             <div className="relative">
-              <code className="block w-full p-4 bg-navy-900 rounded-lg text-accent text-sm font-mono break-all border border-navy-700">
+              <code className="block w-full p-3 sm:p-4 bg-navy-900 rounded-lg text-accent text-xs sm:text-sm font-mono break-all border border-navy-700">
                 {generatedKey}
               </code>
               <button
@@ -622,7 +622,7 @@ export default function SettingsPage() {
         )}
 
         {keyStatus?.hasApiKey && (
-          <div className="flex items-center gap-2 p-3 rounded-lg bg-navy-900 border border-navy-700 text-sm text-gray-300 mb-4">
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-navy-900 border border-navy-700 text-xs sm:text-sm text-gray-300 mb-4">
             <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>
               Active API key
@@ -635,18 +635,18 @@ export default function SettingsPage() {
           </div>
         )}
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
           <button
             onClick={handleGenerateKey}
             disabled={generatingKey || !user.botName}
-            className="btn-primary"
+            className="btn-primary whitespace-nowrap text-xs sm:text-sm"
           >
             {generatingKey ? (
               <><Loader2 className="w-4 h-4 animate-spin" /> Generating...</>
             ) : keyStatus?.hasApiKey ? (
-              <><Key className="w-4 h-4" /> Regenerate Key</>
+              <><Key className="w-4 h-4" /> Regenerate<span className="hidden sm:inline"> Key</span></>
             ) : (
-              <><Key className="w-4 h-4" /> Generate API Key</>
+              <><Key className="w-4 h-4" /> Generate<span className="hidden sm:inline"> API</span> Key</>
             )}
           </button>
 
@@ -654,12 +654,12 @@ export default function SettingsPage() {
             <button
               onClick={handleRevokeKey}
               disabled={revokingKey}
-              className="btn-secondary text-red-400 hover:text-red-300"
+              className="btn-secondary text-red-400 hover:text-red-300 whitespace-nowrap text-xs sm:text-sm"
             >
               {revokingKey ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Revoking...</>
               ) : (
-                <><Trash2 className="w-4 h-4" /> Revoke Key</>
+                <><Trash2 className="w-4 h-4" /> Revoke<span className="hidden sm:inline"> Key</span></>
               )}
             </button>
           )}
@@ -685,7 +685,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Newsletter Section */}
-      <Card padding="lg">
+      <Card padding="none" className="p-4 sm:p-6">
         <div className="flex items-center gap-2 mb-1">
           <Mail className="w-5 h-5 text-accent" />
           <h2 className="text-lg font-semibold text-gray-100">Newsletter</h2>
@@ -837,7 +837,7 @@ export default function SettingsPage() {
         {dataControlsOpen && (
           <div className="mt-3 space-y-4">
             {/* Your Data Section */}
-            <div className="border border-blue-500/20 bg-blue-500/5 rounded-lg p-6">
+            <div className="border border-blue-500/20 bg-blue-500/5 rounded-lg p-4 sm:p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Download className="w-5 h-5 text-blue-400" />
                 <h2 className="text-lg font-semibold text-gray-100">Your Data</h2>
@@ -867,7 +867,7 @@ export default function SettingsPage() {
             </div>
 
             {/* Danger Zone */}
-            <div className="border border-red-500/30 bg-red-500/5 rounded-lg p-6">
+            <div className="border border-red-500/30 bg-red-500/5 rounded-lg p-4 sm:p-6">
               <div className="flex items-center gap-2 mb-4">
                 <ShieldAlert className="w-5 h-5 text-red-400" />
                 <h2 className="text-lg font-semibold text-gray-100">Danger Zone</h2>
