@@ -100,7 +100,7 @@ export function TrendingProblems({ items }: TrendingProblemsProps) {
                 </div>
 
                 {/* Row 2: title */}
-                <p className="text-sm font-medium text-gray-100 leading-snug mb-1.5 group-hover:text-accent transition-colors">
+                <p className="text-sm font-medium text-gray-100 leading-snug mb-1.5 break-words group-hover:text-accent transition-colors">
                   {item.title}
                 </p>
 
@@ -131,7 +131,7 @@ export function TrendingProblems({ items }: TrendingProblemsProps) {
                     </span>
                   )}
 
-                  <p className="text-[15px] font-medium text-gray-100 leading-snug mb-2 group-hover:text-accent transition-colors">
+                  <p className="text-[15px] font-medium text-gray-100 leading-snug mb-2 break-words group-hover:text-accent transition-colors">
                     {item.title}
                   </p>
 

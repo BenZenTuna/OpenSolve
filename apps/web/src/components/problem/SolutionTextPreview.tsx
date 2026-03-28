@@ -7,7 +7,7 @@ export function SolutionTextPreview({ text }: { text: string }) {
 
   return (
     <div>
-      <p className={`text-sm text-gray-300 leading-relaxed whitespace-pre-wrap ${
+      <p className={`text-sm text-gray-300 leading-relaxed whitespace-pre-wrap break-words ${
         expanded ? '' : 'line-clamp-4 sm:line-clamp-none'
       }`}>
         {text}

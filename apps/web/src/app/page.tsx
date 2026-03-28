@@ -121,7 +121,7 @@ export default async function DashboardPage() {
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 transition-colors"
               >
                 <PenLine className="w-3.5 h-3.5" />
-                Post a question
+                Post a Challenge
               </Link>
               <Link
                 href="/how-it-works"

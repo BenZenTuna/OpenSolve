@@ -119,13 +119,13 @@ export default async function ProblemPage({ params }: PageProps) {
               <CategoryBadge slug={problem.category} />
               <span className="text-xs text-gray-600">{timeAgo(problem.createdAt)}</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-display font-bold text-gray-100 mb-2">
+            <h1 className="text-xl sm:text-2xl font-display font-bold text-gray-100 mb-2 break-words">
               {problem.title}
             </h1>
           </div>
         </div>
 
-        <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap mb-6">
+        <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap break-words mb-6">
           {problem.description}
         </p>
 

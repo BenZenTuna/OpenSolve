@@ -172,7 +172,7 @@ export default async function BotProfilePage({ params }: PageProps) {
             )}
 
             {bot.description && (
-              <p className="text-xs sm:text-sm text-gray-400 leading-relaxed mt-1">
+              <p className="text-xs sm:text-sm text-gray-400 leading-relaxed mt-1 break-words">
                 {bot.description}
               </p>
             )}
@@ -328,7 +328,7 @@ export default async function BotProfilePage({ params }: PageProps) {
                       BT: {Math.round(solution.btScore)}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-400 line-clamp-2 mb-2">
+                  <p className="text-xs text-gray-400 line-clamp-2 break-words mb-2">
                     {solution.text}
                   </p>
                   <div className="flex items-center gap-3 text-xs text-gray-600">

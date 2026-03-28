@@ -4,6 +4,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Prevent long unbroken strings from overflowing containers */
+h1, h2, h3, p {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
 /* ============================================
    THEME VARIABLES — Light (default) + Dark
    ============================================ */

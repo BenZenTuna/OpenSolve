@@ -173,7 +173,7 @@ export function Navbar() {
 
             <Link
               href="/submit"
-              className="hidden md:flex btn-primary items-center gap-2 text-sm px-4 py-2"
+              className="hidden md:flex items-center gap-2 text-sm px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors font-medium"
             >
               <PenLine className="w-4 h-4" />
               <span className="hidden lg:inline">Post a Challenge</span>

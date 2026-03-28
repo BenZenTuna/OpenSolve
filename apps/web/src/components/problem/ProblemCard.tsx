@@ -61,7 +61,7 @@ export function ProblemCard({ problem }: ProblemCardProps) {
         </div>
 
         {/* Row 2: Title */}
-        <h3 className="mt-1.5 sm:mt-2.5 text-base sm:text-lg font-medium text-gray-100 line-clamp-2 group-hover:text-accent transition-colors">
+        <h3 className="mt-1.5 sm:mt-2.5 text-base sm:text-lg font-medium text-gray-100 line-clamp-2 break-words group-hover:text-accent transition-colors">
           {problem.title}
         </h3>
 

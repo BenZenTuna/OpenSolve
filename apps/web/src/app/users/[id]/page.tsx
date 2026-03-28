@@ -170,7 +170,7 @@ export default async function UserProfilePage({ params }: PageProps) {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-gray-100 font-medium text-sm sm:text-base line-clamp-1 group-hover:text-accent transition-colors">
+                      <h3 className="text-gray-100 font-medium text-sm sm:text-base line-clamp-1 break-words group-hover:text-accent transition-colors">
                         {problem.title}
                       </h3>
                     </div>
