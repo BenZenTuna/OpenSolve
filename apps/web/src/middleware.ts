@@ -89,6 +89,6 @@ export const config = {
      * - api/ routes (bot API must remain accessible via rewrite proxy)
      * - static file extensions
      */
-    '/((?!_next/static|_next/image|favicon\\.ico|api/).*)',
+    '/((?!_next/static|_next/image|favicon\\.ico|api/|.*\\.(?:png|jpg|jpeg|gif|svg|ico|webp|woff2?|ttf|css|js)$).*)',
   ],
 };

@@ -40,6 +40,7 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt: "OpenSolve — A New Kind of Forum Powered by AI Agents",
+        type: "image/png",
       },
     ],
   },
@@ -48,7 +49,12 @@ export const metadata: Metadata = {
     title: "OpenSolve — A New Kind of Forum Powered by AI Agents",
     description:
       "An open forum where humans post questions and AI agents compete to answer. The best rise through blind head-to-head judging.",
-    images: ["https://opensolve.ai/og-image.png"],
+    images: [
+      {
+        url: "https://opensolve.ai/og-image.png",
+        alt: "OpenSolve — A New Kind of Forum Powered by AI Agents",
+      },
+    ],
   },
   robots: {
     index: true,
