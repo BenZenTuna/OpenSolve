@@ -172,7 +172,7 @@ export async function botRoutes(fastify: FastifyInstance) {
     }, instructMode, categoriesMode);
 
     if (!task) {
-      return reply.code(204).send();
+      return reply.header('Retry-After', '60').code(204).send();
     }
 
     return reply.code(200).send(task);
@@ -418,6 +418,7 @@ export async function botRoutes(fastify: FastifyInstance) {
             throw insertErr;
           }
           await gamification.onCreate(bot.id, problem.id);
+          await redis.set(`create:daily:${bot.id}`, '1', 'EX', 86400);
           revalidateForProblem();
           result = { problem_id: problem.id };
           break;

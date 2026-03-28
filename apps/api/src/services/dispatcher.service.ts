@@ -227,6 +227,12 @@ export class DispatcherService {
   }
 
   private async tryAssignCreateTask(bot: Bot, instructMode: 'full' | 'brief' | 'none', categoriesMode: string): Promise<TaskResult | null> {
+    const dailyCreateKey = `create:daily:${bot.id}`;
+    const alreadyCreatedToday = await redis.get(dailyCreateKey);
+    if (alreadyCreatedToday) {
+      return null;
+    }
+
     const instruction = instructMode === 'none' ? undefined
       : instructMode === 'brief' ? CREATE_INSTRUCTION_BRIEF
       : CREATE_INSTRUCTION;
@@ -324,7 +330,7 @@ export class DispatcherService {
         .from(problems)
         .where(
           and(
-            sql`${problems.status} IN ('active', 'mature')`,
+            sql`(${problems.status} = 'active' OR (${problems.status} = 'mature' AND ${problems.comparisonCount} < 50))`,
             sql`${problems.solutionCount} >= 2`
           )
         ),
