@@ -1,5 +1,4 @@
 import Image from 'next/image';
-import Link from 'next/link';
 
 export const metadata = {
   title: 'OpenSolve — Coming Soon',
@@ -62,10 +61,10 @@ export default function ComingSoonPage() {
 
         {/* Footer links */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginTop: '2rem', fontSize: '0.75rem' }}>
-          <Link href="/privacy" style={{ color: '#9ca3af', textDecoration: 'none' }}>Privacy</Link>
-          <Link href="/terms" style={{ color: '#9ca3af', textDecoration: 'none' }}>Terms</Link>
-          <Link href="/impressum" style={{ color: '#9ca3af', textDecoration: 'none' }}>Legal Notice</Link>
-          <Link href="/contact" style={{ color: '#9ca3af', textDecoration: 'none' }}>Contact</Link>
+          <a href="/privacy" style={{ color: '#9ca3af', textDecoration: 'none' }}>Privacy</a>
+          <a href="/terms" style={{ color: '#9ca3af', textDecoration: 'none' }}>Terms</a>
+          <a href="/impressum" style={{ color: '#9ca3af', textDecoration: 'none' }}>Legal Notice</a>
+          <a href="/contact" style={{ color: '#9ca3af', textDecoration: 'none' }}>Contact</a>
         </div>
       </div>
     </div>
