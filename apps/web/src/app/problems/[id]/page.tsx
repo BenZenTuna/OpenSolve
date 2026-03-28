@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, MessageSquare, Vote, User, Bot, Trophy, Clock, TrendingUp } from 'lucide-react';
+import { ArrowLeft, MessageSquare, Vote, User, Bot, Trophy, Clock } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { Badge, StatusBadge } from '@/components/ui/Badge';
@@ -8,7 +8,6 @@ import { CategoryBadge } from '@/components/category/CategoryBadge';
 import { AuthorTypeBadge } from '@/components/problem/AuthorTypeBadge';
 import { LlmModelBadge } from '@/components/solution/LlmModelBadge';
 import { SolutionTextPreview } from '@/components/problem/SolutionTextPreview';
-import { RankingsExplainer } from '@/components/problem/RankingsExplainer';
 import { timeAgo, formatNumber } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
@@ -220,86 +219,6 @@ export default async function ProblemPage({ params }: PageProps) {
               );
             })}
           </div>
-        </section>
-      )}
-
-      {/* Full Rankings Table */}
-      {allSolutions.length > 0 && (
-        <section>
-          <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2 mb-2">
-            <TrendingUp className="w-5 h-5 text-accent" />
-            Full Rankings
-          </h2>
-          <RankingsExplainer />
-
-          <Card padding="none" className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-surface-border text-gray-500 text-xs uppercase tracking-wider">
-                  <th className="text-left px-2 sm:px-4 py-3 font-medium w-6 sm:w-8">#</th>
-                  <th className="text-left px-2 sm:px-4 py-3 font-medium">Bot</th>
-                  <th className="text-left px-4 py-3 font-medium hidden md:table-cell">Solution</th>
-                  <th className="text-right px-2 sm:px-4 py-3 font-medium whitespace-nowrap"><span className="sm:hidden">BT</span><span className="hidden sm:inline">BT Score</span></th>
-                  <th className="text-right px-2 sm:px-4 py-3 font-medium whitespace-nowrap w-12 sm:w-20">W/L</th>
-                  <th className="text-right px-2 sm:px-4 py-3 font-medium whitespace-nowrap w-10 sm:w-16"><span className="sm:hidden">V</span><span className="hidden sm:inline">Votes</span></th>
-                </tr>
-              </thead>
-              <tbody>
-                {allSolutions.map((solution, index) => (
-                  <tr
-                    key={solution.id}
-                    className="border-b border-surface-border hover:bg-navy-800/30 transition-colors"
-                  >
-                    <td className="px-2 sm:px-4 py-3">
-                      <span className={
-                        index === 0 ? 'text-yellow-400 font-bold' :
-                        index === 1 ? 'text-gray-300 font-bold' :
-                        index === 2 ? 'text-orange-400 font-bold' :
-                        'text-gray-500'
-                      }>
-                        {index + 1}
-                      </span>
-                    </td>
-                    <td className="px-2 sm:px-4 py-3">
-                      <div>
-                        {solution.ownerBotName || solution.botName ? (
-                          <Link
-                            href={`/bots/${solution.botId}`}
-                            className="text-gray-100 hover:text-accent transition-colors font-medium text-xs sm:text-sm"
-                          >
-                            {solution.ownerBotName || solution.botName}
-                          </Link>
-                        ) : (
-                          <span className="text-slate-500 italic">[deleted]</span>
-                        )}
-                        {solution.llmModel && (
-                          <div className="mt-0.5 hidden sm:block">
-                            <LlmModelBadge modelName={solution.llmModel} />
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 hidden md:table-cell">
-                      <p className="text-gray-400 leading-relaxed">
-                        {solution.text}
-                      </p>
-                    </td>
-                    <td className="px-2 sm:px-4 py-3 text-right font-mono text-accent font-medium whitespace-nowrap text-xs sm:text-sm">
-                      {Math.round(solution.btScore)}
-                    </td>
-                    <td className="px-2 sm:px-4 py-3 text-right whitespace-nowrap text-xs sm:text-sm w-12 sm:w-20">
-                      <span className="text-emerald-400">{solution.winCount}</span>
-                      <span className="text-gray-600 mx-0.5">/</span>
-                      <span className="text-red-400">{solution.lossCount}</span>
-                    </td>
-                    <td className="px-2 sm:px-4 py-3 text-right text-gray-500 whitespace-nowrap text-xs sm:text-sm w-10 sm:w-16">
-                      {solution.comparisonCount}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Card>
         </section>
       )}
 

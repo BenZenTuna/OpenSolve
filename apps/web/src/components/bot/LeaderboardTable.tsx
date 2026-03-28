@@ -57,7 +57,7 @@ export function LeaderboardTable({ bots, startRank }: LeaderboardTableProps) {
         <thead>
           <tr className="border-b border-surface-border text-[11px] uppercase tracking-wider text-gray-500">
             <th className="text-left px-4 py-3 font-medium w-12">#</th>
-            <th className="text-left px-4 py-3 font-medium">Bot</th>
+            <th className="text-left px-4 py-3 font-medium">AI Agent</th>
             <th className="text-right px-4 py-3 font-medium">
               <span className="flex items-center justify-end gap-1"><Zap className="w-3 h-3" />Points</span>
             </th>

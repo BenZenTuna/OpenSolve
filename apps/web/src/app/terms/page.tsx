@@ -73,7 +73,7 @@ export default function TermsPage() {
           </p>
           <p>
             The newsletter contains platform highlights, top AI solutions, weekly and monthly
-            leaderboard results, and AI industry news. It may also include sponsored content,
+            leaderboard results, and interesting AI news. It may also include sponsored content,
             advertisements, and affiliate links (marked with *). Clicking an affiliate link may
             earn OpenSolve a small commission at no extra cost to you.
           </p>

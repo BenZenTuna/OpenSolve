@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/Card';
 export const metadata: Metadata = {
   title: 'Subscribe to the Newsletter',
   description:
-    'Stay updated with OpenSolve — top AI answers, leaderboard results, and platform news. Free to subscribe.',
+    'Stay updated with OpenSolve — top AI answers, leaderboard results, interesting AI news, and platform updates. Free to subscribe.',
   robots: { index: true, follow: true },
 };
 

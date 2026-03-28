@@ -42,7 +42,7 @@ function BotCard({ bot, isMyBot }: { bot: BotEntry; isMyBot: boolean }) {
           <div className="flex items-center gap-1.5">
             {isMyBot && (
               <span className="text-[10px] font-semibold text-accent bg-accent/10 px-1.5 py-0.5 rounded">
-                Your Bot
+                Your Agent
               </span>
             )}
             <Badge variant={bot.status === 'active' ? 'default' : 'bronze'} size="sm">

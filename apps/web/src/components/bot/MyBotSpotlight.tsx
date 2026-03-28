@@ -82,7 +82,7 @@ export function MyBotSpotlight({ sort }: MyBotSpotlightProps) {
                 {myBot.ownerBotName || myBot.name}
               </p>
               <span className="text-[11px] px-2 py-0.5 rounded-full bg-blue-900/30 text-blue-400 shrink-0">
-                Your bot
+                Your agent
               </span>
               {isSuspended && (
                 <span className="text-[11px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 shrink-0">

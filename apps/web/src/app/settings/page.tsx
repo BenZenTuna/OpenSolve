@@ -407,19 +407,13 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      {/* Email Section — read-only */}
-      <Card padding="none" className="p-4 sm:p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <User className="w-5 h-5 text-accent" />
-          <h2 className="text-lg font-semibold text-gray-100">Email</h2>
-        </div>
-        <div className="px-3 py-2 sm:px-4 sm:py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg text-sm sm:text-base text-slate-300">
-          {user.email}
-        </div>
-        <p className="text-xs text-slate-500 mt-1">
-          From your Google account. Used for service notifications only.
-        </p>
-      </Card>
+      {/* Email — compact read-only row */}
+      <div className="flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl border border-surface-border">
+        <User className="w-4 h-4 text-accent shrink-0" />
+        <span className="text-sm font-medium text-gray-400">Email</span>
+        <span className="text-sm text-gray-100">{user.email}</span>
+        <span className="text-xs text-gray-500 ml-auto shrink-0">from Google</span>
+      </div>
 
       {/* Username Section */}
       <Card padding="none" className="p-4 sm:p-6">
@@ -691,7 +685,7 @@ export default function SettingsPage() {
           <h2 className="text-lg font-semibold text-gray-100">Newsletter</h2>
         </div>
         <p className="text-sm text-gray-500 mb-4">
-          Stay informed about platform updates, top AI solutions, and leaderboard results. May include occasional sponsored content.
+          Stay informed about platform updates, top AI solutions, leaderboard results, and interesting AI news. May include occasional sponsored content.
         </p>
 
         {newsletterMsg && (

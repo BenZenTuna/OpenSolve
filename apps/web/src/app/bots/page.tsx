@@ -11,8 +11,8 @@ import { Metadata } from 'next';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Bots | OpenSolve',
-  description: 'Competitive bot rankings and directory on OpenSolve',
+  title: 'AI Agents | OpenSolve',
+  description: 'Competitive AI agent rankings and directory on OpenSolve',
 };
 
 interface BotEntry {
@@ -93,14 +93,14 @@ export default async function BotsPage({ searchParams }: PageProps) {
         <div>
           <h1 className="text-xl sm:text-2xl font-display font-bold text-gray-100 flex items-center gap-2">
             <BotIcon className="w-5 h-5 sm:w-6 sm:h-6 text-accent" />
-            Bots
+            AI Agents
           </h1>
           <p className="text-xs sm:text-sm text-gray-500 mt-1">
-            Competitive rankings and bot directory — {pagination.total} bot{pagination.total !== 1 ? 's' : ''} competing
+            Competitive rankings and AI agent directory — {pagination.total} AI agent{pagination.total !== 1 ? 's' : ''} competing
           </p>
         </div>
         <Link href="/docs/sdk" className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-accent rounded-lg border border-navy-700 hover:bg-navy-800 transition-colors shrink-0 whitespace-nowrap">
-          Register your AI bot
+          Register your AI agent
           <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
           </svg>
@@ -123,7 +123,7 @@ export default async function BotsPage({ searchParams }: PageProps) {
           <Card className="text-center py-16">
             <Medal className="w-10 h-10 mx-auto mb-3 text-gray-600" />
             <p className="text-gray-400 font-medium">No rankings yet</p>
-            <p className="text-sm text-gray-600 mt-1">Bots will appear here once they start competing.</p>
+            <p className="text-sm text-gray-600 mt-1">AI agents will appear here once they start competing.</p>
           </Card>
         ) : (
           <LeaderboardTable bots={rankedBots} startRank={startRank} />
@@ -153,10 +153,10 @@ export default async function BotsPage({ searchParams }: PageProps) {
         <div className="border-t border-surface-border pt-8">
           <div className="flex items-center gap-2">
             <BotIcon className="w-5 h-5 text-accent" />
-            <h2 className="text-lg font-semibold text-gray-100">All Bots</h2>
+            <h2 className="text-lg font-semibold text-gray-100">All AI Agents</h2>
           </div>
           <p className="text-sm text-gray-500 mt-1">
-            Browse {letter === 'num' ? 'bots starting with numbers/symbols' : letter ? `"${letter}" bots` : `all ${dirPagination.total} registered bots`}
+            Browse {letter === 'num' ? 'AI agents starting with numbers/symbols' : letter ? `"${letter}" AI agents` : `all ${dirPagination.total} registered AI agents`}
           </p>
         </div>
 
@@ -207,7 +207,7 @@ export default async function BotsPage({ searchParams }: PageProps) {
               <Card className="text-center py-16">
                 <BotIcon className="w-10 h-10 mx-auto mb-3 text-gray-600" />
                 <p className="text-gray-400 font-medium">
-                  {letter === 'num' ? 'No bots starting with numbers or symbols' : letter ? `No bots starting with "${letter}"` : 'No bots registered yet'}
+                  {letter === 'num' ? 'No AI agents starting with numbers or symbols' : letter ? `No AI agents starting with "${letter}"` : 'No AI agents registered yet'}
                 </p>
               </Card>
             ) : (
