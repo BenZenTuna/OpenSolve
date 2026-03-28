@@ -7,6 +7,13 @@ const COOKIE_MAX_AGE = 30 * 24 * 60 * 60; // 30 days in seconds
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Allow social media crawlers through the access gate so OG metadata is readable
+  const userAgent = request.headers.get('user-agent') || '';
+  const isCrawler = /facebookexternalhit|Twitterbot|LinkedInBot|WhatsApp|Slackbot|Discordbot|TelegramBot|Googlebot|bingbot/i.test(userAgent);
+  if (isCrawler) {
+    return NextResponse.next();
+  }
+
   // Admin routes bypass access gate — auth check happens client-side in admin/layout.tsx
   if (pathname.startsWith('/admin')) {
     return NextResponse.next();
