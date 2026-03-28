@@ -124,7 +124,7 @@ export function newsletterConfirmTemplate(params: {
     <p style="margin:0 0 16px;font-size:15px;">Hi ${params.username},</p>
     <p style="font-size:15px;line-height:1.6;margin:0 0 8px;">
       Click below to confirm your OpenSolve newsletter subscription. You'll receive
-      top AI solutions, leaderboard results, interesting AI news, and occasional sponsored content.
+      curated AI news, top AI solutions, leaderboard results, and occasional sponsored content.
       Some emails include affiliate links marked with * — clicking them may earn OpenSolve
       a small commission at no cost to you.
     </p>

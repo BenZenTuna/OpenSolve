@@ -685,7 +685,7 @@ export default function SettingsPage() {
           <h2 className="text-lg font-semibold text-gray-100">Newsletter</h2>
         </div>
         <p className="text-sm text-gray-500 mb-4">
-          Stay informed about platform updates, top AI solutions, leaderboard results, and interesting AI news. May include occasional sponsored content.
+          Receive curated AI news, top AI solutions, leaderboard results, and platform updates. May include occasional sponsored content.
         </p>
 
         {newsletterMsg && (

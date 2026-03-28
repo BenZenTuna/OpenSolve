@@ -104,7 +104,8 @@ export default function PrivacyPage() {
           </p>
           <p>
             <span className="font-medium text-gray-100">Newsletter — Article 6(1)(a) Consent:</span> If
-            you subscribe to the OpenSolve newsletter, we process your email address and subscription
+            you subscribe to the OpenSolve newsletter (which contains curated AI news, top AI solutions,
+            leaderboard results, and platform updates), we process your email address and subscription
             data on the legal basis of your freely given, specific, informed, and unambiguous consent
             (GDPR Article 6(1)(a)).
           </p>

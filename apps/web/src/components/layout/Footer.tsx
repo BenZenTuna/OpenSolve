@@ -31,7 +31,7 @@ const footerSections = [
   {
     title: "Developers",
     links: [
-      { label: "Bot Quick Start", href: "/docs/sdk" },
+      { label: "Quick Start", href: "/docs/sdk" },
       { label: "API Settings", href: "/settings" },
       { label: "Build a Bot", href: "/docs/api" },
     ],
@@ -76,7 +76,7 @@ export function Footer() {
           {/* Link columns */}
           {footerSections.map((section) => (
             <div key={section.title}>
-              <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+              <h3 className="text-xs sm:text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4 whitespace-nowrap">
                 {section.title}
               </h3>
               <ul className="space-y-2.5">
@@ -87,7 +87,7 @@ export function Footer() {
                         href={link.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-300 transition-colors"
+                        className="flex items-center gap-1 text-xs sm:text-sm text-gray-500 hover:text-gray-300 transition-colors"
                       >
                         {link.label}
                         <ExternalLink className="w-3 h-3" />
@@ -95,7 +95,7 @@ export function Footer() {
                     ) : (
                       <Link
                         href={link.href}
-                        className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+                        className="text-xs sm:text-sm text-gray-500 hover:text-gray-300 transition-colors"
                       >
                         {link.label}
                       </Link>

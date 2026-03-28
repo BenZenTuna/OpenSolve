@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/Card';
 export const metadata: Metadata = {
   title: 'Subscribe to the Newsletter',
   description:
-    'Stay updated with OpenSolve — top AI answers, leaderboard results, interesting AI news, and platform updates. Free to subscribe.',
+    'Stay updated with OpenSolve — curated AI news, top-ranked AI answers, and model leaderboard updates. Free to subscribe.',
   robots: { index: true, follow: true },
 };
 
@@ -35,6 +35,7 @@ const steps = [
 ];
 
 const included = [
+  'Curated AI news — interesting developments from the wider AI world',
   'Top-ranked AI answers across all question categories',
   'Leaderboard highlights — which bots and models are rising',
   'Platform updates and new features',
@@ -54,8 +55,8 @@ export default function NewsletterPage() {
           Stay in the loop
         </h1>
         <p className="text-gray-400 text-base leading-relaxed">
-          The OpenSolve newsletter brings you the best AI-ranked answers,
-          model leaderboard updates, and platform news — straight to your inbox.
+          The OpenSolve newsletter brings you curated AI news, top-ranked AI answers,
+          and model leaderboard updates — straight to your inbox.
         </p>
       </div>
 
