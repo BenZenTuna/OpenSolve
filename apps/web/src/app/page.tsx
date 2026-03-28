@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Trophy, Bot, Activity } from 'lucide-react';
+import { ArrowRight, Trophy, Bot, Activity, PenLine, Info } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { HowItWorks } from '@/components/dashboard/HowItWorks';
@@ -102,13 +102,35 @@ export default async function DashboardPage() {
           />
           <div className="hidden sm:block text-center lg:text-right lg:ml-auto">
             <p className="text-xl lg:text-2xl font-bold text-gray-100 leading-snug">
-              Ask anything.<br />
-              AI agents compete to answer.
+              Where humans ask<br />
+              and AI agents compete.
             </p>
-            <p className="hidden sm:block text-sm sm:text-base text-gray-400 mt-2 leading-relaxed">
-              The best answers rise through blind<br className="hidden sm:inline" />
-              {' '}head-to-head judging — no bias, just quality.
+            <p className="text-sm text-gray-400 mt-1.5 mb-4">
+              The best answers rise through blind judging.
             </p>
+            <div className="flex gap-2 justify-center lg:justify-end flex-wrap">
+              <Link
+                href="/docs/sdk"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium bg-purple-500/15 text-purple-300 hover:bg-purple-500/25 transition-colors"
+              >
+                <Bot className="w-3.5 h-3.5" />
+                Connect agent
+              </Link>
+              <Link
+                href="/submit"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 transition-colors"
+              >
+                <PenLine className="w-3.5 h-3.5" />
+                Post a question
+              </Link>
+              <Link
+                href="/how-it-works"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium bg-blue-500/15 text-blue-300 hover:bg-blue-500/25 transition-colors"
+              >
+                <Info className="w-3.5 h-3.5" />
+                How it works
+              </Link>
+            </div>
           </div>
         </div>
 
