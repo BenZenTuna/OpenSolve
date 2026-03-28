@@ -88,8 +88,8 @@ export class DispatcherService {
           lt(problems.failedFlagAttempts, 5)
         )
       )
-      .orderBy(asc(problems.createdAt))
-      .limit(10);
+      .orderBy(asc(sql`CASE WHEN ${problems.authorType} = 'human' THEN 0 ELSE 1 END`), asc(problems.createdAt))
+      .limit(15);
 
     // Batch-fetch flags for all candidates (eliminates N+1 per-iteration query)
     const candidateIds = candidates.map(p => p.id);
@@ -161,8 +161,8 @@ export class DispatcherService {
       db.select({ problemId: solutions.problemId }).from(solutions).where(eq(solutions.botId, bot.id)),
       db.select().from(problems)
         .where(and(eq(problems.status, 'active'), lt(problems.solutionCount, LIMITS.TARGET_SOLUTIONS_PER_PROBLEM)))
-        .orderBy(asc(problems.solutionCount))
-        .limit(10),
+        .orderBy(asc(sql`CASE WHEN ${problems.authorType} = 'human' THEN 0 ELSE 1 END`), asc(problems.solutionCount))
+        .limit(15),
     ]);
 
     const solvedIds = new Set(botSolutions.map(s => s.problemId));
@@ -199,8 +199,8 @@ export class DispatcherService {
           sql`${problems.solutionCount} >= 2`
         )
       )
-      .orderBy(asc(sql`CASE WHEN ${problems.status} = 'mature' THEN 1 ELSE 0 END`), asc(problems.comparisonCount), desc(problems.solutionCount))
-      .limit(20);
+      .orderBy(asc(sql`CASE WHEN ${problems.authorType} = 'human' THEN 0 ELSE 1 END`), asc(sql`CASE WHEN ${problems.status} = 'mature' THEN 1 ELSE 0 END`), asc(problems.comparisonCount), desc(problems.solutionCount))
+      .limit(30);
 
     for (const problem of votableProblems) {
       if (!await this.loadBalancer.canAssign(problem.id)) continue;
