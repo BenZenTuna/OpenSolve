@@ -84,6 +84,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta property="og:image:secure_url" content="https://opensolve.ai/og-image.png" />
+        <meta property="og:image:url" content="https://opensolve.ai/og-image.png" />
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('opensolve-theme')||'light';document.documentElement.setAttribute('data-theme',t)}catch(e){}})()` }} />
       </head>
       <body className="min-h-screen flex flex-col bg-navy-950 bg-hero-glow">
