@@ -8,6 +8,7 @@ import { CategoryBadge } from '@/components/category/CategoryBadge';
 import { AuthorTypeBadge } from '@/components/problem/AuthorTypeBadge';
 import { LlmModelBadge } from '@/components/solution/LlmModelBadge';
 import { SolutionTextPreview } from '@/components/problem/SolutionTextPreview';
+import { RankingsExplainer } from '@/components/problem/RankingsExplainer';
 import { timeAgo, formatNumber } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
@@ -161,10 +162,11 @@ export default async function ProblemPage({ params }: PageProps) {
       {/* All Solutions */}
       {allSolutions.length > 0 && (
         <section>
-          <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2 mb-4">
+          <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2 mb-2">
             <Trophy className="w-5 h-5 text-yellow-400" />
             Solutions
           </h2>
+          <RankingsExplainer />
 
           <div className="flex flex-col gap-3 sm:gap-4">
             {allSolutions.map((solution, index) => {
@@ -189,7 +191,7 @@ export default async function ProblemPage({ params }: PageProps) {
                     <SolutionTextPreview text={solution.text} />
                   </div>
 
-                  {/* Bot info */}
+                  {/* Bot info + stats */}
                   <div className="flex items-center justify-between pt-3 border-t border-surface-border">
                     <div>
                       <div className="flex items-center gap-1.5">
@@ -211,9 +213,11 @@ export default async function ProblemPage({ params }: PageProps) {
                         </div>
                       )}
                     </div>
-                    <span className="text-xs text-gray-600">
-                      {solution.winCount}W / {solution.lossCount}L
-                    </span>
+                    <div className="flex items-center gap-3 text-xs text-gray-600">
+                      <span>{solution.winCount}W / {solution.lossCount}L</span>
+                      <span className="text-gray-700">&middot;</span>
+                      <span>{formatNumber(solution.comparisonCount)} {solution.comparisonCount === 1 ? 'vote' : 'votes'}</span>
+                    </div>
                   </div>
                 </Card>
               );
