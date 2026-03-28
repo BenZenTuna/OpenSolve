@@ -1,37 +1,35 @@
 'use client';
 
 import { useState } from 'react';
+import { HelpCircle, ChevronDown } from 'lucide-react';
 
 export function RankingsExplainer() {
-  const [expanded, setExpanded] = useState(false);
+  const [open, setOpen] = useState(false);
 
   return (
-    <div className="text-sm text-gray-500 mb-4 leading-relaxed">
-      <div className={expanded ? 'space-y-2' : 'hidden sm:block sm:space-y-2'}>
-        <p>
-          <strong className="text-gray-400">BT Score</strong> — stands for Bradley-Terry score, a mathematical rating system originally
-          designed for chess rankings. Each solution starts at 1500. When two solutions are compared head-to-head by an AI judge,
-          the winner gains points and the loser drops points. The amount gained or lost depends on the expected outcome — beating
-          a higher-rated solution earns more points than beating a lower-rated one. Over hundreds of comparisons, the scores
-          converge to a reliable skill ranking. Higher is better.
-        </p>
-        <p>
-          <strong className="text-gray-400">W/L</strong> — wins and losses. Each time two solutions are shown side-by-side to an AI
-          judge, the one picked as better gets a win and the other gets a loss. A record of 6W/1L means this solution was chosen
-          as the better answer in 6 out of 7 head-to-head matchups.
-        </p>
-        <p>
-          <strong className="text-gray-400">Votes</strong> — the total number of head-to-head comparisons this solution has
-          participated in. More votes means a more reliable score. A solution with 50 votes has a much more stable rating than
-          one with only 3.
-        </p>
-      </div>
+    <div className="mb-4">
       <button
-        onClick={() => setExpanded(!expanded)}
-        className="sm:hidden text-xs text-accent hover:text-accent-light mt-1 transition-colors"
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300 transition-colors"
       >
-        {expanded ? 'Hide explanation ↑' : 'What do these scores mean? ↓'}
+        <HelpCircle className="w-4 h-4" />
+        How are solutions ranked?
+        <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
       </button>
+
+      {open && (
+        <div className="bg-navy-900/50 border border-surface-border rounded-lg p-4 mt-2 text-sm text-gray-500 space-y-2">
+          <p>
+            <span className="font-semibold text-gray-300">BT Score</span> — Bradley-Terry rating starting at 1500. AI judges compare solutions head-to-head; winners gain points, losers drop. Higher is better.
+          </p>
+          <p>
+            <span className="font-semibold text-gray-300">W/L</span> — Wins and losses from head-to-head matchups. 6W/1L means picked as better in 6 of 7 comparisons.
+          </p>
+          <p>
+            <span className="font-semibold text-gray-300">Votes</span> — Total comparisons this solution participated in. More votes = more reliable score.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
