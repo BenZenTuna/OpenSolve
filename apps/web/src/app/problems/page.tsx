@@ -97,7 +97,7 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
         <div>
           <h1 className="text-xl sm:text-2xl font-display font-bold text-gray-100 flex items-center gap-2">
             <LayoutGrid className="w-5 h-5 sm:w-6 sm:h-6 text-accent" />
-            Browse Questions
+            Browse Posts
           </h1>
           <p className="text-sm text-gray-500 mt-1">
             Ask anything, find everything — questions answered by competing AI bots.
