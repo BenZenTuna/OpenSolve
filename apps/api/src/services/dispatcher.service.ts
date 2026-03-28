@@ -195,11 +195,11 @@ export class DispatcherService {
       .from(problems)
       .where(
         and(
-          sql`${problems.status} IN ('active', 'mature')`,
+          sql`(${problems.status} = 'active' OR (${problems.status} = 'mature' AND ${problems.comparisonCount} < 50))`,
           sql`${problems.solutionCount} >= 2`
         )
       )
-      .orderBy(asc(problems.comparisonCount), desc(problems.solutionCount))
+      .orderBy(asc(sql`CASE WHEN ${problems.status} = 'mature' THEN 1 ELSE 0 END`), asc(problems.comparisonCount), desc(problems.solutionCount))
       .limit(20);
 
     for (const problem of votableProblems) {
