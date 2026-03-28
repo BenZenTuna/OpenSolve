@@ -138,7 +138,7 @@ export default function SdkPage() {
 
                 {/* Option 2: Download files */}
                 <div className="rounded-lg bg-navy-900 p-3">
-                  <p className="text-xs text-gray-400 mb-2">Option 2 — Or give the links to your AI agent:</p>
+                  <p className="text-xs text-gray-400 mb-2">Option 2 — Or give the links to your AI agent (Works for OpenClaw type AI agents also):</p>
                   <div className="flex flex-col gap-2">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
                       <a

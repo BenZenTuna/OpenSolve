@@ -115,44 +115,42 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
       </div>
 
       {/* Filters */}
-      <Card padding="sm" className="relative z-10">
+      <div className="relative z-10 sm:border sm:border-surface-border sm:rounded-xl sm:bg-surface-card sm:p-4">
         <div className="space-y-2">
-          <div className="flex items-center justify-between flex-wrap gap-y-3">
-            <div className="flex items-center gap-2 flex-wrap">
-              <label className="text-xs text-gray-500 uppercase tracking-wider">Sort</label>
-              <div className="flex gap-1 overflow-x-auto scrollbar-hide sm:flex-wrap sm:overflow-visible pb-1 sm:pb-0">
-                {sortOptions.map((opt) => (
-                  <Link
-                    key={opt.key}
-                    href={`/llm-leaderboard?sort=${opt.key}${family ? `&family=${family}` : ''}`}
-                    className={`shrink-0 whitespace-nowrap px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                      sort === opt.key
-                        ? 'bg-accent/20 text-accent border border-accent/30'
-                        : 'bg-navy-800 text-gray-400 border border-navy-700 hover:text-gray-200 hover:border-navy-600'
-                    }`}
-                  >
-                    {opt.label}
-                  </Link>
-                ))}
-              </div>
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide sm:flex-wrap sm:overflow-visible pb-1 sm:pb-0">
+            <label className="hidden sm:block text-xs text-gray-500 uppercase tracking-wider">Sort</label>
+            {sortOptions.map((opt) => (
+              <Link
+                key={opt.key}
+                href={`/llm-leaderboard?sort=${opt.key}${family ? `&family=${family}` : ''}`}
+                className={`shrink-0 whitespace-nowrap px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                  sort === opt.key
+                    ? 'bg-accent/20 text-accent border border-accent/30'
+                    : 'bg-navy-800 text-gray-400 border border-navy-700 hover:text-gray-200 hover:border-navy-600'
+                }`}
+              >
+                {opt.label}
+              </Link>
+            ))}
+            <div className="shrink-0 ml-auto">
+              <FamilyFilter
+                families={families}
+                currentFamily={family}
+                currentSort={sort}
+              />
             </div>
-            <FamilyFilter
-              families={families}
-              currentFamily={family}
-              currentSort={sort}
-            />
           </div>
           {(() => {
             const activeSort = sortOptions.find(o => o.key === sort);
             return activeSort ? (
-              <div className="ml-1">
-                <p className="text-xs sm:text-sm text-gray-300 font-medium">{activeSort.label}: {activeSort.title}</p>
-                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed hidden sm:block">{activeSort.detail}</p>
+              <div className="ml-1 hidden sm:block">
+                <p className="text-sm text-gray-300 font-medium">{activeSort.label}: {activeSort.title}</p>
+                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{activeSort.detail}</p>
               </div>
             ) : null;
           })()}
         </div>
-      </Card>
+      </div>
 
       {/* Top 3 Podium Cards */}
       {podiumModels.length > 0 && (
@@ -175,22 +173,23 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
                   </span>
                 </div>
 
-                {/* Model name */}
-                <p className="text-sm sm:text-[15px] font-medium text-gray-100 font-mono truncate mb-1">
-                  {model.modelName}
-                </p>
-
-                {/* Family */}
-                <div className="flex items-center gap-1.5 mb-2 sm:mb-3">
-                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: fColor }} />
-                  <span className="text-[11px] sm:text-xs text-gray-500">{model.modelFamily || fName}</span>
+                {/* Model name + family */}
+                <div className="flex items-center gap-2 flex-wrap mb-2 sm:mb-3">
+                  <p className="text-xs sm:text-[15px] font-medium text-gray-100 font-mono truncate">
+                    {model.modelName}
+                  </p>
+                  <span className="hidden sm:inline text-gray-600">&middot;</span>
+                  <div className="hidden sm:flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: fColor }} />
+                    <span className="text-xs text-gray-500">{model.modelFamily || fName}</span>
+                  </div>
                 </div>
 
                 {/* Mini stats — compact inline on mobile, labeled grid on desktop */}
                 <div className="flex items-center gap-3 text-xs text-gray-400 sm:hidden">
                   <span className={i === 0 ? 'text-amber-400 font-medium' : 'text-gray-100 font-medium'}>{model.avgBtScore.toFixed(0)} avg</span>
                   <span className="text-gray-600">&middot;</span>
-                  <span className="text-gray-100 font-medium">{formatNumber(model.totalSolutions)} solutions</span>
+                  <span className="text-gray-100 font-medium">{formatNumber(model.totalSolutions)} {model.totalSolutions === 1 ? 'solution' : 'solutions'}</span>
                 </div>
                 <div className="hidden sm:grid grid-cols-2 gap-2">
                   <div>
