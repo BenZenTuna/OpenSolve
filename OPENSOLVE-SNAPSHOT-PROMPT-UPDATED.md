@@ -1,6 +1,6 @@
 # CLAUDE CODE PROMPT — OpenSolve Full Project Snapshot
 # Paste this entire prompt into Claude Code while in your OpenSolve project directory
-# Session log: PERF-1: Bot auth cache, PostgreSQL connection pool, dispatcher/pair-selector/load-balancer parallelization, sameOwnerBots Redis cache, 3 composite indexes on problems table
+# Session log: PERF-1 + 2026-03-28: Human-first dispatcher priority, mature vote cap/deprioritization, 1/day create limit, AI Agents branding, OG metadata overhaul, (maintenance) route group, newsletter text rebalance, text overflow fix, hero pills
 
 ---
 
@@ -111,6 +111,7 @@ Pay special attention to these key families confirmed in the codebase:
 - `admin:*` (confirmation tokens, email tokens)
 - `dispatch:flag_assigned:{problemId}` — Thundering herd flag counter (INCR on assign, safe Lua DECR on complete/expire, capped at 3)
 - `bot:owner_bots:{ownerId}` — Cached set of bot IDs owned by a user (JSON array, 5min TTL, used by dispatcher to enforce same-owner anti-gaming without repeated DB queries)
+- `create:daily:{botId}` — 1/day create limit (value '1', 86400s TTL, set on successful problem creation, checked in tryAssignCreateTask)
 
 ---
 
@@ -864,7 +865,32 @@ Show the COMPLETE `apps/api/src/services/dispatcher.service.ts`.
 ```bash
 echo "=== Category handling in CREATE tasks ==="
 grep -n -A 20 "tryAssignCreateTask" apps/api/src/services/dispatcher.service.ts | head -30
-echo "↑ Should show 8 categories, flat (no weighted pool)"
+echo "↑ Should show 8 categories, flat (no weighted pool); Redis create:daily check at top"
+
+echo ""
+echo "=== Human-first priority ordering in all 3 task types ==="
+grep -n "authorType" apps/api/src/services/dispatcher.service.ts
+echo "↑ Should show 3 CASE WHEN authorType = 'human' orderings (flag, solve, vote)"
+
+echo ""
+echo "=== Mature deprioritization + 50-comparison cap ==="
+grep -n "mature.*THEN 1\|comparisonCount < 50" apps/api/src/services/dispatcher.service.ts
+echo "↑ Should show CASE WHEN mature THEN 1 in vote ordering + comparisonCount < 50 in WHERE"
+
+echo ""
+echo "=== 1/day create limit ==="
+grep -n "create:daily" apps/api/src/services/dispatcher.service.ts apps/api/src/routes/bot.routes.ts
+echo "↑ Should show Redis get in dispatcher + Redis set (EX 86400) in bot.routes.ts"
+
+echo ""
+echo "=== Retry-After header on 204 ==="
+grep -n "Retry-After" apps/api/src/routes/bot.routes.ts
+echo "↑ Should show Retry-After: 60 on no-task 204 response"
+
+echo ""
+echo "=== Candidate limits ==="
+grep -n "\.limit(" apps/api/src/services/dispatcher.service.ts
+echo "↑ Expected: flag=15, solve=15, vote=30 (increased from 10/10/20)"
 
 echo ""
 echo "=== instruct and categories query params ==="
@@ -1235,6 +1261,22 @@ echo ""
 echo "=== Middleware admin check — no token cookie check (HOTFIX-1) ==="
 grep -n "cookies.get.*token\|callbackUrl\|loginUrl" apps/web/src/middleware.ts
 echo "↑ Must be empty — admin paths should just call NextResponse.next() and let admin/layout.tsx handle auth client-side"
+
+echo ""
+echo "=== Crawler bypass in middleware ==="
+grep -n "isCrawler\|facebookexternalhit\|Twitterbot" apps/web/src/middleware.ts
+echo "↑ Should show user-agent check letting social crawlers bypass access gate for OG meta"
+
+echo ""
+echo "=== Static files excluded from middleware ==="
+grep -n "png\|svg\|jpg\|woff" apps/web/src/middleware.ts
+echo "↑ Matcher should exclude .png, .svg, .jpg, .ico, .webp, .woff2, .css, .js"
+
+echo ""
+echo "=== Coming-soon route group ==="
+ls apps/web/src/app/\\(maintenance\\)/layout.tsx apps/web/src/app/\\(maintenance\\)/coming-soon/page.tsx 2>/dev/null
+echo "↑ Should exist in (maintenance) route group — separate layout without Navbar/Footer"
+ls apps/web/src/app/coming-soon/ 2>/dev/null && echo "⚠️ Old coming-soon dir still exists" || echo "✅ Old dir removed"
 ```
 
 **Category UI components:**
@@ -1265,8 +1307,8 @@ echo "↑ Expected order: All Posts, AI Agents, LLM Arena, How it works"
 
 echo ""
 echo "=== Hero CTAs ==="
-grep -n "Post a Question\|Send your Agent\|How it works" apps/web/src/app/page.tsx | head -5
-echo "↑ Expected: 3 hero CTA links (2 pills + 1 text link)"
+grep -n "Connect agent\|Post a Challenge\|How it works" apps/web/src/app/page.tsx | head -5
+echo "↑ Expected: 3 hero action pills (Connect agent, Post a Challenge, How it works)"
 
 echo ""
 echo "=== Theme toggle in navbar ==="
@@ -1286,8 +1328,13 @@ ls apps/web/src/app/about/page.tsx 2>/dev/null && \
 
 echo ""
 echo "=== Homepage hero tagline ==="
-grep -n "Ask anything\|AI agents compete\|head-to-head" apps/web/src/app/page.tsx | head -5
-echo "↑ Expected: 'Ask anything. AI agents compete to answer.' (hidden on mobile)"
+grep -n "Where humans ask\|AI agents compete\|Connect agent\|Post a Challenge\|How it works" apps/web/src/app/page.tsx | head -10
+echo "↑ Expected: 'Where humans ask / and AI agents compete.' + 3 action pills (Connect agent, Post a Challenge, How it works)"
+
+echo ""
+echo "=== Navbar CTA button ==="
+grep -n "Post a Challenge" apps/web/src/components/layout/Navbar.tsx | head -3
+echo "↑ Should be outlined/border style (not solid fill btn-primary)"
 
 echo ""
 echo "=== Homepage sections ==="
@@ -1325,9 +1372,9 @@ echo "↑ Must be empty — unsubscribe cannot require login (UWG §7)"
 
 echo ""
 echo "=== Footer developer links ==="
-grep -n "Build a Bot\|Bot Quick Start\|API Documentation\|Bot SDK" \
+grep -n "Build a Bot\|Quick Start\|API Documentation\|Bot SDK" \
   apps/web/src/components/layout/Footer.tsx
-echo "↑ Should show new labels only"
+echo "↑ Should show: Quick Start (was Bot Quick Start), Build a Bot, API Settings"
 
 echo ""
 echo "=== Footer contact link ==="
@@ -1932,6 +1979,32 @@ Use this corrected table as the authoritative reference — verify each session 
 | **MY-POSTS-1** | MyPostsBar.tsx (NEW), auth.routes.ts, problems/page.tsx | User posts bar on browse page; problemCount added to /auth/me |
 | **MY-POSTS-NAV-1** | Navbar.tsx | "My Posts" link in profile dropdown (desktop + mobile) |
 | **ARENA-REDESIGN-1** | llm-leaderboard/page.tsx | Model Arena: top 3 podium cards with rank-colored top borders; table simplified 10→7 columns |
+| **UI-ARENA-FIX-1** | llm-leaderboard/page.tsx | Model Arena mobile: "SORT" label + description hidden on mobile, filter area card border removed, podium cards compacted, "1 solutions" grammar fix |
+| **UI-LOGIN-MOBILE-1** | auth/login/page.tsx | Sign-in page mobile: smaller logo, tighter heading, reduced spacing, card border removed on mobile, legal text smaller |
+| **UI-LOGIN-FIX-1** | auth/login/page.tsx | Sign-in: removed full-viewport centering (huge gaps), logo enlarged to 96px/128px, moderate top padding |
+| **UI-LOGIN-LOGO-1** | auth/login/page.tsx | Login: theme-aware brain logo via ThemeLogo (light/dark SVGs) |
+| **UI-SETTINGS-MOBILE-1** | settings/page.tsx | Settings mobile: tighter card padding (p-4), smaller headings, Bot Identity 3-step hidden on mobile, API Key buttons stacked + shortened, email box compact, section gaps tightened |
+| **UI-SETTINGS-FIX-1** | settings/page.tsx | Email section minimized: replaced full card with compact inline row showing email + "from Google" label |
+| **UI-AGENT-1** | bots/page.tsx, bot/*.tsx (5 files) | All user-facing "Bot/Bots" → "AI Agent/AI Agents" on /bots page (routes, variables, component names unchanged) |
+| **NL-TEXT-1** | 7 files (newsletter, settings, banner, terms, privacy, email template) | Newsletter text: "curated AI news" repositioned as lead item in all locations; "interesting AI news" → "curated AI news" |
+| **UI-CLEANUP-1** | problems/[id]/page.tsx | Removed redundant "Full Rankings" table that duplicated solution cards |
+| **UI-CLEANUP-2** | problems/[id]/page.tsx | Restored votes count on solution cards + re-added RankingsExplainer |
+| **UI-CLEANUP-3** | RankingsExplainer.tsx | Rankings explainer now collapsible, default collapsed, with toggle button |
+| **UI-OVERFLOW-FIX-1** | globals.css, 6 page/component files | Added break-words to all user-generated text elements; global CSS safety net for overflow-wrap |
+| **UI-HERO-1** | page.tsx | Hero: replaced tagline with 3 action pill buttons (Connect agent, Post a Challenge, How it works) |
+| **UI-HERO-2** | page.tsx, Navbar.tsx | Hero pill "Post a question" → "Post a Challenge"; Navbar CTA changed from solid fill to outlined border |
+| **VOTE-MATURE-FIX-1** | dispatcher.service.ts | Vote dispatcher: mature problems deprioritized behind active via CASE WHEN ordering |
+| **VOTE-MATURE-CAP-1** | dispatcher.service.ts | Mature problems capped at 50 comparisons in vote query WHERE clause |
+| **SCALE-FIX-1** | dispatcher.service.ts, bot.routes.ts, skill/SKILL.md | Votable counter aligned with vote query (50-cap); 1/day bot create limit via Redis; Retry-After: 60 header on 204; SKILL.md backoff guidance |
+| **HUMAN-PRIORITY-1** | dispatcher.service.ts | Human-first priority in all 3 dispatcher tasks (flag/solve/vote) via CASE WHEN authorType; candidate limits increased to 15/15/30 |
+| **HOW-IT-WORKS-UPDATE-1** | AboutHumanFirst.tsx, AboutBots.tsx | How-it-works: updated priority stack with human-first at every level, mature deprioritization, 1/day create limit |
+| **UI-META-1** | layout.tsx, how-it-works/page.tsx | OG metadata: "AI Bots" → "AI Agents", new tagline, OG image refs, updated keywords |
+| **UI-META-2** | layout.tsx, middleware.ts | Shortened OG description to 121 chars; social media crawlers exempt from access gate |
+| **UI-META-5** | layout.tsx, middleware.ts | OG image fix: static files excluded from middleware matcher (.png/.svg/.jpg etc.); og:image:type added |
+| **UI-META-6** | layout.tsx | Added og:image:secure_url and og:image:url meta tags for LinkedIn compatibility |
+| **MAINT-PAGE-1→4** | (maintenance)/coming-soon/page.tsx, (maintenance)/layout.tsx | Coming-soon page: moved to (maintenance) route group (no Navbar/Footer); inline styles for guaranteed text contrast; footer links use <a> for full navigation |
+| **UI-FOOTER-FIX-1** | Footer.tsx | Footer: heading text-xs + whitespace-nowrap on mobile; link text text-xs; "Bot Quick Start" → "Quick Start" |
+| **SIM-LOAD-2** | scripts/simulate-load.ts | Sim script: 20 templates (was 10), 5 LLM model groups, 800-1800 char solutions, 200ms/3s delays, Model Arena + category + task type reports |
 | **SKILL-FIX** | skill/SKILL.md | Claude Sonnet model example corrected: claude-sonnet-4 → claude-sonnet-4-6 |
 | **THEME-1** | tailwind.config.ts, globals.css, layout.tsx | CSS variable infrastructure for light/dark toggle: navy, gray, accent, surface colors as CSS vars; :root (light) + [data-theme="dark"] variable sets; ThemeProvider.tsx (NEW) with localStorage persistence; flash-prevention script; Moon/Sun toggle in Navbar |
 | **THEME-FIX-1** | ~63 .tsx files, globals.css | Bulk text-white → text-gray-100 (292 instances); 32 accent color !important overrides (blue/emerald/amber/yellow/red/purple/orange/slate) for light mode; text-white restored on 10 colored-bg buttons |
@@ -2484,6 +2557,52 @@ echo "Contact route: $(grep -c "fastify\." apps/api/src/routes/contact.routes.ts
     - "LLM gamification" italic subtitle hidden on mobile? (yes/no)
     - HowItWorks hidden on mobile with "learn how it works →" link? (yes/no)
     - Rising Right Now section above Solution Spotlight? (yes/no)
-    - /bots page has "How to register your AI bot" button? (yes/no)
+    - /bots page has "Register your AI agent" button? (yes/no)
+50. Dispatcher priorities (VOTE-MATURE-FIX-1, VOTE-MATURE-CAP-1, HUMAN-PRIORITY-1, SCALE-FIX-1):
+    - Vote ordering: human-first → mature-deprioritized → comparisonCount ASC → solutionCount DESC? (yes/no)
+    - Solve ordering: human-first → solutionCount ASC? (yes/no)
+    - Flag ordering: human-first → createdAt ASC? (yes/no)
+    - Mature problems capped at 50 comparisons in vote WHERE clause? (yes/no)
+    - refreshCounters votable query matches vote query (includes 50-cap on mature)? (yes/no)
+    - Candidate limits: flag=15, solve=15, vote=30? (yes/no)
+    - 1/day bot create limit via Redis create:daily:{botId}? (yes/no)
+    - Redis key set with EX 86400 on successful problem creation? (yes/no)
+    - Retry-After: 60 header on 204 no-task response? (yes/no)
+    - SKILL.md tells bots to sleep 60s on 204? (yes/no)
+51. Text & branding updates (UI-AGENT-1, NL-TEXT-1, UI-META-1):
+    - /bots page: all user-facing "Bot/Bots" → "AI Agent/AI Agents"? (yes/no)
+    - Route paths /bots, /bots/[id] unchanged? (yes/no)
+    - Variable/component names unchanged (still use "bot" internally)? (yes/no)
+    - Newsletter: "curated AI news" is first item in all 7 locations? (yes/no)
+    - OG metadata: title/description say "AI Agents" not "AI Bots"? (yes/no)
+    - Keywords include "Bradley-Terry", "LLM arena"? (yes/no)
+    - og:image, og:image:secure_url, og:image:url, og:image:type all present? (yes/no)
+52. Access gate & coming-soon (MAINT-PAGE-1→4, UI-META-2, UI-META-5):
+    - Coming-soon page in (maintenance) route group? (yes/no)
+    - (maintenance)/layout.tsx has NO Navbar/Footer? (yes/no)
+    - Coming-soon page uses inline styles (not Tailwind classes) for text colors? (yes/no)
+    - Footer links use <a> tags (not next/link Link)? (yes/no)
+    - Social media crawlers bypass access gate (user-agent check)? (yes/no)
+    - Static files (.png, .svg, etc.) excluded from middleware matcher? (yes/no)
+    - og-image.png accessible on both opensolve.ai and www.opensolve.ai? (yes/no)
+53. UI overflow fix (UI-OVERFLOW-FIX-1):
+    - Global CSS: h1/h2/h3/p have overflow-wrap: break-word? (yes/no)
+    - break-words class on problem title, description, solution text? (yes/no)
+54. Hero & homepage (UI-HERO-1, UI-HERO-2):
+    - Hero has 3 action pills (Connect agent, Post a Challenge, How it works)? (yes/no)
+    - Navbar CTA is outlined/border style (not solid btn-primary fill)? (yes/no)
+    - Browse page heading says "Browse Posts" (not "Browse Questions")? (yes/no)
+55. Problem detail (UI-CLEANUP-1→3):
+    - "Full Rankings" table removed? (yes/no)
+    - Vote count displayed on each solution card? (yes/no)
+    - RankingsExplainer collapsible, default collapsed? (yes/no)
+56. Footer fix (UI-FOOTER-FIX-1):
+    - Footer headings whitespace-nowrap + text-xs on mobile? (yes/no)
+    - "Bot Quick Start" → "Quick Start"? (yes/no)
+57. How-it-works content (HOW-IT-WORKS-UPDATE-1):
+    - AboutHumanFirst mentions human-first at every level (flag/solve/vote)? (yes/no)
+    - AboutHumanFirst mentions mature deprioritization? (yes/no)
+    - AboutHumanFirst mentions 1/day create limit? (yes/no)
+    - AboutBots mentions 1/day create limit? (yes/no)
 
 Target length: 2,000–5,000 lines. Be thorough but do not repeat the same file contents across multiple sections.
