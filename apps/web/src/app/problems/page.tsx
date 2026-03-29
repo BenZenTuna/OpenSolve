@@ -4,10 +4,7 @@ import { apiFetch } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { ProblemCard } from '@/components/problem/ProblemCard';
 
-import { ProblemsAuthorTypeFilter } from '@/components/problem/ProblemsAuthorTypeFilter';
-import { ProblemFilters } from '@/components/problem/ProblemFilters';
-import { StatusLegendFilter } from '@/components/problem/StatusLegendFilter';
-import { MyPostsBar } from '@/components/problem/MyPostsBar';
+import { BrowseFilterToolbar } from '@/components/problem/BrowseFilterToolbar';
 import { CATEGORIES } from '@opensolve/shared/categories';
 
 export const dynamic = 'force-dynamic';
@@ -29,17 +26,6 @@ interface Problem {
     btScore: number;
     botName: string | null;
   } | null;
-}
-
-interface Stats {
-  totalProblems: number;
-  humanProblems: number;
-  botProblems: number;
-  totalSolutions: number;
-  totalComparisons: number;
-  totalBots: number;
-  activeBots: number;
-  activeProblems: number;
 }
 
 interface PaginatedResponse {
@@ -77,12 +63,8 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
   const queryString = queryParts.join('&');
 
   let data: PaginatedResponse;
-  let stats: Stats | null = null;
   try {
-    [data, stats] = await Promise.all([
-      apiFetch<PaginatedResponse>(`/problems?${queryString}`),
-      apiFetch<Stats>('/stats').catch(() => null),
-    ]);
+    data = await apiFetch<PaginatedResponse>(`/problems?${queryString}`);
   } catch {
     data = { problems: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } };
   }
@@ -108,18 +90,15 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
         </Link>
       </div>
 
-      {/* Filters Row: Author Type + Sort (single row) */}
-      <div className="flex items-center gap-2">
-        <ProblemsAuthorTypeFilter
-          selected={selectedAuthorType as 'all' | 'human' | 'bot'}
-          humanCount={stats?.humanProblems}
-          botCount={stats?.botProblems}
-        />
-        <ProblemFilters currentSort={sort} />
-      </div>
+      {/* Filters Row: Author Type + Status + Sort (single toolbar) */}
+      <BrowseFilterToolbar
+        currentAuthorType={selectedAuthorType}
+        currentStatus={status}
+        currentSort={sort}
+      />
 
       {/* Category Browsing */}
-      <div className="flex gap-2 overflow-x-auto scrollbar-hide sm:flex-wrap sm:overflow-visible [mask-image:linear-gradient(to_right,black_85%,transparent_100%)] sm:[mask-image:none] pb-1 sm:pb-0">
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide sm:flex-wrap sm:overflow-visible [mask-image:linear-gradient(to_right,black_85%,transparent_100%)] sm:[mask-image:none] pb-1 sm:pb-0 -mt-2">
         <Link
           href={`/problems?${new URLSearchParams({ ...(status ? { status } : {}), ...(authorType ? { author_type: authorType } : {}), sort }).toString()}`}
           scroll={false}
@@ -138,12 +117,6 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
           </Link>
         ))}
       </div>
-
-      {/* Status Lifecycle Filter */}
-      <StatusLegendFilter currentStatus={status} />
-
-      {/* User posts bar (logged-in only) */}
-      <MyPostsBar />
 
       {/* Problem Grid */}
       {problems.length === 0 ? (

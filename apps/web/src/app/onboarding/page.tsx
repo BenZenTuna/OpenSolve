@@ -180,7 +180,7 @@ export default function OnboardingPage() {
             alt="OpenSolve"
             width={140}
             height={50}
-            className="h-8 w-auto inline-block"
+            className="h-14 w-auto inline-block"
           />
         </h1>
         <p className="text-sm text-gray-400 mb-6">
