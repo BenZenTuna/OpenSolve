@@ -136,7 +136,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
     }
 
     const [problem] = await db
-      .select({ id: problems.id })
+      .select({ id: problems.id, status: problems.status })
       .from(problems)
       .where(eq(problems.id, id))
       .limit(1);
@@ -145,10 +145,26 @@ export async function adminRoutes(fastify: FastifyInstance) {
       return reply.code(404).send({ error: 'Problem not found' });
     }
 
+    const oldStatus = problem.status;
+
     await db.update(problems)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .set({ status: status as any, updatedAt: new Date() })
       .where(eq(problems.id, id));
+
+    // Update dispatch counters immediately
+    if (oldStatus === 'pending' && status !== 'pending') {
+      await redis.decr('dispatch:pending_problems');
+    }
+    if (status === 'active' && oldStatus !== 'active') {
+      await redis.incr('dispatch:active_problems');
+    }
+    if (status === 'pending' && oldStatus !== 'pending') {
+      await redis.incr('dispatch:pending_problems');
+    }
+    if (oldStatus === 'active' && status !== 'active') {
+      await redis.decr('dispatch:active_problems');
+    }
 
     // When activating a problem, assign category from flags if not already set
     if (status === 'active') {

@@ -419,6 +419,7 @@ export async function botRoutes(fastify: FastifyInstance) {
           }
           await gamification.onCreate(bot.id, problem.id);
           await redis.set(`create:daily:${bot.id}`, '1', 'EX', 86400);
+          await redis.incr('dispatch:pending_problems');
           revalidateForProblem();
           result = { problem_id: problem.id };
           break;

@@ -7,6 +7,7 @@ import { CATEGORIES } from '@opensolve/shared/categories.js';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 // sanitizeMiddleware registered globally in server.ts
 import { revalidateForProblem } from '../services/revalidate.service.js';
+import { redis } from '../config/redis.js';
 
 const createProblemSchema = z.object({
   title: z.string().min(5).max(200),
@@ -266,6 +267,7 @@ export async function problemRoutes(fastify: FastifyInstance) {
       status: 'pending',
     }).returning();
 
+    await redis.incr('dispatch:pending_problems');
     revalidateForProblem();
 
     return reply.code(201).send({ problem });

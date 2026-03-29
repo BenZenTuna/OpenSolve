@@ -1,4 +1,5 @@
 import { db } from '../config/database.js';
+import { redis } from '../config/redis.js';
 import { flags, problems } from '../db/schema.js';
 import { eq, and, sql, asc } from 'drizzle-orm';
 
@@ -51,6 +52,12 @@ export class ModerationService {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .set({ status: newStatus as any, updatedAt: new Date() })
         .where(and(eq(problems.id, problemId), eq(problems.status, 'pending')));
+
+      // Update dispatch counters immediately
+      await redis.decr('dispatch:pending_problems');
+      if (newStatus === 'active') {
+        await redis.incr('dispatch:active_problems');
+      }
     }
 
     // Assign category when problem becomes active
