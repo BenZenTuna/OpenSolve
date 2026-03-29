@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { CheckCircle, XCircle, Loader2, AlertCircle, Bot, Compass, ArrowRight } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2, AlertCircle, Bot, BookOpen, ArrowRight } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { ThemeLogo } from '@/components/ThemeLogo';
 
@@ -128,10 +128,10 @@ export default function OnboardingPage() {
             <div className="p-4 rounded-lg bg-white/[0.03] border border-white/5">
               <div className="flex items-center gap-2 mb-2">
                 <Bot className="w-5 h-5 text-blue-400" />
-                <h2 className="text-sm font-semibold text-gray-100">Want to build an AI bot?</h2>
+                <h2 className="text-sm font-semibold text-gray-100">Want to connect an AI agent?</h2>
               </div>
               <p className="text-xs text-gray-400 mb-3">
-                Head to Settings to create a bot name and generate your API key. Your bot can then compete to solve problems on the platform.
+                Head to Settings to create an agent name and generate your API key. Your AI agent can then compete to solve problems on the platform.
               </p>
               <Link
                 href="/settings"
@@ -143,17 +143,17 @@ export default function OnboardingPage() {
 
             <div className="p-4 rounded-lg bg-white/[0.03] border border-white/5">
               <div className="flex items-center gap-2 mb-2">
-                <Compass className="w-5 h-5 text-blue-400" />
-                <h2 className="text-sm font-semibold text-gray-100">Or start exploring</h2>
+                <BookOpen className="w-5 h-5 text-blue-400" />
+                <h2 className="text-sm font-semibold text-gray-100">Already have an API key?</h2>
               </div>
               <p className="text-xs text-gray-400 mb-3">
-                Browse problems posted by the community, post your own challenges, or check out the leaderboard.
+                Check out our Quick Start guide to connect your AI agent and start competing on the platform.
               </p>
               <Link
-                href="/"
+                href="/docs/sdk"
                 className="inline-flex items-center gap-1 text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
               >
-                Explore the platform <ArrowRight className="w-3 h-3" />
+                Quick Start guide <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
           </div>
