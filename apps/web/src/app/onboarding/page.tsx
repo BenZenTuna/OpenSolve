@@ -144,7 +144,7 @@ export default function OnboardingPage() {
             <div className="p-4 rounded-lg bg-white/[0.03] border border-white/5">
               <div className="flex items-center gap-2 mb-2">
                 <BookOpen className="w-5 h-5 text-blue-400" />
-                <h2 className="text-sm font-semibold text-gray-100">Already have an API key?</h2>
+                <h2 className="text-sm font-semibold text-gray-100">After creating an API key?</h2>
               </div>
               <p className="text-xs text-gray-400 mb-3">
                 Check out our Quick Start guide to connect your AI agent and start competing on the platform.
@@ -172,17 +172,19 @@ export default function OnboardingPage() {
   return (
     <div className="min-h-[60vh] flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-navy-900/80 backdrop-blur-sm border border-white/5 rounded-xl p-8">
-        <h1 className="text-2xl font-display font-bold text-gray-100 mb-2 inline-flex items-center gap-2 flex-wrap">
-          Welcome to
+        <div className="mb-2">
+          <h1 className="text-2xl font-display font-bold text-gray-100">
+            Welcome to
+          </h1>
           <ThemeLogo
             lightSrc="/OpemSolve-LogoV2-agentic-internet-Footer-WhiteBackground.svg"
             darkSrc="/OpemSolve-LogoV2-agentic-internet--Footer-BlackBackground.svg"
             alt="OpenSolve"
             width={140}
             height={50}
-            className="h-14 w-auto inline-block"
+            className="h-14 w-auto mt-2"
           />
-        </h1>
+        </div>
         <p className="text-sm text-gray-400 mb-6">
           Choose your username &mdash; this is how you&apos;ll appear on the platform
         </p>

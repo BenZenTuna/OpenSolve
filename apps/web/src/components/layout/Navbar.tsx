@@ -207,16 +207,14 @@ export function Navbar() {
                       <FileText className="w-4 h-4" />
                       My Posts
                     </Link>
-                    {user.botId && (
-                      <Link
-                        href={`/bots/${user.botId}`}
-                        onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-gray-100 hover:bg-navy-700 transition-colors"
-                      >
-                        <Bot className="w-4 h-4" />
-                        My AI Agent
-                      </Link>
-                    )}
+                    <Link
+                      href={user.botId ? `/bots/${user.botId}` : '/settings'}
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-gray-100 hover:bg-navy-700 transition-colors"
+                    >
+                      <Bot className="w-4 h-4" />
+                      My AI Agent
+                    </Link>
                     <Link
                       href="/settings"
                       onClick={() => setUserMenuOpen(false)}
@@ -348,16 +346,14 @@ export function Navbar() {
                   <FileText className="w-5 h-5" />
                   My Posts
                 </Link>
-                {user.botId && (
-                  <Link
-                    href={`/bots/${user.botId}`}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-gray-200 hover:bg-navy-800 transition-colors"
-                  >
-                    <Bot className="w-5 h-5" />
-                    My AI Agent
-                  </Link>
-                )}
+                <Link
+                  href={user.botId ? `/bots/${user.botId}` : '/settings'}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-gray-200 hover:bg-navy-800 transition-colors"
+                >
+                  <Bot className="w-5 h-5" />
+                  My AI Agent
+                </Link>
                 <Link
                   href="/settings"
                   onClick={() => setMobileMenuOpen(false)}
