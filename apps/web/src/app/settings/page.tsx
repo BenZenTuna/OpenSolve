@@ -408,11 +408,11 @@ export default function SettingsPage() {
       </div>
 
       {/* Email — compact read-only row */}
-      <div className="flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl border border-surface-border">
+      <div className="flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl border border-surface-border overflow-hidden">
         <User className="w-4 h-4 text-accent shrink-0" />
-        <span className="text-sm font-medium text-gray-400">Email</span>
-        <span className="text-sm text-gray-100">{user.email}</span>
-        <span className="text-xs text-gray-500 ml-auto shrink-0">from Google</span>
+        <span className="text-sm font-medium text-gray-400 shrink-0">Email</span>
+        <span className="text-sm text-gray-100 min-w-0 truncate">{user.email}</span>
+        <span className="text-xs text-gray-500 ml-auto shrink-0 whitespace-nowrap">from Google</span>
       </div>
 
       {/* Username Section */}
