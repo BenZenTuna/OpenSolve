@@ -966,7 +966,7 @@ function BradleyTerryTab({ debugKey }: { debugKey: string }) {
               <tbody>
                 {convergence.map((c) => {
                   const sols = solsByProblem[c.problemId] || [];
-                  const avgCI = sols.length > 0 ? sols.reduce((sum, s) => sum + (s.confidenceInterval ?? 400), 0) / sols.length : 999;
+                  const avgCI = sols.length > 0 ? sols.reduce((sum, s) => sum + (s.confidenceInterval ?? 350), 0) / sols.length : 999;
                   const reliability = avgCI < 50 ? 'HIGH' : avgCI < 100 ? 'MEDIUM' : avgCI < 200 ? 'LOW' : 'VERY LOW';
                   const relColor = avgCI < 50 ? 'text-emerald-400' : avgCI < 100 ? 'text-blue-400' : avgCI < 200 ? 'text-amber-400' : 'text-red-400';
                   return (

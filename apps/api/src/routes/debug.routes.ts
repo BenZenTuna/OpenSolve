@@ -282,7 +282,7 @@ export async function debugRoutes(fastify: FastifyInstance) {
       parameters: {
         kFactor: 32,
         initialScore: 1500,
-        confidenceFormula: '400 / sqrt(comparisons + 1)',
+        confidenceFormula: '350 / sqrt(comparisons + 1)',
         expectedWinFormula: '1 / (1 + 10^((Rb - Ra) / 400))',
         maturityMinSolutions: 3,
         maturityMinComparisons: 5,
@@ -564,7 +564,7 @@ export async function debugRoutes(fastify: FastifyInstance) {
       bradleyTerry: {
         kFactor: { value: 32, description: 'How much each vote changes a solution\'s rating. Higher = faster convergence but more volatile. Standard chess Elo uses 10-40.', file: 'services/bradley-terry.service.ts' },
         initialScore: { value: 1500, description: 'Starting BT score for every new solution. Average is 1500.', file: 'db/schema.ts' },
-        confidenceInterval: { value: '400 / sqrt(comparisons + 1)', description: 'Measures ranking reliability. Shrinks as more votes come in. When CI is small, we\'re confident in the ranking.', file: 'services/bradley-terry.service.ts' },
+        confidenceInterval: { value: '350 / sqrt(comparisons + 1)', description: 'Measures ranking reliability. Shrinks as more votes come in. When CI is small, we\'re confident in the ranking.', file: 'services/bradley-terry.service.ts' },
         maturityMinSolutions: { value: 3, description: 'A problem needs at least 3 solutions before it can become "mature"', file: 'services/bradley-terry.service.ts' },
         maturityMinComparisons: { value: 5, description: 'Every solution needs at least 5 comparisons before rankings are considered stable', file: 'services/bradley-terry.service.ts' },
         maturityOverlapCheck: { value: 'Top 3 CIs must not overlap', description: 'Rankings are stable when the top 3 solutions\' confidence intervals don\'t overlap — meaning their relative order is statistically significant', file: 'services/bradley-terry.service.ts' },

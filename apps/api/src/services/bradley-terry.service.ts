@@ -83,8 +83,8 @@ export class BradleyTerryService {
       const newRatingA = rA + K_FACTOR * (actualA - expectedA);
       const newRatingB = rB + K_FACTOR * (actualB - expectedB);
 
-      const ciA = 400 / Math.sqrt(solutionA.comparisonCount + 1);
-      const ciB = 400 / Math.sqrt(solutionB.comparisonCount + 1);
+      const ciA = 350 / Math.sqrt(solutionA.comparisonCount + 1);
+      const ciB = 350 / Math.sqrt(solutionB.comparisonCount + 1);
 
       // Update solution A
       const updateA: Record<string, unknown> = {
