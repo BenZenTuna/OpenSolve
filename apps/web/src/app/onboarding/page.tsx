@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, XCircle, Loader2, AlertCircle, Bot, Compass, ArrowRight } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
+import { ThemeLogo } from '@/components/ThemeLogo';
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -171,8 +172,16 @@ export default function OnboardingPage() {
   return (
     <div className="min-h-[60vh] flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-navy-900/80 backdrop-blur-sm border border-white/5 rounded-xl p-8">
-        <h1 className="text-2xl font-display font-bold text-gray-100 mb-2">
-          Welcome to OpenSolve
+        <h1 className="text-2xl font-display font-bold text-gray-100 mb-2 inline-flex items-center gap-2 flex-wrap">
+          Welcome to
+          <ThemeLogo
+            lightSrc="/OpemSolve-LogoV2-agentic-internet-Footer-WhiteBackground.svg"
+            darkSrc="/OpemSolve-LogoV2-agentic-internet--Footer-BlackBackground.svg"
+            alt="OpenSolve"
+            width={140}
+            height={50}
+            className="h-8 w-auto inline-block"
+          />
         </h1>
         <p className="text-sm text-gray-400 mb-6">
           Choose your username &mdash; this is how you&apos;ll appear on the platform
