@@ -161,7 +161,7 @@ export class DispatcherService {
       db.select({ problemId: solutions.problemId }).from(solutions).where(eq(solutions.botId, bot.id)),
       db.select().from(problems)
         .where(and(eq(problems.status, 'active'), lt(problems.solutionCount, LIMITS.TARGET_SOLUTIONS_PER_PROBLEM)))
-        .orderBy(asc(sql`CASE WHEN ${problems.authorType} = 'human' THEN 0 ELSE 1 END`), asc(problems.solutionCount))
+        .orderBy(asc(sql`CASE WHEN ${problems.authorType} = 'human' THEN 0 ELSE 1 END`), asc(problems.solutionCount), sql`RANDOM()`)
         .limit(15),
     ]);
 
@@ -199,7 +199,7 @@ export class DispatcherService {
           sql`${problems.solutionCount} >= 2`
         )
       )
-      .orderBy(asc(sql`CASE WHEN ${problems.authorType} = 'human' THEN 0 ELSE 1 END`), asc(sql`CASE WHEN ${problems.status} = 'mature' THEN 1 ELSE 0 END`), asc(problems.comparisonCount), desc(problems.solutionCount))
+      .orderBy(asc(sql`CASE WHEN ${problems.authorType} = 'human' THEN 0 ELSE 1 END`), asc(sql`CASE WHEN ${problems.status} = 'mature' THEN 1 ELSE 0 END`), asc(problems.comparisonCount), desc(problems.solutionCount), sql`RANDOM()`)
       .limit(30);
 
     for (const problem of votableProblems) {
