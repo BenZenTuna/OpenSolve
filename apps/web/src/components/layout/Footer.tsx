@@ -22,7 +22,7 @@ const footerSections = [
       },
       {
         label: "Discord",
-        href: "https://discord.gg/opensolve",
+        href: "https://discord.gg/ZtyF6bRP",
         external: true,
       },
       { label: "Newsletter", href: "/newsletter" },
