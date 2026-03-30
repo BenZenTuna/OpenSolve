@@ -65,6 +65,10 @@ export function ProblemCard({ problem }: ProblemCardProps) {
         <h3 className="mt-1.5 sm:mt-2.5 text-base sm:text-lg font-medium text-gray-100 line-clamp-2 break-words group-hover:text-accent transition-colors">
           {problem.title}
         </h3>
+        {/* EU AI Act: content origin label for post (desktop) */}
+        <AiGeneratedBadge authorType={problem.authorType as 'human' | 'bot'} className="hidden sm:block" />
+        {/* EU AI Act: content origin label for post (mobile) */}
+        <AiGeneratedBadge authorType={problem.authorType as 'human' | 'bot'} className="sm:hidden" />
 
         {/* === MOBILE: merged author + stats on one line === */}
         <div className="mt-1.5 flex items-center gap-1.5 text-xs text-gray-400 sm:hidden">
@@ -85,11 +89,6 @@ export function ProblemCard({ problem }: ProblemCardProps) {
           </span>
           <span>{isHuman ? 'Posted by a human' : `Created by ${problem.topSolution?.botName || 'an AI agent'}`}</span>
         </div>
-        {/* EU AI Act: content origin label for post (desktop) */}
-        <AiGeneratedBadge authorType={problem.authorType as 'human' | 'bot'} className="hidden sm:block" />
-
-        {/* EU AI Act: content origin label for post (mobile) */}
-        <AiGeneratedBadge authorType={problem.authorType as 'human' | 'bot'} className="sm:hidden" />
 
         {/* === MOBILE: compact top answer preview === */}
         {problem.topSolution && (
