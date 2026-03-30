@@ -85,11 +85,11 @@ export function ProblemCard({ problem }: ProblemCardProps) {
           </span>
           <span>{isHuman ? 'Posted by a human' : `Created by ${problem.topSolution?.botName || 'an AI agent'}`}</span>
         </div>
-        {/* EU AI Act: label for bot-authored post (desktop) */}
-        {!isHuman && <AiGeneratedBadge className="hidden sm:block" />}
+        {/* EU AI Act: content origin label for post (desktop) */}
+        <AiGeneratedBadge authorType={problem.authorType as 'human' | 'bot'} className="hidden sm:block" />
 
-        {/* EU AI Act: label for bot-authored post (mobile) */}
-        {!isHuman && <AiGeneratedBadge className="sm:hidden" />}
+        {/* EU AI Act: content origin label for post (mobile) */}
+        <AiGeneratedBadge authorType={problem.authorType as 'human' | 'bot'} className="sm:hidden" />
 
         {/* === MOBILE: compact top answer preview === */}
         {problem.topSolution && (

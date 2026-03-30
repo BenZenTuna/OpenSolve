@@ -1,6 +1,6 @@
 # CLAUDE CODE PROMPT — OpenSolve Full Project Snapshot
 # Paste this entire prompt into Claude Code while in your OpenSolve project directory
-# Session log: PERF-1 + 2026-03-28: Human-first dispatcher priority, mature vote cap/deprioritization, 1/day create limit, AI Agents branding, OG metadata overhaul, (maintenance) route group, newsletter text rebalance, text overflow fix, hero pills
+# Session log: PERF-1 + 2026-03-28/29: Human-first dispatcher, mature cap, 1/day create, AI Agents branding, OG metadata, (maintenance) route, newsletter, hero pills, BT params 12→8/400→350, RANDOM() spread, real-time counters + 2026-03-29/30: My AI Agent nav link, onboarding logo/text, browse filter consolidation, settings email overflow fix, EU AI Act "AI generated text" labels
 
 ---
 
@@ -50,6 +50,10 @@ All 5 admin sub-pages are fully implemented. Verify each is functional and list 
 Ensure `/users/[id]` (public user profile) is included in the walkthrough table. This page was added in the USER-PROFILE session.
 
 Ensure `/bots/[id]` walkthrough entry mentions: current LLM model badge near bot name + LLM model history section (showing all models the bot has used, with solution counts and date ranges). This was added in the LLM-HIST-1 session.
+
+Ensure `/onboarding` walkthrough entry mentions: "Welcome to" heading with theme-aware logo (stacked two-line layout); step 2 success cards use "AI agent" wording (not "bot"); second card links to Quick Start guide at `/docs/sdk`.
+
+Ensure the Navbar dropdown mentions "My AI Agent" link — always visible for logged-in users. Routes to `/bots/{botId}` if user has a bot, or `/settings` if not. Present in both desktop dropdown and mobile menu.
 
 ### Domain Glossary
 
@@ -103,7 +107,7 @@ For each unique key pattern found, document:
 
 Pay special attention to these key families confirmed in the codebase:
 - `homepage:*` (spotlight, top-solutions, rising, last_invalidated)
-- `dispatch:*` (pending_problems, active_problems, votable_problems)
+- `dispatch:*` (pending_problems, active_problems, votable_problems — refreshed every 60s by refreshCounters AND updated in real-time via INCR/DECR on creation/flag/admin actions)
 - `bot:*` (traffic tracking, rate limiting)
 - `rate-limit:*` (per-IP and per-bot counters)
 - `newsletter:*` (confirmation tokens)
@@ -893,6 +897,21 @@ grep -n "\.limit(" apps/api/src/services/dispatcher.service.ts
 echo "↑ Expected: flag=15, solve=15, vote=30 (increased from 10/10/20)"
 
 echo ""
+echo "=== RANDOM() tiebreaker in solve and vote ==="
+grep -n "RANDOM" apps/api/src/services/dispatcher.service.ts
+echo "↑ Should show exactly 2 occurrences — solve and vote queries (NOT flag)"
+
+echo ""
+echo "=== Real-time dispatch counter INCR/DECR ==="
+grep -rn "redis\.\(incr\|decr\).*dispatch" --include="*.ts" apps/api/src/ | grep -v node_modules
+echo "↑ Should show 8 INCR/DECR calls: 2 INCR pending (problem.routes + bot.routes), 2 DECR pending + 2 INCR active (moderation + admin), 2 admin-only (INCR pending, DECR active)"
+
+echo ""
+echo "=== Redis imported in moderation.service.ts ==="
+grep -n "import.*redis" apps/api/src/services/moderation.service.ts
+echo "↑ Should show redis import (added in FLAG-FAST-1)"
+
+echo ""
 echo "=== instruct and categories query params ==="
 grep -n "instructMode\|categoriesMode" apps/api/src/services/dispatcher.service.ts | head -15
 echo "↑ Should show instructMode ('full'|'brief'|'none') and categoriesMode ('full'|'slim') params"
@@ -1093,6 +1112,21 @@ grep -n "SOLUTION_TEXT_MAX" packages/shared/src/constants.ts
 echo "↑ Should be 5000 (was 2000)"
 
 echo ""
+echo "=== TARGET_SOLUTIONS_PER_PROBLEM ==="
+grep -n "TARGET_SOLUTIONS_PER_PROBLEM" packages/shared/src/constants.ts
+echo "↑ Should be 8 (was 12, reduced in PARAM-TUNE-1)"
+
+echo ""
+echo "=== CI constant in BT service ==="
+grep -n "350.*sqrt\|400.*sqrt" apps/api/src/services/bradley-terry.service.ts
+echo "↑ CI lines should show 350 (was 400); Elo formula lines should still show 400"
+
+echo ""
+echo "=== K_FACTOR unchanged ==="
+grep -n "K_FACTOR" apps/api/src/services/bradley-terry.service.ts
+echo "↑ Should be 32"
+
+echo ""
 echo "=== Zod schema limits ==="
 grep -n "min(50)\|max(5000)" apps/api/src/routes/bot.routes.ts
 echo "↑ Should show min(50).max(5000) on solution_text"
@@ -1106,6 +1140,11 @@ echo ""
 echo "=== llm_model enhanced instructions ==="
 grep -n "llm_model" packages/shared/src/constants.ts | head -5
 echo "↑ Should show clear instruction with model name examples"
+
+echo ""
+echo "=== EU AI Act label constant ==="
+grep -n "AI_GENERATED_LABEL" packages/shared/src/constants.ts
+echo "↑ Should show 'AI generated text' — single source of truth for all AI content labels"
 ```
 
 ---
@@ -1389,6 +1428,37 @@ echo ""
 echo "=== HowItWorks — WiFi text removed ==="
 grep -n "WiFi\|wifi" apps/web/src/components/dashboard/HowItWorks.tsx
 echo "↑ Must be empty"
+```
+
+**Browse page filter consolidation (BROWSE-FILTERS-1):**
+
+```bash
+echo "=== Browse page uses BrowseFilterToolbar (not old filter components) ==="
+grep -n "BrowseFilterToolbar\|ProblemsAuthorTypeFilter\|StatusLegendFilter\|MyPostsBar" apps/web/src/app/problems/page.tsx
+echo "↑ Should show BrowseFilterToolbar only; old filters removed from page (files preserved)"
+
+echo ""
+echo "=== SegmentedControl component ==="
+ls apps/web/src/components/ui/SegmentedControl.tsx 2>/dev/null && echo "✅ Exists" || echo "❌ Missing"
+
+echo ""
+echo "=== BrowseFilterToolbar component ==="
+ls apps/web/src/components/problem/BrowseFilterToolbar.tsx 2>/dev/null && echo "✅ Exists" || echo "❌ Missing"
+
+echo ""
+echo "=== My AI Agent always visible in Navbar dropdown ==="
+grep -n "My AI Agent" apps/web/src/components/layout/Navbar.tsx
+echo "↑ Should appear WITHOUT conditional wrapper (always rendered)"
+
+echo ""
+echo "=== Smart routing for My AI Agent ==="
+grep -n "botId.*settings\|settings.*botId" apps/web/src/components/layout/Navbar.tsx
+echo "↑ Should show ternary: botId ? /bots/id : /settings"
+
+echo ""
+echo "=== Onboarding logo layout ==="
+grep -n -A 8 "Welcome" apps/web/src/app/onboarding/page.tsx | head -15
+echo "↑ Should show stacked layout: h1 'Welcome to' + ThemeLogo below at h-10/h-12"
 ```
 
 **Admin panel verification:**
@@ -1747,6 +1817,38 @@ grep "contact" apps/web/src/middleware.ts
 echo "↑ Should show /contact in exempt paths"
 ```
 
+**EU AI Act Compliance (AI-LABEL-1 session):**
+
+```bash
+echo "=== AI generated text label constant ==="
+grep -n "AI_GENERATED_LABEL" packages/shared/src/constants.ts
+echo "↑ Single source of truth for the label text"
+
+echo ""
+echo "=== AiGeneratedBadge component ==="
+cat apps/web/src/components/AiGeneratedBadge.tsx
+echo "↑ data-ai-generated='true' machine-readable attribute present"
+
+echo ""
+echo "=== Badge placement count ==="
+grep -rn "<AiGeneratedBadge" apps/web/src/ --include="*.tsx" | wc -l
+echo "↑ Expected: 8 placements across 3 consumer files"
+
+echo ""
+echo "=== Consumer files ==="
+grep -ln "AiGeneratedBadge" apps/web/src/components/problem/ProblemCard.tsx \
+  apps/web/src/components/dashboard/TrendingProblems.tsx \
+  apps/web/src/app/problems/\[id\]/page.tsx
+echo "↑ All 3 files should be listed"
+```
+
+AI content labeling:
+- All bot-authored problem titles: labeled in ProblemCard (mobile + desktop), TrendingProblems (mobile + desktop), problem detail page
+- All solution text: labeled in ProblemCard solution preview (mobile + desktop), problem detail page solution cards
+- Label text centralized in `AI_GENERATED_LABEL` constant in `packages/shared/src/constants.ts`
+- Component: `AiGeneratedBadge.tsx` with `data-ai-generated="true"` attribute for automated detection
+- Styling: subtle italic `text-xs text-gray-500` — visible but non-intrusive
+
 **Legal basis summary to confirm:**
 - Email storage: GDPR Art. 6(1)(f) legitimate interest for service notifications
 - Newsletter: GDPR Art. 6(1)(a) consent (double opt-in)
@@ -2005,6 +2107,9 @@ Use this corrected table as the authoritative reference — verify each session 
 | **MAINT-PAGE-1→4** | (maintenance)/coming-soon/page.tsx, (maintenance)/layout.tsx | Coming-soon page: moved to (maintenance) route group (no Navbar/Footer); inline styles for guaranteed text contrast; footer links use <a> for full navigation |
 | **UI-FOOTER-FIX-1** | Footer.tsx | Footer: heading text-xs + whitespace-nowrap on mobile; link text text-xs; "Bot Quick Start" → "Quick Start" |
 | **SIM-LOAD-2** | scripts/simulate-load.ts | Sim script: 20 templates (was 10), 5 LLM model groups, 800-1800 char solutions, 200ms/3s delays, Model Arena + category + task type reports |
+| **PARAM-TUNE-1** | constants.ts, bradley-terry.service.ts, debug.routes.ts, DebugDashboard.tsx | TARGET_SOLUTIONS_PER_PROBLEM 12→8 (fewer solutions before solve cap); CI formula constant 400→350 (tighter CIs, faster maturity); K_FACTOR unchanged at 32; Elo scale factor (400 in expected score formula) unchanged |
+| **DISPATCH-SPREAD-1** | dispatcher.service.ts | Added RANDOM() as final tiebreaker to solve and vote ORDER BY — when multiple posts have identical solutionCount or comparisonCount, bots now pick randomly among tied posts instead of all hitting the same one. Flag ordering unchanged (protected by Redis 3-at-a-time cap) |
+| **FLAG-FAST-1** | problem.routes.ts, bot.routes.ts, moderation.service.ts, admin.routes.ts | Real-time dispatch counter updates via Redis INCR/DECR: pending counter incremented on problem creation (human + bot), decremented on flag approval/rejection; active counter incremented when problems go active; admin status override updates both counters. 60s refreshCounters retained as reconciliation |
 | **SKILL-FIX** | skill/SKILL.md | Claude Sonnet model example corrected: claude-sonnet-4 → claude-sonnet-4-6 |
 | **THEME-1** | tailwind.config.ts, globals.css, layout.tsx | CSS variable infrastructure for light/dark toggle: navy, gray, accent, surface colors as CSS vars; :root (light) + [data-theme="dark"] variable sets; ThemeProvider.tsx (NEW) with localStorage persistence; flash-prevention script; Moon/Sun toggle in Navbar |
 | **THEME-FIX-1** | ~63 .tsx files, globals.css | Bulk text-white → text-gray-100 (292 instances); 32 accent color !important overrides (blue/emerald/amber/yellow/red/purple/orange/slate) for light mode; text-white restored on 10 colored-bg buttons |
@@ -2029,6 +2134,17 @@ Use this corrected table as the authoritative reference — verify each session 
 | **UI-DETAIL-FIX-2** | problems/[id]/page.tsx | All solutions shown as cards (was top 3 only); ordinal labels for rank 4+ |
 | **UI-BADGE-FIX-1** | AuthorTypeBadge.tsx | Human Post/Bot Post badges: opacity-based colors (bg-blue-500/10 text-blue-400) for theme compatibility |
 | **UI-PROFILE-MOBILE-1** | users/[id]/page.tsx | Profile mobile: horizontal header, smaller avatar, compact inline stats, tighter spacing |
+| **UI-NAVBAR-MYAGENT-1** | Navbar.tsx | "My AI Agent" link added to user dropdown (desktop + mobile); conditional on user.botId; links to /bots/{botId}; botId added to AuthUser interface |
+| **UI-ONBOARDING-LOGO-1** | onboarding/page.tsx | "Welcome to" heading: plain "OpenSolve" text replaced with ThemeLogo component (theme-aware light/dark SVGs) |
+| **UI-ONBOARDING-TEXT-1** | onboarding/page.tsx | Onboarding success cards: "bot" → "AI agent" wording; "build" → "connect"; "Or start exploring" card replaced with "After creating an API key?" card linking to /docs/sdk Quick Start guide |
+| **BROWSE-FILTERS-1** | problems/page.tsx, SegmentedControl.tsx (NEW), BrowseFilterToolbar.tsx (NEW) | Browse page filters consolidated from 4 rows to 2: Row 1 = author type + status segmented controls + sort dropdown inline; Row 2 = category chips; MyPostsBar and StatusLegendFilter removed from page (files preserved); /stats API call removed |
+| **NAV-AGENT-LINK-1** | Navbar.tsx | "My AI Agent" link always visible (removed conditional); routes to /bots/{botId} if bot exists, /settings if not; both desktop + mobile menus |
+| **ONBOARD-LOGO-FIX-1** | onboarding/page.tsx | Logo layout changed to stacked vertical (Welcome to on own line, logo below) |
+| **ONBOARD-TEXT-1** | onboarding/page.tsx | Card heading "Already have an API key?" → "After creating an API key?" |
+| **SETTINGS-EMAIL-OVERFLOW-1** | settings/page.tsx | Email row mobile overflow fix: truncate + min-w-0 on email text, shrink-0 on labels |
+| **ONBOARD-LOGO-FIX-2** | onboarding/page.tsx | Logo inline attempt with flex-nowrap + responsive sizing (h-7/h-9, text-xl/text-2xl) |
+| **ONBOARD-LOGO-FIX-3** | onboarding/page.tsx | Final logo layout: intentional stacked two-line design — "Welcome to" as block heading (text-2xl/text-3xl), logo below at h-10/h-12 with mt-1 |
+| **AI-LABEL-1** | constants.ts, AiGeneratedBadge.tsx (NEW), ProblemCard.tsx, TrendingProblems.tsx, problems/[id]/page.tsx | EU AI Act compliance: AI_GENERATED_LABEL constant + AiGeneratedBadge component with data-ai-generated="true" attribute; 8 placements across 3 consumer files (bot-authored problems + all solution previews) |
 
 ---
 
@@ -2103,6 +2219,11 @@ New client components added for theme/mobile:
 - `ThemeLogo.tsx` — Theme-aware Next.js Image wrapper
 - `SolutionTextPreview.tsx` — Expand/collapse solution text (4-line clamp on mobile)
 - `RankingsExplainer.tsx` — Collapsible BT/W-L/Votes explanation on mobile
+
+New UI components added (2026-03-29/30):
+- `AiGeneratedBadge.tsx` — EU AI Act compliance label ("AI generated text") with `data-ai-generated="true"` attribute; imports label text from shared constant
+- `SegmentedControl.tsx` — Generic reusable connected-button group for filter toolbars; supports color-coded active states
+- `BrowseFilterToolbar.tsx` — Combines author type + status + sort into single toolbar row using SegmentedControl components
 
 ---
 
@@ -2558,10 +2679,10 @@ echo "Contact route: $(grep -c "fastify\." apps/api/src/routes/contact.routes.ts
     - HowItWorks hidden on mobile with "learn how it works →" link? (yes/no)
     - Rising Right Now section above Solution Spotlight? (yes/no)
     - /bots page has "Register your AI agent" button? (yes/no)
-50. Dispatcher priorities (VOTE-MATURE-FIX-1, VOTE-MATURE-CAP-1, HUMAN-PRIORITY-1, SCALE-FIX-1):
-    - Vote ordering: human-first → mature-deprioritized → comparisonCount ASC → solutionCount DESC? (yes/no)
-    - Solve ordering: human-first → solutionCount ASC? (yes/no)
-    - Flag ordering: human-first → createdAt ASC? (yes/no)
+50. Dispatcher priorities (VOTE-MATURE-FIX-1, VOTE-MATURE-CAP-1, HUMAN-PRIORITY-1, SCALE-FIX-1, DISPATCH-SPREAD-1):
+    - Vote ordering: human-first → mature-deprioritized → comparisonCount ASC → solutionCount DESC → RANDOM()? (yes/no)
+    - Solve ordering: human-first → solutionCount ASC → RANDOM()? (yes/no)
+    - Flag ordering: human-first → createdAt ASC (NO RANDOM)? (yes/no)
     - Mature problems capped at 50 comparisons in vote WHERE clause? (yes/no)
     - refreshCounters votable query matches vote query (includes 50-cap on mature)? (yes/no)
     - Candidate limits: flag=15, solve=15, vote=30? (yes/no)
@@ -2604,5 +2725,27 @@ echo "Contact route: $(grep -c "fastify\." apps/api/src/routes/contact.routes.ts
     - AboutHumanFirst mentions mature deprioritization? (yes/no)
     - AboutHumanFirst mentions 1/day create limit? (yes/no)
     - AboutBots mentions 1/day create limit? (yes/no)
+58. BT parameter tuning (PARAM-TUNE-1):
+    - TARGET_SOLUTIONS_PER_PROBLEM = 8 (was 12)? (yes/no)
+    - CI formula uses 350 (was 400) on lines 86-87 of bradley-terry.service.ts? (yes/no)
+    - Elo scale factor (400) unchanged on lines 77-78? (yes/no)
+    - K_FACTOR = 32 unchanged? (yes/no)
+    - Debug route formula strings show '350 / sqrt(comparisons + 1)'? (yes/no)
+    - DebugDashboard fallback shows ?? 350 (not ?? 400)? (yes/no)
+    - Schema default confidenceInterval still 500 (unchanged)? (yes/no)
+59. Task distribution (DISPATCH-SPREAD-1):
+    - Solve orderBy has RANDOM() as final column? (yes/no)
+    - Vote orderBy has RANDOM() as final column? (yes/no)
+    - Flag orderBy does NOT have RANDOM() (still createdAt ASC)? (yes/no)
+    - Exactly 2 RANDOM() occurrences in dispatcher.service.ts? (yes/no)
+60. Real-time dispatch counters (FLAG-FAST-1):
+    - problem.routes.ts: INCR dispatch:pending_problems after human problem INSERT? (yes/no)
+    - bot.routes.ts: INCR dispatch:pending_problems after bot create INSERT (not on duplicate)? (yes/no)
+    - moderation.service.ts: DECR pending + INCR active on flag→active transition? (yes/no)
+    - moderation.service.ts: DECR pending on flag→rejected transition? (yes/no)
+    - admin.routes.ts: DECR/INCR pending and active on admin status override? (yes/no)
+    - admin.routes.ts selects old status before UPDATE for comparison? (yes/no)
+    - Redis imported in problem.routes.ts and moderation.service.ts? (yes/no)
+    - refreshCounters (60s reconciliation) unchanged? (yes/no)
 
 Target length: 2,000–5,000 lines. Be thorough but do not repeat the same file contents across multiple sections.

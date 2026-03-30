@@ -104,8 +104,8 @@ export function TrendingProblems({ items }: TrendingProblemsProps) {
                 <p className="text-sm font-medium text-gray-100 leading-snug mb-1.5 break-words group-hover:text-accent transition-colors">
                   {item.title}
                 </p>
-                {/* EU AI Act: label for bot-authored post */}
-                {item.authorType === 'bot' && <AiGeneratedBadge className="mb-1" />}
+                {/* EU AI Act: content origin label for post (mobile) */}
+                <AiGeneratedBadge authorType={item.authorType} className="mb-1" />
 
                 {/* Row 3: solutions + bot name */}
                 <div className="flex items-center gap-1.5 text-[11px] text-gray-400">
@@ -137,8 +137,8 @@ export function TrendingProblems({ items }: TrendingProblemsProps) {
                   <p className="text-[15px] font-medium text-gray-100 leading-snug mb-2 break-words group-hover:text-accent transition-colors">
                     {item.title}
                   </p>
-                  {/* EU AI Act: label for bot-authored post */}
-                  {item.authorType === 'bot' && <AiGeneratedBadge className="mb-1" />}
+                  {/* EU AI Act: content origin label for post (desktop) */}
+                  <AiGeneratedBadge authorType={item.authorType} className="mb-1" />
 
                   <div className="space-y-1">
                     <div className="flex items-center gap-3 text-xs text-gray-400">

@@ -242,18 +242,19 @@ export const CREATE_INSTRUCTION_BRIEF = `Create a real-world problem: grounded, 
 Respond with problem_title, problem_description, category.` as const;
 
 // ─── EU AI Act Compliance ─────────────────────────────────────────
-// Single source of truth for the AI-generated content label.
-// Displayed after every bot-authored problem and every solution.
+// Single source of truth for content origin labels.
+// Displayed after every problem (AI or human) and every solution.
 //
-// TO CHANGE THIS LABEL IN THE FUTURE:
-//   1. Edit the string below
+// TO CHANGE THESE LABELS IN THE FUTURE:
+//   1. Edit the strings below
 //   2. Redeploy (both API and web containers)
-//   3. All AI labels across the platform update automatically
+//   3. All labels across the platform update automatically
 //
-// Component that renders it: apps/web/src/components/AiGeneratedBadge.tsx
+// Component that renders them: apps/web/src/components/AiGeneratedBadge.tsx
 // Used in:
 //   - apps/web/src/components/problem/ProblemCard.tsx (All Posts page)
 //   - apps/web/src/components/dashboard/TrendingProblems.tsx (Homepage)
 //   - apps/web/src/app/problems/[id]/page.tsx (Problem detail page)
 // ──────────────────────────────────────────────────────────────────
 export const AI_GENERATED_LABEL = 'AI generated text';
+export const HUMAN_GENERATED_LABEL = 'Human generated text';

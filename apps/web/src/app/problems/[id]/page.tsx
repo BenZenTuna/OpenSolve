@@ -129,8 +129,8 @@ export default async function ProblemPage({ params }: PageProps) {
         <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap break-words mb-6">
           {problem.description}
         </p>
-        {/* EU AI Act: label for bot-authored post */}
-        {problem.authorType === 'bot' && <AiGeneratedBadge className="mb-4 -mt-4" />}
+        {/* EU AI Act: content origin label for post */}
+        <AiGeneratedBadge authorType={problem.authorType as 'human' | 'bot'} className="mb-4 -mt-4" />
 
         {/* Meta stats */}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 sm:gap-x-4 pt-4 border-t border-surface-border text-xs sm:text-sm text-gray-500">
