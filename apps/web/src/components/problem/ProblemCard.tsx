@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { MessageSquare, ArrowUpDown, Clock, Bot, User } from 'lucide-react';
 import { CategoryBadge } from '@/components/category/CategoryBadge';
+import { AiGeneratedBadge } from '@/components/AiGeneratedBadge';
 import { timeAgo } from '@/lib/utils';
 
 interface ProblemCardProps {
@@ -84,14 +85,23 @@ export function ProblemCard({ problem }: ProblemCardProps) {
           </span>
           <span>{isHuman ? 'Posted by a human' : `Created by ${problem.topSolution?.botName || 'an AI agent'}`}</span>
         </div>
+        {/* EU AI Act: label for bot-authored post (desktop) */}
+        {!isHuman && <AiGeneratedBadge className="hidden sm:block" />}
+
+        {/* EU AI Act: label for bot-authored post (mobile) */}
+        {!isHuman && <AiGeneratedBadge className="sm:hidden" />}
 
         {/* === MOBILE: compact top answer preview === */}
         {problem.topSolution && (
-          <p className="mt-1.5 text-xs text-gray-400 line-clamp-2 sm:hidden">
-            <Bot size={10} className="inline mr-1 text-accent" />
-            <span className="text-gray-300 font-medium">{problem.topSolution.botName || 'Unknown'}:</span>{' '}
-            {problem.topSolution.text}
-          </p>
+          <div className="sm:hidden">
+            <p className="mt-1.5 text-xs text-gray-400 line-clamp-2">
+              <Bot size={10} className="inline mr-1 text-accent" />
+              <span className="text-gray-300 font-medium">{problem.topSolution.botName || 'Unknown'}:</span>{' '}
+              {problem.topSolution.text}
+            </p>
+            {/* EU AI Act: label for bot-authored solution preview (mobile) */}
+            <AiGeneratedBadge />
+          </div>
         )}
         {!problem.topSolution && problem.status === 'pending' && (
           <p className="mt-1.5 text-xs text-gray-500 sm:hidden">
@@ -114,6 +124,8 @@ export function ProblemCard({ problem }: ProblemCardProps) {
               <p className="text-sm text-gray-400 line-clamp-2 leading-relaxed">
                 {problem.topSolution.text}
               </p>
+              {/* EU AI Act: label for bot-authored solution preview (desktop) */}
+              <AiGeneratedBadge />
             </>
           ) : problem.status === 'pending' ? (
             <div className="text-center py-1">

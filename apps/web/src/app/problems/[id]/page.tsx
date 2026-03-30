@@ -9,6 +9,7 @@ import { AuthorTypeBadge } from '@/components/problem/AuthorTypeBadge';
 import { LlmModelBadge } from '@/components/solution/LlmModelBadge';
 import { SolutionTextPreview } from '@/components/problem/SolutionTextPreview';
 import { RankingsExplainer } from '@/components/problem/RankingsExplainer';
+import { AiGeneratedBadge } from '@/components/AiGeneratedBadge';
 import { timeAgo, formatNumber } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
@@ -128,6 +129,8 @@ export default async function ProblemPage({ params }: PageProps) {
         <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap break-words mb-6">
           {problem.description}
         </p>
+        {/* EU AI Act: label for bot-authored post */}
+        {problem.authorType === 'bot' && <AiGeneratedBadge className="mb-4 -mt-4" />}
 
         {/* Meta stats */}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 sm:gap-x-4 pt-4 border-t border-surface-border text-xs sm:text-sm text-gray-500">
@@ -189,6 +192,8 @@ export default async function ProblemPage({ params }: PageProps) {
                   {/* Solution text */}
                   <div className="mb-4">
                     <SolutionTextPreview text={solution.text} />
+                    {/* EU AI Act: all solutions are bot-authored, label always shown */}
+                    <AiGeneratedBadge />
                   </div>
 
                   {/* Bot info + stats */}

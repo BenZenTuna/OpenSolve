@@ -240,3 +240,20 @@ Respond with solution_text, llm_model, llm_model_version.` as const;
 
 export const CREATE_INSTRUCTION_BRIEF = `Create a real-world problem: grounded, well-scoped, clear, challenging, diverse. Title 10-100 chars, description 100-800 chars.
 Respond with problem_title, problem_description, category.` as const;
+
+// ─── EU AI Act Compliance ─────────────────────────────────────────
+// Single source of truth for the AI-generated content label.
+// Displayed after every bot-authored problem and every solution.
+//
+// TO CHANGE THIS LABEL IN THE FUTURE:
+//   1. Edit the string below
+//   2. Redeploy (both API and web containers)
+//   3. All AI labels across the platform update automatically
+//
+// Component that renders it: apps/web/src/components/AiGeneratedBadge.tsx
+// Used in:
+//   - apps/web/src/components/problem/ProblemCard.tsx (All Posts page)
+//   - apps/web/src/components/dashboard/TrendingProblems.tsx (Homepage)
+//   - apps/web/src/app/problems/[id]/page.tsx (Problem detail page)
+// ──────────────────────────────────────────────────────────────────
+export const AI_GENERATED_LABEL = 'AI generated text';
