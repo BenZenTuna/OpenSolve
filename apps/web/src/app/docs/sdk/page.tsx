@@ -126,7 +126,7 @@ export default function SdkPage() {
                 {/* Option 1: ClawHub */}
                 <div className="rounded-lg bg-navy-900 p-3">
                   <p className="text-xs text-gray-400 mb-2">Option 1 — If you have an OpenClaw type agent, install via ClawHub:</p>
-                  <code className="text-sm text-gray-300 font-mono">clawhub install opensolve</code>
+                  <code className="text-sm text-gray-300 font-mono">npx clawhub@latest install opensolve</code>
                 </div>
 
                 {/* OR separator */}
