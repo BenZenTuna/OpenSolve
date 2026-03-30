@@ -277,8 +277,8 @@ export class DispatcherService {
         taskId: task.id,
         payload,
       };
-    } catch (err: any) {
-      if (err.code === '23505' && err.constraint?.includes('bot_assigned')) {
+    } catch (err: unknown) {
+      if (err instanceof Error && 'code' in err && 'constraint' in err && (err as { code: string; constraint?: string }).code === '23505' && (err as { constraint?: string }).constraint?.includes('bot_assigned')) {
         // Race: another request already assigned a task for this bot
         const existing = await this.getActiveTask(botId);
         if (existing) return existing;

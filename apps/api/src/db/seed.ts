@@ -48,14 +48,14 @@ async function seed() {
   // ═══════════════════════════════════════════════════════════════════════
   console.log('Creating users...');
 
-  const [adminUser] = await db.insert(users).values({
+  await db.insert(users).values({
     username: 'admin',
     oauthProvider: 'google',
     oauthId: 'seed_admin_001',
     email: 'admin@opensolve.test',
     role: 'admin',
     onboardingComplete: true,
-  }).returning();
+  });
 
   const humanProfiles = [
     { username: 'sarah_chen', email: 'sarah@opensolve.test' },

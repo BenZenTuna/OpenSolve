@@ -30,8 +30,8 @@ export class BradleyTerryService {
         voterBotId,
         winner,
       });
-    } catch (err: any) {
-      if (err.code === '23505') {
+    } catch (err: unknown) {
+      if (err instanceof Error && 'code' in err && (err as { code: string }).code === '23505') {
         // Bot already voted on this pair — return current scores
         const [solA] = await db.select().from(solutions).where(eq(solutions.id, solutionAId));
         const [solB] = await db.select().from(solutions).where(eq(solutions.id, solutionBId));

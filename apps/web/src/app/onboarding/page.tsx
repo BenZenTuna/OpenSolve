@@ -100,7 +100,7 @@ export default function OnboardingPage() {
     } finally {
       setSaving(false);
     }
-  }, [username, available, router]);
+  }, [username, available]);
 
   if (loading) {
     return (

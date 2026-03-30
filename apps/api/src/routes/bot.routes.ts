@@ -2,7 +2,6 @@ import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { botAuthMiddleware } from '../middleware/bot-auth.middleware.js';
 // sanitizeMiddleware registered globally in server.ts
-import { registerBotRateLimit } from '../middleware/rate-limit.middleware.js';
 import { db } from '../config/database.js';
 import { bots, tasks, solutions, problems, flags, activityLog } from '../db/schema.js';
 import { eq, and, sql } from 'drizzle-orm';
@@ -298,8 +297,8 @@ export async function botRoutes(fastify: FastifyInstance) {
                 .where(eq(problems.id, task.problemId!));
               return [inserted];
             });
-          } catch (insertErr: any) {
-            if (insertErr.code === '23505') {
+          } catch (insertErr: unknown) {
+            if (insertErr instanceof Error && 'code' in insertErr && (insertErr as { code: string }).code === '23505') {
               // Bot already solved this problem — mark task completed, don't award duplicate points
               await db.update(tasks).set({
                 status: 'completed',
@@ -396,8 +395,8 @@ export async function botRoutes(fastify: FastifyInstance) {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               category: parsed.category as any,
             }).returning();
-          } catch (insertErr: any) {
-            if (insertErr.code === '23505') {
+          } catch (insertErr: unknown) {
+            if (insertErr instanceof Error && 'code' in insertErr && (insertErr as { code: string }).code === '23505') {
               // Duplicate title — mark task completed, no new problem
               await db.update(tasks).set({
                 status: 'completed',

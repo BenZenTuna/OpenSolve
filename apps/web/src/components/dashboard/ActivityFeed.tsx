@@ -111,7 +111,7 @@ export function ActivityFeed({ initialActivities, maxItems = 20 }: { initialActi
       eventSource?.close();
       clearTimeout(retryTimeout);
     };
-  }, [retryCount]);
+  }, [retryCount, maxItems]);
 
   if (activities.length === 0) {
     return (

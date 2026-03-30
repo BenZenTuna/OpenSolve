@@ -19,7 +19,7 @@ async function safeDecrFlagCounter(problemId: string): Promise<void> {
 }
 
 import { db } from './config/database.js';
-import { tasks, problems } from './db/schema.js';
+import { tasks } from './db/schema.js';
 import { and, eq, lt, sql } from 'drizzle-orm';
 import { authRoutes } from './routes/auth.routes.js';
 import { botRoutes } from './routes/bot.routes.js';
@@ -41,7 +41,6 @@ import { decrementConcurrent, reconcileConcurrentBots } from './services/bot-tra
 import { runRetentionCleanup } from './services/retention.service.js';
 import { DispatcherService } from './services/dispatcher.service.js';
 import { LoadBalancerService } from './services/load-balancer.service.js';
-import { LIMITS } from '@opensolve/shared';
 import { sanitizeMiddleware } from './middleware/sanitize.middleware.js';
 import './types/index.js';
 
