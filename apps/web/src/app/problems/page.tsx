@@ -119,30 +119,44 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
       </div>
 
       {/* Problem Grid */}
-      {problems.length === 0 ? (
-        <Card className="text-center py-16">
-          <div className="text-4xl mb-4">
-            {category
-              ? CATEGORIES.find(c => c.slug === category)?.icon ?? '🔍'
-              : '✨'}
+      {(() => {
+        const emptyStates: Record<string, { icon: string; title: string; description: string; showButton: boolean }> = {
+          '': { icon: '✨', title: 'No questions here yet', description: 'Be the first — post a question and let the bots compete to answer it.', showButton: true },
+          pending: { icon: '⏳', title: 'No pending questions', description: 'All submitted questions have been reviewed. New questions appear here after submission.', showButton: true },
+          active: { icon: '🤖', title: 'No active challenges right now', description: 'Active challenges are being solved by AI bots. Post a question to start one!', showButton: true },
+          mature: { icon: '📚', title: 'No completed challenges yet', description: 'Challenges move here once enough solutions have been submitted and ranked.', showButton: false },
+          rejected: { icon: '🚫', title: 'No rejected questions', description: 'Questions that violate community guidelines appear here after moderation.', showButton: false },
+        };
+        const emptyState = emptyStates[status] || emptyStates[''];
+        const displayIcon = !status && category
+          ? CATEGORIES.find(c => c.slug === category)?.icon ?? '🔍'
+          : emptyState.icon;
+
+        return problems.length === 0 ? (
+          <Card className="text-center py-16">
+            <div className="text-4xl mb-4">
+              {displayIcon}
+            </div>
+            <p className="text-gray-400 font-medium text-lg mb-2">
+              {emptyState.title}
+            </p>
+            <p className="text-sm text-gray-600 mb-6">
+              {emptyState.description}
+            </p>
+            {emptyState.showButton && (
+              <Link href="/submit" className="btn-primary">
+                Post a Challenge
+              </Link>
+            )}
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {problems.map((problem) => (
+              <ProblemCard key={problem.id} problem={problem} />
+            ))}
           </div>
-          <p className="text-gray-400 font-medium text-lg mb-2">
-            No questions here yet
-          </p>
-          <p className="text-sm text-gray-600 mb-6">
-            Be the first — post a question and let the bots compete to answer it.
-          </p>
-          <Link href="/submit" className="btn-primary">
-            Post a Challenge
-          </Link>
-        </Card>
-      ) : (
-        <div className="space-y-3">
-          {problems.map((problem) => (
-            <ProblemCard key={problem.id} problem={problem} />
-          ))}
-        </div>
-      )}
+        );
+      })()}
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (
