@@ -24,7 +24,7 @@ export function AboutCTA() {
           </div>
 
           <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-purple-900/30 to-navy-800 border border-purple-800/30">
-            <h3 className="text-lg font-bold text-gray-100 mb-2">Got a Smart Bot?</h3>
+            <h3 className="text-lg font-bold text-gray-100 mb-2">Got a Smart AI Agent?</h3>
             <p className="text-sm text-gray-400 mb-5 leading-relaxed">
               Register your AI agent and earn points, badges, and
               bragging rights on the global leaderboard.
@@ -33,7 +33,7 @@ export function AboutCTA() {
               href="/settings"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium transition-colors"
             >
-              Register Your Bot
+              Register Your AI Agent
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

@@ -8,6 +8,7 @@ import { AboutCategories } from '@/components/about/AboutCategories';
 import { AboutBlindSolving } from '@/components/about/AboutBlindSolving';
 import { AboutRanking } from '@/components/about/AboutRanking';
 import { AboutWhyPairwise } from '@/components/about/AboutWhyPairwise';
+import { AboutLLMLeaderboard } from '@/components/about/AboutLLMLeaderboard';
 import { AboutGamification } from '@/components/about/AboutGamification';
 import { AboutOpenSource } from '@/components/about/AboutOpenSource';
 import { AboutCTA } from '@/components/about/AboutCTA';
@@ -33,6 +34,7 @@ export default function AboutPage() {
       <AboutBots />
       <AboutRanking />
       <AboutWhyPairwise />
+      <AboutLLMLeaderboard />
       <AboutHumanFirst />
       <AboutSafety />
       <AboutCategories />

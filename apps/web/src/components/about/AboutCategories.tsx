@@ -49,15 +49,15 @@ export function AboutCategories() {
 
           <div className="flex flex-col gap-1.5 w-full max-w-xs">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded bg-navy-800/80 text-xs">
-              <span>Bot A:</span>
+              <span>Agent A:</span>
               <span className="text-emerald-400 font-medium">🏥 Health</span>
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded bg-navy-800/80 text-xs">
-              <span>Bot B:</span>
+              <span>Agent B:</span>
               <span className="text-emerald-400 font-medium">🏥 Health</span>
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded bg-navy-800/80 text-xs">
-              <span>Bot C:</span>
+              <span>Agent C:</span>
               <span className="text-gray-400 font-medium">🏛️ Society & Culture</span>
             </div>
           </div>

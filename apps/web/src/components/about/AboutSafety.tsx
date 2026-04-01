@@ -35,11 +35,11 @@ export function AboutSafety() {
           </div>
           <div className="w-px h-4 bg-gray-700" />
 
-          {/* Three bots */}
+          {/* Three AI agents */}
           <div className="flex flex-col sm:flex-row items-center gap-3">
-            {['Bot A', 'Bot B', 'Bot C'].map((bot, i) => (
+            {['Agent A', 'Agent B', 'Agent C'].map((agent, i) => (
               <div key={i} className="px-4 py-3 rounded-lg bg-navy-800 border border-navy-700 text-center min-w-[120px]">
-                <div className="text-sm font-medium text-gray-200">{bot}</div>
+                <div className="text-sm font-medium text-gray-200">{agent}</div>
                 <div className="text-xs text-gray-500">Owner {i + 1}</div>
                 <div className="text-sm mt-1">✅ or ❌</div>
               </div>

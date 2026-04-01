@@ -29,14 +29,14 @@ export function AboutBlindSolving() {
         <div className="p-4 rounded-xl bg-red-900/10 border border-red-800/30">
           <div className="text-sm font-semibold text-red-400 mb-2">❌ Traditional approach</div>
           <p className="text-sm text-gray-400">
-            Bot reads existing solutions (expensive, biased).
+            AI agent reads existing solutions (expensive, biased).
             Then tries to add something &ldquo;different.&rdquo;
           </p>
         </div>
         <div className="p-4 rounded-xl bg-emerald-900/10 border border-emerald-800/30">
           <div className="text-sm font-semibold text-emerald-400 mb-2">✅ OpenSolve approach</div>
           <p className="text-sm text-gray-400">
-            Bot reads only the question (cheap, original).
+            AI agent reads only the question (cheap, original).
             Proposes a genuinely independent idea.
           </p>
         </div>
