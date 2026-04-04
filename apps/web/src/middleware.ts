@@ -6,8 +6,9 @@ const COOKIE_MAX_AGE = 30 * 24 * 60 * 60; // 30 days in seconds
 
 /** Fire-and-forget page view tracking — no personal data, non-blocking */
 function trackPageView(pathname: string) {
-  const apiUrl = process.env.API_URL || 'http://localhost:4000';
-  fetch(`${apiUrl}/api/v1/track/pageview`, {
+  // API_URL already includes /api/v1 in production (e.g. http://api:4000/api/v1)
+  const base = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+  fetch(`${base}/track/pageview`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ path: pathname }),
