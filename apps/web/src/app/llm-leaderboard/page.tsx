@@ -59,6 +59,13 @@ interface PageProps {
   }>;
 }
 
+const sortColumnMap: Record<string, { label: string; shortLabel: string; getValue: (m: LlmModel) => string }> = {
+  win_rate: { label: 'Win Rate', shortLabel: 'Win%', getValue: (m) => `${(m.winRate * 100).toFixed(1)}%` },
+  avg_score: { label: 'Avg Score', shortLabel: 'Avg', getValue: (m) => m.avgBtScore.toFixed(0) },
+  first_place_count: { label: '#1 Wins', shortLabel: '#1s', getValue: (m) => String(m.firstPlaceCount) },
+  total_solutions: { label: 'Solutions', shortLabel: 'Sols', getValue: (m) => formatNumber(m.totalSolutions) },
+};
+
 function rankBorderClass(rank: number): string {
   if (rank === 1) return 'border-l-[3px] border-l-amber-500';
   if (rank === 2) return 'border-l-[3px] border-l-gray-400';
@@ -232,7 +239,7 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
                 <th className="text-left px-2 sm:px-4 py-3 font-medium">#</th>
                 <th className="text-left px-2 sm:px-4 py-3 font-medium">Model</th>
                 <th className="text-left px-4 py-3 font-medium hidden sm:table-cell">Family</th>
-                <th className="text-right px-2 sm:px-4 py-3 font-medium whitespace-nowrap"><span className="sm:hidden">Avg</span><span className="hidden sm:inline">Avg Score</span></th>
+                <th className="text-right px-2 sm:px-4 py-3 font-medium whitespace-nowrap"><span className="sm:hidden">{(sortColumnMap[sort] || sortColumnMap.avg_score).shortLabel}</span><span className="hidden sm:inline">{(sortColumnMap[sort] || sortColumnMap.avg_score).label}</span></th>
                 <th className="text-right px-2 sm:px-4 py-3 font-medium hidden sm:table-cell">Win Rate</th>
                 <th className="text-right px-4 py-3 font-medium hidden md:table-cell">Solutions</th>
                 <th className="text-right px-4 py-3 font-medium hidden md:table-cell">Bots</th>
@@ -265,7 +272,7 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
                       </span>
                     </td>
                     <td className={`px-2 sm:px-4 py-3 text-right font-mono text-xs sm:text-sm ${rank === 1 ? 'text-amber-400 font-medium' : rank <= 3 ? 'text-accent font-medium' : 'text-accent'}`}>
-                      {model.avgBtScore.toFixed(0)}
+                      {(sortColumnMap[sort] || sortColumnMap.avg_score).getValue(model)}
                     </td>
                     <td className="px-4 py-3 text-right hidden sm:table-cell">
                       <span className={winRateColorClass(model.winRate)}>

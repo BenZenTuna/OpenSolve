@@ -38,6 +38,7 @@ import { adminEmailRoutes } from './routes/admin.email.routes.js';
 import { contactRoutes } from './routes/contact.routes.js';
 import { userProfileRoutes } from './routes/user-profile.routes.js';
 import { decrementConcurrent, reconcileConcurrentBots } from './services/bot-traffic.service.js';
+import { LlmLeaderboardService } from './services/llm-leaderboard.service.js';
 import { runRetentionCleanup } from './services/retention.service.js';
 import { DispatcherService } from './services/dispatcher.service.js';
 import { LoadBalancerService } from './services/load-balancer.service.js';
@@ -275,6 +276,18 @@ async function start() {
         server.log.error(err, 'Failed to reconcile concurrent bots counter')
       );
     }, 60 * 1000);
+
+    // Recalculate LLM leaderboard stats every 5 minutes.
+    // Safety net so model avg scores and win rates stay current even if
+    // the per-vote trigger (every 3rd comparison) misses edge cases.
+    const llmLeaderboard = new LlmLeaderboardService();
+    setInterval(async () => {
+      try {
+        await llmLeaderboard.recalculateAll();
+      } catch (err) {
+        server.log.error(err, 'LLM leaderboard recalculation failed');
+      }
+    }, 5 * 60 * 1000);
   } catch (err) {
     logger.error(err, 'Failed to start server');
     process.exit(1);

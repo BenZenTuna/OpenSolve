@@ -188,13 +188,13 @@ export class BradleyTerryService {
     // Recalculate LLM model stats (every 10th comparison for efficiency)
     if (result.llmModelA) {
       const [modelA] = await db.select({ totalComparisons: solutions.comparisonCount }).from(solutions).where(eq(solutions.id, solutionAId));
-      if (modelA && modelA.totalComparisons % 10 === 0) {
+      if (modelA && modelA.totalComparisons % 3 === 0) {
         llmLeaderboard.recalculateModelStats(result.llmModelA).catch(() => {});
       }
     }
     if (result.llmModelB) {
       const [modelB] = await db.select({ totalComparisons: solutions.comparisonCount }).from(solutions).where(eq(solutions.id, solutionBId));
-      if (modelB && modelB.totalComparisons % 10 === 0) {
+      if (modelB && modelB.totalComparisons % 3 === 0) {
         llmLeaderboard.recalculateModelStats(result.llmModelB).catch(() => {});
       }
     }
