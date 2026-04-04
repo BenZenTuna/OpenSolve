@@ -146,8 +146,10 @@ export default function AdminDashboardPage() {
   const [botSummary, setBotSummary] = useState<BotSummary | null>(null);
   const [throughput, setThroughput] = useState<ThroughputHour[] | null>(null);
   const [moderationCounts, setModerationCounts] = useState<ModerationCounts | null>(null);
-  const [traffic, setTraffic] = useState<TrafficResponse | null>(null);
-  const [trafficPeriod, setTrafficPeriod] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('daily');
+  const [pageViewTraffic, setPageViewTraffic] = useState<TrafficResponse | null>(null);
+  const [botTraffic, setBotTraffic] = useState<TrafficResponse | null>(null);
+  const [pageViewPeriod, setPageViewPeriod] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('daily');
+  const [botTrafficPeriod, setBotTrafficPeriod] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('daily');
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [refreshing, setRefreshing] = useState(false);
@@ -161,7 +163,8 @@ export default function AdminDashboardPage() {
       adminFetch<BotSummary>('/admin/bots/summary'),
       adminFetch<{ data: ThroughputHour[] }>('/admin/metrics/throughput'),
       adminFetch<{ counts: ModerationCounts }>('/admin/moderation/queue'),
-      adminFetch<TrafficResponse>(`/admin/stats/visits?period=${trafficPeriod}`),
+      adminFetch<TrafficResponse>(`/admin/stats/visits?period=${pageViewPeriod}`),
+      adminFetch<TrafficResponse>(`/admin/stats/visits?period=${botTrafficPeriod}`),
     ]);
 
     if (results[0].status === 'fulfilled') setStats(results[0].value);
@@ -181,11 +184,14 @@ export default function AdminDashboardPage() {
     if (results[4].status === 'fulfilled') setModerationCounts(results[4].value.counts);
     else newErrors.moderation = 'Failed to load moderation queue';
 
-    if (results[5].status === 'fulfilled') setTraffic(results[5].value);
-    else newErrors.traffic = 'Failed to load traffic data';
+    if (results[5].status === 'fulfilled') setPageViewTraffic(results[5].value);
+    else newErrors.pageViewTraffic = 'Failed to load page view data';
+
+    if (results[6].status === 'fulfilled') setBotTraffic(results[6].value);
+    else newErrors.botTraffic = 'Failed to load bot traffic data';
 
     setErrors(newErrors);
-  }, [trafficPeriod]);
+  }, [pageViewPeriod, botTrafficPeriod]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -248,24 +254,6 @@ export default function AdminDashboardPage() {
           <StatCard label="Flags" value={stats?.totalFlags ?? null} icon={Flag} color="bg-red-500" />
           <StatCard label="Views Today" value={stats?.todayPageViews ?? null} icon={Eye} color="bg-cyan-500" />
           <StatCard label="Bot Reqs Today" value={stats?.todayBotRequests ?? null} icon={Bot} color="bg-amber-500" />
-        </div>
-      )}
-
-      {/* Today's Top Pages */}
-      {stats?.todayTopPaths && stats.todayTopPaths.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <h3 className="text-sm font-semibold text-gray-700 mb-2">Top Pages Today</h3>
-          <div className="space-y-1">
-            {stats.todayTopPaths.map((p, i) => (
-              <div key={p.path} className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 truncate">
-                  <span className="text-gray-400 mr-2">{i + 1}.</span>
-                  {p.path}
-                </span>
-                <span className="text-gray-900 font-medium ml-2 shrink-0">{p.views}</span>
-              </div>
-            ))}
-          </div>
         </div>
       )}
 
@@ -399,84 +387,140 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Section 2b: Platform Traffic */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-gray-900">Platform Traffic</h2>
-          <div className="flex gap-1">
-            {(['daily', 'weekly', 'monthly', 'yearly'] as const).map((p) => (
-              <button
-                key={p}
-                onClick={() => setTrafficPeriod(p)}
-                className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
-                  trafficPeriod === p
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                {{ daily: 'Day', weekly: 'Week', monthly: 'Month', yearly: 'Year' }[p]}
-              </button>
-            ))}
-          </div>
-        </div>
-        {errors.traffic ? (
-          <SectionError message={errors.traffic} onRetry={handleRefresh} />
-        ) : !traffic ? (
-          <div className="h-64 bg-gray-100 rounded animate-pulse" />
-        ) : traffic.data.length === 0 ? (
-          <div className="h-64 flex items-center justify-center text-sm text-gray-400">
-            No traffic data yet
-          </div>
-        ) : (
-          <>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={traffic.data.map(d => ({
-                  ...d,
-                  label: trafficPeriod === 'yearly'
-                    ? new Date(d.date).toLocaleDateString([], { year: 'numeric' })
-                    : trafficPeriod === 'monthly'
-                    ? new Date(d.date).toLocaleDateString([], { month: 'short', year: 'numeric' })
-                    : new Date(d.date).toLocaleDateString([], { month: 'short', day: 'numeric' }),
-                }))}>
-                  <defs>
-                    <linearGradient id="pageViewGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="botReqGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#9ca3af' }} interval="preserveStartEnd" tickLine={false} axisLine={{ stroke: '#e5e7eb' }} />
-                  <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} tickLine={false} axisLine={false} allowDecimals={false} />
-                  <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }} />
-                  <Area type="monotone" dataKey="pageViews" stroke="#3b82f6" fill="url(#pageViewGrad)" strokeWidth={2} name="Page Views" />
-                  <Area type="monotone" dataKey="botRequests" stroke="#f59e0b" fill="url(#botReqGrad)" strokeWidth={2} name="Bot Requests" />
-                  <Legend verticalAlign="top" align="right" iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '12px' }} />
-                </AreaChart>
-              </ResponsiveContainer>
+      {/* Section 2b: Traffic Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Page Views Chart */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-semibold text-gray-900">Page Views</h2>
+            <div className="flex gap-1">
+              {(['daily', 'weekly', 'monthly', 'yearly'] as const).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPageViewPeriod(p)}
+                  className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
+                    pageViewPeriod === p
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  {{ daily: 'Day', weekly: 'Week', monthly: 'Month', yearly: 'Year' }[p]}
+                </button>
+              ))}
             </div>
-            {traffic.topPaths.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-gray-100">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Top Pages ({trafficPeriod})</h3>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-1">
-                  {traffic.topPaths.slice(0, 6).map((p, i) => (
-                    <div key={p.path} className="flex items-center justify-between text-xs">
-                      <span className="text-gray-600 truncate"><span className="text-gray-400 mr-1">{i + 1}.</span>{p.path}</span>
-                      <span className="text-gray-900 font-medium ml-2 shrink-0">{p.totalViews.toLocaleString()}</span>
-                    </div>
-                  ))}
-                </div>
+          </div>
+          {errors.pageViewTraffic ? (
+            <SectionError message={errors.pageViewTraffic} onRetry={handleRefresh} />
+          ) : !pageViewTraffic ? (
+            <div className="h-64 bg-gray-100 rounded animate-pulse" />
+          ) : pageViewTraffic.data.length === 0 ? (
+            <div className="h-64 flex items-center justify-center text-sm text-gray-400">
+              No page view data yet
+            </div>
+          ) : (
+            <>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={pageViewTraffic.data.map(d => ({
+                    ...d,
+                    label: pageViewPeriod === 'yearly'
+                      ? new Date(d.date).toLocaleDateString([], { year: 'numeric' })
+                      : pageViewPeriod === 'monthly'
+                      ? new Date(d.date).toLocaleDateString([], { month: 'short', year: 'numeric' })
+                      : new Date(d.date).toLocaleDateString([], { month: 'short', day: 'numeric' }),
+                  }))}>
+                    <defs>
+                      <linearGradient id="pageViewGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#9ca3af' }} interval="preserveStartEnd" tickLine={false} axisLine={{ stroke: '#e5e7eb' }} />
+                    <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} tickLine={false} axisLine={false} allowDecimals={false} />
+                    <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }} />
+                    <Area type="monotone" dataKey="pageViews" stroke="#3b82f6" fill="url(#pageViewGrad)" strokeWidth={2} name="Page Views" />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
-            )}
-            <div className="mt-3 flex gap-4 text-xs text-gray-500">
-              <span>Total views: <span className="font-medium text-gray-700">{traffic.totals.pageViews.toLocaleString()}</span></span>
-              <span>Total bot requests: <span className="font-medium text-gray-700">{traffic.totals.botRequests.toLocaleString()}</span></span>
+              {pageViewTraffic.topPaths.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Top Pages</h3>
+                  <div className="space-y-1">
+                    {pageViewTraffic.topPaths.slice(0, 6).map((p, i) => (
+                      <div key={p.path} className="flex items-center justify-between text-xs">
+                        <span className="text-gray-600 truncate"><span className="text-gray-400 mr-1">{i + 1}.</span>{p.path}</span>
+                        <span className="text-gray-900 font-medium ml-2 shrink-0">{p.totalViews.toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div className="mt-3 text-xs text-gray-500">
+                Total: <span className="font-medium text-gray-700">{pageViewTraffic.totals.pageViews.toLocaleString()}</span> views
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Bot API Requests Chart */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-semibold text-gray-900">Bot API Requests</h2>
+            <div className="flex gap-1">
+              {(['daily', 'weekly', 'monthly', 'yearly'] as const).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setBotTrafficPeriod(p)}
+                  className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
+                    botTrafficPeriod === p
+                      ? 'bg-amber-100 text-amber-700'
+                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  {{ daily: 'Day', weekly: 'Week', monthly: 'Month', yearly: 'Year' }[p]}
+                </button>
+              ))}
             </div>
-          </>
-        )}
+          </div>
+          {errors.botTraffic ? (
+            <SectionError message={errors.botTraffic} onRetry={handleRefresh} />
+          ) : !botTraffic ? (
+            <div className="h-64 bg-gray-100 rounded animate-pulse" />
+          ) : botTraffic.data.length === 0 ? (
+            <div className="h-64 flex items-center justify-center text-sm text-gray-400">
+              No bot traffic data yet
+            </div>
+          ) : (
+            <>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={botTraffic.data.map(d => ({
+                    ...d,
+                    label: botTrafficPeriod === 'yearly'
+                      ? new Date(d.date).toLocaleDateString([], { year: 'numeric' })
+                      : botTrafficPeriod === 'monthly'
+                      ? new Date(d.date).toLocaleDateString([], { month: 'short', year: 'numeric' })
+                      : new Date(d.date).toLocaleDateString([], { month: 'short', day: 'numeric' }),
+                  }))}>
+                    <defs>
+                      <linearGradient id="botReqGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#9ca3af' }} interval="preserveStartEnd" tickLine={false} axisLine={{ stroke: '#e5e7eb' }} />
+                    <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} tickLine={false} axisLine={false} allowDecimals={false} />
+                    <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }} />
+                    <Area type="monotone" dataKey="botRequests" stroke="#f59e0b" fill="url(#botReqGrad)" strokeWidth={2} name="Bot Requests" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="mt-3 text-xs text-gray-500">
+                Total: <span className="font-medium text-gray-700">{botTraffic.totals.botRequests.toLocaleString()}</span> requests
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Section 3: Bot Health + Moderation Queue */}

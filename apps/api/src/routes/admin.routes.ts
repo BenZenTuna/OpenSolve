@@ -300,15 +300,17 @@ export async function adminRoutes(fastify: FastifyInstance) {
       conditions.push(eq(dailyVisitStats.path, query.path));
     }
 
+    // truncFn is safe — validated by Zod enum, only 'day'|'week'|'month'|'year'
+    const trunc = sql.raw(`'${truncFn}'`);
     const data = await db.select({
-      date: sql<string>`date_trunc(${truncFn}, ${dailyVisitStats.date})::date::text`,
+      date: sql<string>`date_trunc(${trunc}, ${dailyVisitStats.date})::date::text`,
       pageViews: sql<number>`COALESCE(sum(${dailyVisitStats.pageViews}), 0)::int`,
       botRequests: sql<number>`COALESCE(sum(${dailyVisitStats.botRequests}), 0)::int`,
     })
     .from(dailyVisitStats)
     .where(and(...conditions))
-    .groupBy(sql`date_trunc(${truncFn}, ${dailyVisitStats.date})`)
-    .orderBy(sql`date_trunc(${truncFn}, ${dailyVisitStats.date})`);
+    .groupBy(sql`date_trunc(${trunc}, ${dailyVisitStats.date})`)
+    .orderBy(sql`date_trunc(${trunc}, ${dailyVisitStats.date})`);
 
     const topPaths = await db.select({
       path: dailyVisitStats.path,
