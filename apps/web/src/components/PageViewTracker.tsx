@@ -8,8 +8,8 @@ export function PageViewTracker() {
   const lastTrackedRef = useRef<string>('');
 
   useEffect(() => {
-    // Only track the homepage
-    if (pathname !== '/') return;
+    // Skip admin routes
+    if (pathname.startsWith('/admin')) return;
 
     // Avoid double-tracking the same path (React strict mode, etc.)
     if (lastTrackedRef.current === pathname) return;

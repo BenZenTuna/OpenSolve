@@ -55,6 +55,51 @@ interface TrafficResponse {
   totals: { pageViews: number; botRequests: number };
 }
 
+interface ByPathResponse {
+  series: Array<{ path: string; data: Array<{ date: string; pageViews: number }> }>;
+  availablePaths: string[];
+}
+
+const PAGE_COLORS = [
+  { stroke: '#3b82f6', fill: '#3b82f6' },
+  { stroke: '#8b5cf6', fill: '#8b5cf6' },
+  { stroke: '#06b6d4', fill: '#06b6d4' },
+  { stroke: '#10b981', fill: '#10b981' },
+  { stroke: '#f59e0b', fill: '#f59e0b' },
+  { stroke: '#ef4444', fill: '#ef4444' },
+  { stroke: '#ec4899', fill: '#ec4899' },
+  { stroke: '#6366f1', fill: '#6366f1' },
+];
+
+const PATH_LABELS: Record<string, string> = {
+  '/': 'Homepage',
+  '/problems': 'All Posts',
+  '/bots': 'AI Agents',
+  '/problems/[id]': 'Problem Detail',
+  '/bots/[id]': 'Agent Profile',
+  '/users/[id]': 'User Profile',
+  '/llm-leaderboard': 'LLM Arena',
+  '/llm-leaderboard/[modelName]': 'Model Detail',
+  '/how-it-works': 'How it Works',
+  '/submit': 'Post Challenge',
+  '/settings': 'Settings',
+  '/search': 'Search',
+  '/docs/api': 'API Docs',
+  '/docs/sdk': 'SDK Guide',
+  '/hall-of-fame': 'Hall of Fame',
+  '/newsletter': 'Newsletter',
+  '/contact': 'Contact',
+  '/privacy': 'Privacy',
+  '/terms': 'Terms',
+  '/impressum': 'Impressum',
+  '/auth/login': 'Login',
+  '/onboarding': 'Onboarding',
+};
+
+function pathLabel(path: string): string {
+  return PATH_LABELS[path] || path;
+}
+
 interface ProblemSummary {
   pending: number;
   approved: number;
@@ -146,10 +191,11 @@ export default function AdminDashboardPage() {
   const [botSummary, setBotSummary] = useState<BotSummary | null>(null);
   const [throughput, setThroughput] = useState<ThroughputHour[] | null>(null);
   const [moderationCounts, setModerationCounts] = useState<ModerationCounts | null>(null);
-  const [pageViewTraffic, setPageViewTraffic] = useState<TrafficResponse | null>(null);
+  const [pageViewByPath, setPageViewByPath] = useState<ByPathResponse | null>(null);
   const [botTraffic, setBotTraffic] = useState<TrafficResponse | null>(null);
   const [pageViewPeriod, setPageViewPeriod] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('daily');
   const [botTrafficPeriod, setBotTrafficPeriod] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('daily');
+  const [selectedPaths, setSelectedPaths] = useState<string[]>([]);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [refreshing, setRefreshing] = useState(false);
@@ -163,7 +209,7 @@ export default function AdminDashboardPage() {
       adminFetch<BotSummary>('/admin/bots/summary'),
       adminFetch<{ data: ThroughputHour[] }>('/admin/metrics/throughput'),
       adminFetch<{ counts: ModerationCounts }>('/admin/moderation/queue'),
-      adminFetch<TrafficResponse>(`/admin/stats/visits?period=${pageViewPeriod}`),
+      adminFetch<ByPathResponse>(`/admin/stats/visits/by-path?period=${pageViewPeriod}${selectedPaths.length > 0 ? `&paths=${selectedPaths.join(',')}` : ''}`),
       adminFetch<TrafficResponse>(`/admin/stats/visits?period=${botTrafficPeriod}`),
     ]);
 
@@ -184,14 +230,14 @@ export default function AdminDashboardPage() {
     if (results[4].status === 'fulfilled') setModerationCounts(results[4].value.counts);
     else newErrors.moderation = 'Failed to load moderation queue';
 
-    if (results[5].status === 'fulfilled') setPageViewTraffic(results[5].value);
+    if (results[5].status === 'fulfilled') setPageViewByPath(results[5].value);
     else newErrors.pageViewTraffic = 'Failed to load page view data';
 
     if (results[6].status === 'fulfilled') setBotTraffic(results[6].value);
     else newErrors.botTraffic = 'Failed to load bot traffic data';
 
     setErrors(newErrors);
-  }, [pageViewPeriod, botTrafficPeriod]);
+  }, [pageViewPeriod, botTrafficPeriod, selectedPaths]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -389,9 +435,9 @@ export default function AdminDashboardPage() {
 
       {/* Section 2b: Traffic Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Page Views Chart */}
+        {/* Page Views by Path Chart */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3">
             <h2 className="text-base font-semibold text-gray-900">Page Views</h2>
             <div className="flex gap-1">
               {(['daily', 'weekly', 'monthly', 'yearly'] as const).map((p) => (
@@ -409,57 +455,119 @@ export default function AdminDashboardPage() {
               ))}
             </div>
           </div>
+
+          {/* Path filter chips */}
+          {pageViewByPath?.availablePaths && pageViewByPath.availablePaths.length > 0 && (
+            <div className="flex items-center gap-1.5 mb-3 overflow-x-auto scrollbar-hide pb-1">
+              <button
+                onClick={() => setSelectedPaths([])}
+                className={`shrink-0 px-2 py-0.5 text-[11px] font-medium rounded-full transition-colors ${
+                  selectedPaths.length === 0
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'bg-gray-100 text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Top 8
+              </button>
+              {pageViewByPath.availablePaths.map((path, i) => {
+                const isActive = selectedPaths.includes(path);
+                const color = PAGE_COLORS[i % PAGE_COLORS.length];
+                return (
+                  <button
+                    key={path}
+                    onClick={() => setSelectedPaths(prev =>
+                      prev.includes(path) ? prev.filter(p => p !== path) : [...prev, path]
+                    )}
+                    className={`shrink-0 flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium rounded-full transition-colors ${
+                      isActive
+                        ? 'bg-gray-900 text-white'
+                        : 'bg-gray-100 text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: color.stroke }} />
+                    {pathLabel(path)}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
           {errors.pageViewTraffic ? (
             <SectionError message={errors.pageViewTraffic} onRetry={handleRefresh} />
-          ) : !pageViewTraffic ? (
+          ) : !pageViewByPath ? (
             <div className="h-64 bg-gray-100 rounded animate-pulse" />
-          ) : pageViewTraffic.data.length === 0 ? (
+          ) : pageViewByPath.series.length === 0 ? (
             <div className="h-64 flex items-center justify-center text-sm text-gray-400">
               No page view data yet
             </div>
-          ) : (
-            <>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={pageViewTraffic.data.map(d => ({
-                    ...d,
-                    label: pageViewPeriod === 'yearly'
-                      ? new Date(d.date).toLocaleDateString([], { year: 'numeric' })
-                      : pageViewPeriod === 'monthly'
-                      ? new Date(d.date).toLocaleDateString([], { month: 'short', year: 'numeric' })
-                      : new Date(d.date).toLocaleDateString([], { month: 'short', day: 'numeric' }),
-                  }))}>
-                    <defs>
-                      <linearGradient id="pageViewGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#9ca3af' }} interval="preserveStartEnd" tickLine={false} axisLine={{ stroke: '#e5e7eb' }} />
-                    <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} tickLine={false} axisLine={false} allowDecimals={false} />
-                    <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }} />
-                    <Area type="monotone" dataKey="pageViews" stroke="#3b82f6" fill="url(#pageViewGrad)" strokeWidth={2} name="Page Views" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-              {pageViewTraffic.topPaths.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-gray-100">
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Top Pages</h3>
-                  <div className="space-y-1">
-                    {pageViewTraffic.topPaths.slice(0, 6).map((p, i) => (
-                      <div key={p.path} className="flex items-center justify-between text-xs">
-                        <span className="text-gray-600 truncate"><span className="text-gray-400 mr-1">{i + 1}.</span>{p.path}</span>
-                        <span className="text-gray-900 font-medium ml-2 shrink-0">{p.totalViews.toLocaleString()}</span>
-                      </div>
-                    ))}
-                  </div>
+          ) : (() => {
+            // Build unified chart data: each date gets a row with all paths as columns
+            const dateMap = new Map<string, Record<string, number>>();
+            for (const s of pageViewByPath.series) {
+              for (const d of s.data) {
+                const row = dateMap.get(d.date) || {};
+                row[s.path] = (row[s.path] || 0) + d.pageViews;
+                dateMap.set(d.date, row);
+              }
+            }
+            const chartData = Array.from(dateMap.entries())
+              .sort(([a], [b]) => a.localeCompare(b))
+              .map(([date, paths]) => ({
+                ...paths,
+                label: pageViewPeriod === 'yearly'
+                  ? new Date(date).toLocaleDateString([], { year: 'numeric' })
+                  : pageViewPeriod === 'monthly'
+                  ? new Date(date).toLocaleDateString([], { month: 'short', year: 'numeric' })
+                  : new Date(date).toLocaleDateString([], { month: 'short', day: 'numeric' }),
+              }));
+            const pathKeys = pageViewByPath.series.map(s => s.path);
+
+            return (
+              <>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartData}>
+                      <defs>
+                        {pathKeys.map((path, i) => (
+                          <linearGradient key={path} id={`pvGrad${i}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={PAGE_COLORS[i % PAGE_COLORS.length].fill} stopOpacity={0.15} />
+                            <stop offset="95%" stopColor={PAGE_COLORS[i % PAGE_COLORS.length].fill} stopOpacity={0} />
+                          </linearGradient>
+                        ))}
+                      </defs>
+                      <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#9ca3af' }} interval="preserveStartEnd" tickLine={false} axisLine={{ stroke: '#e5e7eb' }} />
+                      <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} tickLine={false} axisLine={false} allowDecimals={false} />
+                      <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }} />
+                      {pathKeys.map((path, i) => (
+                        <Area
+                          key={path}
+                          type="monotone"
+                          dataKey={path}
+                          stroke={PAGE_COLORS[i % PAGE_COLORS.length].stroke}
+                          fill={`url(#pvGrad${i})`}
+                          strokeWidth={2}
+                          name={pathLabel(path)}
+                        />
+                      ))}
+                    </AreaChart>
+                  </ResponsiveContainer>
                 </div>
-              )}
-              <div className="mt-3 text-xs text-gray-500">
-                Total: <span className="font-medium text-gray-700">{pageViewTraffic.totals.pageViews.toLocaleString()}</span> views
-              </div>
-            </>
-          )}
+                {/* Legend with totals */}
+                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+                  {pageViewByPath.series.map((s, i) => {
+                    const total = s.data.reduce((sum, d) => sum + d.pageViews, 0);
+                    return (
+                      <div key={s.path} className="flex items-center gap-1.5 text-xs text-gray-600">
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: PAGE_COLORS[i % PAGE_COLORS.length].stroke }} />
+                        <span>{pathLabel(s.path)}</span>
+                        <span className="font-medium text-gray-900">{total.toLocaleString()}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            );
+          })()}
         </div>
 
         {/* Bot API Requests Chart */}

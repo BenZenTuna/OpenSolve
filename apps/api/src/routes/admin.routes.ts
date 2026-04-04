@@ -355,6 +355,104 @@ export async function adminRoutes(fastify: FastifyInstance) {
     return reply.code(200).send({ data, topPaths, totals });
   });
 
+  // ===== GET /admin/stats/visits/by-path — Per-path time series =====
+  fastify.get('/admin/stats/visits/by-path', async (request, reply) => {
+    const query = z.object({
+      period: z.enum(['daily', 'weekly', 'monthly', 'yearly']).default('daily'),
+      from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+      to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+      paths: z.string().max(2000).optional(),
+    }).parse(request.query);
+
+    const now = new Date();
+    const defaultFrom = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const fromDate = query.from || defaultFrom;
+    const toDate = query.to || now.toISOString().split('T')[0];
+
+    const truncFn = { daily: 'day', weekly: 'week', monthly: 'month', yearly: 'year' }[query.period];
+    const trunc = sql.raw(`'${truncFn}'`);
+
+    // Get all available paths in the date range
+    const availableRows = await db.selectDistinct({ path: dailyVisitStats.path })
+      .from(dailyVisitStats)
+      .where(and(
+        gte(dailyVisitStats.date, fromDate),
+        lte(dailyVisitStats.date, toDate),
+      ))
+      .orderBy(dailyVisitStats.path);
+    const availablePaths = availableRows.map(r => r.path).filter(p => p !== '_bot_total');
+
+    // Determine which paths to show
+    let targetPaths: string[];
+    if (query.paths) {
+      targetPaths = query.paths.split(',').map(p => p.trim()).filter(Boolean);
+    } else {
+      // Top 8 by total views
+      const topRows = await db.select({
+        path: dailyVisitStats.path,
+        total: sql<number>`COALESCE(sum(${dailyVisitStats.pageViews}), 0)::int`,
+      })
+      .from(dailyVisitStats)
+      .where(and(
+        gte(dailyVisitStats.date, fromDate),
+        lte(dailyVisitStats.date, toDate),
+        sql`${dailyVisitStats.path} != '_bot_total'`,
+      ))
+      .groupBy(dailyVisitStats.path)
+      .orderBy(desc(sql`sum(${dailyVisitStats.pageViews})`))
+      .limit(8);
+      targetPaths = topRows.map(r => r.path);
+    }
+
+    // Fetch time series for each target path
+    const series: Array<{ path: string; data: Array<{ date: string; pageViews: number }> }> = [];
+    for (const path of targetPaths) {
+      const rows = await db.select({
+        date: sql<string>`date_trunc(${trunc}, ${dailyVisitStats.date})::date::text`,
+        pageViews: sql<number>`COALESCE(sum(${dailyVisitStats.pageViews}), 0)::int`,
+      })
+      .from(dailyVisitStats)
+      .where(and(
+        gte(dailyVisitStats.date, fromDate),
+        lte(dailyVisitStats.date, toDate),
+        eq(dailyVisitStats.path, path),
+      ))
+      .groupBy(sql`date_trunc(${trunc}, ${dailyVisitStats.date})`)
+      .orderBy(sql`date_trunc(${trunc}, ${dailyVisitStats.date})`);
+
+      series.push({ path, data: rows });
+    }
+
+    // Merge today's live Redis counts
+    const todayDateStr = now.toISOString().split('T')[0];
+    if (todayDateStr >= fromDate && todayDateStr <= toDate) {
+      const todayVisits = await getTodayStats();
+      for (const s of series) {
+        const todayForPath = todayVisits.paths.find(p => p.path === s.path);
+        if (!todayForPath) continue;
+        const todayEntry = s.data.find(d => d.date === todayDateStr);
+        if (todayEntry) {
+          todayEntry.pageViews += todayForPath.views;
+        } else {
+          s.data.push({ date: todayDateStr, pageViews: todayForPath.views });
+        }
+      }
+      // Add paths from today that aren't in series yet
+      for (const tp of todayVisits.paths) {
+        if (!targetPaths.includes(tp.path) && !query.paths) continue;
+        if (series.find(s => s.path === tp.path)) continue;
+        series.push({ path: tp.path, data: [{ date: todayDateStr, pageViews: tp.views }] });
+      }
+      // Add today's paths to availablePaths
+      for (const tp of todayVisits.paths) {
+        if (!availablePaths.includes(tp.path)) availablePaths.push(tp.path);
+      }
+      availablePaths.sort();
+    }
+
+    return reply.code(200).send({ series, availablePaths });
+  });
+
   // ===== GET /admin/users — Filterable user list =====
   fastify.get('/admin/users', async (request, reply) => {
     const query = request.query as Record<string, string | undefined>;
