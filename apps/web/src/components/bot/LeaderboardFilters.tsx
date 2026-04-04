@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
 import { Zap, TrendingUp, MessageSquare, Vote, Target } from 'lucide-react';
+import { SortDescription } from '@/components/llm/SortDescription';
 
 const sortOptions = [
   {
@@ -70,10 +71,7 @@ export function LeaderboardFilters({ currentSort, basePath = '/bots' }: { curren
         ))}
       </div>
 
-      <div className="text-sm">
-        <p className="text-gray-300 font-medium text-xs sm:text-sm">{active.label}: {active.title}</p>
-        <p className="text-xs text-gray-500 mt-0.5 leading-relaxed hidden sm:block">{active.detail}</p>
-      </div>
+      <SortDescription label={active.label} title={active.title} detail={active.detail} />
     </div>
   );
 }
