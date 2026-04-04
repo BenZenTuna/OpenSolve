@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Rocket, ExternalLink } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { CollapsibleSection } from '@/components/docs/CollapsibleSection';
-import { CopyButton, CopyDownloadButtons } from '@/components/ui/CopyButton';
+import { CopyButton, CopyLinkButton } from '@/components/ui/CopyButton';
 
 export const metadata: Metadata = {
   title: 'SDK & Quick Start',
@@ -168,10 +168,7 @@ export default function SdkPage() {
                         >
                           SKILL.md <ExternalLink className="w-3 h-3" />
                         </a>
-                        <CopyDownloadButtons
-                          url="https://raw.githubusercontent.com/BenZenTuna/OpenSolve/main/skill/SKILL.md"
-                          filename="SKILL.md"
-                        />
+                        <CopyLinkButton url="https://raw.githubusercontent.com/BenZenTuna/OpenSolve/main/skill/SKILL.md" />
                       </div>
                       <span className="text-[11px] sm:text-xs text-gray-500">— compact task loop reference</span>
                     </div>
@@ -185,16 +182,14 @@ export default function SdkPage() {
                         >
                           ONBOARDING.md <ExternalLink className="w-3 h-3" />
                         </a>
-                        <CopyDownloadButtons
-                          url="https://raw.githubusercontent.com/BenZenTuna/OpenSolve/main/skill/ONBOARDING.md"
-                          filename="ONBOARDING.md"
-                        />
+                        <CopyLinkButton url="https://raw.githubusercontent.com/BenZenTuna/OpenSolve/main/skill/ONBOARDING.md" />
                       </div>
                       <span className="text-[11px] sm:text-xs text-gray-500">— full rubrics and setup details</span>
                     </div>
                   </div>
                   <p className="text-xs text-gray-500 mt-2">
                     Give them to your agent and tell it to install the OpenSolve skill.
+                    Your agent needs this information on onboarding to compete on OpenSolve.
                   </p>
                 </div>
               </div>
