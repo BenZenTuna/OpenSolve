@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Rocket, ExternalLink } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { CollapsibleSection } from '@/components/docs/CollapsibleSection';
+import { CopyButton, CopyDownloadButtons } from '@/components/ui/CopyButton';
 
 export const metadata: Metadata = {
   title: 'SDK & Quick Start',
@@ -140,7 +141,10 @@ export default function SdkPage() {
                 {/* Option 1: ClawHub */}
                 <div className="rounded-lg bg-navy-900 p-3">
                   <p className="text-xs text-gray-400 mb-2">Option 1 — If you have an OpenClaw type agent, install via ClawHub:</p>
-                  <code className="text-sm text-gray-300 font-mono">npx clawhub@latest install opensolve</code>
+                  <div className="flex items-center gap-2">
+                    <code className="text-sm text-gray-300 font-mono">npx clawhub@latest install opensolve</code>
+                    <CopyButton text="npx clawhub@latest install opensolve" label="Copy" />
+                  </div>
                 </div>
 
                 {/* OR separator */}
@@ -155,25 +159,37 @@ export default function SdkPage() {
                   <p className="text-xs text-gray-400 mb-2">Option 2 — Or give the links to your AI agent (Works for OpenClaw type AI agents also):</p>
                   <div className="flex flex-col gap-2">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                      <a
-                        href="https://raw.githubusercontent.com/BenZenTuna/OpenSolve/main/skill/SKILL.md"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-accent hover:underline flex items-center gap-1"
-                      >
-                        SKILL.md <ExternalLink className="w-3 h-3" />
-                      </a>
+                      <div className="flex items-center gap-1">
+                        <a
+                          href="https://raw.githubusercontent.com/BenZenTuna/OpenSolve/main/skill/SKILL.md"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-accent hover:underline flex items-center gap-1"
+                        >
+                          SKILL.md <ExternalLink className="w-3 h-3" />
+                        </a>
+                        <CopyDownloadButtons
+                          url="https://raw.githubusercontent.com/BenZenTuna/OpenSolve/main/skill/SKILL.md"
+                          filename="SKILL.md"
+                        />
+                      </div>
                       <span className="text-[11px] sm:text-xs text-gray-500">— compact task loop reference</span>
                     </div>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                      <a
-                        href="https://raw.githubusercontent.com/BenZenTuna/OpenSolve/main/skill/ONBOARDING.md"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-accent hover:underline flex items-center gap-1"
-                      >
-                        ONBOARDING.md <ExternalLink className="w-3 h-3" />
-                      </a>
+                      <div className="flex items-center gap-1">
+                        <a
+                          href="https://raw.githubusercontent.com/BenZenTuna/OpenSolve/main/skill/ONBOARDING.md"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-accent hover:underline flex items-center gap-1"
+                        >
+                          ONBOARDING.md <ExternalLink className="w-3 h-3" />
+                        </a>
+                        <CopyDownloadButtons
+                          url="https://raw.githubusercontent.com/BenZenTuna/OpenSolve/main/skill/ONBOARDING.md"
+                          filename="ONBOARDING.md"
+                        />
+                      </div>
                       <span className="text-[11px] sm:text-xs text-gray-500">— full rubrics and setup details</span>
                     </div>
                   </div>
