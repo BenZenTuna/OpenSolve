@@ -4,6 +4,16 @@ const COOKIE_NAME = 'os_access_gate';
 const COOKIE_VALUE = 'granted';
 const COOKIE_MAX_AGE = 30 * 24 * 60 * 60; // 30 days in seconds
 
+/** Fire-and-forget page view tracking — no personal data, non-blocking */
+function trackPageView(pathname: string) {
+  const apiUrl = process.env.API_URL || 'http://localhost:4000';
+  fetch(`${apiUrl}/api/v1/track/pageview`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ path: pathname }),
+  }).catch(() => {});
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -14,7 +24,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Admin routes bypass access gate — auth check happens client-side in admin/layout.tsx
+  // Admin routes bypass access gate and are not tracked
   if (pathname.startsWith('/admin')) {
     return NextResponse.next();
   }
@@ -22,7 +32,10 @@ export function middleware(request: NextRequest) {
   const secret = process.env.ACCESS_GATE_SECRET;
 
   // Gate disabled if no secret configured
-  if (!secret) return NextResponse.next();
+  if (!secret) {
+    trackPageView(pathname);
+    return NextResponse.next();
+  }
 
   const { searchParams } = request.nextUrl;
   const accessParam = searchParams.get('access');
@@ -60,6 +73,7 @@ export function middleware(request: NextRequest) {
 
   // Allow through if valid cookie exists
   if (request.cookies.get(COOKIE_NAME)?.value === COOKIE_VALUE) {
+    trackPageView(pathname);
     return NextResponse.next();
   }
 

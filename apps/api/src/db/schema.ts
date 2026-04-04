@@ -1,6 +1,6 @@
 import {
   pgTable, uuid, varchar, text, integer, real, boolean,
-  timestamp, pgEnum, index, uniqueIndex, serial
+  timestamp, date, pgEnum, index, uniqueIndex, serial
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -267,6 +267,19 @@ export const llmModels = pgTable('llm_models', {
   modelNameIdx: uniqueIndex('llm_models_model_name_idx').on(table.modelName),
   avgScoreIdx: index('llm_models_avg_score_idx').on(table.avgBtScore),
   familyIdx: index('llm_models_family_idx').on(table.modelFamily),
+}));
+
+export const dailyVisitStats = pgTable('daily_visit_stats', {
+  id: serial('id').primaryKey(),
+  date: date('date').notNull(),
+  path: varchar('path', { length: 255 }).notNull().default('/'),
+  pageViews: integer('page_views').notNull().default(0),
+  botRequests: integer('bot_requests').notNull().default(0),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => ({
+  dateIdx: index('idx_daily_visit_stats_date').on(table.date),
+  pathIdx: index('idx_daily_visit_stats_path').on(table.path),
+  datePathUnique: uniqueIndex('daily_visit_stats_date_path_key').on(table.date, table.path),
 }));
 
 // ===== RELATIONS =====

@@ -1,5 +1,6 @@
 import { db } from '../config/database.js';
 import { activityLog, tasks, problems } from '../db/schema.js';
+import { flushVisitStatsToDb } from './visit-tracking.service.js';
 import { and, eq, lt, inArray, SQL } from 'drizzle-orm';
 import { logger } from '../utils/logger.js';
 import {
@@ -60,6 +61,13 @@ export interface RetentionResult {
 
 export async function runRetentionCleanup(): Promise<RetentionResult> {
   logger.info('GDPR retention cleanup started');
+
+  // Flush yesterday's visit stats from Redis to PostgreSQL before cleanup
+  try {
+    await flushVisitStatsToDb();
+  } catch (err) {
+    logger.error({ err }, 'Visit stats flush failed (continuing with retention)');
+  }
 
   try {
     // Activity logs older than 90 days

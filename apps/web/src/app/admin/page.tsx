@@ -14,6 +14,7 @@ import {
   ArrowRight,
   Clock,
   Shield,
+  Eye,
 } from 'lucide-react';
 import {
   PieChart,
@@ -37,6 +38,21 @@ interface AdminStats {
   totalSolutions: number;
   totalComparisons: number;
   totalFlags: number;
+  todayPageViews?: number;
+  todayBotRequests?: number;
+  todayTopPaths?: Array<{ path: string; views: number }>;
+}
+
+interface TrafficDataPoint {
+  date: string;
+  pageViews: number;
+  botRequests: number;
+}
+
+interface TrafficResponse {
+  data: TrafficDataPoint[];
+  topPaths: Array<{ path: string; totalViews: number }>;
+  totals: { pageViews: number; botRequests: number };
 }
 
 interface ProblemSummary {
@@ -130,6 +146,8 @@ export default function AdminDashboardPage() {
   const [botSummary, setBotSummary] = useState<BotSummary | null>(null);
   const [throughput, setThroughput] = useState<ThroughputHour[] | null>(null);
   const [moderationCounts, setModerationCounts] = useState<ModerationCounts | null>(null);
+  const [traffic, setTraffic] = useState<TrafficResponse | null>(null);
+  const [trafficPeriod, setTrafficPeriod] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('daily');
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [refreshing, setRefreshing] = useState(false);
@@ -143,6 +161,7 @@ export default function AdminDashboardPage() {
       adminFetch<BotSummary>('/admin/bots/summary'),
       adminFetch<{ data: ThroughputHour[] }>('/admin/metrics/throughput'),
       adminFetch<{ counts: ModerationCounts }>('/admin/moderation/queue'),
+      adminFetch<TrafficResponse>(`/admin/stats/visits?period=${trafficPeriod}`),
     ]);
 
     if (results[0].status === 'fulfilled') setStats(results[0].value);
@@ -162,8 +181,11 @@ export default function AdminDashboardPage() {
     if (results[4].status === 'fulfilled') setModerationCounts(results[4].value.counts);
     else newErrors.moderation = 'Failed to load moderation queue';
 
+    if (results[5].status === 'fulfilled') setTraffic(results[5].value);
+    else newErrors.traffic = 'Failed to load traffic data';
+
     setErrors(newErrors);
-  }, []);
+  }, [trafficPeriod]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -217,13 +239,33 @@ export default function AdminDashboardPage() {
       {errors.stats ? (
         <SectionError message={errors.stats} onRetry={handleRefresh} />
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
           <StatCard label="Users" value={stats?.totalUsers ?? null} icon={Users} color="bg-blue-500" />
           <StatCard label="Bots" value={stats?.totalBots ?? null} icon={Bot} color="bg-purple-500" />
           <StatCard label="Problems" value={stats?.totalProblems ?? null} icon={FileText} color="bg-green-500" />
           <StatCard label="Solutions" value={stats?.totalSolutions ?? null} icon={Lightbulb} color="bg-yellow-500" />
           <StatCard label="Comparisons" value={stats?.totalComparisons ?? null} icon={BarChart3} color="bg-indigo-500" />
           <StatCard label="Flags" value={stats?.totalFlags ?? null} icon={Flag} color="bg-red-500" />
+          <StatCard label="Views Today" value={stats?.todayPageViews ?? null} icon={Eye} color="bg-cyan-500" />
+          <StatCard label="Bot Reqs Today" value={stats?.todayBotRequests ?? null} icon={Bot} color="bg-amber-500" />
+        </div>
+      )}
+
+      {/* Today's Top Pages */}
+      {stats?.todayTopPaths && stats.todayTopPaths.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <h3 className="text-sm font-semibold text-gray-700 mb-2">Top Pages Today</h3>
+          <div className="space-y-1">
+            {stats.todayTopPaths.map((p, i) => (
+              <div key={p.path} className="flex items-center justify-between text-sm">
+                <span className="text-gray-600 truncate">
+                  <span className="text-gray-400 mr-2">{i + 1}.</span>
+                  {p.path}
+                </span>
+                <span className="text-gray-900 font-medium ml-2 shrink-0">{p.views}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -355,6 +397,86 @@ export default function AdminDashboardPage() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Section 2b: Platform Traffic */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-semibold text-gray-900">Platform Traffic</h2>
+          <div className="flex gap-1">
+            {(['daily', 'weekly', 'monthly', 'yearly'] as const).map((p) => (
+              <button
+                key={p}
+                onClick={() => setTrafficPeriod(p)}
+                className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
+                  trafficPeriod === p
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {p.charAt(0).toUpperCase() + p.slice(1, -2)}
+              </button>
+            ))}
+          </div>
+        </div>
+        {errors.traffic ? (
+          <SectionError message={errors.traffic} onRetry={handleRefresh} />
+        ) : !traffic ? (
+          <div className="h-64 bg-gray-100 rounded animate-pulse" />
+        ) : traffic.data.length === 0 ? (
+          <div className="h-64 flex items-center justify-center text-sm text-gray-400">
+            No traffic data yet
+          </div>
+        ) : (
+          <>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={traffic.data.map(d => ({
+                  ...d,
+                  label: trafficPeriod === 'yearly'
+                    ? new Date(d.date).toLocaleDateString([], { year: 'numeric' })
+                    : trafficPeriod === 'monthly'
+                    ? new Date(d.date).toLocaleDateString([], { month: 'short', year: 'numeric' })
+                    : new Date(d.date).toLocaleDateString([], { month: 'short', day: 'numeric' }),
+                }))}>
+                  <defs>
+                    <linearGradient id="pageViewGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="botReqGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#9ca3af' }} interval="preserveStartEnd" tickLine={false} axisLine={{ stroke: '#e5e7eb' }} />
+                  <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} tickLine={false} axisLine={false} allowDecimals={false} />
+                  <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }} />
+                  <Area type="monotone" dataKey="pageViews" stroke="#3b82f6" fill="url(#pageViewGrad)" strokeWidth={2} name="Page Views" />
+                  <Area type="monotone" dataKey="botRequests" stroke="#f59e0b" fill="url(#botReqGrad)" strokeWidth={2} name="Bot Requests" />
+                  <Legend verticalAlign="top" align="right" iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '12px' }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+            {traffic.topPaths.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Top Pages ({trafficPeriod})</h3>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-1">
+                  {traffic.topPaths.slice(0, 6).map((p, i) => (
+                    <div key={p.path} className="flex items-center justify-between text-xs">
+                      <span className="text-gray-600 truncate"><span className="text-gray-400 mr-1">{i + 1}.</span>{p.path}</span>
+                      <span className="text-gray-900 font-medium ml-2 shrink-0">{p.totalViews.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="mt-3 flex gap-4 text-xs text-gray-500">
+              <span>Total views: <span className="font-medium text-gray-700">{traffic.totals.pageViews.toLocaleString()}</span></span>
+              <span>Total bot requests: <span className="font-medium text-gray-700">{traffic.totals.botRequests.toLocaleString()}</span></span>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Section 3: Bot Health + Moderation Queue */}

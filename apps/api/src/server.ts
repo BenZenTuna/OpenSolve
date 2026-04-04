@@ -39,6 +39,8 @@ import { contactRoutes } from './routes/contact.routes.js';
 import { userProfileRoutes } from './routes/user-profile.routes.js';
 import { decrementConcurrent, reconcileConcurrentBots } from './services/bot-traffic.service.js';
 import { LlmLeaderboardService } from './services/llm-leaderboard.service.js';
+import { trackRoutes } from './routes/track.routes.js';
+import { incrementBotRequest } from './services/visit-tracking.service.js';
 import { runRetentionCleanup } from './services/retention.service.js';
 import { DispatcherService } from './services/dispatcher.service.js';
 import { LoadBalancerService } from './services/load-balancer.service.js';
@@ -115,10 +117,11 @@ async function buildServer() {
   // Global XSS sanitization on all request bodies
   app.addHook('preHandler', sanitizeMiddleware);
 
-  // Decrement concurrent bot connections on response
+  // Decrement concurrent bot connections on response + count bot requests
   app.addHook('onResponse', async (request) => {
     if (request.bot) {
       decrementConcurrent().catch(() => {});
+      incrementBotRequest().catch(() => {});
     }
   });
 
@@ -156,6 +159,7 @@ async function buildServer() {
   await app.register(adminEmailRoutes, { prefix: '/api/v1' });
   await app.register(contactRoutes, { prefix: '/api/v1' });
   await app.register(userProfileRoutes, { prefix: '/api/v1' });
+  await app.register(trackRoutes, { prefix: '/api/v1/track' });
 
   return app;
 }

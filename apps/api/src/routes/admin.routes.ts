@@ -1,8 +1,10 @@
 import crypto from 'node:crypto';
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { db } from '../config/database.js';
-import { problems, bots, users, flags, tasks, activityLog } from '../db/schema.js';
-import { eq, sql, and, or, ilike, desc, asc, gte, isNotNull, isNull } from 'drizzle-orm';
+import { problems, bots, users, flags, tasks, activityLog, dailyVisitStats } from '../db/schema.js';
+import { eq, sql, and, or, ilike, desc, asc, gte, lte, isNotNull, isNull } from 'drizzle-orm';
+import { z } from 'zod';
+import { getTodayStats } from '../services/visit-tracking.service.js';
 import { adminMiddleware } from '../middleware/auth.middleware.js';
 import { env } from '../config/env.js';
 import { likeContains } from '../utils/sql-helpers.js';
@@ -256,9 +258,99 @@ export async function adminRoutes(fastify: FastifyInstance) {
       totalFlags: sql<number>`(SELECT count(*) FROM flags)::int`,
     }).from(sql`(SELECT 1) as _`);
 
-    await redis.set('stats:admin', JSON.stringify(stats), 'EX', 30);
+    const todayVisits = await getTodayStats();
+    const enriched = {
+      ...stats,
+      todayPageViews: todayVisits.totalPageViews,
+      todayBotRequests: todayVisits.botRequests,
+      todayTopPaths: todayVisits.paths.slice(0, 5),
+    };
 
-    return reply.code(200).send(stats);
+    await redis.set('stats:admin', JSON.stringify(enriched), 'EX', 30);
+
+    return reply.code(200).send(enriched);
+  });
+
+  // ===== GET /admin/stats/visits — Historical visit data =====
+  fastify.get('/admin/stats/visits', async (request, reply) => {
+    const query = z.object({
+      period: z.enum(['daily', 'weekly', 'monthly', 'yearly']).default('daily'),
+      from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+      to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+      path: z.string().max(255).optional(),
+    }).parse(request.query);
+
+    const now = new Date();
+    const defaultFrom = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const fromDate = query.from || defaultFrom;
+    const toDate = query.to || now.toISOString().split('T')[0];
+
+    const truncFn = {
+      daily: 'day',
+      weekly: 'week',
+      monthly: 'month',
+      yearly: 'year',
+    }[query.period];
+
+    const conditions = [
+      gte(dailyVisitStats.date, fromDate),
+      lte(dailyVisitStats.date, toDate),
+    ];
+    if (query.path) {
+      conditions.push(eq(dailyVisitStats.path, query.path));
+    }
+
+    const data = await db.select({
+      date: sql<string>`date_trunc(${truncFn}, ${dailyVisitStats.date})::date::text`,
+      pageViews: sql<number>`COALESCE(sum(${dailyVisitStats.pageViews}), 0)::int`,
+      botRequests: sql<number>`COALESCE(sum(${dailyVisitStats.botRequests}), 0)::int`,
+    })
+    .from(dailyVisitStats)
+    .where(and(...conditions))
+    .groupBy(sql`date_trunc(${truncFn}, ${dailyVisitStats.date})`)
+    .orderBy(sql`date_trunc(${truncFn}, ${dailyVisitStats.date})`);
+
+    const topPaths = await db.select({
+      path: dailyVisitStats.path,
+      totalViews: sql<number>`COALESCE(sum(${dailyVisitStats.pageViews}), 0)::int`,
+    })
+    .from(dailyVisitStats)
+    .where(and(
+      gte(dailyVisitStats.date, fromDate),
+      lte(dailyVisitStats.date, toDate),
+    ))
+    .groupBy(dailyVisitStats.path)
+    .orderBy(desc(sql`sum(${dailyVisitStats.pageViews})`))
+    .limit(10);
+
+    const totals = data.reduce(
+      (acc, d) => ({
+        pageViews: acc.pageViews + d.pageViews,
+        botRequests: acc.botRequests + d.botRequests,
+      }),
+      { pageViews: 0, botRequests: 0 },
+    );
+
+    // Merge today's live Redis counts for the current period
+    const todayVisits = await getTodayStats();
+    const todayDateStr = new Date().toISOString().split('T')[0];
+    if (todayDateStr >= fromDate && todayDateStr <= toDate) {
+      const todayEntry = data.find(d => d.date === todayDateStr);
+      if (todayEntry) {
+        todayEntry.pageViews += todayVisits.totalPageViews;
+        todayEntry.botRequests += todayVisits.botRequests;
+      } else {
+        data.push({
+          date: todayDateStr,
+          pageViews: todayVisits.totalPageViews,
+          botRequests: todayVisits.botRequests,
+        });
+      }
+      totals.pageViews += todayVisits.totalPageViews;
+      totals.botRequests += todayVisits.botRequests;
+    }
+
+    return reply.code(200).send({ data, topPaths, totals });
   });
 
   // ===== GET /admin/users — Filterable user list =====
