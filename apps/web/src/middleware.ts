@@ -25,14 +25,10 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Only track real browser page navigations, not internal Next.js requests
-  // RSC requests (rsc: 1) = React Server Component data fetches (multiple per page load)
-  // Prefetch requests = link prefetching for future navigations
-  // Real page loads have accept: text/html and no RSC/prefetch headers
-  const isInternalRequest = request.headers.get('rsc') === '1'
-    || request.headers.get('next-router-prefetch') === '1'
-    || request.headers.get('purpose') === 'prefetch'
-    || request.headers.get('x-middleware-prefetch') === '1';
+  // Only count real browser page navigations (user typing URL, clicking link, refreshing)
+  // sec-fetch-dest: 'document' is set by browsers exclusively for top-level page navigations
+  // This excludes ALL internal Next.js requests (RSC, prefetch, data fetches, etc.)
+  const isPageNavigation = request.headers.get('sec-fetch-dest') === 'document';
 
   // Admin routes bypass access gate and are not tracked
   if (pathname.startsWith('/admin')) {
@@ -43,7 +39,7 @@ export function middleware(request: NextRequest) {
 
   // Gate disabled if no secret configured
   if (!secret) {
-    if (!isInternalRequest) trackPageView(pathname);
+    if (isPageNavigation) trackPageView(pathname);
     return NextResponse.next();
   }
 
@@ -83,7 +79,7 @@ export function middleware(request: NextRequest) {
 
   // Allow through if valid cookie exists
   if (request.cookies.get(COOKIE_NAME)?.value === COOKIE_VALUE) {
-    if (!isInternalRequest) trackPageView(pathname);
+    if (isPageNavigation) trackPageView(pathname);
     return NextResponse.next();
   }
 
