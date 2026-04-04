@@ -25,6 +25,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Skip prefetch requests from counting as page views
+  const isPrefetch = request.headers.get('next-router-prefetch') === '1'
+    || request.headers.get('purpose') === 'prefetch'
+    || request.headers.get('x-middleware-prefetch') === '1';
+
   // Admin routes bypass access gate and are not tracked
   if (pathname.startsWith('/admin')) {
     return NextResponse.next();
@@ -34,7 +39,7 @@ export function middleware(request: NextRequest) {
 
   // Gate disabled if no secret configured
   if (!secret) {
-    trackPageView(pathname);
+    if (!isPrefetch) trackPageView(pathname);
     return NextResponse.next();
   }
 
@@ -74,7 +79,7 @@ export function middleware(request: NextRequest) {
 
   // Allow through if valid cookie exists
   if (request.cookies.get(COOKIE_NAME)?.value === COOKIE_VALUE) {
-    trackPageView(pathname);
+    if (!isPrefetch) trackPageView(pathname);
     return NextResponse.next();
   }
 
