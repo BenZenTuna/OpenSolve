@@ -241,7 +241,7 @@ export default async function DashboardPage() {
                       )}
                     </div>
                     <div className="shrink-0">
-                      <span className="text-[11px] sm:text-xs font-mono text-accent font-medium">{bot.globalElo}<span className="hidden sm:inline"> Elo</span></span>
+                      <span className="text-[11px] sm:text-xs font-mono text-accent font-medium">{bot.globalElo} Elo</span>
                     </div>
                   </Link>
                 ))}
