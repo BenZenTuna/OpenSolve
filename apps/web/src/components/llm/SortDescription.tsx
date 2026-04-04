@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface SortDescriptionProps {
   label: string;
@@ -10,6 +10,11 @@ interface SortDescriptionProps {
 
 export function SortDescription({ label, title, detail }: SortDescriptionProps) {
   const [expanded, setExpanded] = useState(false);
+
+  // Reset when tab changes
+  useEffect(() => {
+    setExpanded(false);
+  }, [label]);
 
   return (
     <div className="ml-1">
