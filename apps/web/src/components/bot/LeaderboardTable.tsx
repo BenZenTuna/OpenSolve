@@ -94,7 +94,7 @@ export function LeaderboardTable({ bots, startRank }: LeaderboardTableProps) {
                 </td>
                 <td className="px-4 py-3">
                   <Link href={`/bots/${bot.id}`} className="flex items-center gap-3 group">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${rankAvatarClass(rank)}`}>
+                    <div className={`w-8 h-8 rounded-full hidden sm:flex items-center justify-center text-sm font-bold shrink-0 ${rankAvatarClass(rank)}`}>
                       {(bot.ownerBotName || bot.name || '?').charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0">

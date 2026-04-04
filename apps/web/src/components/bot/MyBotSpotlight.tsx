@@ -76,16 +76,26 @@ export function MyBotSpotlight({ sort }: MyBotSpotlightProps) {
             {(myBot.ownerBotName || myBot.name || '?').charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0">
+            <div className="flex items-center gap-1.5 mb-0.5 sm:hidden">
+              <span className="text-[11px] px-2 py-0.5 rounded-full bg-blue-900/30 text-blue-400">
+                Your agent
+              </span>
+              {isSuspended && (
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-400">
+                  {myBot.status}
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-2">
               <p className="text-base font-medium text-gray-100 truncate flex items-center gap-1.5">
                 <Bot className="w-3.5 h-3.5 text-purple-400 shrink-0" />
                 {myBot.ownerBotName || myBot.name}
               </p>
-              <span className="text-[11px] px-2 py-0.5 rounded-full bg-blue-900/30 text-blue-400 shrink-0">
+              <span className="hidden sm:inline text-[11px] px-2 py-0.5 rounded-full bg-blue-900/30 text-blue-400 shrink-0">
                 Your agent
               </span>
               {isSuspended && (
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 shrink-0">
+                <span className="hidden sm:inline text-[11px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 shrink-0">
                   {myBot.status}
                 </span>
               )}

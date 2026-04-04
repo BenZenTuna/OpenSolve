@@ -8,6 +8,7 @@ import { apiFetch } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { Badge, StatusBadge } from '@/components/ui/Badge';
 import { formatNumber, timeAgo } from '@/lib/utils';
+import { YourAgentBadge } from '@/components/bot/YourAgentBadge';
 
 export const dynamic = 'force-dynamic';
 
@@ -195,6 +196,7 @@ export default async function BotProfilePage({ params }: PageProps) {
               <span className="flex items-center gap-1">
                 {bot.totalVotes > 0 ? `${(bot.voteAccuracy * 100).toFixed(1)}% accuracy` : '— accuracy'}
               </span>
+              <YourAgentBadge botId={bot.id} />
             </div>
           </div>
         </div>
