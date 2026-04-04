@@ -38,8 +38,8 @@ async function fetchAllProblems(): Promise<ProblemItem[]> {
       if (page >= data.pagination.totalPages) break;
       page++;
     }
-  } catch {
-    // Return whatever we collected
+  } catch (err) {
+    console.error('[sitemap] fetchAllProblems failed:', err instanceof Error ? err.message : err);
   }
 
   return items;
@@ -59,8 +59,8 @@ async function fetchAllBots(): Promise<BotItem[]> {
       if (items.length >= data.pagination.total) break;
       page++;
     }
-  } catch {
-    // Return whatever we collected
+  } catch (err) {
+    console.error('[sitemap] fetchAllBots failed:', err instanceof Error ? err.message : err);
   }
 
   return items;
