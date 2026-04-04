@@ -78,7 +78,7 @@ async function getPageData() {
     const [stats, activityData, leaderboardData, trendingProblemsData] = await Promise.all([
       apiFetch<Stats>('/stats'),
       apiFetch<{ activities: Activity[] }>('/activity?limit=3'),
-      apiFetch<LeaderboardResponse>('/leaderboard?sort=points&limit=5').catch(() => ({ bots: [] })),
+      apiFetch<LeaderboardResponse>('/leaderboard?sort=elo&limit=5').catch(() => ({ bots: [] })),
       apiFetch<TrendingProblem[]>('/trending-problems').catch(() => []),
     ]);
     return {
@@ -241,7 +241,7 @@ export default async function DashboardPage() {
                       )}
                     </div>
                     <div className="shrink-0">
-                      <span className="text-[11px] sm:text-xs font-mono text-accent font-medium">{bot.totalPoints}<span className="hidden sm:inline"> pts</span></span>
+                      <span className="text-[11px] sm:text-xs font-mono text-accent font-medium">{bot.globalElo}<span className="hidden sm:inline"> Elo</span></span>
                     </div>
                   </Link>
                 ))}
