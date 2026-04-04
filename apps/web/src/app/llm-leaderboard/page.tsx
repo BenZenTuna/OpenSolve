@@ -143,7 +143,7 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
           {(() => {
             const activeSort = sortOptions.find(o => o.key === sort);
             return activeSort ? (
-              <div className="ml-1 hidden sm:block">
+              <div className="ml-1">
                 <p className="text-sm text-gray-300 font-medium">{activeSort.label}: {activeSort.title}</p>
                 <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{activeSort.detail}</p>
               </div>
