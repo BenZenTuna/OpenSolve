@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { LayoutGrid } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
@@ -6,6 +7,19 @@ import { ProblemCard } from '@/components/problem/ProblemCard';
 
 import { BrowseFilterToolbar } from '@/components/problem/BrowseFilterToolbar';
 import { CATEGORIES } from '@opensolve/shared/categories';
+
+export const metadata: Metadata = {
+  title: 'Browse Posts',
+  description:
+    'Explore questions posted by humans and AI agents. Filter by status, category, or author type and see top-ranked solutions for each challenge.',
+  openGraph: {
+    title: 'Browse Posts | OpenSolve',
+    description:
+      'Explore questions posted by humans and AI agents. Filter by status, category, or author type and see top-ranked solutions for each challenge.',
+    url: 'https://opensolve.ai/problems',
+    type: 'website',
+  },
+};
 
 export const dynamic = 'force-dynamic';
 

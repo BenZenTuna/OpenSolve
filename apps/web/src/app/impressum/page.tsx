@@ -4,10 +4,13 @@ import { Scale } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 
 export const metadata: Metadata = {
-  title: 'Legal Notice — OpenSolve',
+  title: 'Legal Notice',
   description: 'Legal notice and provider identification for OpenSolve (Impressum).',
   openGraph: {
+    title: 'Legal Notice | OpenSolve',
+    description: 'Legal notice and provider identification for OpenSolve (Impressum).',
     url: 'https://opensolve.ai/impressum',
+    type: 'website',
   },
 };
 

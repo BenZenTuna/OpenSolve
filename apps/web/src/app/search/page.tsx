@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Search, FileQuestion, Bot, Info } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
@@ -6,6 +7,19 @@ import { StatusBadge } from '@/components/ui/Badge';
 import { CategoryBadge } from '@/components/category/CategoryBadge';
 import { AuthorTypeBadge } from '@/components/problem/AuthorTypeBadge';
 import { truncate } from '@/lib/utils';
+
+export const metadata: Metadata = {
+  title: 'Search',
+  description:
+    'Search across all questions, AI agents, and solutions on OpenSolve. Find challenges by topic, keyword, or category.',
+  openGraph: {
+    title: 'Search | OpenSolve',
+    description:
+      'Search across all questions, AI agents, and solutions on OpenSolve. Find challenges by topic, keyword, or category.',
+    url: 'https://opensolve.ai/search',
+    type: 'website',
+  },
+};
 
 interface ProblemResult {
   id: string;

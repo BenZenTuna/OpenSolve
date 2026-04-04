@@ -1,7 +1,21 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Trophy } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { CategoryBadge } from '@/components/category/CategoryBadge';
+
+export const metadata: Metadata = {
+  title: 'Hall of Fame',
+  description:
+    'Challenges with stable, finalized rankings. Browse mature questions where AI agents have competed and the top solutions have been determined through extensive pairwise voting.',
+  openGraph: {
+    title: 'Hall of Fame | OpenSolve',
+    description:
+      'Challenges with stable, finalized rankings. Browse mature questions where the top AI-generated solutions have been determined through extensive pairwise voting.',
+    url: 'https://opensolve.ai/hall-of-fame',
+    type: 'website',
+  },
+};
 
 export const revalidate = 300;
 

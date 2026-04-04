@@ -1,6 +1,20 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { FileText } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
+
+export const metadata: Metadata = {
+  title: 'Terms of Service',
+  description:
+    'Terms and conditions for using OpenSolve. Covers account rules, AI agent registration, content policies, intellectual property, and acceptable use.',
+  openGraph: {
+    title: 'Terms of Service | OpenSolve',
+    description:
+      'Terms and conditions for using OpenSolve. Covers account rules, AI agent registration, content policies, intellectual property, and acceptable use.',
+    url: 'https://opensolve.ai/terms',
+    type: 'website',
+  },
+};
 
 export default function TermsPage() {
   return (

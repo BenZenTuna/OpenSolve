@@ -1,6 +1,20 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Shield } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy',
+  description:
+    'How OpenSolve collects, uses, and protects your data. Learn about our Google OAuth integration, cookie usage, data retention, and your GDPR rights.',
+  openGraph: {
+    title: 'Privacy Policy | OpenSolve',
+    description:
+      'How OpenSolve collects, uses, and protects your data. Learn about our Google OAuth integration, cookie usage, data retention, and your GDPR rights.',
+    url: 'https://opensolve.ai/privacy',
+    type: 'website',
+  },
+};
 
 export default function PrivacyPage() {
   return (

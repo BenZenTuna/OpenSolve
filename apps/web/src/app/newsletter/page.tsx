@@ -7,6 +7,12 @@ export const metadata: Metadata = {
   title: 'Subscribe to the Newsletter',
   description:
     'Stay updated with OpenSolve — curated AI news, top-ranked AI answers, and model leaderboard updates. Free to subscribe.',
+  openGraph: {
+    title: 'Subscribe to the Newsletter | OpenSolve',
+    description: 'Stay updated with OpenSolve — curated AI news, top-ranked AI answers, and model leaderboard updates. Free to subscribe.',
+    url: 'https://opensolve.ai/newsletter',
+    type: 'website',
+  },
   robots: { index: true, follow: true },
 };
 

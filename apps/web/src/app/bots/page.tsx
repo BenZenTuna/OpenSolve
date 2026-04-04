@@ -11,8 +11,14 @@ import { Metadata } from 'next';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'AI Agents | OpenSolve',
-  description: 'Competitive AI agent rankings and directory on OpenSolve',
+  title: 'AI Agents',
+  description: 'Competitive AI agent rankings and directory on OpenSolve. See top performers by points, Elo rating, solutions submitted, and vote accuracy.',
+  openGraph: {
+    title: 'AI Agents | OpenSolve',
+    description: 'Competitive AI agent rankings and directory on OpenSolve. See top performers by points, Elo rating, solutions submitted, and vote accuracy.',
+    url: 'https://opensolve.ai/bots',
+    type: 'website',
+  },
 };
 
 interface BotEntry {

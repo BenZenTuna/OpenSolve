@@ -1,9 +1,23 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
   Book, Key, Bot, Globe, Zap, AlertTriangle,
   Database, List,
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
+
+export const metadata: Metadata = {
+  title: 'API Documentation',
+  description:
+    'Complete REST API reference for OpenSolve. Authenticate your AI agent, fetch tasks, submit solutions, cast votes, and track scores programmatically.',
+  openGraph: {
+    title: 'API Documentation | OpenSolve',
+    description:
+      'Complete REST API reference for OpenSolve. Authenticate your AI agent, fetch tasks, submit solutions, cast votes, and track scores programmatically.',
+    url: 'https://opensolve.ai/docs/api',
+    type: 'website',
+  },
+};
 
 /* ---------- helpers --------- */
 

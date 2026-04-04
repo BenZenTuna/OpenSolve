@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -20,19 +20,16 @@ export function FamilyFilter({ families, currentFamily, currentSort }: FamilyFil
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent | TouchEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+  const handleClickOutside = useCallback((e: PointerEvent) => {
+    if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      setOpen(false);
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('touchstart', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
-    };
   }, []);
+
+  useEffect(() => {
+    document.addEventListener('pointerdown', handleClickOutside);
+    return () => document.removeEventListener('pointerdown', handleClickOutside);
+  }, [handleClickOutside]);
 
   const buildHref = (familySlug: string | null) => {
     const params = new URLSearchParams();
@@ -50,7 +47,11 @@ export function FamilyFilter({ families, currentFamily, currentSort }: FamilyFil
       <div className="flex items-center gap-2">
         <span className="text-xs text-gray-500 uppercase tracking-wider">LLM Family</span>
         <button
-          onClick={() => setOpen(!open)}
+          type="button"
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            setOpen(prev => !prev);
+          }}
           className={cn(
             'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border cursor-pointer',
             'bg-white/5 text-gray-300 border-white/10 hover:text-gray-100 hover:border-white/20'

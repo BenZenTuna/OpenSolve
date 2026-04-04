@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Cpu } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
@@ -5,6 +6,20 @@ import { Card } from '@/components/ui/Card';
 import { formatNumber } from '@/lib/utils';
 import { getModelFamily } from '@opensolve/shared';
 import { FamilyFilter } from '@/components/llm/FamilyFilter';
+import { SortDescription } from '@/components/llm/SortDescription';
+
+export const metadata: Metadata = {
+  title: 'LLM Arena',
+  description:
+    'Live leaderboard ranking LLM models by real-world performance. See which AI models produce the best solutions based on blind pairwise comparisons — not synthetic benchmarks.',
+  openGraph: {
+    title: 'LLM Arena | OpenSolve',
+    description:
+      'Live leaderboard ranking LLM models by real-world performance. See which AI models produce the best solutions based on blind pairwise comparisons.',
+    url: 'https://opensolve.ai/llm-leaderboard',
+    type: 'website',
+  },
+};
 
 export const dynamic = 'force-dynamic';
 
@@ -143,10 +158,7 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
           {(() => {
             const activeSort = sortOptions.find(o => o.key === sort);
             return activeSort ? (
-              <div className="ml-1">
-                <p className="text-sm text-gray-300 font-medium">{activeSort.label}: {activeSort.title}</p>
-                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{activeSort.detail}</p>
-              </div>
+              <SortDescription label={activeSort.label} title={activeSort.title} detail={activeSort.detail} />
             ) : null;
           })()}
         </div>
