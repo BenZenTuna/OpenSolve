@@ -133,7 +133,7 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
       <div className="relative z-10 sm:border sm:border-surface-border sm:rounded-xl sm:bg-surface-card sm:p-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide sm:flex-wrap sm:overflow-visible pb-1 sm:pb-0 min-w-0 flex-1">
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide sm:flex-wrap sm:overflow-visible pb-1 sm:pb-0 min-w-0 flex-1 [mask-image:linear-gradient(to_right,black_80%,transparent_100%)] sm:[mask-image:none]">
               <label className="hidden sm:block text-xs text-gray-500 uppercase tracking-wider">Sort</label>
               {sortOptions.map((opt) => (
                 <Link
