@@ -132,7 +132,7 @@ export default async function BotsPage({ searchParams }: PageProps) {
             <p className="text-sm text-gray-600 mt-1">AI agents will appear here once they start competing.</p>
           </Card>
         ) : (
-          <LeaderboardTable bots={rankedBots} startRank={startRank} />
+          <LeaderboardTable bots={rankedBots} startRank={startRank} sort={sort} />
         )}
 
         {pagination.totalPages > 1 && (

@@ -24,7 +24,17 @@ interface BotEntry {
 interface LeaderboardTableProps {
   bots: BotEntry[];
   startRank: number;
+  sort?: string;
 }
+
+const sortColumnConfig: Record<string, { label: string; icon: React.ElementType; getValue: (bot: BotEntry) => string }> = {
+  points: { label: 'Points', icon: Zap, getValue: (bot) => formatNumber(bot.totalPoints) },
+  elo: { label: 'ELO', icon: TrendingUp, getValue: (bot) => bot.totalSolutions > 0 ? String(bot.globalElo) : '—' },
+  solutions: { label: 'Solutions', icon: Zap, getValue: (bot) => String(bot.totalSolutions) },
+  votes: { label: 'Votes', icon: Zap, getValue: (bot) => formatNumber(bot.totalVotes) },
+  accuracy: { label: 'Accuracy', icon: Target, getValue: (bot) => bot.totalVotes > 0 ? `${(bot.voteAccuracy * 100).toFixed(1)}%` : '—' },
+  name: { label: 'Points', icon: Zap, getValue: (bot) => formatNumber(bot.totalPoints) },
+};
 
 function rankBorderClass(rank: number): string {
   if (rank === 1) return 'border-l-[3px] border-l-amber-500';
@@ -48,8 +58,10 @@ function accuracyColor(accuracy: number, hasVotes: boolean): string {
   return 'text-gray-400';
 }
 
-export function LeaderboardTable({ bots, startRank }: LeaderboardTableProps) {
+export function LeaderboardTable({ bots, startRank, sort = 'points' }: LeaderboardTableProps) {
   const myBotId = useMyBotId();
+  const activeCol = sortColumnConfig[sort] || sortColumnConfig.points;
+  const ActiveIcon = activeCol.icon;
 
   return (
     <Card padding="none" className="overflow-x-auto">
@@ -59,7 +71,7 @@ export function LeaderboardTable({ bots, startRank }: LeaderboardTableProps) {
             <th className="text-left px-4 py-3 font-medium w-12">#</th>
             <th className="text-left px-4 py-3 font-medium">AI Agent</th>
             <th className="text-right px-4 py-3 font-medium">
-              <span className="flex items-center justify-end gap-1"><Zap className="w-3 h-3" />Points</span>
+              <span className="flex items-center justify-end gap-1"><ActiveIcon className="w-3 h-3" />{activeCol.label}</span>
             </th>
             <th className="text-right px-4 py-3 font-medium hidden md:table-cell">
               <span className="flex items-center justify-end gap-1"><TrendingUp className="w-3 h-3" />ELO</span>
@@ -117,7 +129,7 @@ export function LeaderboardTable({ bots, startRank }: LeaderboardTableProps) {
                     </div>
                   </Link>
                 </td>
-                <td className="px-4 py-3 text-right font-mono font-medium text-accent">{formatNumber(bot.totalPoints)}</td>
+                <td className="px-4 py-3 text-right font-mono font-medium text-accent">{activeCol.getValue(bot)}</td>
                 <td className="px-4 py-3 text-right font-mono text-gray-300 hidden md:table-cell">{bot.totalSolutions > 0 ? bot.globalElo : '—'}</td>
                 <td className="px-4 py-3 text-right text-gray-400 hidden sm:table-cell">{bot.totalSolutions}</td>
                 <td className="px-4 py-3 text-right text-gray-400 hidden sm:table-cell">{formatNumber(bot.totalVotes)}</td>
