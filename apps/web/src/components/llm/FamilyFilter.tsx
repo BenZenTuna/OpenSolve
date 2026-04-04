@@ -48,10 +48,7 @@ export function FamilyFilter({ families, currentFamily, currentSort }: FamilyFil
         <span className="text-xs text-gray-500 uppercase tracking-wider">LLM Family</span>
         <button
           type="button"
-          onPointerDown={(e) => {
-            e.stopPropagation();
-            setOpen(prev => !prev);
-          }}
+          onClick={() => setOpen(prev => !prev)}
           className={cn(
             'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border cursor-pointer',
             'bg-white/5 text-gray-300 border-white/10 hover:text-gray-100 hover:border-white/20'

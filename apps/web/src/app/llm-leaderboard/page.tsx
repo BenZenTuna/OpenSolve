@@ -132,22 +132,24 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
       {/* Filters */}
       <div className="relative z-10 sm:border sm:border-surface-border sm:rounded-xl sm:bg-surface-card sm:p-4">
         <div className="space-y-2">
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide sm:flex-wrap sm:overflow-visible pb-1 sm:pb-0">
-            <label className="hidden sm:block text-xs text-gray-500 uppercase tracking-wider">Sort</label>
-            {sortOptions.map((opt) => (
-              <Link
-                key={opt.key}
-                href={`/llm-leaderboard?sort=${opt.key}${family ? `&family=${family}` : ''}`}
-                className={`shrink-0 whitespace-nowrap px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                  sort === opt.key
-                    ? 'bg-accent/20 text-accent border border-accent/30'
-                    : 'bg-navy-800 text-gray-400 border border-navy-700 hover:text-gray-200 hover:border-navy-600'
-                }`}
-              >
-                {opt.label}
-              </Link>
-            ))}
-            <div className="shrink-0 ml-auto">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide sm:flex-wrap sm:overflow-visible pb-1 sm:pb-0 min-w-0 flex-1">
+              <label className="hidden sm:block text-xs text-gray-500 uppercase tracking-wider">Sort</label>
+              {sortOptions.map((opt) => (
+                <Link
+                  key={opt.key}
+                  href={`/llm-leaderboard?sort=${opt.key}${family ? `&family=${family}` : ''}`}
+                  className={`shrink-0 whitespace-nowrap px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                    sort === opt.key
+                      ? 'bg-accent/20 text-accent border border-accent/30'
+                      : 'bg-navy-800 text-gray-400 border border-navy-700 hover:text-gray-200 hover:border-navy-600'
+                  }`}
+                >
+                  {opt.label}
+                </Link>
+              ))}
+            </div>
+            <div className="shrink-0">
               <FamilyFilter
                 families={families}
                 currentFamily={family}
