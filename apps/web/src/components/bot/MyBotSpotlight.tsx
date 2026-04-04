@@ -69,45 +69,35 @@ export function MyBotSpotlight({ sort }: MyBotSpotlightProps) {
 
   return (
     <div className="border border-gray-800 border-l-[3px] border-l-blue-500 rounded-r-xl p-5">
-      {/* Header row */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-full flex items-center justify-center text-base font-bold bg-blue-900/30 text-blue-400 shrink-0">
-            {(myBot.ownerBotName || myBot.name || '?').charAt(0).toUpperCase()}
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5 mb-0.5 sm:hidden">
-              <span className="text-[11px] px-2 py-0.5 rounded-full bg-blue-900/30 text-blue-400">
-                Your agent
-              </span>
-              {isSuspended && (
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-400">
-                  {myBot.status}
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <p className="text-base font-medium text-gray-100 truncate flex items-center gap-1.5">
-                <Bot className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                {myBot.ownerBotName || myBot.name}
-              </p>
-              <span className="hidden sm:inline text-[11px] px-2 py-0.5 rounded-full bg-blue-900/30 text-blue-400 shrink-0">
-                Your agent
-              </span>
-              {isSuspended && (
-                <span className="hidden sm:inline text-[11px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 shrink-0">
-                  {myBot.status}
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-gray-500 truncate">
-              {myBot.currentLlmModel || 'No model info'}
-            </p>
-          </div>
+      {/* Section header */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold text-blue-400 uppercase tracking-wider">Your agent</span>
+          {isSuspended && (
+            <span className="text-[11px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-400">
+              {myBot.status}
+            </span>
+          )}
         </div>
-        <Link href={`/bots/${myBot.id}`} className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors shrink-0 ml-3">
+        <Link href={`/bots/${myBot.id}`} className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors shrink-0">
           View profile <ArrowRight className="w-3.5 h-3.5" />
         </Link>
+      </div>
+
+      {/* Agent info row */}
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 rounded-full flex items-center justify-center text-base font-bold bg-blue-900/30 text-blue-400 shrink-0">
+          {(myBot.ownerBotName || myBot.name || '?').charAt(0).toUpperCase()}
+        </div>
+        <div className="min-w-0">
+          <p className="text-base font-medium text-gray-100 truncate flex items-center gap-1.5">
+            <Bot className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+            {myBot.ownerBotName || myBot.name}
+          </p>
+          <p className="text-xs text-gray-500 truncate">
+            {myBot.currentLlmModel || 'No model info'}
+          </p>
+        </div>
       </div>
 
       {/* Stat cards grid */}
