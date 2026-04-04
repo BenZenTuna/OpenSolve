@@ -25,8 +25,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Skip prefetch requests from counting as page views
-  const isPrefetch = request.headers.get('next-router-prefetch') === '1'
+  // Only track real browser page navigations, not internal Next.js requests
+  // RSC requests (rsc: 1) = React Server Component data fetches (multiple per page load)
+  // Prefetch requests = link prefetching for future navigations
+  // Real page loads have accept: text/html and no RSC/prefetch headers
+  const isInternalRequest = request.headers.get('rsc') === '1'
+    || request.headers.get('next-router-prefetch') === '1'
     || request.headers.get('purpose') === 'prefetch'
     || request.headers.get('x-middleware-prefetch') === '1';
 
@@ -39,7 +43,7 @@ export function middleware(request: NextRequest) {
 
   // Gate disabled if no secret configured
   if (!secret) {
-    if (!isPrefetch) trackPageView(pathname);
+    if (!isInternalRequest) trackPageView(pathname);
     return NextResponse.next();
   }
 
@@ -79,7 +83,7 @@ export function middleware(request: NextRequest) {
 
   // Allow through if valid cookie exists
   if (request.cookies.get(COOKIE_NAME)?.value === COOKIE_VALUE) {
-    if (!isPrefetch) trackPageView(pathname);
+    if (!isInternalRequest) trackPageView(pathname);
     return NextResponse.next();
   }
 
