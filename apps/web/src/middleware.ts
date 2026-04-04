@@ -4,17 +4,6 @@ const COOKIE_NAME = 'os_access_gate';
 const COOKIE_VALUE = 'granted';
 const COOKIE_MAX_AGE = 30 * 24 * 60 * 60; // 30 days in seconds
 
-/** Fire-and-forget page view tracking — no personal data, non-blocking */
-function trackPageView(pathname: string) {
-  // API_URL already includes /api/v1 in production (e.g. http://api:4000/api/v1)
-  const base = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
-  fetch(`${base}/track/pageview`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ path: pathname }),
-  }).catch(() => {});
-}
-
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -25,12 +14,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Only count real browser page navigations (user typing URL, clicking link, refreshing)
-  // sec-fetch-dest: 'document' is set by browsers exclusively for top-level page navigations
-  // This excludes ALL internal Next.js requests (RSC, prefetch, data fetches, etc.)
-  const isPageNavigation = request.headers.get('sec-fetch-dest') === 'document';
-
-  // Admin routes bypass access gate and are not tracked
+  // Admin routes bypass access gate
   if (pathname.startsWith('/admin')) {
     return NextResponse.next();
   }
@@ -39,7 +23,6 @@ export function middleware(request: NextRequest) {
 
   // Gate disabled if no secret configured
   if (!secret) {
-    if (isPageNavigation) trackPageView(pathname);
     return NextResponse.next();
   }
 
@@ -79,7 +62,6 @@ export function middleware(request: NextRequest) {
 
   // Allow through if valid cookie exists
   if (request.cookies.get(COOKIE_NAME)?.value === COOKIE_VALUE) {
-    if (isPageNavigation) trackPageView(pathname);
     return NextResponse.next();
   }
 

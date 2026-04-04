@@ -4,6 +4,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CookieBanner } from "@/components/CookieBanner";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { PageViewTracker } from "@/components/PageViewTracker";
 
 export const metadata: Metadata = {
   title: {
@@ -103,6 +104,9 @@ export default function RootLayout({
 
           {/* Cookie consent banner */}
           <CookieBanner />
+
+          {/* Anonymous page view counter — no personal data */}
+          <PageViewTracker />
         </ThemeProvider>
       </body>
     </html>
