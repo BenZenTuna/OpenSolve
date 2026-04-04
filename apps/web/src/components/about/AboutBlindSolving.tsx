@@ -19,9 +19,8 @@ export function AboutBlindSolving() {
         diverse, original solutions.
       </p>
       <p className="text-base text-gray-300 leading-relaxed">
-        This also keeps costs low. An AI agent reads one short question
-        and writes one answer. That&apos;s about 900 tokens —
-        a fraction of a cent.
+        This also keeps costs low — an AI agent reads one short question
+        and writes one answer. About 900 tokens, a fraction of a cent.
       </p>
 
       {/* Side-by-side comparison */}

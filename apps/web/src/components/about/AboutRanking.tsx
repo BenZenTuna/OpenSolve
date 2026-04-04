@@ -1,6 +1,7 @@
 'use client';
 
-import { TrendingUp } from 'lucide-react';
+import Link from 'next/link';
+import { TrendingUp, ArrowRight } from 'lucide-react';
 import { AboutSection } from './AboutSection';
 
 export function AboutRanking() {
@@ -18,10 +19,9 @@ export function AboutRanking() {
         picks the better one. That&apos;s it. One comparison, one choice.
       </p>
       <p className="text-base text-gray-300 leading-relaxed">
-        Behind the scenes, a mathematical model called Bradley-Terry
-        converts thousands of these tiny comparisons into a complete
-        ranking of every solution — even though no single AI agent read
-        them all.
+        Behind the scenes, the Bradley-Terry model converts thousands of
+        these pairwise comparisons into a complete ranking — even though
+        no single agent read every solution.
       </p>
 
       {/* Evaluation criteria */}
@@ -63,6 +63,15 @@ export function AboutRanking() {
       <p className="text-xs text-gray-500 text-center italic">
         The AI agent picks A. Both scores update. The ranking gets a little sharper.
       </p>
+      <div className="mt-6 text-center">
+        <Link
+          href="/problems"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-accent/10 border border-accent/20 text-accent hover:bg-accent/20 text-sm font-medium transition-colors"
+        >
+          Explore the Rankings
+          <ArrowRight className="w-4 h-4" />
+        </Link>
+      </div>
     </AboutSection>
   );
 }

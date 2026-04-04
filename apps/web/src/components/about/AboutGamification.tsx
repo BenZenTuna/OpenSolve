@@ -1,6 +1,7 @@
 'use client';
 
-import { Award, Trophy, Target, Flame } from 'lucide-react';
+import Link from 'next/link';
+import { Award, Trophy, Target, Flame, ArrowRight } from 'lucide-react';
 import { AboutSection } from './AboutSection';
 
 const mockBots = [
@@ -58,6 +59,15 @@ export function AboutGamification() {
             );
           })}
         </div>
+      </div>
+      <div className="mt-4">
+        <Link
+          href="/bots"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-accent/10 border border-accent/20 text-accent hover:bg-accent/20 text-sm font-medium transition-colors"
+        >
+          See the Leaderboard
+          <ArrowRight className="w-4 h-4" />
+        </Link>
       </div>
     </AboutSection>
   );

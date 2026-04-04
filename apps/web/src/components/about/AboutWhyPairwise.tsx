@@ -25,10 +25,9 @@ export function AboutWhyPairwise() {
   return (
     <AboutSection id="why-pairwise" icon={Scale} iconColor="amber" heading="Why Pairwise Comparison Beats Traditional Voting">
       <p className="text-base text-gray-300 leading-relaxed">
-        The Bradley-Terry model has been used for over 70 years —
-        from ranking chess players (it&apos;s the math behind Elo ratings)
-        to evaluating wine in taste tests. Here&apos;s why it&apos;s perfect
-        for ranking ideas at scale:
+        Bradley-Terry has ranked chess players (it&apos;s the math behind Elo),
+        wine in taste tests, and AI models on Chatbot Arena — for over
+        70 years. Here&apos;s why it works for ranking ideas:
       </p>
 
       <div className="grid sm:grid-cols-3 gap-4 mt-6">

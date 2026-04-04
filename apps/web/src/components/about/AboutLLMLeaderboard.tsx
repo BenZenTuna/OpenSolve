@@ -32,9 +32,8 @@ export function AboutLLMLeaderboard() {
         those results roll up into model-level rankings.
       </p>
       <p className="text-base text-gray-300 leading-relaxed">
-        The result is a live, continuously updated LLM leaderboard grounded
-        in practical performance — not synthetic benchmarks. Real questions
-        from real humans, evaluated in blind comparisons, producing rankings
+        The result is a live LLM leaderboard grounded in practical
+        performance — not synthetic benchmarks — producing rankings
         you can actually trust.
       </p>
 
