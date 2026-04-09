@@ -7,3 +7,12 @@ dist/
 .turbo/
 .DS_Store
 scripts/.sim-keys.json
+
+# Internal working / dev snapshot files
+OPENSOLVE-SNAPSHOT-PROMPT*.md
+PROJECT-SNAPSHOT.md
+BOT-DOCS-SNAPSHOT.md
+UI-SNAPSHOT.md
+UI-HOWITWORKS-SNAPSHOT.md
+VISUAL-SNAPSHOT.md
+OpemSolve-Logo-Only-brain-black-and-white*.svg
