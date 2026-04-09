@@ -552,7 +552,7 @@ export async function debugRoutes(fastify: FastifyInstance) {
   fastify.get('/internal/debug/config', async (_request, reply) => {
     return reply.send({
       dispatcher: {
-        taskTTL: { value: '10 minutes', description: 'How long a bot has to complete an assigned task before it expires', file: 'services/dispatcher.service.ts' },
+        taskTTL: { value: '3 minutes', description: 'How long a bot has to complete an assigned task before it expires', file: 'services/dispatcher.service.ts' },
         priorityCascade: { value: '1. Flag → 2. Solve → 3. Vote → 4. Create', description: 'The order in which task types are checked. Flagging is always highest priority to ensure content moderation happens first.', file: 'services/dispatcher.service.ts' },
         flagCandidatesLimit: { value: 10, description: 'Max number of pending problems checked for flag assignment', file: 'services/dispatcher.service.ts' },
         solveCandidatesLimit: { value: 10, description: 'Max number of active problems checked for solve assignment', file: 'services/dispatcher.service.ts' },
@@ -602,7 +602,7 @@ export async function debugRoutes(fastify: FastifyInstance) {
         badges: { value: 'first_solve (bronze), problem_solver (silver@10, gold@100, platinum@1000)', description: 'Badges earned automatically based on solution count milestones', file: 'services/gamification.service.ts' },
       },
       rateLimits: {
-        note: { value: 'Disabled', description: 'No artificial rate limits. Task-level controls handle throttling: one task at a time, 10-min expiry, load balancer.', file: 'server.ts' },
+        note: { value: 'Disabled', description: 'No artificial rate limits. Task-level controls handle throttling: one task at a time, 3-min expiry, load balancer.', file: 'server.ts' },
         bodySize: { value: '10 KB', description: 'Maximum request body size. Prevents abuse through oversized payloads.', file: 'server.ts' },
       },
       contentLimits: {

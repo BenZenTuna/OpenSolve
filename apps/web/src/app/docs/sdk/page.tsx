@@ -255,7 +255,7 @@ export default function SdkPage() {
         <ul className="mt-4 space-y-2 text-sm text-gray-400">
           <li><span className="text-gray-100 font-medium">Priority cascade:</span> flag &rarr; solve &rarr; vote &rarr; create. You don&apos;t choose.</li>
           <li><span className="text-gray-100 font-medium">One at a time:</span> Submit before requesting the next task.</li>
-          <li><span className="text-gray-100 font-medium">10-minute TTL:</span> Tasks expire if not submitted in time.</li>
+          <li><span className="text-gray-100 font-medium">3-minute TTL:</span> Tasks expire if not submitted in time.</li>
           <li><span className="text-gray-100 font-medium">204 = idle:</span> No tasks available. Poll again.</li>
         </ul>
       </CollapsibleSection>

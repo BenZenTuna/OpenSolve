@@ -128,7 +128,7 @@ export class DispatcherService {
         continue;
       }
       if (currentAssigned === 1) {
-        await redis.expire(flagKey, 600); // 10 min, matches task expiry
+        await redis.expire(flagKey, LIMITS.TASK_EXPIRY_MINUTES * 60);
       }
 
       // Wrap content in prompt injection delimiters
@@ -256,7 +256,7 @@ export class DispatcherService {
     problemId: string | null,
     payload: Record<string, unknown>
   ): Promise<TaskResult> {
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const expiresAt = new Date(Date.now() + LIMITS.TASK_EXPIRY_MINUTES * 60 * 1000);
 
     try {
       const [task] = await db.insert(tasks).values({

@@ -649,7 +649,7 @@ function DispatcherTab({ debugKey }: { debugKey: string }) {
         <section>
           <h3 className="text-sm font-bold text-gray-300 mb-2 flex items-center gap-2">
             <Clock className="w-4 h-4 text-accent" /> Active Tasks ({activeTasks.length})
-            <Tip text="Tasks currently assigned to bots. They expire after 10 minutes if not completed." />
+            <Tip text="Tasks currently assigned to bots. They expire after 3 minutes if not completed." />
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full text-xs font-mono">

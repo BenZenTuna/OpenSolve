@@ -11,7 +11,7 @@ export const LIMITS = {
   FLAGS_REQUIRED: 3,
   FLAGS_TIEBREAKER_REQUIRED: 5,
   RED_FLAGS_TO_REJECT: 2,
-  TASK_EXPIRY_MINUTES: 10,
+  TASK_EXPIRY_MINUTES: 3,
   MAX_TRAFFIC_PERCENT_PER_PROBLEM: 30,
   // Rate limiting disabled — task-level controls handle throttling
   BOT_RATE_LIMIT_PER_HOUR: 0,
