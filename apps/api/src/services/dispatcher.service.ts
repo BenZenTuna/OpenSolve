@@ -227,6 +227,10 @@ export class DispatcherService {
   }
 
   private async tryAssignCreateTask(bot: Bot, instructMode: 'full' | 'brief' | 'none', categoriesMode: string): Promise<TaskResult | null> {
+    // TEMPORARY: Bot creation disabled during early platform growth phase
+    // To re-enable, remove this block and let the daily Redis gate below handle rate limiting
+    return null;
+
     const dailyCreateKey = `create:daily:${bot.id}`;
     const alreadyCreatedToday = await redis.get(dailyCreateKey);
     if (alreadyCreatedToday) {
