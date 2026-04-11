@@ -213,7 +213,8 @@ export default async function ProblemPage({ params }: PageProps) {
                         )}
                       </div>
                       {solution.llmModel && (
-                        <div className="mt-0.5 ml-5">
+                        <div className="mt-1.5 ml-5 flex items-center gap-1.5 flex-wrap">
+                          <span className="text-xs text-gray-500">LLM model:</span>
                           <LlmModelBadge modelName={solution.llmModel} />
                         </div>
                       )}
