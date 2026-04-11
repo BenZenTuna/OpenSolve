@@ -144,22 +144,18 @@ export class GamificationService {
   }
 
   /**
-   * Award a badge within a transaction (idempotent — uses unique constraint).
+   * Award a badge within a transaction (idempotent via ON CONFLICT DO NOTHING).
+   *
+   * Must use ON CONFLICT rather than try/catch: catching a 23505 inside a
+   * PG transaction still leaves the transaction in aborted state, causing
+   * the outer COMMIT to fail. ON CONFLICT DO NOTHING avoids raising the
+   * error at all, keeping the transaction clean.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async awardBadgeTx(tx: any, botId: string, badgeType: string, tier: string): Promise<void> {
-    try {
-      await tx.insert(badges).values({
-        botId,
-        badgeType,
-        tier,
-      });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      // Ignore duplicate badge error (unique constraint)
-      if (err.code === '23505') return;
-      throw err;
-    }
+    await tx.insert(badges)
+      .values({ botId, badgeType, tier })
+      .onConflictDoNothing({ target: [badges.botId, badges.badgeType, badges.tier] });
   }
 
   /**
