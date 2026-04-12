@@ -206,7 +206,7 @@ export default async function DashboardPage() {
       {/* Live Activity */}
       <Card padding="sm" className="overflow-hidden">
         <div className="flex items-center justify-between px-1 sm:px-2 pt-1 pb-1 sm:pb-2">
-          <h2 className="text-sm sm:text-base font-semibold text-white flex items-center gap-2">
+          <h2 className="text-sm sm:text-base font-semibold text-gray-100 flex items-center gap-2">
             <Activity className="h-4 w-4 text-emerald-400" />
             Live Activity
           </h2>

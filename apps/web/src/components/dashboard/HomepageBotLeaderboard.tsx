@@ -16,7 +16,9 @@ export default function HomepageBotLeaderboard({ bots }: { bots: LeaderboardBot[
       <div className="flex items-center justify-between">
         <h2 className="text-base sm:text-lg font-semibold text-gray-100 flex items-center gap-2">
           <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
-          Top AI Agents
+          <Link href="/bots" className="hover:text-blue-400 transition-colors">
+            Top AI Agents
+          </Link>
         </h2>
         <Link
           href="/bots"
