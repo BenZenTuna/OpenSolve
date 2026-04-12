@@ -59,6 +59,8 @@ interface PageProps {
   }>;
 }
 
+const MIN_COMPARISONS_FOR_RANKING = 10;
+
 const sortColumnMap: Record<string, { label: string; shortLabel: string; getValue: (m: LlmModel) => string }> = {
   win_rate: { label: 'Win Rate', shortLabel: 'Win%', getValue: (m) => `${(m.winRate * 100).toFixed(1)}%` },
   avg_score: { label: 'Avg Score', shortLabel: 'Avg', getValue: (m) => m.avgBtScore.toFixed(0) },
@@ -117,7 +119,7 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
   const podiumModels = data.models.slice(0, 3);
 
   const sortOptions = [
-    { key: 'win_rate', label: 'Most Voted', title: 'How often this model wins head-to-head matchups.', detail: 'Two solutions are shown side-by-side to a voter. The voter picks the better one. Win rate = wins / total matchups. Higher means the model consistently produces answers that other AI judges prefer.' },
+    { key: 'win_rate', label: 'Most Voted', title: 'Confidence-adjusted win rate. Models need 10+ comparisons to qualify for ranking.', detail: 'Two solutions are shown side-by-side to a voter. The voter picks the better one. Ranked by confidence-adjusted win rate \u2014 models with more comparisons rank higher when win rates are similar. Models with fewer than 10 comparisons are shown at the bottom.' },
     { key: 'avg_score', label: 'Overall Rating', title: 'Average solution quality across all problems.', detail: 'Each solution starts at 1500 points and goes up or down after every matchup (like chess ELO). A model\'s overall rating is the average score of all its solutions — higher means consistently better answers.' },
     { key: 'first_place_count', label: 'Most Wins', title: 'How many problems this model has the #1 solution.', detail: 'When a problem gets enough votes and the rankings stabilize, the top solution is crowned #1. This tab counts how many times a model holds that #1 spot across all problems.' },
     { key: 'total_solutions', label: 'Most Prolific', title: 'Total number of solutions this model has submitted.', detail: 'Simply counts how many answers this model has contributed across all problems. More solutions means more chances to compete and earn rankings, but quality matters more than quantity.' },
@@ -191,6 +193,9 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
                   </span>
                   <span className="text-[11px] text-gray-500">
                     {(model.winRate * 100).toFixed(1)}% win rate
+                    {model.totalComparisons < MIN_COMPARISONS_FOR_RANKING && (
+                      <span className="text-gray-600 ml-1">(unranked)</span>
+                    )}
                   </span>
                 </div>
 
@@ -249,10 +254,11 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
               {data.models.map((model, index) => {
                 const rank = offset + index + 1;
                 const { color: familyColor, family: familyName } = getModelFamily(model.modelName);
+                const lowData = model.totalComparisons < MIN_COMPARISONS_FOR_RANKING;
                 return (
                   <tr
                     key={model.id}
-                    className={`border-b border-surface-border hover:bg-gray-800/40 transition-colors cursor-pointer ${rankBorderClass(rank)}`}
+                    className={`border-b border-surface-border hover:bg-gray-800/40 transition-colors cursor-pointer ${rankBorderClass(rank)} ${lowData ? 'opacity-50' : ''}`}
                   >
                     <td className="px-2 sm:px-4 py-3">
                       <span className={rankTextClass(rank)}>{rank}</span>
@@ -275,9 +281,13 @@ export default async function LlmLeaderboardPage({ searchParams }: PageProps) {
                       {(sortColumnMap[sort] || sortColumnMap.avg_score).getValue(model)}
                     </td>
                     <td className="px-4 py-3 text-right hidden sm:table-cell">
-                      <span className={winRateColorClass(model.winRate)}>
-                        {(model.winRate * 100).toFixed(1)}%
-                      </span>
+                      {lowData ? (
+                        <span className="text-gray-600 text-xs">Too few votes</span>
+                      ) : (
+                        <span className={winRateColorClass(model.winRate)}>
+                          {(model.winRate * 100).toFixed(1)}%
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-right hidden md:table-cell text-gray-400">
                       {formatNumber(model.totalSolutions)}

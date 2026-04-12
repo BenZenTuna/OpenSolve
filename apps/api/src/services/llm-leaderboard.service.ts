@@ -3,6 +3,8 @@ import { solutions, llmModels } from '../db/schema.js';
 import { eq, sql, desc } from 'drizzle-orm';
 import { getModelFamily } from '@opensolve/shared';
 
+const MIN_COMPARISONS_FOR_RANKING = 10;
+
 export function extractModelFamily(modelName: string): string {
   return getModelFamily(modelName).family;
 }
@@ -145,12 +147,30 @@ export class LlmLeaderboardService {
   }) {
     const { sort = 'win_rate', limit = 20, offset = 0, family } = options;
 
-    const orderBy = {
-      win_rate: desc(llmModels.winRate),
-      avg_score: desc(llmModels.avgBtScore),
-      first_place_count: desc(llmModels.firstPlaceCount),
-      total_solutions: desc(llmModels.totalSolutions),
-    }[sort] || desc(llmModels.winRate);
+    // Wilson score lower bound (95% CI) for win_rate sort
+    // Penalizes small sample sizes: 1/1 (100%) scores much lower than 80/100 (80%)
+    // z = 1.96, z² = 3.8416, z²/2 = 1.9208, z²/4 = 0.9604
+    const wilsonLowerBound = sql<number>`
+      CASE
+        WHEN ${llmModels.totalComparisons} < ${MIN_COMPARISONS_FOR_RANKING} THEN -1
+        WHEN ${llmModels.totalComparisons} = 0 THEN -1
+        ELSE (
+          (${llmModels.winRate} + 1.9208 / ${llmModels.totalComparisons}
+           - 1.96 * SQRT(
+               (${llmModels.winRate} * (1.0 - ${llmModels.winRate}) + 0.9604 / ${llmModels.totalComparisons})
+               / ${llmModels.totalComparisons}
+             )
+          ) / (1.0 + 3.8416 / ${llmModels.totalComparisons})
+        )
+      END
+    `;
+
+    const orderByColumns = {
+      win_rate: [desc(wilsonLowerBound), desc(llmModels.totalComparisons)],
+      avg_score: [desc(llmModels.avgBtScore)],
+      first_place_count: [desc(llmModels.firstPlaceCount)],
+      total_solutions: [desc(llmModels.totalSolutions)],
+    }[sort] || [desc(wilsonLowerBound), desc(llmModels.totalComparisons)];
 
     const conditions = [];
     if (family) {
@@ -162,8 +182,8 @@ export class LlmLeaderboardService {
 
     const [items, countResult] = await Promise.all([
       whereClause
-        ? query.where(whereClause).orderBy(orderBy).limit(limit).offset(offset)
-        : query.orderBy(orderBy).limit(limit).offset(offset),
+        ? query.where(whereClause).orderBy(...orderByColumns).limit(limit).offset(offset)
+        : query.orderBy(...orderByColumns).limit(limit).offset(offset),
       whereClause
         ? db.select({ count: sql<number>`count(*)::int` }).from(llmModels).where(whereClause)
         : db.select({ count: sql<number>`count(*)::int` }).from(llmModels),
