@@ -28,13 +28,13 @@ export default function HomepageLlmLeaderboard({ models }: { models: LlmModelEnt
         </Link>
       </div>
 
-      <Card padding="none" className="flex-1">
+      <Card padding="none" className="flex-1 flex flex-col">
         {models.length === 0 ? (
           <div className="px-3 sm:px-5 py-6 text-center text-xs text-gray-500">
             No models ranked yet
           </div>
         ) : (
-          <div className="divide-y divide-surface-border">
+          <div className="divide-y divide-surface-border flex-1 flex flex-col">
             {models.map((model, i) => {
               const { color } = getModelFamily(model.modelName);
               const name = displayModelName(model.modelName);
@@ -44,7 +44,7 @@ export default function HomepageLlmLeaderboard({ models }: { models: LlmModelEnt
                 <Link
                   key={model.modelName}
                   href={`/llm-leaderboard/${encodeURIComponent(model.modelName)}`}
-                  className="flex items-center gap-1.5 sm:gap-3 px-2 sm:px-4 py-1.5 sm:py-2.5 hover:bg-navy-800/50 transition-colors group"
+                  className="flex items-center gap-1.5 sm:gap-3 px-2 sm:px-4 py-1.5 sm:py-2.5 hover:bg-navy-800/50 transition-colors group flex-1"
                 >
                   <span className="text-xs sm:text-sm font-medium text-gray-500 w-4 sm:w-5 text-right shrink-0">
                     {i + 1}
