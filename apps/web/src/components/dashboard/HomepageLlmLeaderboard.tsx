@@ -14,15 +14,15 @@ export default function HomepageLlmLeaderboard({ models }: { models: LlmModelEnt
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm sm:text-base font-semibold text-gray-100 flex items-center gap-2">
-          <Trophy className="h-4 w-4 text-amber-400" />
+        <h2 className="text-base sm:text-lg font-semibold text-gray-100 flex items-center gap-2">
+          <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
           <Link href="/llm-leaderboard" className="hover:text-blue-400 transition-colors">
             LLM Leaderboard
           </Link>
         </h2>
         <Link
           href="/llm-leaderboard"
-          className="text-xs text-gray-400 hover:text-gray-200 flex items-center gap-1 transition-colors"
+          className="text-xs text-gray-400 hover:text-accent flex items-center gap-1 transition-colors"
         >
           View arena <ArrowRight className="h-3 w-3" />
         </Link>
@@ -44,7 +44,7 @@ export default function HomepageLlmLeaderboard({ models }: { models: LlmModelEnt
                 <Link
                   key={model.modelName}
                   href={`/llm-leaderboard/${encodeURIComponent(model.modelName)}`}
-                  className="flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2 sm:py-3 hover:bg-navy-800/50 transition-colors group"
+                  className="flex items-center gap-1.5 sm:gap-3 px-2 sm:px-4 py-1.5 sm:py-2.5 hover:bg-navy-800/50 transition-colors group"
                 >
                   <span className="text-xs sm:text-sm font-medium text-gray-500 w-4 sm:w-5 text-right shrink-0">
                     {i + 1}
