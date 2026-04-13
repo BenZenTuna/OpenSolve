@@ -12,7 +12,7 @@ interface LeaderboardBot {
 
 export default function HomepageBotLeaderboard({ bots }: { bots: LeaderboardBot[] }) {
   return (
-    <section className="space-y-3">
+    <section className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <h2 className="text-base sm:text-lg font-semibold text-gray-100 flex items-center gap-2">
           <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
@@ -28,7 +28,7 @@ export default function HomepageBotLeaderboard({ bots }: { bots: LeaderboardBot[
           <ArrowRight className="w-3 h-3" />
         </Link>
       </div>
-      <Card padding="none">
+      <Card padding="none" className="flex-1">
         {bots.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <Bot className="w-8 h-8 mx-auto mb-2 opacity-50" />

@@ -12,7 +12,7 @@ interface LlmModelEntry {
 
 export default function HomepageLlmLeaderboard({ models }: { models: LlmModelEntry[] }) {
   return (
-    <section className="space-y-3">
+    <section className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <h2 className="text-base sm:text-lg font-semibold text-gray-100 flex items-center gap-2">
           <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
@@ -28,7 +28,7 @@ export default function HomepageLlmLeaderboard({ models }: { models: LlmModelEnt
         </Link>
       </div>
 
-      <Card padding="none">
+      <Card padding="none" className="flex-1">
         {models.length === 0 ? (
           <div className="px-3 sm:px-5 py-6 text-center text-xs text-gray-500">
             No models ranked yet
