@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getModelFamily } from '@opensolve/shared';
+import { adminFetch } from '@/lib/admin-api';
 import {
   Activity, Cpu, BarChart3, Shield, Bot, BookOpen,
   ChevronDown, ChevronRight, Info, AlertTriangle,
@@ -186,7 +187,7 @@ interface FamilyDistEntry {
 
 // ─── Hooks & Helpers ─────────────────────────────────────────────────────────
 
-function useDebugFetch<T>(endpoint: string, key: string, pollMs?: number) {
+function useDebugFetch<T>(endpoint: string, pollMs?: number) {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -194,14 +195,7 @@ function useDebugFetch<T>(endpoint: string, key: string, pollMs?: number) {
 
   const fetchData = useCallback(async () => {
     try {
-      const res = await fetch(`/api/v1/internal/debug/${endpoint}`, {
-        headers: { 'X-Debug-Key': key },
-      });
-      if (!res.ok) {
-        if (res.status === 404) throw new Error('unauthorized');
-        throw new Error(`HTTP ${res.status}`);
-      }
-      const json = await res.json();
+      const json = await adminFetch<T>(`/internal/debug/${endpoint}`);
       if (mountedRef.current) {
         setData(json);
         setError(null);
@@ -211,7 +205,7 @@ function useDebugFetch<T>(endpoint: string, key: string, pollMs?: number) {
     } finally {
       if (mountedRef.current) setLoading(false);
     }
-  }, [endpoint, key]);
+  }, [endpoint]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -339,9 +333,9 @@ const STATUS_CONFIG: Record<string, { color: string; bg: string; label: string }
   red: { color: 'text-red-400', bg: 'bg-red-400', label: 'Critical' },
 };
 
-function BotTrafficTab({ debugKey }: { debugKey: string }) {
+function BotTrafficTab() {
   const { data, loading, error } = useDebugFetch<BotTrafficData>(
-    'bot-traffic', debugKey, 5000
+    'bot-traffic', 5000
   );
 
   if (loading && !data) return <LoadingState />;
@@ -521,9 +515,9 @@ function BotTrafficTab({ debugKey }: { debugKey: string }) {
 
 // ─── Tab 1: Live Feed ────────────────────────────────────────────────────────
 
-function LiveFeedTab({ debugKey }: { debugKey: string }) {
+function LiveFeedTab() {
   const { data, loading, error } = useDebugFetch<{ activities: DebugEvent[] }>(
-    'events', debugKey, 3000
+    'events', 3000
   );
 
   if (loading && !data) return <LoadingState />;
@@ -582,14 +576,14 @@ function extractFamilyFromModel(modelName: string): string {
 
 // ─── Tab 2: Dispatcher ──────────────────────────────────────────────────────
 
-function DispatcherTab({ debugKey }: { debugKey: string }) {
+function DispatcherTab() {
   const { data, loading, error } = useDebugFetch<{
     problems: DispatcherProblem[];
     activeTasks: ActiveTask[];
     trafficDistribution: { problemId: string; count: number; percent: string }[];
     totalHourlyTraffic: number;
     statusCounts: { status: string; count: number }[];
-  }>('dispatcher-state', debugKey, 10000);
+  }>('dispatcher-state', 10000);
 
   const [hoveredModels, setHoveredModels] = useState<string | null>(null);
 
@@ -760,7 +754,7 @@ function DispatcherTab({ debugKey }: { debugKey: string }) {
 
 // ─── Tab 3: Bradley-Terry ────────────────────────────────────────────────────
 
-function BradleyTerryTab({ debugKey }: { debugKey: string }) {
+function BradleyTerryTab() {
   const { data, loading, error } = useDebugFetch<{
     voteDistribution: VoteDistribution;
     convergenceData: ConvergenceItem[];
@@ -784,7 +778,7 @@ function BradleyTerryTab({ debugKey }: { debugKey: string }) {
       adoptionRate: number;
       familyDistribution: FamilyDistEntry[];
     };
-  }>('bt-stats', debugKey, 15000);
+  }>('bt-stats', 15000);
 
   if (loading && !data) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
@@ -999,7 +993,7 @@ function BradleyTerryTab({ debugKey }: { debugKey: string }) {
 
 // ─── Tab 4: Content Moderation ───────────────────────────────────────────────
 
-function ModerationTab({ debugKey }: { debugKey: string }) {
+function ModerationTab() {
   const { data, loading, error } = useDebugFetch<{
     pending: DispatcherProblem[];
     rejected: DispatcherProblem[];
@@ -1012,7 +1006,7 @@ function ModerationTab({ debugKey }: { debugKey: string }) {
       tiebreakerThreshold: number;
       flagCategories: string[];
     };
-  }>('moderation', debugKey, 10000);
+  }>('moderation', 10000);
 
   if (loading && !data) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
@@ -1166,12 +1160,12 @@ function ModerationTab({ debugKey }: { debugKey: string }) {
 
 // ─── Tab 5: Bot Monitor ──────────────────────────────────────────────────────
 
-function BotMonitorTab({ debugKey }: { debugKey: string }) {
+function BotMonitorTab() {
   const { data, loading, error } = useDebugFetch<{
     bots: BotEntry[];
     assignedTasks: Record<string, { taskType: string; problemId: string; assignedAt: string; expiresAt: string }[]>;
     rateLimits: { note: string };
-  }>('bots', debugKey, 10000);
+  }>('bots', 10000);
 
   if (loading && !data) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
@@ -1282,10 +1276,9 @@ function BotMonitorTab({ debugKey }: { debugKey: string }) {
 
 // ─── Tab 6: Rules & Limits ───────────────────────────────────────────────────
 
-function RulesTab({ debugKey }: { debugKey: string }) {
+function RulesTab() {
   const { data, loading, error } = useDebugFetch<Record<string, Record<string, ConfigValue>>>(
-    'config', debugKey
-  );
+    'config'  );
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   if (loading && !data) return <LoadingState />;
@@ -1370,14 +1363,14 @@ function RulesTab({ debugKey }: { debugKey: string }) {
           </div>
         );
       })}
-      <RetentionCleanupSection debugKey={debugKey} />
+      <RetentionCleanupSection />
     </div>
   );
 }
 
 // ─── Retention Cleanup Section ───────────────────────────────────────────────
 
-function RetentionCleanupSection({ debugKey }: { debugKey: string }) {
+function RetentionCleanupSection() {
   const [confirming, setConfirming] = useState(false);
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -1386,12 +1379,7 @@ function RetentionCleanupSection({ debugKey }: { debugKey: string }) {
     setRunning(true);
     setResult(null);
     try {
-      const res = await fetch('/api/v1/internal/debug/retention-cleanup', {
-        method: 'POST',
-        headers: { 'X-Debug-Key': debugKey },
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      const data = await adminFetch('/internal/debug/retention-cleanup', { method: 'POST' });
       setResult({ success: true, message: JSON.stringify(data, null, 2) });
     } catch (e: unknown) {
       setResult({ success: false, message: e instanceof Error ? e.message : 'Unknown error' });
@@ -1452,12 +1440,12 @@ function RetentionCleanupSection({ debugKey }: { debugKey: string }) {
 
 // ─── Tab 7: LLM Models ──────────────────────────────────────────────────────
 
-function LlmModelsTab({ debugKey }: { debugKey: string }) {
+function LlmModelsTab() {
   const { data, loading, error } = useDebugFetch<{
     summary: LlmSummary;
     models: LlmModelEntry[];
     recentModelActivity: RecentModelActivity[];
-  }>('llm-models', debugKey, 5000);
+  }>('llm-models', 5000);
 
   const [sortKey, setSortKey] = useState<string>('avgBtScore');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
@@ -1723,7 +1711,7 @@ const TABS = [
   { label: 'LLM Models', icon: Dna, desc: 'Model tracking' },
 ];
 
-export default function DebugDashboard({ debugKey }: { debugKey: string }) {
+export default function DebugDashboard() {
   const [activeTab, setActiveTab] = useState(0);
 
   return (
@@ -1767,14 +1755,14 @@ export default function DebugDashboard({ debugKey }: { debugKey: string }) {
 
       {/* Tab Content */}
       <div className="px-4 sm:px-6 lg:px-8 py-6">
-        {activeTab === 0 && <BotTrafficTab debugKey={debugKey} />}
-        {activeTab === 1 && <LiveFeedTab debugKey={debugKey} />}
-        {activeTab === 2 && <DispatcherTab debugKey={debugKey} />}
-        {activeTab === 3 && <BradleyTerryTab debugKey={debugKey} />}
-        {activeTab === 4 && <ModerationTab debugKey={debugKey} />}
-        {activeTab === 5 && <BotMonitorTab debugKey={debugKey} />}
-        {activeTab === 6 && <RulesTab debugKey={debugKey} />}
-        {activeTab === 7 && <LlmModelsTab debugKey={debugKey} />}
+        {activeTab === 0 && <BotTrafficTab />}
+        {activeTab === 1 && <LiveFeedTab />}
+        {activeTab === 2 && <DispatcherTab />}
+        {activeTab === 3 && <BradleyTerryTab />}
+        {activeTab === 4 && <ModerationTab />}
+        {activeTab === 5 && <BotMonitorTab />}
+        {activeTab === 6 && <RulesTab />}
+        {activeTab === 7 && <LlmModelsTab />}
       </div>
     </div>
   );

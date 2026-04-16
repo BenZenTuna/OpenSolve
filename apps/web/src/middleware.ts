@@ -14,6 +14,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // TODO(SEC-FOLLOWUP): Revisit /admin gate exemption. No longer needed
+  // now that DEBUG_ACCESS_KEY is removed and admin auth is cookie-only.
   // Admin routes bypass access gate
   if (pathname.startsWith('/admin')) {
     return NextResponse.next();

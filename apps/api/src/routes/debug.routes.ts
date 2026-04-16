@@ -1,4 +1,3 @@
-import crypto from 'node:crypto';
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { db } from '../config/database.js';
 import { redis } from '../config/redis.js';
@@ -11,33 +10,17 @@ import { authMiddleware } from '../middleware/auth.middleware.js';
 import { getTrafficStats } from '../services/bot-traffic.service.js';
 import { runRetentionCleanup } from '../services/retention.service.js';
 import { LlmLeaderboardService } from '../services/llm-leaderboard.service.js';
-import { env } from '../config/env.js';
-
-function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
-}
 
 async function debugGuard(request: FastifyRequest, reply: FastifyReply) {
-  // If no DEBUG_ACCESS_KEY is configured, debug endpoints are disabled entirely
-  if (!env.DEBUG_ACCESS_KEY) {
-    return reply.code(404).send({ error: 'Not found' });
-  }
-
-  // Check X-Debug-Key header with timing-safe comparison
-  const headerKey = request.headers['x-debug-key'] as string | undefined;
-  if (headerKey && timingSafeEqual(headerKey, env.DEBUG_ACCESS_KEY)) return;
-
-  // Fall through to admin JWT check
   try {
     await authMiddleware(request, reply);
     if (reply.sent) return;
-    if (request.user?.role === 'admin') return;
+    if (request.user?.role !== 'admin') {
+      return reply.code(404).send({ error: 'Not found' });
+    }
   } catch {
-    // Fall through to 404
+    return reply.code(404).send({ error: 'Not found' });
   }
-
-  return reply.code(404).send({ error: 'Not found' });
 }
 
 export async function debugRoutes(fastify: FastifyInstance) {

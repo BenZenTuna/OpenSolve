@@ -30,12 +30,6 @@ const envSchema = z.object({
   MEILISEARCH_HOST: z.string().default('http://localhost:7700'),
   MEILISEARCH_KEY: z.string().default(''),
 
-  // Debug dashboard access key (min 20 chars, omit or leave empty to disable debug endpoints)
-  DEBUG_ACCESS_KEY: z.preprocess(
-    (val) => (val === '' ? undefined : val),
-    z.string().min(20).optional(),
-  ),
-
   // Email / Resend
   RESEND_API_KEY: z.string().default(''),
   RESEND_FROM_EMAIL: z.string().default('noreply@mail.opensolve.ai'),
