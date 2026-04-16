@@ -448,8 +448,8 @@ export async function debugRoutes(fastify: FastifyInstance) {
 
     const [summaryStats] = await db.select({
       totalModels: sql<number>`count(*)::int`,
-      modelsToday: sql<number>`count(*) FILTER (WHERE last_seen_at >= ${today})::int`,
-      modelsThisWeek: sql<number>`count(*) FILTER (WHERE last_seen_at >= ${weekAgo})::int`,
+      modelsToday: sql<number>`count(*) FILTER (WHERE last_seen_at >= ${today.toISOString()})::int`,
+      modelsThisWeek: sql<number>`count(*) FILTER (WHERE last_seen_at >= ${weekAgo.toISOString()})::int`,
     }).from(llmModels);
 
     const [solutionCounts] = await db.select({
