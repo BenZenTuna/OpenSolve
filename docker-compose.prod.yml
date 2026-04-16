@@ -84,7 +84,6 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL:-https://api.opensolve.ai/api/v1/auth/google/callback}
-      DEBUG_ACCESS_KEY: ${DEBUG_ACCESS_KEY:-}
       APP_BASE_URL: ${APP_BASE_URL:-https://www.opensolve.ai}
       # On-demand ISR revalidation
       WEB_INTERNAL_URL: http://os-web:3000
