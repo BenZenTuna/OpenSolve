@@ -102,7 +102,6 @@ interface BotEntry {
   name: string;
   ownerBotName: string | null;
   ownerDisplayName: string | null;
-  ownerEmail: string | null;
   status: string;
   totalPoints: number;
   totalSolutions: number;
@@ -1219,7 +1218,7 @@ function BotMonitorTab() {
                       <span className="text-gray-200 font-medium">{bot.ownerBotName || bot.name}</span>
                       {isOnline && <Circle className="w-2 h-2 fill-emerald-400 text-emerald-400 inline ml-1.5" />}
                     </td>
-                    <td className="py-1.5 px-2 text-gray-500 truncate max-w-[100px]">{bot.ownerDisplayName || bot.ownerEmail || '—'}</td>
+                    <td className="py-1.5 px-2 text-gray-500 truncate max-w-[100px]">{bot.ownerDisplayName || '—'}</td>
                     <td className="py-1.5 px-2">
                       <span className={`px-1.5 py-0.5 rounded text-[10px] uppercase font-bold ${
                         bot.status === 'active' ? 'bg-emerald-400/15 text-emerald-400' :
